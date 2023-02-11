@@ -84,6 +84,6 @@ export default async (channel, mod, version) => {
   ]) extractAsars(p);
 
   if (mod !== 'host') {
-    fs.copyFileSync(finalPath, join(outDir, 'latest'));
+    fs.copyFileSync(finalPath, join(outDir, 'latest'), { recursive: true });
   }
 };
