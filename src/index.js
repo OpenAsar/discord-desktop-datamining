@@ -1,4 +1,5 @@
-import download from './download.js';
+import download, { _cache, baseOutDir, symlink } from './download.js';
+import { join } from 'path';
 
 const modules = [
   'host',
@@ -25,3 +26,9 @@ const [ channel = 'canary' ] = process.argv.slice(2);
 for (const mod of modules) {
   await download(channel, mod);
 }
+
+// hack to get manifest from download
+const manifest = Object.values(_cache)[0];
+
+const hostVersion = manifest.full.host_version.join('.');
+await symlink(join(baseOutDir, hostVersion), join(baseOutDir, 'latest'));

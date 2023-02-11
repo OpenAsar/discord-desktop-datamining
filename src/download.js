@@ -9,7 +9,9 @@ import asar from '@electron/asar';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const _cache = {};
+export const baseOutDir = join(__dirname, '..', 'out');
+
+export const _cache = {};
 const fetchJson = async url => {
   if (_cache[url]) return _cache[url];
   return _cache[url] = await (await fetch(url)).json();
@@ -28,6 +30,14 @@ const extractAsars = dir => {
   }
 };
 
+export const symlink = async (target, path) => {
+  await fs.promises.mkdir(dirname(path)).catch(_ => {});
+
+  fs.rmSync(path, { force: true });
+  fs.symlinkSync(target, path, 'junction');
+};
+
+
 export default async (channel, mod, version) => {
   const manifest = await fetchJson(`https://discord.com/api/updates/distributions/app/manifests/latest?platform=win&channel=${channel}&arch=x86`);
 
@@ -40,7 +50,7 @@ export default async (channel, mod, version) => {
   const downloadUrl = mod === 'host' ? `${domain}/distro/app/${channel}/win/x86/1.0.${version}/full.distro` : `${domain}/distro/app/${channel}/win/x86/${hostVersion}/discord_${mod}/${version}/full.distro`;
   console.log('DOWNLOADING', mod, version, '|', downloadUrl);
 
-  const outDir = join(__dirname, '..', 'out', hostVersion, mod === 'host' ? 'host' : `modules`, mod === 'host' ? '' : mod);
+  const outDir = join(baseOutDir, hostVersion, mod === 'host' ? 'host' : `modules`, mod === 'host' ? '' : mod);
 
   const tarPath = join(__dirname, '..', 'tmp', mod + '-' + version + '.tar');
   const finalPath = join(outDir, mod === 'host' ? '' : `${version}`);
@@ -81,7 +91,6 @@ export default async (channel, mod, version) => {
   ]) extractAsars(p);
 
   if (mod !== 'host') {
-    const versionlessPath = join(outDir, 'latest');
-    fs.cpSync(finalPath, versionlessPath, { recursive: true, force: true });
+    await symlink(finalPath, join(outDir, 'latest'));
   }
 };
