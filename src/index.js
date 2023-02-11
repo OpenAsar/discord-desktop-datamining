@@ -31,4 +31,4 @@ for (const mod of modules) {
 const manifest = Object.values(_cache)[0];
 
 const hostVersion = manifest.full.host_version.join('.');
-await symlink(join(baseOutDir, hostVersion), join(baseOutDir, 'latest'));
+fs.copyFileSync(join(baseOutDir, hostVersion), join(baseOutDir, 'latest'));

@@ -30,13 +30,6 @@ const extractAsars = dir => {
   }
 };
 
-export const symlink = async (target, path) => {
-  await fs.promises.mkdir(dirname(path)).catch(_ => {});
-
-  fs.rmSync(path, { force: true });
-  fs.symlinkSync(target, path, process.platform === 'win32' ? 'junction' : 'dir');
-};
-
 
 export default async (channel, mod, version) => {
   const manifest = await fetchJson(`https://discord.com/api/updates/distributions/app/manifests/latest?platform=win&channel=${channel}&arch=x86`);
@@ -91,6 +84,6 @@ export default async (channel, mod, version) => {
   ]) extractAsars(p);
 
   if (mod !== 'host') {
-    await symlink(finalPath, join(outDir, 'latest'));
+    fs.copyFileSync(finalPath, join(outDir, 'latest'));
   }
 };
