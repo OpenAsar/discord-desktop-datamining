@@ -1,4 +1,4 @@
-import download, { _cache, baseOutDir, symlink } from './download.js';
+import download, { _cache, baseOutDir } from './download.js';
 import { join } from 'path';
 
 const modules = [
