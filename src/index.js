@@ -1,5 +1,6 @@
 import download, { _cache, baseOutDir } from './download.js';
 import { join } from 'path';
+import { cpSync } from 'fs';
 
 const modules = [
   'host',
@@ -31,4 +32,4 @@ for (const mod of modules) {
 const manifest = Object.values(_cache)[0];
 
 const hostVersion = manifest.full.host_version.join('.');
-fs.cpSync(join(baseOutDir, hostVersion), join(baseOutDir, 'latest'), { recursive: true });
+cpSync(join(baseOutDir, hostVersion), join(baseOutDir, 'latest'), { recursive: true });
