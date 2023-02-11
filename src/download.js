@@ -34,7 +34,7 @@ export const symlink = async (target, path) => {
   await fs.promises.mkdir(dirname(path)).catch(_ => {});
 
   fs.rmSync(path, { force: true });
-  fs.symlinkSync(target, path, 'junction');
+  fs.symlinkSync(target, path, process.platform === 'win32' ? 'junction' : 'dir');
 };
 
 
