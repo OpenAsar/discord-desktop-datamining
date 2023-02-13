@@ -41,7 +41,10 @@ jobs:
       - name: Publish
         run: |
           cp -rf out/. ${{ env.CHECKOUT_DIR }}
+
+          echo "" > /tmp/changes.txt
           cp -rf changes.txt /tmp/changes.txt
+
           cd ${{ env.CHECKOUT_DIR }}
 
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
