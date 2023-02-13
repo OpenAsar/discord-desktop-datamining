@@ -1,38 +1,21 @@
 "use strict";
 
-const electron = require('electron');
-
-const {
-  reconcileCrashReporterMetadata
-} = require('../../../common/crashReporterUtils');
-
-const {
-  getElectronMajorVersion
-} = require('../../../common/processUtils');
-
-const {
-  CRASH_REPORTER_UPDATE_METADATA
-} = require('../common/constants').IPCEvents;
-
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getMetadata = getMetadata;
+exports.updateCrashReporter = updateCrashReporter;
+var _electron = _interopRequireDefault(require("electron"));
+var _crashReporterUtils = require("../../../common/crashReporterUtils");
+var _DiscordIPC = require("../common/DiscordIPC");
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 let metadata = {};
 updateCrashReporter(metadata);
-
-async function updateCrashReporter(additional_metadata) {
-  const result = await electron.ipcRenderer.invoke(CRASH_REPORTER_UPDATE_METADATA, additional_metadata); // Calling crashReporter.start from a renderer process was deprecated in Electron 9.
-
-  if (getElectronMajorVersion() < 9) {
-    electron.crashReporter.start(result.args);
-  }
-
-  metadata = result.metadata || {};
-  reconcileCrashReporterMetadata(electron.crashReporter, metadata);
+async function updateCrashReporter(additionalMetadata) {
+  const result = await _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.CRASH_REPORTER_UPDATE_METADATA, additionalMetadata);
+  metadata = result.metadata ?? {};
+  (0, _crashReporterUtils.reconcileCrashReporterMetadata)(_electron.default.crashReporter, metadata);
 }
-
 function getMetadata() {
   return metadata;
 }
-
-module.exports = {
-  updateCrashReporter,
-  getMetadata
-};

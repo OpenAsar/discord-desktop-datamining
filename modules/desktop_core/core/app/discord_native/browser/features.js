@@ -4,15 +4,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.injectFeaturesBackend = injectFeaturesBackend;
-
-const electron = require('electron');
-
-const {
-  FEATURES_GET_BROWSER_FEATURES
-} = require('../common/constants').IPCEvents;
-
+var _DiscordIPC = require("../common/DiscordIPC");
 let injectedFeatures = null;
-
 function getFeatures() {
   return injectedFeatures != null ? injectedFeatures : {
     getSupported: () => {
@@ -24,11 +17,9 @@ function getFeatures() {
     declareSupported: () => {}
   };
 }
-
 function injectFeaturesBackend(features) {
   injectedFeatures = features;
 }
-
-electron.ipcMain.on(FEATURES_GET_BROWSER_FEATURES, event => {
+_DiscordIPC.DiscordIPC.main.on(_DiscordIPC.IPCEvents.FEATURES_GET_BROWSER_FEATURES, event => {
   event.returnValue = getFeatures().getSupported();
 });

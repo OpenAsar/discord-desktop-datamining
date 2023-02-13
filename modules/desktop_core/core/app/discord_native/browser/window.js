@@ -4,11 +4,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.injectGetWindow = injectGetWindow;
-
 const electron = require('electron');
-
 const process = require('process');
-
 const {
   WINDOW_BLUR,
   WINDOW_CLOSE,
@@ -23,15 +20,12 @@ const {
   WINDOW_IS_ALWAYS_ON_TOP,
   WINDOW_SET_ALWAYS_ON_TOP
 } = require('../common/constants').IPCEvents;
-
 let injectedGetWindow = _key => {
   return null;
 };
-
 function injectGetWindow(getWindow) {
   injectedGetWindow = getWindow;
 }
-
 electron.ipcMain.handle(WINDOW_FLASH_FRAME, async (_, flag) => {
   const currentWindow = injectedGetWindow();
   if (currentWindow == null || currentWindow.flashFrame == null) return;
@@ -50,7 +44,6 @@ electron.ipcMain.handle(WINDOW_RESTORE, async (_, key) => {
 electron.ipcMain.handle(WINDOW_MAXIMIZE, async (_, key) => {
   const win = injectedGetWindow(key);
   if (win == null) return;
-
   if (win.isMaximized()) {
     win.unmaximize();
   } else {
@@ -75,7 +68,6 @@ electron.ipcMain.handle(WINDOW_IS_ALWAYS_ON_TOP, async (_, key) => {
 });
 electron.ipcMain.handle(WINDOW_BLUR, async (_, key) => {
   const win = injectedGetWindow(key);
-
   if (win != null && !win.isDestroyed()) {
     win.blur();
   }

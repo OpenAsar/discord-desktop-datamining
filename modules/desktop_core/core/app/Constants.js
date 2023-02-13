@@ -3,7 +3,6 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
 // before we can set up (and export) our constants, we first need to grab bootstrap's constants
 // so we can merge them in with our constants
 function init(bootstrapConstants) {
@@ -46,12 +45,10 @@ function init(bootstrapConstants) {
     UpdaterEvents,
     MenuEvents
   };
-
   for (const [k, v] of Object.entries(exported)) {
     module.exports[k] = v;
   }
 }
-
 module.exports = {
   init
 };

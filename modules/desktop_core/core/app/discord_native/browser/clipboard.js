@@ -1,13 +1,13 @@
 "use strict";
 
+// @ts-nocheck
+/* eslint-disable */
 const electron = require('electron');
-
 const {
   CLIPBOARD_COPY,
   CLIPBOARD_CUT,
   CLIPBOARD_PASTE
 } = require('../common/constants').IPCEvents;
-
 electron.ipcMain.handle(CLIPBOARD_COPY, async _ => {
   electron.webContents.getFocusedWebContents().copy();
 });

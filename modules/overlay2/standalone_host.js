@@ -45,7 +45,8 @@ app.whenReady().then(function () {
 
   require('discord_desktop_core/core.asar/app/discord_native/browser/constants');
 
-  var crashReporterSetup = require('discord_desktop_core/core.asar/app/crashReporterSetup');
+  var _require3 = require('discord_desktop_core/core.asar/app/bootstrapModules/crashReporterSetup'),
+      crashReporterSetup = _require3.crashReporterSetup;
 
   crashReporterSetup.init(buildInfo);
 

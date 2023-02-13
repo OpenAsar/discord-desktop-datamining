@@ -16,9 +16,7 @@ var _require = require('electron'),
 var Overlay = require('./overlay_module.js');
 
 var _require2 = require('./securityUtils'),
-    saferShellOpenExternal = _require2.saferShellOpenExternal;
-
-var path = require('path'); // IPC events must be prefixed with `DISCORD_`
+    saferShellOpenExternal = _require2.saferShellOpenExternal; // IPC events must be prefixed with `DISCORD_`
 
 
 var ipcMain = {
@@ -105,6 +103,7 @@ function createRenderer(pid, url) {
       webPreferences: {
         offscreen: true,
         nodeIntegration: false,
+        sandbox: false,
         preload: require.resolve('discord_desktop_core/core.asar/app/mainScreenPreload.js'),
         enableRemoteModule: false,
         contextIsolation: true
@@ -124,6 +123,14 @@ function createRenderer(pid, url) {
     Overlay.sendCommand(renderer.pid, {
       message: 'relay',
       _relay: 'renderer_crashed'
+    });
+    destroyRenderer(pid);
+  });
+  renderer.window.webContents.on('preload-error', function (_event, _input, error) {
+    Overlay.logMessage("Overlay for pid ".concat(renderer.pid, " crashed in preload: ").concat(error, "\n").concat(error.stack));
+    Overlay.sendCommand(renderer.pid, {
+      message: 'relay',
+      _relay: 'renderer_preload_crashed'
     });
     destroyRenderer(pid);
   });

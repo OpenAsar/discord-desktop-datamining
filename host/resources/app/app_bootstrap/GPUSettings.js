@@ -7,6 +7,7 @@
 //    be able to update GPUSettings OTA, we will have the core module provide
 //    us with the GPUSettings
 // so tl;dr this is core module's GPUSettings, providing compat for web
+
 exports.replace = function (GPUSettings) {
   // replacing module.exports directly would have no effect, since requires are cached
   // so we mutate the existing object

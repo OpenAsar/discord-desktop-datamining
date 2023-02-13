@@ -1,40 +1,18 @@
 "use strict";
 
-const electron = require('electron');
-
-const lodash = require('lodash');
-
-const {
-  reconcileCrashReporterMetadata
-} = require('../../../common/crashReporterUtils');
-
-const {
-  getElectronMajorVersion
-} = require('../../../common/processUtils');
-
-const {
-  metadata
-} = require('../../crashReporterSetup');
-
-const {
-  CRASH_REPORTER_UPDATE_METADATA
-} = require('../common/constants').IPCEvents;
-
-electron.ipcMain.handle(CRASH_REPORTER_UPDATE_METADATA, async (_, additional_metadata) => {
-  const final_metadata = lodash.defaultsDeep({}, metadata, additional_metadata || {});
-  const result = {
-    metadata: final_metadata
-  }; // In Electron 9 we only start the crashReporter once and let reconcileCrashReporterMetadata
-  // do the work of keeping `extra` up-to-date. Prior to this we would simply start crashReporter
-  // again to apply new metadata as well as pass the full arguments back to the renderer so it
-  // could do similarly.
-
-  if (getElectronMajorVersion() < 9) {
-    const args = getCrashReporterArgs(final_metadata);
-    electron.crashReporter.start(args);
-    result.args = args;
-  }
-
-  reconcileCrashReporterMetadata(electron.crashReporter, final_metadata);
-  return result;
+var _assert = _interopRequireDefault(require("assert"));
+var _electron = _interopRequireDefault(require("electron"));
+var _lodash = _interopRequireDefault(require("lodash"));
+var _crashReporterUtils = require("../../../common/crashReporterUtils");
+var _crashReporterSetup = require("../../bootstrapModules/crashReporterSetup");
+var _DiscordIPC = require("../common/DiscordIPC");
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.CRASH_REPORTER_UPDATE_METADATA, (_, additionalMetadata) => {
+  const metadata = _crashReporterSetup.crashReporterSetup.metadata;
+  (0, _assert.default)(metadata != null, 'Metadata imported improperly.');
+  const finalMetadata = _lodash.default.defaultsDeep(metadata, additionalMetadata ?? {});
+  (0, _crashReporterUtils.reconcileCrashReporterMetadata)(_electron.default.crashReporter, finalMetadata);
+  return Promise.resolve({
+    metadata: finalMetadata
+  });
 });

@@ -1,11 +1,8 @@
 "use strict";
 
-const electron = require('electron');
-
-const {
-  ACCESSIBILITY_GET_ENABLED
-} = require('../common/constants').IPCEvents;
-
-electron.ipcMain.handle(ACCESSIBILITY_GET_ENABLED, async _ => {
-  return electron.app.accessibilitySupportEnabled;
+var _electron = _interopRequireDefault(require("electron"));
+var _DiscordIPC = require("../common/DiscordIPC");
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.ACCESSIBILITY_GET_ENABLED, _ => {
+  return Promise.resolve(_electron.default.app.accessibilitySupportEnabled);
 });

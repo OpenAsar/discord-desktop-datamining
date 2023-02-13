@@ -5,34 +5,22 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.exposeModuleResource = exposeModuleResource;
 exports.platform = exports.isWindows = exports.isOSX = exports.isLinux = void 0;
-
 var _fs = _interopRequireDefault(require("fs"));
-
 var _os = _interopRequireDefault(require("os"));
-
 var _path = _interopRequireDefault(require("path"));
-
+var _paths = require("./bootstrapModules/paths");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 // Miscellaneous utility functions.
-const paths = require('./paths');
 
 function exposeModuleResource(asarPath, fileName) {
   const appPath = _path.default.resolve(__dirname, '..');
-
   const fullPathToAsarFile = _path.default.join(appPath, asarPath, fileName);
-
   const data = _fs.default.readFileSync(fullPathToAsarFile);
-
-  const nativeFilePath = _path.default.join(paths.getUserData(), fileName);
-
+  const nativeFilePath = _path.default.join(_paths.paths.getUserData(), fileName);
   _fs.default.writeFileSync(nativeFilePath, data);
-
   return nativeFilePath;
 }
-
 const platform = _os.default.platform();
-
 exports.platform = platform;
 const isWindows = /^win/.test(platform);
 exports.isWindows = isWindows;
