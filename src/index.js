@@ -26,6 +26,7 @@ const modules = [
 
 let [ channel = 'canary', oldManifest = '' ] = process.argv.slice(2);
 if (oldManifest && existsSync(oldManifest)) oldManifest = JSON.parse(readFileSync(oldManifest));
+  else oldManifest = false;
 
 for (const mod of modules) {
   await download(channel, mod);
