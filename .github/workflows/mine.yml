@@ -41,6 +41,7 @@ jobs:
       - name: Publish
         run: |
           cp -rf out/. ${{ env.CHECKOUT_DIR }}
+          cp -rf changes.txt /tmp/changes.txt
           cd ${{ env.CHECKOUT_DIR }}
 
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -50,5 +51,5 @@ jobs:
           echo "*.exe" > .gitignore
 
           git add .
-          git diff-index --quiet HEAD || git commit -m "${{ matrix.channel }} update"
+          git diff-index --quiet HEAD || git commit -m "${{ matrix.channel }} update" -m "$(cat /tmp/changes.txt)"
           git push origin ${{ matrix.channel }}
