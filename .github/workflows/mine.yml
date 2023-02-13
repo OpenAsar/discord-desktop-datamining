@@ -36,7 +36,7 @@ jobs:
       - name: Run
         run: |
           npm install
-          node src ${{ matrix.channel }}
+          node src ${{ matrix.channel }} "${{ env.CHECKOUT_DIR }}/manifest.json"
 
       - name: Publish
         run: |
