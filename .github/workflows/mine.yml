@@ -40,7 +40,6 @@ jobs:
 
       - name: Publish
         run: |
-          rm -rf ${{ env.CHECKOUT_DIR }}/*
           cp -rf out/. ${{ env.CHECKOUT_DIR }}
           cd ${{ env.CHECKOUT_DIR }}
 
