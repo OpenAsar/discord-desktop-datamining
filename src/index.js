@@ -1,6 +1,6 @@
 import download, { _cache, baseOutDir } from './download.js';
 import { join } from 'path';
-import { cpSync, writeFileSync, readFileSync } from 'fs';
+import { cpSync, writeFileSync, readFileSync, existsSync } from 'fs';
 
 global.LATEST_ONLY = true;
 
@@ -25,7 +25,7 @@ const modules = [
 ];
 
 let [ channel = 'canary', oldManifest = '' ] = process.argv.slice(2);
-if (oldManifest) oldManifest = JSON.parse(readFileSync(oldManifest));
+if (oldManifest && existsSync(oldManifest)) oldManifest = JSON.parse(readFileSync(oldManifest));
 
 for (const mod of modules) {
   await download(channel, mod);
