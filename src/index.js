@@ -2,6 +2,8 @@ import download, { _cache, baseOutDir } from './download.js';
 import { join } from 'path';
 import { cpSync } from 'fs';
 
+global.LATEST_ONLY = true;
+
 const modules = [
   'host',
   'desktop_core',
@@ -32,4 +34,4 @@ for (const mod of modules) {
 const manifest = Object.values(_cache)[0];
 
 const hostVersion = manifest.full.host_version.join('.');
-cpSync(join(baseOutDir, hostVersion), join(baseOutDir, 'latest'), { recursive: true });
+if (!LATEST_ONLY) cpSync(join(baseOutDir, hostVersion), join(baseOutDir, 'latest'), { recursive: true });

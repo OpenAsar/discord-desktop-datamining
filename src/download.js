@@ -46,7 +46,8 @@ export default async (channel, mod, version) => {
   const outDir = join(baseOutDir, hostVersion, mod === 'host' ? 'host' : `modules`, mod === 'host' ? '' : mod);
 
   const tarPath = join(__dirname, '..', 'tmp', mod + '-' + version + '.tar');
-  const finalPath = join(outDir, mod === 'host' ? '' : `${version}`);
+  let finalPath = join(outDir, mod === 'host' ? '' : `${version}`);
+  if (global.LATEST_ONLY) finalPath = join(baseOutDir, mod === 'host' ? 'host' : `modules`, mod === 'host' ? '' : mod);
 
   fs.rmSync(tarPath, { force: true });
   fs.rmSync(finalPath, { recursive: true, force: true });
@@ -83,7 +84,7 @@ export default async (channel, mod, version) => {
     join(finalPath, 'resources')
   ]) extractAsars(p);
 
-  if (mod !== 'host') {
+  if (mod !== 'host' && !global.LATEST_ONLY) {
     fs.cpSync(finalPath, join(outDir, 'latest'), { recursive: true });
   }
 };
