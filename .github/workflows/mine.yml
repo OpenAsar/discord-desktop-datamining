@@ -43,7 +43,7 @@ jobs:
           cp -rf out/. ${{ env.CHECKOUT_DIR }}
 
           echo "" > /tmp/changes.txt
-          cp -rf changes.txt /tmp/changes.txt
+          cp -rf changes.txt /tmp/changes.txt || :
 
           cd ${{ env.CHECKOUT_DIR }}
 
