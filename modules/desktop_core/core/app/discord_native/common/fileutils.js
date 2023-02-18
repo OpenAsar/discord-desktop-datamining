@@ -9,6 +9,7 @@ Object.defineProperty(exports, "basename", {
     return _path.basename;
   }
 });
+exports.deleteFile = deleteFile;
 Object.defineProperty(exports, "dirname", {
   enumerable: true,
   get: function () {
@@ -21,6 +22,7 @@ Object.defineProperty(exports, "extname", {
     return _path.extname;
   }
 });
+exports.getFilesnamesFromDirectory = getFilesnamesFromDirectory;
 Object.defineProperty(exports, "join", {
   enumerable: true,
   get: function () {
@@ -93,4 +95,11 @@ function readFiles(filenames, maxSize) {
       promiseFs.close(handle); // No reason to await?
     }
   }));
+}
+
+function getFilesnamesFromDirectory(path) {
+  return promiseFs.readdir(path);
+}
+function deleteFile(filename) {
+  return promiseFs.unlink(filename);
 }
