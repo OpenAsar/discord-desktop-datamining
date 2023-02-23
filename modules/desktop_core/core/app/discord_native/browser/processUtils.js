@@ -7,6 +7,9 @@ exports.processUtilsSettings = void 0;
 var _electron = _interopRequireDefault(require("electron"));
 var _process = _interopRequireDefault(require("process"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+// @ts-nocheck
+/* eslint-disable */
+
 const {
   PROCESS_UTILS_GET_CPU_USAGE,
   PROCESS_UTILS_GET_MEMORY_INFO,

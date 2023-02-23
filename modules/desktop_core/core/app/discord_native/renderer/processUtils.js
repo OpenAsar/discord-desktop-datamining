@@ -5,6 +5,9 @@ var _os = _interopRequireDefault(require("os"));
 var _process = _interopRequireDefault(require("process"));
 var _minidump = require("./minidump");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+// @ts-nocheck
+/* eslint-disable */
+
 const {
   PROCESS_UTILS_GET_CPU_USAGE,
   PROCESS_UTILS_FLUSH_DNS_CACHE,
