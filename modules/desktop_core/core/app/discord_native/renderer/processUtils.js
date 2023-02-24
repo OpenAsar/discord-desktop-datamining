@@ -1,27 +1,32 @@
 "use strict";
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.flushCookies = flushCookies;
+exports.flushDNSCache = flushDNSCache;
+exports.flushStorageData = flushStorageData;
+exports.getCPUCoreCount = getCPUCoreCount;
+exports.getCurrentCPUUsagePercent = getCurrentCPUUsagePercent;
+exports.getCurrentMemoryUsageKB = getCurrentMemoryUsageKB;
+exports.getLastCrash = getLastCrash;
+exports.getMainArgvSync = getMainArgvSync;
+exports.purgeMemory = purgeMemory;
 var _electron = _interopRequireDefault(require("electron"));
 var _os = _interopRequireDefault(require("os"));
 var _process = _interopRequireDefault(require("process"));
+var _DiscordIPC = require("../common/DiscordIPC");
 var _minidump = require("./minidump");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-const {
-  PROCESS_UTILS_GET_CPU_USAGE,
-  PROCESS_UTILS_FLUSH_DNS_CACHE,
-  PROCESS_UTILS_FLUSH_COOKIES,
-  PROCESS_UTILS_FLUSH_STORAGE_DATA,
-  PROCESS_UTILS_GET_MAIN_ARGV_SYNC,
-  PROCESS_UTILS_GET_LAST_CRASH
-} = require('../common/constants').IPCEvents;
 // Note: CPU interval should be kept insync with Android's DeviceResourceUsageMonitor interval.
 const CPU_USAGE_GATHER_INTERVAL = 1000;
 const MEMORY_USAGE_GATHER_INTERVAL = 5000;
-const mainArgv = _electron.default.ipcRenderer.sendSync(PROCESS_UTILS_GET_MAIN_ARGV_SYNC);
+const mainArgv = _DiscordIPC.DiscordIPC.renderer.sendSync(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_MAIN_ARGV_SYNC);
 let totalProcessorUsagePercent = 0;
 let totalMemoryUsageKB = 0;
 const cpuCoreCount = _os.default.cpus().length;
 setInterval(() => {
-  _electron.default.ipcRenderer.invoke(PROCESS_UTILS_GET_CPU_USAGE).then(usage => totalProcessorUsagePercent = usage);
+  _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_CPU_USAGE).then(usage => totalProcessorUsagePercent = usage);
 }, CPU_USAGE_GATHER_INTERVAL);
 let memoryUsageTimerRunning = false;
 function getCurrentMemoryUsageKB() {
@@ -40,11 +45,11 @@ function getCurrentMemoryUsageKB() {
   totalMemoryUsageKB = computeMemoryUsage();
   return totalMemoryUsageKB;
 }
-async function flushDNSCache() {
-  _electron.default.ipcRenderer.invoke(PROCESS_UTILS_FLUSH_DNS_CACHE);
+function flushDNSCache() {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_FLUSH_DNS_CACHE);
 }
 async function getLastCrash() {
-  const lastCrash = await _electron.default.ipcRenderer.invoke(PROCESS_UTILS_GET_LAST_CRASH);
+  const lastCrash = await _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_LAST_CRASH);
   const minidumpExceptionType = lastCrash.id != null ? await (0, _minidump.findNewestCrashFileExceptionType)() : null;
   return {
     date: lastCrash.date,
@@ -56,7 +61,7 @@ async function getLastCrash() {
 }
 async function flushCookies(callback) {
   try {
-    await _electron.default.ipcRenderer.invoke(PROCESS_UTILS_FLUSH_COOKIES);
+    await _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_FLUSH_COOKIES);
     callback();
   } catch (err) {
     callback(err);
@@ -64,13 +69,13 @@ async function flushCookies(callback) {
 }
 async function flushStorageData(callback) {
   try {
-    await _electron.default.ipcRenderer.invoke(PROCESS_UTILS_FLUSH_STORAGE_DATA);
+    await _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_FLUSH_STORAGE_DATA);
     callback();
   } catch (err) {
     callback(err);
   }
 }
-async function purgeMemory() {
+function purgeMemory() {
   _electron.default.webFrame.clearCache();
 }
 function getCurrentCPUUsagePercent() {
@@ -82,14 +87,3 @@ function getCPUCoreCount() {
 function getMainArgvSync() {
   return mainArgv;
 }
-module.exports = {
-  flushDNSCache,
-  flushCookies,
-  getLastCrash,
-  flushStorageData,
-  purgeMemory,
-  getCurrentCPUUsagePercent,
-  getCurrentMemoryUsageKB,
-  getCPUCoreCount,
-  getMainArgvSync
-};
