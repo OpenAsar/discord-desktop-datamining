@@ -17,7 +17,7 @@ var _electron = _interopRequireDefault(require("electron"));
 var _os = _interopRequireDefault(require("os"));
 var _process = _interopRequireDefault(require("process"));
 var _DiscordIPC = require("../common/DiscordIPC");
-var _minidump = require("./minidump");
+var _minidumpReader = require("./minidumpReader");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 // Note: CPU interval should be kept insync with Android's DeviceResourceUsageMonitor interval.
 const CPU_USAGE_GATHER_INTERVAL = 1000;
@@ -51,13 +51,13 @@ function flushDNSCache() {
 }
 async function getLastCrash() {
   const lastCrash = await _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_LAST_CRASH);
-  const minidumpExceptionType = lastCrash.id != null ? await (0, _minidump.findNewestCrashFileExceptionType)() : null;
+  const minidumpInformation = lastCrash.id != null ? await (0, _minidumpReader.getNewestMinidumpInformation)() : null;
   return {
     date: lastCrash.date,
     id: lastCrash.id,
     rendererCrashReason: lastCrash.rendererCrashReason,
     rendererCrashExitCode: lastCrash.rendererCrashExitCode,
-    minidumpExceptionType,
+    minidumpInformation,
     storedInformation: lastCrash.storedInformation
   };
 }
