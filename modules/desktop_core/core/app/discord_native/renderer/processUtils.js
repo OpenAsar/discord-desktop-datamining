@@ -12,6 +12,7 @@ exports.getCurrentMemoryUsageKB = getCurrentMemoryUsageKB;
 exports.getLastCrash = getLastCrash;
 exports.getMainArgvSync = getMainArgvSync;
 exports.purgeMemory = purgeMemory;
+exports.setCrashInformation = setCrashInformation;
 var _electron = _interopRequireDefault(require("electron"));
 var _os = _interopRequireDefault(require("os"));
 var _process = _interopRequireDefault(require("process"));
@@ -56,7 +57,8 @@ async function getLastCrash() {
     id: lastCrash.id,
     rendererCrashReason: lastCrash.rendererCrashReason,
     rendererCrashExitCode: lastCrash.rendererCrashExitCode,
-    minidumpExceptionType: minidumpExceptionType
+    minidumpExceptionType,
+    storedInformation: lastCrash.storedInformation
   };
 }
 async function flushCookies(callback) {
@@ -86,4 +88,7 @@ function getCPUCoreCount() {
 }
 function getMainArgvSync() {
   return mainArgv;
+}
+function setCrashInformation(crashInformation, state) {
+  _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_SET_CRASH_INFORMATION, crashInformation, state);
 }

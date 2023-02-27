@@ -485,6 +485,8 @@ function launchMainAppWindow(isVisible) {
     const killed = reason === 'killed';
     _processUtils.processUtilsSettings.rendererCrashReason = reason;
     _processUtils.processUtilsSettings.rendererCrashExitCode = (details === null || details === void 0 ? void 0 : details.exitCode) ?? null;
+    _processUtils.processUtilsSettings.lastRunsStoredInformation = _processUtils.processUtilsSettings.currentStoredInformation;
+    _processUtils.processUtilsSettings.currentStoredInformation = {};
     if (killed) {
       _electron.app.quit();
       return;
