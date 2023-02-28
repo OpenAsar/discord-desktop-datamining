@@ -164,7 +164,6 @@ function bindConnectionInstance(instance) {
     startReplay: () => instance.startReplay(),
     startSamplesPlayback: (options, channels, callback) => instance.startSamplesPlayback(options, channels, callback),
     stopSamplesPlayback: () => instance.stopSamplesPlayback(),
-    setClipRecordSsrc: (ssrc, type, direction, shouldRecord) => instance.setClipRecordSsrc(ssrc, type, direction, shouldRecord),
     setRtcLogMarker: (marker) => instance.setRtcLogMarker(marker),
     startSamplesLocalPlayback: (samplesId, options, channels, callback) => instance.startSamplesLocalPlayback(samplesId, options, channels, callback),
     stopSamplesLocalPlayback: (sourceId) => instance.stopSamplesLocalPlayback(sourceId),

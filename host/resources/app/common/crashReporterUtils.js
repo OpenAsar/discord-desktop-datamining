@@ -5,8 +5,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.flatten = flatten;
 exports.reconcileCrashReporterMetadata = reconcileCrashReporterMetadata;
-// @ts-nocheck
-/* eslint-disable */
 const {
   getElectronMajorVersion
 } = require('./processUtils');

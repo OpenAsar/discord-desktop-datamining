@@ -6,44 +6,49 @@ Object.defineProperty(exports, "__esModule", {
 exports.processUtilsSettings = void 0;
 var _electron = _interopRequireDefault(require("electron"));
 var _process = _interopRequireDefault(require("process"));
-var _DiscordIPC = require("../common/DiscordIPC");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+const {
+  PROCESS_UTILS_GET_CPU_USAGE,
+  PROCESS_UTILS_GET_MEMORY_INFO,
+  PROCESS_UTILS_FLUSH_DNS_CACHE,
+  PROCESS_UTILS_FLUSH_COOKIES,
+  PROCESS_UTILS_FLUSH_STORAGE_DATA,
+  PROCESS_UTILS_GET_MAIN_ARGV_SYNC,
+  PROCESS_UTILS_GET_LAST_CRASH
+} = require('../common/constants').IPCEvents;
 const processUtilsSettings = {
   rendererCrashReason: null,
   rendererCrashExitCode: null
 };
 exports.processUtilsSettings = processUtilsSettings;
-_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_CPU_USAGE, _ => {
+_electron.default.ipcMain.handle(PROCESS_UTILS_GET_CPU_USAGE, async _ => {
   let totalProcessorUsagePercent = 0.0;
   for (const processMetric of _electron.default.app.getAppMetrics()) {
     totalProcessorUsagePercent += processMetric.cpu.percentCPUUsage;
   }
-  return Promise.resolve(totalProcessorUsagePercent);
+  return totalProcessorUsagePercent;
 });
-_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_LAST_CRASH, _ => {
-  return Promise.resolve({
+_electron.default.ipcMain.handle(PROCESS_UTILS_GET_LAST_CRASH, _ => {
+  return {
     ..._electron.default.crashReporter.getLastCrashReport(),
     rendererCrashReason: processUtilsSettings.rendererCrashReason,
     rendererCrashExitCode: processUtilsSettings.rendererCrashExitCode
-  });
+  };
 });
-_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_MEMORY_INFO, _ => {
+_electron.default.ipcMain.handle(PROCESS_UTILS_GET_MEMORY_INFO, async _ => {
   return _process.default.getProcessMemoryInfo();
 });
-_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_FLUSH_DNS_CACHE, _ => {
+_electron.default.ipcMain.handle(PROCESS_UTILS_FLUSH_DNS_CACHE, async _ => {
   const defaultSession = _electron.default.session.defaultSession;
-  if (defaultSession != null && defaultSession.clearHostResolverCache != null) {
-    defaultSession.clearHostResolverCache();
-  }
-  return Promise.resolve();
+  if (!defaultSession || !defaultSession.clearHostResolverCache) return;
+  defaultSession.clearHostResolverCache();
 });
-_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_FLUSH_COOKIES, _ => {
+_electron.default.ipcMain.handle(PROCESS_UTILS_FLUSH_COOKIES, async _ => {
   return _electron.default.session.defaultSession.cookies.flushStore();
 });
-_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_FLUSH_STORAGE_DATA, _ => {
+_electron.default.ipcMain.handle(PROCESS_UTILS_FLUSH_STORAGE_DATA, async _ => {
   _electron.default.session.defaultSession.flushStorageData();
-  return Promise.resolve();
 });
-_DiscordIPC.DiscordIPC.main.on(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_MAIN_ARGV_SYNC, event => {
+_electron.default.ipcMain.on(PROCESS_UTILS_GET_MAIN_ARGV_SYNC, event => {
   event.returnValue = _process.default.argv;
 });

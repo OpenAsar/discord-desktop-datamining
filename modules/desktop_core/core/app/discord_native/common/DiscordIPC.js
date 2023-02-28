@@ -18,20 +18,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // Save people from needing two imports.
 
 class DiscordMainIPC {
-  /**
-   * For handling sync events.
-   */
-
   static on(channel, listener) {
     _electron.default.ipcMain.on(channel, (...args) => {
       return listener.apply(this, args);
     });
   }
-
-  /**
-   * For handling async events.
-   */
-
   static handle(channel, listener) {
     return _electron.default.ipcMain.handle(channel, (...args) => {
       return listener.apply(this, args);
@@ -39,18 +30,9 @@ class DiscordMainIPC {
   }
 }
 class DiscordRendererIPC {
-  /**
-   * For sending sync events.
-   */
-
   static sendSync(...args) {
     return _electron.default.ipcRenderer.sendSync.apply(_electron.default.ipcRenderer, args);
   }
-
-  /**
-   * For sending async events.
-   */
-
   static invoke(...args) {
     return _electron.default.ipcRenderer.invoke.apply(_electron.default.ipcRenderer, args);
   }

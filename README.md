@@ -2,26 +2,26 @@
 
 ## development versions
 
-**host: 1.0.710**
+**host: 1.0.711**
 
 | module | version |
 | ------ | :-----: |
-| media | 1 |
-| game_utils | 1 |
-| voice | 6 |
-| cloudsync | 1 |
-| utils | 1 |
-| erlpack | 1 |
-| hook | 1 |
-| dispatch | 1 |
-| overlay2 | 1 |
-| vigilante | 1 |
 | modules | 1 |
-| krisp | 1 |
-| rpc | 1 |
-| desktop_core | 1 |
 | spellcheck | 1 |
+| utils | 1 |
+| desktop_core | 1 |
 | sekrit | 1 |
+| media | 1 |
+| overlay2 | 1 |
+| hook | 1 |
+| cloudsync | 1 |
+| rpc | 1 |
+| game_utils | 1 |
+| voice | 1 |
+| dispatch | 1 |
+| vigilante | 1 |
+| erlpack | 1 |
+| krisp | 1 |
 
 ## branches
 
