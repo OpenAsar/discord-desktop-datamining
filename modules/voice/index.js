@@ -93,6 +93,8 @@ features.declareSupported('simulcast_bugfix');
 features.declareSupported('direct_video');
 features.declareSupported('electron_video');
 features.declareSupported('fixed_keyframe_interval');
+features.declareSupported('first_frame_callback');
+features.declareSupported('remote_user_multi_stream');
 
 if (process.platform === 'win32' || process.platform === 'darwin') {
   features.declareSupported('soundshare');
@@ -149,6 +151,7 @@ function bindConnectionInstance(instance) {
       instance.setRemoteUserCanHavePriority(userId, canHavePriority),
 
     setOnVideoCallback: (callback) => instance.setOnVideoCallback(callback),
+    setOnFirstFrameCallback: (callback) => instance.setOnFirstFrameCallback(callback),
     setVideoBroadcast: (broadcasting) => instance.setVideoBroadcast(broadcasting),
     setDesktopSource: (id, videoHook, type) => instance.setDesktopSource(id, videoHook, type),
     setDesktopSourceWithOptions: (options) => instance.setDesktopSourceWithOptions(options),
