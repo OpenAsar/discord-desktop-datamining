@@ -50,6 +50,10 @@ class FileReader {
     return new ReadResult(new Uint32Array(this.buffer.buffer, 0, u32toReadCount));
   }
   async readMinidumpString(rva) {
+    if (rva === 0) {
+      return '';
+    }
+
     // https://learn.microsoft.com/en-us/windows/win32/api/minidumpapiset/ns-minidumpapiset-minidump_string
     await this.readCore(4, rva);
     const length = this.buffer[0] | this.buffer[1] << 8 | this.buffer[2] << 16 | this.buffer[3] << 24;
@@ -145,12 +149,134 @@ var MinidumpStreamType;
   MinidumpStreamType[MinidumpStreamType["ceStreamDiagnosisList"] = 32780] = "ceStreamDiagnosisList";
   MinidumpStreamType[MinidumpStreamType["LastReservedStream"] = 65535] = "LastReservedStream";
 })(MinidumpStreamType || (MinidumpStreamType = {}));
-function getVersionString(ms, ls) {
-  const first = ms >> 16 & 0xffff;
-  const second = ms & 0xffff;
-  const third = ls >> 16 & 0xffff;
-  const fourth = ls & 0xffff;
-  return `${first}.${second}.${third}.${fourth}`;
+// https://docs.microsoft.com/en-us/windows/win32/api/minidumpapiset/ns-minidumpapiset-minidump_header
+class MINIDUMP_HEADER {
+  static U32_SIZE = 4;
+  constructor(reader) {
+    this.signature = reader.readuint32();
+    this.version = reader.readuint32();
+    this.numberOfStreams = reader.readuint32();
+    this.streamDirectoryOffset = reader.readuint32();
+  }
+  static async read(reader, position) {
+    return new MINIDUMP_HEADER(await reader.read(MINIDUMP_HEADER.U32_SIZE, position));
+  }
+}
+
+// https://docs.microsoft.com/en-us/windows/win32/api/minidumpapiset/ns-minidumpapiset-minidump_directory
+class MINIDUMP_DIRECTORY {
+  static U32_SIZE = 3;
+  constructor(reader) {
+    this.streamType = reader.readuint32();
+    this.dataSize = reader.readuint32();
+    this.dataOffset = reader.readuint32();
+  }
+  static async read(reader, position) {
+    return new MINIDUMP_DIRECTORY(await reader.read(MINIDUMP_DIRECTORY.U32_SIZE, position));
+  }
+}
+
+// https://docs.microsoft.com/en-us/windows/win32/api/minidumpapiset/ns-minidumpapiset-minidump_exception_stream
+class MINIDUMP_EXCEPTION_STREAM {
+  static U32_SIZE = 8;
+  constructor(reader) {
+    this.threadId = reader.readuint32();
+    this.alignment = reader.readuint32();
+    this.exceptionCode = reader.readuint32();
+    this.exceptionFlags = reader.readuint32();
+    this.exceptionRecord = reader.readuint64();
+    this.exceptionAddress = reader.readuint64();
+  }
+  static async read(reader, position) {
+    return new MINIDUMP_EXCEPTION_STREAM(await reader.read(MINIDUMP_EXCEPTION_STREAM.U32_SIZE, position));
+  }
+  getExceptionCodeString() {
+    const exceptionCode = this.exceptionCode.toString(16).toUpperCase().padStart(8, '0');
+    const exceptionString = exceptionTypes[exceptionCode] ?? exceptionCode;
+    return exceptionString;
+  }
+}
+
+// https://learn.microsoft.com/en-us/windows/win32/api/minidumpapiset/ns-minidumpapiset-minidump_location_descriptor
+class MINIDUMP_LOCATION_DESCRIPTOR {
+  constructor(reader) {
+    this.dataSize = reader.readuint32();
+    this.rva = reader.readuint32();
+  }
+}
+
+// https://learn.microsoft.com/en-us/windows/win32/api/minidumpapiset/ns-minidumpapiset-minidump_module_list
+class MINIDUMP_MODULE_LIST {
+  static U32_SIZE = 1;
+  constructor(reader) {
+    this.numberOfModules = reader.readuint32();
+  }
+  static async read(reader, position) {
+    return new MINIDUMP_MODULE_LIST(await reader.read(MINIDUMP_MODULE_LIST.U32_SIZE, position));
+  }
+}
+
+// https://learn.microsoft.com/en-us/windows/win32/api/minidumpapiset/ns-minidumpapiset-minidump_module
+class MINIDUMP_MODULE {
+  // sizeof(MINIDUMP_MODULE)              108
+  // sizeof(VS_FIXEDFILEINFO)              52
+  // sizeof(MINIDUMP_LOCATION_DESCRIPTOR)   8
+  // sizeof(RVA)                            4
+  static U32_SIZE = 108 / 4;
+  constructor(reader) {
+    this.baseOfImage = reader.readuint64();
+    this.sizeOfImage = reader.readuint32();
+    this.checkSum = reader.readuint32();
+    this.timeDateStamp = reader.readuint32();
+    this.moduleNameRva = reader.readuint32();
+    this.versionInfo = new VS_FIXEDFILEINFO(reader);
+    this.cvRecord = new MINIDUMP_LOCATION_DESCRIPTOR(reader);
+    this.miscRecord = new MINIDUMP_LOCATION_DESCRIPTOR(reader);
+    this.reserved0 = reader.readuint64();
+    this.reserved1 = reader.readuint64();
+  }
+  static async read(reader, position) {
+    return new MINIDUMP_MODULE(await reader.read(MINIDUMP_MODULE.U32_SIZE, position));
+  }
+  containsAddress(address) {
+    const endAddress = this.baseOfImage + BigInt(this.sizeOfImage);
+    return this.baseOfImage <= address && endAddress > address;
+  }
+  async getModuleFileName(reader) {
+    const moduleName = await reader.readMinidumpString(this.moduleNameRva);
+    let dirPos = moduleName.lastIndexOf('\\');
+    if (dirPos === -1) {
+      dirPos = moduleName.lastIndexOf('/');
+    }
+    dirPos = dirPos === -1 ? 0 : dirPos + 1;
+    return moduleName.slice(dirPos);
+  }
+}
+
+// https://learn.microsoft.com/en-us/windows/win32/api/verrsrc/ns-verrsrc-vs_fixedfileinfo
+class VS_FIXEDFILEINFO {
+  constructor(reader) {
+    this.dwSignature = reader.readuint32();
+    this.dwStrucVersion = reader.readuint32();
+    this.dwFileVersionMS = reader.readuint32();
+    this.dwFileVersionLS = reader.readuint32();
+    this.dwProductVersionMS = reader.readuint32();
+    this.dwProductVersionLS = reader.readuint32();
+    this.dwFileFlagsMask = reader.readuint32();
+    this.dwFileFlags = reader.readuint32();
+    this.dwFileOS = reader.readuint32();
+    this.dwFileType = reader.readuint32();
+    this.dwFileSubtype = reader.readuint32();
+    this.dwFileDateMS = reader.readuint32();
+    this.dwFileDateLS = reader.readuint32();
+  }
+  getVersionString() {
+    const first = this.dwProductVersionMS >> 16 & 0xffff;
+    const second = this.dwProductVersionMS & 0xffff;
+    const third = this.dwProductVersionLS >> 16 & 0xffff;
+    const fourth = this.dwProductVersionLS & 0xffff;
+    return `${first}.${second}.${third}.${fourth}`;
+  }
 }
 async function readMinidump(file) {
   if (file == null || !isMinidumpFilename(file)) return null;
@@ -158,15 +284,7 @@ async function readMinidump(file) {
   const info = {};
   try {
     reader = new FileReader(file);
-    const headerResult = await reader.read(4, 0);
-
-    // https://docs.microsoft.com/en-us/windows/win32/api/minidumpapiset/ns-minidumpapiset-minidump_header
-    const header = {
-      signature: headerResult.readuint32(),
-      version: headerResult.readuint32(),
-      numberOfStreams: headerResult.readuint32(),
-      streamDirectoryOffset: headerResult.readuint32()
-    };
+    const header = await MINIDUMP_HEADER.read(reader, 0);
     if (header.signature !== 0x504d444d) {
       console.log(`readMinidump Bad signature: 0x${header.signature.toString(16)}`);
       return null;
@@ -178,121 +296,52 @@ async function readMinidump(file) {
       return null;
     }
     const streamLookup = {};
+
+    // First create a lookup because we want to process the entries in a specific order.
     for (let i = 0; i < header.numberOfStreams; ++i) {
       const streamOffset = header.streamDirectoryOffset + i * 12;
-      const streamResult = await reader.read(3, streamOffset);
-      const streamType = streamResult.readuint32();
+      const entry = await MINIDUMP_DIRECTORY.read(reader, streamOffset);
 
       // We only care about a limited amount of stream types, so lets avoid some of the overhead.
-      switch (streamType) {
+      switch (entry.streamType) {
         case MinidumpStreamType.ExceptionStream:
         case MinidumpStreamType.ModuleListStream:
           break;
         default:
           continue;
       }
-
-      // https://docs.microsoft.com/en-us/windows/win32/api/minidumpapiset/ns-minidumpapiset-minidump_directory
-      const entry = {
-        streamType: streamType,
-        dataSize: streamResult.readuint32(),
-        dataOffset: streamResult.readuint32()
-      };
-      let entryLookup = streamLookup[entry.streamType];
-      if (entryLookup == null) {
-        entryLookup = [];
-        streamLookup[entry.streamType] = entryLookup;
-      }
-      entryLookup.push(entry);
+      streamLookup[entry.streamType] = entry;
     }
-    const exceptionStreams = streamLookup[MinidumpStreamType.ExceptionStream];
-    if (exceptionStreams == null || exceptionStreams.length === 0) {
+    const exceptionStreamEntry = streamLookup[MinidumpStreamType.ExceptionStream];
+    if (exceptionStreamEntry == null) {
       console.log(`readMinidump: No ExceptionStream found.`);
       return null;
     }
-    const exceptionStreamEntry = exceptionStreams[0];
-    const exceptionReadResult = await reader.read(8, exceptionStreamEntry.dataOffset);
-
-    // https://docs.microsoft.com/en-us/windows/win32/api/minidumpapiset/ns-minidumpapiset-minidump_exception_stream
-    const exceptionStream = {
-      threadId: exceptionReadResult.readuint32(),
-      alignment: exceptionReadResult.readuint32(),
-      exceptionCode: exceptionReadResult.readuint32(),
-      exceptionFlags: exceptionReadResult.readuint32(),
-      exceptionRecord: exceptionReadResult.readuint64(),
-      exceptionAddress: exceptionReadResult.readuint64()
-    };
-    const exceptionCode = exceptionStream.exceptionCode.toString(16).toUpperCase();
-    const exceptionString = exceptionTypes[exceptionCode] ?? exceptionCode;
+    const exceptionStream = await MINIDUMP_EXCEPTION_STREAM.read(reader, exceptionStreamEntry.dataOffset);
+    info.exceptionString = exceptionStream.getExceptionCodeString();
     const exceptionAddrString = exceptionStream.exceptionAddress.toString(16);
-    console.log(`readMinidump exceptionCode: ${exceptionString}, exceptionAddress ${exceptionAddrString}`);
-    info.exceptionString = exceptionString;
-    const exceptionAddress = exceptionStream.exceptionAddress;
-    const moduleStreams = streamLookup[MinidumpStreamType.ModuleListStream];
+    console.log(`readMinidump exceptionCode: ${info.exceptionString}, exceptionAddress ${exceptionAddrString}`);
+    const moduleStreamEntry = streamLookup[MinidumpStreamType.ModuleListStream];
     // Skip if `exceptionAddress` is 0 since there will be no crashing module.
-    if (moduleStreams != null && moduleStreams.length > 0 && exceptionAddress !== BigInt(0)) {
-      const moduleStreamEntry = moduleStreams[0];
+    if (moduleStreamEntry != null && exceptionStream.exceptionAddress !== BigInt(0)) {
       // https://learn.microsoft.com/en-us/windows/win32/api/minidumpapiset/ns-minidumpapiset-minidump_module_list
 
-      const countReadResult = await reader.read(1, moduleStreamEntry.dataOffset);
-      const numberOfModules = countReadResult.readuint32();
-
+      // Do not read them all at once. This 1) allows us to exit early, 2) would require a variable sized buffer
+      // instead of our smaller fixed size buffer.
+      const moduleList = await MINIDUMP_MODULE_LIST.read(reader, moduleStreamEntry.dataOffset);
       // Sanity check, this number is arbitrary.
-      if (numberOfModules > 0x200) {
-        console.log(`readMinidump ModuleListstream Bad numberOfModules: 0x${numberOfModules.toString(16)}`);
+      if (moduleList.numberOfModules > 0x200) {
+        console.log(`readMinidump ModuleListstream Bad numberOfModules: 0x${moduleList.numberOfModules.toString(16)}`);
+        return info;
       }
       let moduleEntryOffset = moduleStreamEntry.dataOffset + 4;
-      moduleStreamsLoop: for (let i = 0; i < numberOfModules; ++i) {
-        const moduleReadResult = await reader.read(108 / 4, moduleEntryOffset);
-        moduleEntryOffset += 108;
-
-        // sizeof(MINIDUMP_MODULE)              108
-        // sizeof(VS_FIXEDFILEINFO)              52
-        // sizeof(MINIDUMP_LOCATION_DESCRIPTOR)   8
-        // sizeof(RVA)                            4
-
-        // https://learn.microsoft.com/en-us/windows/win32/api/minidumpapiset/ns-minidumpapiset-minidump_module
-        // Commented out valid but unused values.
-        const module = {
-          baseOfImage: moduleReadResult.readuint64(),
-          sizeOfImage: moduleReadResult.readuint32(),
-          checkSum: moduleReadResult.readuint32(),
-          timeDateStamp: moduleReadResult.readuint32(),
-          moduleNameRva: moduleReadResult.readuint32(),
-          versionInfo: {
-            dwSignature: moduleReadResult.readuint32(),
-            dwStrucVersion: moduleReadResult.readuint32(),
-            dwFileVersionMS: moduleReadResult.readuint32(),
-            dwFileVersionLS: moduleReadResult.readuint32(),
-            dwProductVersionMS: moduleReadResult.readuint32(),
-            dwProductVersionLS: moduleReadResult.readuint32()
-            // dwFileFlagsMask: moduleReadResult.readuint32(),
-            // dwFileFlags: moduleReadResult.readuint32(),
-            // dwFileOS: moduleReadResult.readuint32(),
-            // dwFileType: moduleReadResult.readuint32(),
-            // dwFileSubtype: moduleReadResult.readuint32(),
-            // dwFileDateMS: moduleReadResult.readuint32(),
-            // dwFileDateLS: moduleReadResult.readuint32(),
-          }
-          // cvRecord: moduleReadResult.readuint64(),
-          // miscRecord: moduleReadResult.readuint64(),
-          // reserved0: moduleReadResult.readuint64(),
-          // reserved1: moduleReadResult.readuint64(),
-        };
-
-        const endAddress = module.baseOfImage + BigInt(module.sizeOfImage);
-        if (module.baseOfImage <= exceptionAddress && endAddress > exceptionAddress) {
-          const moduleName = await reader.readMinidumpString(module.moduleNameRva);
-          let dirPos = moduleName.lastIndexOf('\\');
-          if (dirPos === -1) {
-            dirPos = moduleName.lastIndexOf('/');
-          }
-          dirPos = dirPos === -1 ? 0 : dirPos + 1;
-          const moduleFilename = moduleName.slice(dirPos);
-          console.log(`readMinidump ModuleListstream crashing module ${moduleName} (${moduleFilename})`);
-          info.exceptionModuleName = moduleFilename;
-          info.exceptionModuleVersion = getVersionString(module.versionInfo.dwProductVersionMS, module.versionInfo.dwProductVersionLS);
-          info.relativeCrashAddress = (exceptionAddress - module.baseOfImage).toString(16);
+      moduleStreamsLoop: for (let i = 0; i < moduleList.numberOfModules; ++i) {
+        const module = await MINIDUMP_MODULE.read(reader, moduleEntryOffset);
+        moduleEntryOffset += MINIDUMP_MODULE.U32_SIZE * 4;
+        if (module.containsAddress(exceptionStream.exceptionAddress)) {
+          info.exceptionModuleName = await module.getModuleFileName(reader);
+          info.exceptionModuleVersion = module.versionInfo.getVersionString();
+          info.relativeCrashAddress = (exceptionStream.exceptionAddress - module.baseOfImage).toString(16);
           break moduleStreamsLoop;
         }
       }
