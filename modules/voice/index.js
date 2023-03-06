@@ -95,6 +95,7 @@ features.declareSupported('electron_video');
 features.declareSupported('fixed_keyframe_interval');
 features.declareSupported('first_frame_callback');
 features.declareSupported('remote_user_multi_stream');
+features.declareSupported('clips');
 
 if (process.platform === 'win32' || process.platform === 'darwin') {
   features.declareSupported('soundshare');
