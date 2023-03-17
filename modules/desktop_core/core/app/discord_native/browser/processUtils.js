@@ -6,49 +6,54 @@ Object.defineProperty(exports, "__esModule", {
 exports.processUtilsSettings = void 0;
 var _electron = _interopRequireDefault(require("electron"));
 var _process = _interopRequireDefault(require("process"));
+var _DiscordIPC = require("../common/DiscordIPC");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-const {
-  PROCESS_UTILS_GET_CPU_USAGE,
-  PROCESS_UTILS_GET_MEMORY_INFO,
-  PROCESS_UTILS_FLUSH_DNS_CACHE,
-  PROCESS_UTILS_FLUSH_COOKIES,
-  PROCESS_UTILS_FLUSH_STORAGE_DATA,
-  PROCESS_UTILS_GET_MAIN_ARGV_SYNC,
-  PROCESS_UTILS_GET_LAST_CRASH
-} = require('../common/constants').IPCEvents;
+// Since crashes normally happen inside of the renderer process, we can store crash information inside of the
+// browser/main process, and report it back after the next startup.
+// lastRunsStoredInformation is set from currentStoredInformation, and currentStoredInformation is cleared on startup.
 const processUtilsSettings = {
   rendererCrashReason: null,
-  rendererCrashExitCode: null
+  rendererCrashExitCode: null,
+  lastRunsStoredInformation: {},
+  currentStoredInformation: {}
 };
 exports.processUtilsSettings = processUtilsSettings;
-_electron.default.ipcMain.handle(PROCESS_UTILS_GET_CPU_USAGE, async _ => {
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_CPU_USAGE, _ => {
   let totalProcessorUsagePercent = 0.0;
   for (const processMetric of _electron.default.app.getAppMetrics()) {
     totalProcessorUsagePercent += processMetric.cpu.percentCPUUsage;
   }
-  return totalProcessorUsagePercent;
+  return Promise.resolve(totalProcessorUsagePercent);
 });
-_electron.default.ipcMain.handle(PROCESS_UTILS_GET_LAST_CRASH, _ => {
-  return {
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_LAST_CRASH, _ => {
+  return Promise.resolve({
     ..._electron.default.crashReporter.getLastCrashReport(),
     rendererCrashReason: processUtilsSettings.rendererCrashReason,
-    rendererCrashExitCode: processUtilsSettings.rendererCrashExitCode
-  };
+    rendererCrashExitCode: processUtilsSettings.rendererCrashExitCode,
+    storedInformation: processUtilsSettings.lastRunsStoredInformation
+  });
 });
-_electron.default.ipcMain.handle(PROCESS_UTILS_GET_MEMORY_INFO, async _ => {
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_MEMORY_INFO, _ => {
   return _process.default.getProcessMemoryInfo();
 });
-_electron.default.ipcMain.handle(PROCESS_UTILS_FLUSH_DNS_CACHE, async _ => {
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_FLUSH_DNS_CACHE, _ => {
   const defaultSession = _electron.default.session.defaultSession;
-  if (!defaultSession || !defaultSession.clearHostResolverCache) return;
-  defaultSession.clearHostResolverCache();
+  if (defaultSession != null && defaultSession.clearHostResolverCache != null) {
+    defaultSession.clearHostResolverCache();
+  }
+  return Promise.resolve();
 });
-_electron.default.ipcMain.handle(PROCESS_UTILS_FLUSH_COOKIES, async _ => {
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_FLUSH_COOKIES, _ => {
   return _electron.default.session.defaultSession.cookies.flushStore();
 });
-_electron.default.ipcMain.handle(PROCESS_UTILS_FLUSH_STORAGE_DATA, async _ => {
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_FLUSH_STORAGE_DATA, _ => {
   _electron.default.session.defaultSession.flushStorageData();
+  return Promise.resolve();
 });
-_electron.default.ipcMain.on(PROCESS_UTILS_GET_MAIN_ARGV_SYNC, event => {
+_DiscordIPC.DiscordIPC.main.on(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_MAIN_ARGV_SYNC, event => {
   event.returnValue = _process.default.argv;
+});
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_SET_CRASH_INFORMATION, (_, crashInformation, state) => {
+  processUtilsSettings.currentStoredInformation[crashInformation] = state;
+  return Promise.resolve();
 });
