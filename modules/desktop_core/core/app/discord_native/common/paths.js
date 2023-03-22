@@ -8,7 +8,6 @@ exports.getPath = getPath;
 var _electron = _interopRequireDefault(require("electron"));
 var _fs = _interopRequireDefault(require("fs"));
 var _originalFs = _interopRequireDefault(require("original-fs"));
-var _os = _interopRequireDefault(require("os"));
 var _path = _interopRequireDefault(require("path"));
 var _util = _interopRequireDefault(require("util"));
 var _processUtils = require("../../../common/processUtils");
@@ -48,8 +47,7 @@ async function orderedFiles(folder) {
   }
 }
 async function getCrashFiles() {
-  // Electron 9 changes crash folder location
-  const crashBaseFolder = (0, _processUtils.getElectronMajorVersion)() < 9 ? _path.default.join(_os.default.tmpdir(), 'Discord Crashes') : await getPath('crashDumps');
+  const crashBaseFolder = await getPath('crashDumps');
   const crashFolder = _processUtils.IS_WIN ? _path.default.join(crashBaseFolder, 'reports') : _path.default.join(crashBaseFolder, 'completed');
   return orderedFiles(crashFolder);
 }

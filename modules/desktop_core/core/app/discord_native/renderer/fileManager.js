@@ -36,12 +36,12 @@ exports.readTimeSeriesLogFiles = readTimeSeriesLogFiles;
 exports.saveWithDialog = saveWithDialog;
 exports.showItemInFolder = showItemInFolder;
 exports.showOpenDialog = showOpenDialog;
-var _buffer = _interopRequireDefault(require("buffer"));
 var _fs = _interopRequireDefault(require("fs"));
 var _originalFs = _interopRequireDefault(require("original-fs"));
 var _path = _interopRequireWildcard(require("path"));
 var _util = _interopRequireDefault(require("util"));
 var _DiscordIPC = require("../common/DiscordIPC");
+var _fileutils = require("../common/fileutils");
 var _paths = require("../common/paths");
 var _files = require("./files");
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
@@ -53,7 +53,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 // Reason for original-fs being import/no-unresolved: https://github.com/discord/discord/pull/74159#discussion_r893733771
 
-const MAX_LENGTH = _buffer.default.constants.MAX_LENGTH;
 const INVALID_FILENAME_CHAR_REGEX = /[^a-zA-Z0-9-_.]/g;
 const promiseFs = {
   readdir: _util.default.promisify(_originalFs.default.readdir),
@@ -97,7 +96,7 @@ async function readLogFiles(maxSize) {
   if (crashFiles.length > 0) {
     filesToUpload.push(crashFiles[0]);
   }
-  return readFulfilledFiles(filesToUpload, maxSize, false);
+  return (0, _fileutils.readFulfilledFiles)(filesToUpload, maxSize, false);
 }
 async function readTimeSeriesLogFiles(maxSize, blindChannelId) {
   if (blindChannelId == null) {
@@ -120,7 +119,7 @@ async function readTimeSeriesLogFiles(maxSize, blindChannelId) {
     console.warn(`readTimeSeriesLogFiles: Exceeded limit of ${maxLogFiles} files, had ${filenames.length}.`);
     filenames.splice(maxLogFiles);
   }
-  const readfiles = await readFulfilledFiles(filenames, maxSize, false);
+  const readfiles = await (0, _fileutils.readFulfilledFiles)(filenames, maxSize, false);
   // Delete the files after they've been read.
   await Promise.all(allLogFiles.map(filename => promiseFs.unlink(filename)));
   return readfiles;
@@ -158,51 +157,8 @@ function showItemInFolder(path) {
 }
 async function openFiles(dialogOptions, maxSize) {
   const filenames = await showOpenDialog(dialogOptions);
-  return readFulfilledFiles(filenames, maxSize, true);
+  return (0, _fileutils.readFulfilledFiles)(filenames, maxSize, true);
 }
-
-// Perform `readFiles` but only return `fulfilled` results.
-// If [orException] is set, exception if any of the results were rejected.
-async function readFulfilledFiles(filenames, maxSize, orException) {
-  const files = await readFiles(filenames, maxSize);
-  if (orException) {
-    files.forEach(result => {
-      if (result.status === 'rejected') {
-        throw result.reason;
-      }
-    });
-  }
-  return files.filter(result => result.status === 'fulfilled').map(result => result.value);
-}
-function readFiles(filenames, maxSize) {
-  maxSize = Math.min(maxSize, MAX_LENGTH);
-  return Promise.allSettled(filenames.map(async filename => {
-    const handle = await promiseFs.open(filename, 'r');
-    try {
-      const stats = await promiseFs.fstat(handle);
-      if (maxSize != null && stats.size > maxSize) {
-        // Used to help determine why openFiles failed.
-        // Cannot use an error here because context bridge will remove the code field.
-        // eslint-disable-next-line no-throw-literal
-        throw {
-          code: 'ETOOLARGE',
-          message: 'upload too large',
-          filesize: stats.size,
-          maxSize
-        };
-      }
-      const buffer = Buffer.alloc(stats.size);
-      const data = await promiseFs.read(handle, buffer, 0, stats.size, 0);
-      return {
-        data: data.buffer.slice(0, data.bytesRead),
-        filename: _path.default.basename(filename)
-      };
-    } finally {
-      promiseFs.close(handle); // No reason to await?
-    }
-  }));
-}
-
 function getModulePath() {
   return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.FILE_MANAGER_GET_MODULE_PATH);
 }

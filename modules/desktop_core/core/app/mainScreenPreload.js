@@ -36,6 +36,7 @@ if (window.opener === null) {
     crashReporter: require('./discord_native/renderer/crashReporter'),
     desktopCapture: require('./discord_native/renderer/desktopCapture'),
     fileManager: require('./discord_native/renderer/fileManager'),
+    clips: require('./discord_native/renderer/clips'),
     processUtils: require('./discord_native/renderer/processUtils'),
     powerSaveBlocker: require('./discord_native/renderer/powerSaveBlocker'),
     http: require('./discord_native/renderer/http'),
