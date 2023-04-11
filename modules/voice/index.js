@@ -96,6 +96,7 @@ features.declareSupported('fixed_keyframe_interval');
 features.declareSupported('first_frame_callback');
 features.declareSupported('remote_user_multi_stream');
 features.declareSupported('clips');
+features.declareSupported('speed_test');
 
 if (process.platform === 'win32' || process.platform === 'darwin') {
   features.declareSupported('soundshare');
@@ -198,6 +199,27 @@ VoiceEngine.createReplayConnection = function (audioEngineId, callback, replayLo
   }
 
   return bindConnectionInstance(new VoiceEngine.VoiceReplayConnection(replayLog, audioEngineId, callback));
+};
+
+function bindSpeedTestConnectionInstance(instance) {
+  return {
+    destroy: () => instance.destroy(),
+
+    setTransportOptions: (options) => instance.setTransportOptions(options),
+    getEncryptionModes: (callback) => instance.getEncryptionModes(callback),
+    setPingInterval: (interval) => instance.setPingInterval(interval),
+    setPingCallback: (callback) => instance.setPingCallback(callback),
+    setPingTimeoutCallback: (callback) => instance.setPingTimeoutCallback(callback),
+    startClientToServerSpeedTest: (options) => instance.startClientToServerSpeedTest(options),
+    endClientToServerSpeedTest: (options) => instance.endClientToServerSpeedTest(options),
+    startServerToClientSpeedTest: (options) => instance.startServerToClientSpeedTest(options),
+    endServerToClientSpeedTest: (options) => instance.endServerToClientSpeedTest(options),
+  };
+}
+
+VoiceEngine.createSpeedTestConnectionWithOptions = function (userId, connectionOptions, onConnectCallback) {
+  let instance = new VoiceEngine.SpeedTestConnection(userId, connectionOptions, onConnectCallback);
+  return bindSpeedTestConnectionInstance(instance);
 };
 
 VoiceEngine.setAudioSubsystem = function (subsystem) {

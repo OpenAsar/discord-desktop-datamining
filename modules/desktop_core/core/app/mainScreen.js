@@ -396,9 +396,19 @@ function launchMainAppWindow(isVisible) {
         callback(true);
         return;
       case 'notifications':
-      case 'fullscreen':
       case 'pointerLock':
         callback((0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, WEBAPP_ENDPOINT));
+        return;
+      case 'fullscreen':
+        let result = false;
+        if (details.isMainFrame) {
+          result = (0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, WEBAPP_ENDPOINT);
+        } else {
+          // If we're in a subframe then just allow since the details.requestingUrl is the subframe's URL and
+          // there's nothing to match here.
+          result = true;
+        }
+        callback(result);
         return;
     }
     callback(false);
@@ -410,7 +420,11 @@ function launchMainAppWindow(isVisible) {
       case 'notifications':
       case 'fullscreen':
       case 'pointerLock':
-        return (0, _securityUtils.checkUrlOriginMatches)(requestingOrigin, WEBAPP_ENDPOINT);
+        if (details.isMainFrame || details.embeddingOrigin == null) {
+          return (0, _securityUtils.checkUrlOriginMatches)(requestingOrigin, WEBAPP_ENDPOINT);
+        } else {
+          return (0, _securityUtils.checkUrlOriginMatches)(details.embeddingOrigin, WEBAPP_ENDPOINT);
+        }
     }
     return false;
   });
