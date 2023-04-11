@@ -207,6 +207,7 @@ function bindSpeedTestConnectionInstance(instance) {
 
     setTransportOptions: (options) => instance.setTransportOptions(options),
     getEncryptionModes: (callback) => instance.getEncryptionModes(callback),
+    getNetworkOverhead: (callback) => instance.getNetworkOverhead(callback),
     setPingInterval: (interval) => instance.setPingInterval(interval),
     setPingCallback: (callback) => instance.setPingCallback(callback),
     setPingTimeoutCallback: (callback) => instance.setPingTimeoutCallback(callback),
