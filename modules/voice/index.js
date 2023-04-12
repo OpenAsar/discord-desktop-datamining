@@ -169,11 +169,14 @@ function bindConnectionInstance(instance) {
     startReplay: () => instance.startReplay(),
     startSamplesPlayback: (options, channels, callback) => instance.startSamplesPlayback(options, channels, callback),
     stopSamplesPlayback: () => instance.stopSamplesPlayback(),
-    setClipRecordSsrc: (ssrc, type, direction, shouldRecord) => instance.setClipRecordSsrc(ssrc, type, direction, shouldRecord),
+    setClipRecordSsrc: (ssrc, type, direction, shouldRecord) =>
+      instance.setClipRecordSsrc(ssrc, type, direction, shouldRecord),
     setRtcLogMarker: (marker) => instance.setRtcLogMarker(marker),
-    startSamplesLocalPlayback: (samplesId, options, channels, callback) => instance.startSamplesLocalPlayback(samplesId, options, channels, callback),
+    startSamplesLocalPlayback: (samplesId, options, channels, callback) =>
+      instance.startSamplesLocalPlayback(samplesId, options, channels, callback),
     stopSamplesLocalPlayback: (sourceId) => instance.stopSamplesLocalPlayback(sourceId),
     stopAllSamplesLocalPlayback: () => instance.stopAllSamplesLocalPlayback(),
+    setOnVideoEncoderFallbackCallback: (codecName) => instance.setOnVideoEncoderFallbackCallback(codecName),
   };
 }
 
@@ -184,7 +187,7 @@ if (isElectronRenderer) {
 }
 
 VoiceEngine.createVoiceConnectionWithOptions = function (userId, connectionOptions, onConnectCallback) {
-  let instance = new VoiceEngine.VoiceConnection(userId, connectionOptions, onConnectCallback);
+  const instance = new VoiceEngine.VoiceConnection(userId, connectionOptions, onConnectCallback);
   return bindConnectionInstance(instance);
 };
 VoiceEngine.createOwnStreamConnectionWithOptions = VoiceEngine.createVoiceConnectionWithOptions;
