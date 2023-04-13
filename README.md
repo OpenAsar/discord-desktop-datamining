@@ -6,22 +6,22 @@
 
 | module | version |
 | ------ | :-----: |
-| overlay2 | 83 |
-| desktop_core | 83 |
-| dispatch | 83 |
-| vigilante | 83 |
-| game_utils | 83 |
-| voice | 83 |
-| cloudsync | 83 |
-| sekrit | 83 |
-| media | 83 |
-| utils | 83 |
-| rpc | 83 |
-| hook | 83 |
-| erlpack | 83 |
+| overlay2 | 85 |
+| media | 85 |
+| utils | 85 |
+| hook | 85 |
+| vigilante | 85 |
+| desktop_core | 85 |
+| spellcheck | 85 |
+| modules | 85 |
+| erlpack | 85 |
+| rpc | 85 |
+| cloudsync | 85 |
+| sekrit | 85 |
+| voice | 85 |
+| game_utils | 85 |
+| dispatch | 85 |
 | krisp | 1 |
-| spellcheck | 83 |
-| modules | 83 |
 
 ## branches
 
