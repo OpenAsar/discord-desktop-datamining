@@ -5,7 +5,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.processUtilsSettings = void 0;
 var _electron = _interopRequireDefault(require("electron"));
+var _os = _interopRequireDefault(require("os"));
 var _process = _interopRequireDefault(require("process"));
+var _systeminformation = _interopRequireDefault(require("systeminformation"));
 var _DiscordIPC = require("../common/DiscordIPC");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 // Since crashes normally happen inside of the renderer process, we can store crash information inside of the
@@ -35,6 +37,25 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_LAST_
 });
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_MEMORY_INFO, _ => {
   return _process.default.getProcessMemoryInfo();
+});
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_SYSTEM_INFO, async _ => {
+  const gpuInfo = await _systeminformation.default.graphics();
+  return {
+    cpus: _os.default.cpus().map(cpu => ({
+      model: cpu.model,
+      speed: cpu.speed
+    })),
+    gpus: gpuInfo.controllers.map(({
+      model,
+      vendor,
+      vram
+    }) => ({
+      model,
+      vendor,
+      memory: vram ?? -1
+    })),
+    total_memory: _os.default.totalmem()
+  };
 });
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_FLUSH_DNS_CACHE, _ => {
   const defaultSession = _electron.default.session.defaultSession;

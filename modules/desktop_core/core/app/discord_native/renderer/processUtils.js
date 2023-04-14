@@ -11,6 +11,7 @@ exports.getCurrentCPUUsagePercent = getCurrentCPUUsagePercent;
 exports.getCurrentMemoryUsageKB = getCurrentMemoryUsageKB;
 exports.getLastCrash = getLastCrash;
 exports.getMainArgvSync = getMainArgvSync;
+exports.getSystemInfo = getSystemInfo;
 exports.purgeMemory = purgeMemory;
 exports.setCrashInformation = setCrashInformation;
 var _electron = _interopRequireDefault(require("electron"));
@@ -68,6 +69,9 @@ async function flushCookies(callback) {
   } catch (err) {
     callback(err);
   }
+}
+function getSystemInfo() {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_SYSTEM_INFO);
 }
 async function flushStorageData(callback) {
   try {
