@@ -3,6 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.WEBAPP_ENDPOINT = void 0;
 exports.getMainWindowId = getMainWindowId;
 exports.handleOpenUrl = handleOpenUrl;
 exports.init = init;
@@ -73,6 +74,7 @@ const getWebappEndpoint = () => {
   return endpoint;
 };
 const WEBAPP_ENDPOINT = getWebappEndpoint();
+exports.WEBAPP_ENDPOINT = WEBAPP_ENDPOINT;
 function getSanitizedPath(path) {
   // using the whatwg URL api, get a sanitized pathname from given path
   // this is because url.parse's `path` may not always have a slash
