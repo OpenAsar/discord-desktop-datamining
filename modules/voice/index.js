@@ -214,10 +214,10 @@ function bindSpeedTestConnectionInstance(instance) {
     setPingInterval: (interval) => instance.setPingInterval(interval),
     setPingCallback: (callback) => instance.setPingCallback(callback),
     setPingTimeoutCallback: (callback) => instance.setPingTimeoutCallback(callback),
-    startClientToServerSpeedTest: (options) => instance.startClientToServerSpeedTest(options),
-    endClientToServerSpeedTest: (options) => instance.endClientToServerSpeedTest(options),
-    startServerToClientSpeedTest: (options) => instance.startServerToClientSpeedTest(options),
-    endServerToClientSpeedTest: (options) => instance.endServerToClientSpeedTest(options),
+    startSpeedTestSender: (options, callback) => instance.startSpeedTestSender(options, callback),
+    stopSpeedTestSender: () => instance.stopSpeedTestSender(),
+    startSpeedTestReceiver: (options, callback) => instance.startSpeedTestReceiver(options, callback),
+    stopSpeedTestReceiver: (callback) => instance.stopSpeedTestReceiver(callback),
   };
 }
 
