@@ -56,13 +56,13 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_OPEN, (_
     y: 0,
     transparent: true,
     title: 'Discord_Overlay3' + Math.round(Math.random() * 1e9).toString(16),
-    // TODO: I'd really rather a guid.
     // TODO: For some reason, it does not workout if the window starts hidden. Perhaps it's not loading and the native
     // code isn't firing?
     // show: false, // It's shown when initialized by the native code.
     frame: false,
-    focusable: false,
     // Sets WS_EX_NOACTIVATE, which keeps it out of the taskbar prior to our initialization running.
+    // Disabled for the time being as it appears to make opening dev tools impossible.
+    // focusable: true,
     webPreferences: {
       preload: _path.default.join(__dirname, '..', '..', 'mainScreenPreload.js'),
       nodeIntegration: false,
