@@ -46,6 +46,7 @@ if (window.opener === null) {
     userDataCache: require('./discord_native/renderer/userDataCache'),
     thumbar: require('./discord_native/renderer/thumbar'),
     safeStorage: require('./discord_native/renderer/safeStorage'),
+    globalOverlay: require('./discord_native/renderer/globalOverlay'),
     // TODO: remove these once web no longer uses them
     remoteApp: app,
     // TODO:  Fix. This is a hack to get typing done.

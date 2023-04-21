@@ -57,6 +57,7 @@ function startup(bootstrapModules) {
   const features = require('./discord_native/browser/features');
   features.injectFeaturesBackend(appFeatures.getFeatures());
   require('./discord_native/browser/fileManager');
+  require('./discord_native/browser/globalOverlay');
   require('./discord_native/browser/clips');
   require('./discord_native/browser/userDataCache');
   const gpuSettings = require('./discord_native/browser/gpuSettings');

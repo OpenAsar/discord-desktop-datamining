@@ -4,6 +4,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.getMetadata = getMetadata;
+exports.triggerUnhandledException = triggerUnhandledException;
 exports.updateCrashReporter = updateCrashReporter;
 var _electron = _interopRequireDefault(require("electron"));
 var _crashReporterUtils = require("../../../common/crashReporterUtils");
@@ -18,4 +19,9 @@ async function updateCrashReporter(additionalMetadata) {
 }
 function getMetadata() {
   return metadata;
+}
+
+// Internal test for unhandled JS exception
+async function triggerUnhandledException() {
+  await _electron.default.ipcRenderer.invoke(_DiscordIPC.IPCEvents.UNHANDLED_JS_EXCEPTION);
 }
