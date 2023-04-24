@@ -1,8 +1,5 @@
 "use strict";
 
-const {
-  app
-} = require('electron');
 const buildInfo = require('./buildInfo');
 const paths = require('../common/paths');
 paths.init(buildInfo);
