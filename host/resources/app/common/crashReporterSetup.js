@@ -49,7 +49,15 @@ function getCrashReporterArgs(metadata) {
 function initializeSentrySdk(sentry) {
   const sentryDsn = supportsTls13 ? 'https://8405981abe5045908f0d88135eba7ba5@o64374.ingest.sentry.io/1197903' : 'https://8405981abe5045908f0d88135eba7ba5@o64374.insecure.sentry.io/1197903';
   sentry.init({
-    dsn: sentryDsn
+    dsn: sentryDsn,
+    beforeSend(event) {
+      var _metadata$sentry, _metadata$sentry2;
+      // Currently beforeSend is only fired for discord-desktop-js project,
+      // due to outdated sentry/electron sdk
+      event.release = metadata === null || metadata === void 0 ? void 0 : (_metadata$sentry = metadata['sentry']) === null || _metadata$sentry === void 0 ? void 0 : _metadata$sentry['release'];
+      event.environment = metadata === null || metadata === void 0 ? void 0 : (_metadata$sentry2 = metadata['sentry']) === null || _metadata$sentry2 === void 0 ? void 0 : _metadata$sentry2['environment'];
+      return event;
+    }
   });
 }
 function init(buildInfo, sentry) {

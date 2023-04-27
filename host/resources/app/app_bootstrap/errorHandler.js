@@ -9,6 +9,7 @@ exports.init = init;
 var Sentry = _interopRequireWildcard(require("@sentry/node"));
 var _electron = require("electron");
 var _process = _interopRequireDefault(require("process"));
+var _crashReporterSetup = require("../common/crashReporterSetup");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
@@ -20,11 +21,25 @@ const consoleOutputOnly = _process.default.env.DISCORD_TEST != null;
 function isErrorSafeToSuppress(error) {
   return /attempting to call a function in a renderer window/i.test(error.message);
 }
+function captureJSException(error) {
+  Sentry.captureException(error, scope => {
+    scope.clear();
+    scope.setTag('nativeBuildNumber', _crashReporterSetup.metadata.nativeBuildNumber);
+    scope.setUser(_crashReporterSetup.metadata.sentry.user);
+    scope.setExtras({
+      environment: _crashReporterSetup.metadata.sentry.environment,
+      release: _crashReporterSetup.metadata.sentry.release,
+      nativeBuildNumber: _crashReporterSetup.metadata.nativeBuildNumber
+    });
+    return scope;
+  });
+}
 function init() {
   _process.default.on('uncaughtException', error => {
     const stack = error.stack ? error.stack : String(error);
     const message = `Uncaught exception:\n ${stack}`;
     console.warn(message);
+    captureJSException(error);
     if (!isErrorSafeToSuppress(error)) {
       if (consoleOutputOnly) {
         console.error(`${message} error: ${error}`);
@@ -54,7 +69,7 @@ function fatal(err) {
   } else {
     _electron.dialog.showMessageBox(options, callback);
   }
-  Sentry.captureException(err);
+  captureJSException(err);
 }
 
 // capture a handled error for telemetry purposes, e.g. finding update loops.
@@ -64,7 +79,7 @@ function handled(err) {
   }
   if (totalHandledErrors < HANDLED_ERROR_LIMIT && handledErrorCounter++ % HANDLED_ERROR_INTERVAL == 0) {
     console.warn('Reporting non-fatal error', err);
-    Sentry.captureException(err);
+    captureJSException(err);
     totalHandledErrors++;
   }
 }
