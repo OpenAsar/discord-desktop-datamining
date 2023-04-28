@@ -53,7 +53,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 // Reason for original-fs being import/no-unresolved: https://github.com/discord/discord/pull/74159#discussion_r893733771
 
-const INVALID_FILENAME_CHAR_REGEX = /[^a-zA-Z0-9-_.]/g;
 const promiseFs = {
   readdir: _util.default.promisify(_originalFs.default.readdir),
   open: _util.default.promisify(_originalFs.default.open),
@@ -64,7 +63,7 @@ const promiseFs = {
   close: _util.default.promisify(_originalFs.default.close)
 };
 async function saveWithDialog(fileContents, fileName) {
-  if (INVALID_FILENAME_CHAR_REGEX.test(fileName)) {
+  if ((0, _files.containsInvalidFileChar)(fileName)) {
     throw new Error('fileName has invalid characters');
   }
   const defaultPath = _path.default.join(await (0, _paths.getPath)('downloads'), fileName);
