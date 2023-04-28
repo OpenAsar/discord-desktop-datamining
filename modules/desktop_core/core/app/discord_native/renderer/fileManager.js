@@ -10,6 +10,7 @@ Object.defineProperty(exports, "basename", {
   }
 });
 exports.cleanupTempFiles = cleanupTempFiles;
+exports.combineWebRtcLogs = combineWebRtcLogs;
 Object.defineProperty(exports, "dirname", {
   enumerable: true,
   get: function () {
@@ -86,11 +87,13 @@ async function showOpenDialog({
 }
 async function readLogFiles(maxSize) {
   // MAX_DEBUG_LOG_FILES may need to be increased as more files are added.
+  await combineWebRtcLogs('discord-webrtc_0', 'discord-webrtc_1', 'discord-webrtc');
+  await combineWebRtcLogs('discord-last-webrtc_0', 'discord-last-webrtc_1', 'discord-webrtc-last');
   const modulePath = await getModulePath();
   const voicePath = _path.default.join(modulePath, 'discord_voice');
   const hookPath = _path.default.join(modulePath, 'discord_hook');
   const utilsPath = _path.default.join(modulePath, 'discord_utils');
-  const filesToUpload = [_path.default.join(voicePath, 'discord-webrtc_0'), _path.default.join(voicePath, 'discord-webrtc_1'), _path.default.join(voicePath, 'discord-last-webrtc_0'), _path.default.join(voicePath, 'discord-last-webrtc_1'), _path.default.join(voicePath, 'audio_state.json'), _path.default.join(hookPath, 'hook.log'), _path.default.join(utilsPath, 'live_minidump.dmp')];
+  const filesToUpload = [_path.default.join(voicePath, 'discord-webrtc'), _path.default.join(voicePath, 'discord-webrtc-last'), _path.default.join(voicePath, 'audio_state.json'), _path.default.join(hookPath, 'hook.log'), _path.default.join(utilsPath, 'live_minidump.dmp')];
   const crashFiles = await (0, _paths.getCrashFiles)();
   if (crashFiles.length > 0) {
     filesToUpload.push(crashFiles[0]);
@@ -122,6 +125,30 @@ async function readTimeSeriesLogFiles(maxSize, blindChannelId) {
   // Delete the files after they've been read.
   await Promise.all(allLogFiles.map(filename => promiseFs.unlink(filename)));
   return readfiles;
+}
+async function combineWebRtcLogs(path1, path2, destinationPath) {
+  const modulePath = await getModulePath();
+  const voicePath = _path.default.join(modulePath, 'discord_voice');
+  const webRtcFile1 = _path.default.join(voicePath, path1);
+  const webRtcFile2 = _path.default.join(voicePath, path2);
+  const combinedFilePath = _path.default.join(voicePath, destinationPath);
+  const [file1Data, file2Data] = await Promise.all([_fs.default.promises.readFile(webRtcFile1).catch(_ => null), _fs.default.promises.readFile(webRtcFile2).catch(_ => null)]);
+  await _fs.default.promises.open(combinedFilePath, 'w');
+  if (file1Data !== null && file2Data === null) {
+    await _fs.default.promises.appendFile(combinedFilePath, file1Data);
+  } else if (file1Data === null && file2Data !== null) {
+    await _fs.default.promises.appendFile(combinedFilePath, file2Data);
+  } else if (file1Data !== null && file2Data !== null) {
+    const webRtcFile1Stats = await promiseFs.stat(webRtcFile1);
+    const webRtcFile2Stats = await promiseFs.stat(webRtcFile2);
+    if (webRtcFile1Stats.mtimeMs > webRtcFile2Stats.mtimeMs) {
+      await _fs.default.promises.appendFile(combinedFilePath, file2Data);
+      await _fs.default.promises.appendFile(combinedFilePath, file1Data);
+    } else {
+      await _fs.default.promises.appendFile(combinedFilePath, file1Data);
+      await _fs.default.promises.appendFile(combinedFilePath, file2Data);
+    }
+  }
 }
 async function cleanupTempFiles() {
   // Since this runs on startup, handle and report all errors as cleanly as possible.
