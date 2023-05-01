@@ -22,7 +22,9 @@ if (mode === 'app') {
   const {
     NEW_UPDATE_ENDPOINT
   } = require('./Constants');
-  if (buildInfo.newUpdater) {
+
+  // The dev setup better resembles the older updater setup.
+  if (!buildInfo.debug && buildInfo.newUpdater) {
     if (!updater.tryInitUpdater(buildInfo, NEW_UPDATE_ENDPOINT)) {
       throw new Error('Failed to initialize modules in overlay host.');
     }
