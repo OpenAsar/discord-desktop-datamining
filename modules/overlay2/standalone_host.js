@@ -1,5 +1,8 @@
 "use strict";
 
+// @ts-nocheck
+
+/* eslint-disable */
 var _require = require('electron'),
     app = _require.app;
 

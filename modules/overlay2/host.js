@@ -7,6 +7,9 @@ exports.createRenderer = createRenderer;
 exports.destroyRenderer = destroyRenderer;
 exports.eventHandler = eventHandler;
 
+// @ts-nocheck
+
+/* eslint-disable */
 var Backoff = require('./Backoff');
 
 var _require = require('electron'),
