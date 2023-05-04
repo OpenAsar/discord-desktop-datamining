@@ -7,31 +7,32 @@ exports.createRenderer = createRenderer;
 exports.destroyRenderer = destroyRenderer;
 exports.eventHandler = eventHandler;
 
-// @ts-nocheck
+var _electron = require("electron");
 
-/* eslint-disable */
-var Backoff = require('./Backoff');
+var _Backoff = _interopRequireDefault(require("./Backoff"));
 
-var _require = require('electron'),
-    BrowserWindow = _require.BrowserWindow,
-    _ipcMain = _require.ipcMain;
+var _overlay_module = _interopRequireDefault(require("./overlay_module"));
 
-var Overlay = require('./overlay_module.js');
+var _securityUtils = require("./securityUtils");
 
-var _require2 = require('./securityUtils'),
-    saferShellOpenExternal = _require2.saferShellOpenExternal; // IPC events must be prefixed with `DISCORD_`
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
+/* eslint-disable no-console */
 
+/* eslint-disable @typescript-eslint/ban-types */
+// eslint-disable-next-line import/no-unresolved
+// eslint-disable-next-line import/no-unresolved
+// IPC events must be prefixed with `DISCORD_`
 var ipcMain = {
   on: function on(event, callback) {
-    return _ipcMain.on("DISCORD_".concat(event), callback);
+    return _electron.ipcMain.on("DISCORD_".concat(event), callback);
   },
   removeListener: function removeListener(event, callback) {
-    return _ipcMain.removeListener("DISCORD_".concat(event), callback);
+    return _electron.ipcMain.removeListener("DISCORD_".concat(event), callback);
   }
 };
-ipcMain.on('OPEN_EXTERNAL_URL', function (e, externalUrl) {
-  saferShellOpenExternal(externalUrl)["catch"](function (_err) {
+ipcMain.on('OPEN_EXTERNAL_URL', function (_e, externalUrl) {
+  (0, _securityUtils.saferShellOpenExternal)(externalUrl)["catch"](function (_err) {
     console.error('Failed to open external URL', externalUrl);
   });
 });
@@ -69,7 +70,7 @@ function handleAccelerators(contents, event) {
 
   var fname = accelerators[event['keyCode']];
 
-  if (!fname) {
+  if (fname == null) {
     return false;
   }
 
@@ -88,8 +89,8 @@ function createRenderer(pid, url) {
     return;
   }
 
-  var _require3 = require('url'),
-      URL = _require3.URL;
+  var _require = require('url'),
+      URL = _require.URL;
 
   var urlWithPid = new URL(url);
   urlWithPid.searchParams.append('pid', pid.toString());
@@ -98,8 +99,8 @@ function createRenderer(pid, url) {
     pid: pid,
     url: "file://".concat(__dirname, "/start.html?pid=").concat(pid.toString()),
     overlayURL: url,
-    backoff: new Backoff(1000, 30000),
-    window: new BrowserWindow({
+    backoff: new _Backoff["default"](1000, 30000),
+    window: new _electron.BrowserWindow({
       show: false,
       skipTaskbar: true,
       transparent: true,
@@ -114,42 +115,49 @@ function createRenderer(pid, url) {
     })
   };
   var renderer = renderers[pid];
-  Overlay.connectProcess(pid);
+
+  _overlay_module["default"].connectProcess(pid);
 
   if (renderer.window.webContents._setDiscordOverlayProcessId) {
     renderer.window.webContents._setDiscordOverlayProcessId(pid);
   } // "paint" event will be skipped if direct frame delivery is enabled.
 
 
-  renderer.window.webContents.on('crashed', function (e, killed) {
-    Overlay.logMessage("Overlay for pid ".concat(renderer.pid, " crashed").concat(killed ? ' (killed)' : ''));
-    Overlay.sendCommand(renderer.pid, {
+  renderer.window.webContents.on('crashed', function (_e, killed) {
+    _overlay_module["default"].logMessage("Overlay for pid ".concat(renderer.pid, " crashed").concat(killed ? ' (killed)' : ''));
+
+    _overlay_module["default"].sendCommand(renderer.pid, {
       message: 'relay',
       _relay: 'renderer_crashed'
     });
+
     destroyRenderer(pid);
   });
   renderer.window.webContents.on('preload-error', function (_event, _input, error) {
-    Overlay.logMessage("Overlay for pid ".concat(renderer.pid, " crashed in preload: ").concat(error, "\n").concat(error.stack));
-    Overlay.sendCommand(renderer.pid, {
+    _overlay_module["default"].logMessage("Overlay for pid ".concat(renderer.pid, " crashed in preload: ").concat(error, "\n").concat(error.stack));
+
+    _overlay_module["default"].sendCommand(renderer.pid, {
       message: 'relay',
       _relay: 'renderer_preload_crashed'
     });
+
     destroyRenderer(pid);
   });
-  renderer.window.webContents.on('console-message', function (_event, _level, message, _line_no, _source_id) {
-    Overlay.logMessage("OverlayRenderer[".concat(pid, "]: ").concat(message));
+  renderer.window.webContents.on('console-message', function (_event, _level, message, _lineNo, _sourceId) {
+    _overlay_module["default"].logMessage("OverlayRenderer[".concat(pid, "]: ").concat(message));
   });
-  renderer.window.webContents.on('paint', function (_event, _dirty, image, _legacy_width, _legacy_height) {
+  renderer.window.webContents.on('paint', function (_event, _dirty, image, legacyWidth, legacyHeight) {
     // [adill] support electron <=1.8.4 which sent a (buffer, width, height) instead of (image)
     if (Buffer.isBuffer(image)) {
-      var width = _legacy_width;
-      var height = _legacy_height;
-      Overlay.sendFramebuffer(renderer.pid, image, width, height);
+      var width = legacyWidth;
+      var height = legacyHeight;
+
+      _overlay_module["default"].sendFramebuffer(renderer.pid, image, width, height);
+
       return;
     }
 
-    Overlay.sendFramebuffer(renderer.pid, image.getBitmap(), image.getSize().width, image.getSize().height);
+    _overlay_module["default"].sendFramebuffer(renderer.pid, image.getBitmap(), image.getSize().width, image.getSize().height);
   });
   renderer.window.webContents.on('new-window', function (e, url) {
     e.preventDefault();
@@ -222,15 +230,15 @@ function loadOverlay(pid) {
         break;
     }
 
-    if (cursor) {
-      Overlay.sendCommand(renderer.pid, {
+    if (cursor != null) {
+      _overlay_module["default"].sendCommand(renderer.pid, {
         message: 'set_cursor',
         cursor: cursor
       });
     }
   });
   renderer.window.webContents.on('start-drag', function (_event, image, offset) {
-    Overlay.sendCommand(renderer.pid, {
+    _overlay_module["default"].sendCommand(renderer.pid, {
       message: 'set_drag_state',
       dragging: true,
       image: image.getBitmap().toJSON().data,
@@ -239,13 +247,13 @@ function loadOverlay(pid) {
     });
   });
   renderer.window.webContents.on('stop-drag', function (_event) {
-    Overlay.sendCommand(renderer.pid, {
+    _overlay_module["default"].sendCommand(renderer.pid, {
       message: 'set_drag_state',
       dragging: false
     });
   });
   renderer.window.webContents.on('ime-composition-range-changed', function (_event, start, end, bounds) {
-    Overlay.sendCommand(renderer.pid, {
+    _overlay_module["default"].sendCommand(renderer.pid, {
       message: 'ime_composition_range_changed',
       start: start,
       end: end,
@@ -253,26 +261,30 @@ function loadOverlay(pid) {
     });
   });
   renderer.window.webContents.on('selection-bounds-changed', function (_event, anchor, focus, isAnchorFirst) {
-    Overlay.sendCommand(renderer.pid, {
+    _overlay_module["default"].sendCommand(renderer.pid, {
       message: 'ime_selection_bounds_changed',
       anchor: anchor,
       focus: focus,
       isAnchorFirst: isAnchorFirst
     });
   });
-  renderer.window.webContents.on('did-fail-load', function (e, errCode, errDesc, validatedURL) {
+  renderer.window.webContents.on('did-fail-load', function (_e, errCode, errDesc, validatedURL) {
     if (validatedURL !== renderer.url) {
-      Overlay.logMessage("Failed non-overlay URL load (".concat(validatedURL, ") with code ").concat(errCode, " and description ").concat(errDesc));
+      _overlay_module["default"].logMessage("Failed non-overlay URL load (".concat(validatedURL, ") with code ").concat(errCode, " and description ").concat(errDesc));
+
       return;
     }
 
-    Overlay.logMessage("Failed overlay URL load (".concat(validatedURL, ") with code ").concat(errCode, " and description ").concat(errDesc));
-    Overlay.sendCommand(renderer.pid, {
+    _overlay_module["default"].logMessage("Failed overlay URL load (".concat(validatedURL, ") with code ").concat(errCode, " and description ").concat(errDesc));
+
+    _overlay_module["default"].sendCommand(renderer.pid, {
       message: 'relay',
       _relay: 'renderer_load_failed'
     });
+
     renderer.backoff.fail(function () {
-      Overlay.logMessage("Retrying overlay URL load ".concat(renderer.url));
+      _overlay_module["default"].logMessage("Retrying overlay URL load ".concat(renderer.url));
+
       renderer.window.loadURL(renderer.url);
     });
   });
@@ -280,7 +292,9 @@ function loadOverlay(pid) {
     if (renderer.window.webContents.getURL() === renderer.overlayURL) {
       renderer.window.focusOnWebView();
       renderer.backoff.succeed();
-      Overlay.logMessage('Overlay is ready to show');
+
+      _overlay_module["default"].logMessage('Overlay is ready to show');
+
       renderer.window.webContents.invalidate(); // NB: allow a short window for repainting to ameliorate white-screen flashes some users experience.
       // see https://github.com/electron/electron/pull/25448 for context as to why we aren't using
       // `ready-to-show` -- tl;dr: it is not consistent and the hack fix in electron only "fixes"
@@ -288,7 +302,7 @@ function loadOverlay(pid) {
       // overlay url and, thusly, miss `ready-to-show` on some systems / chromium versions.
 
       setTimeout(function () {
-        Overlay.sendCommand(renderer.pid, {
+        _overlay_module["default"].sendCommand(renderer.pid, {
           message: 'relay',
           _relay: 'ready_to_show'
         });
@@ -297,7 +311,7 @@ function loadOverlay(pid) {
   });
 
   if (renderer.window.webContents.sendImeEvent) {
-    Overlay.sendCommand(renderer.pid, {
+    _overlay_module["default"].sendCommand(renderer.pid, {
       message: 'notify_ime_supported'
     });
   }
@@ -313,7 +327,7 @@ function destroyRenderer(pid) {
     return;
   }
 
-  Overlay.disconnectProcess(pid);
+  _overlay_module["default"].disconnectProcess(pid);
 
   if (renderer.backoff) {
     renderer.backoff.cancel();
@@ -327,7 +341,7 @@ function destroyRenderer(pid) {
 }
 
 function needsTranslation(event) {
-  return 'msg' in event || !'type' in event;
+  return 'msg' in event || !('type' in event);
 }
 
 function eventHandler(pid, event) {
@@ -341,7 +355,7 @@ function eventHandler(pid, event) {
 
   if (event.message === 'graphics_info') {
     if (event.width > 0 && event.height > 0) {
-      Overlay.logMessage("Resizing overlay renderer to ".concat(event.width, "x").concat(event.height));
+      _overlay_module["default"].logMessage("Resizing overlay renderer to ".concat(event.width, "x").concat(event.height));
 
       if (global.features.supports('overlay-hidpi')) {
         var screenRect = {
@@ -366,7 +380,7 @@ function eventHandler(pid, event) {
     renderer.window.webContents.invalidate();
   } else if (event.message === 'input_event') {
     renderer.window.focusOnWebView();
-    var translated = needsTranslation(event) ? Overlay.translateInputEvent(event) : event;
+    var translated = needsTranslation(event) ? _overlay_module["default"].translateInputEvent(event) : event;
 
     if (translated) {
       if (!handleAccelerators(renderer.window.webContents, translated)) {
@@ -384,7 +398,8 @@ function eventHandler(pid, event) {
       }
     }
   } else if (event.message === 'renderer_started') {
-    Overlay.logMessage("Overlay renderer for ".concat(pid, " started successfully."));
+    _overlay_module["default"].logMessage("Overlay renderer for ".concat(pid, " started successfully."));
+
     renderer.started = true;
 
     if (!renderer.first_framebuffer) {

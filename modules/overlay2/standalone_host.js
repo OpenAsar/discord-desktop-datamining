@@ -1,31 +1,33 @@
 "use strict";
 
-// @ts-nocheck
+var _electron = require("electron");
 
-/* eslint-disable */
-var _require = require('electron'),
-    app = _require.app;
+var _path = _interopRequireDefault(require("path"));
 
-var path = require('path');
+var _process = _interopRequireDefault(require("process"));
 
-var _require2 = require('./host'),
-    createRenderer = _require2.createRenderer,
-    destroyRenderer = _require2.destroyRenderer,
-    eventHandler = _require2.eventHandler;
+var _FeatureFlags = _interopRequireDefault(require("./FeatureFlags"));
 
-var FeatureFlags = require('./FeatureFlags');
+var _host = require("./host");
 
-var Overlay = require('./overlay_module.js');
+var _overlay_module = _interopRequireDefault(require("./overlay_module"));
 
-process.on('uncaughtException', function (e) {
-  Overlay.logMessage("Overlay host process exception: ".concat(e.message));
-  Overlay.logMessage(e.stack);
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+_process["default"].on('uncaughtException', function (e) {
+  var _e$stack;
+
+  _overlay_module["default"].logMessage("Overlay host process exception: ".concat(e.message));
+
+  _overlay_module["default"].logMessage((_e$stack = e.stack) !== null && _e$stack !== void 0 ? _e$stack : '');
 });
-global.features = new FeatureFlags();
+
+global.features = new _FeatureFlags["default"]();
 global.mainAppDirname = __dirname;
 
-if (process.versions.electron) {
-  var versionBits = process.versions.electron.split('.');
+if (_process["default"].versions.electron) {
+  var versionBits = _process["default"].versions.electron.split('.');
+
   var majorVersion = parseInt(versionBits[0], 10);
 
   if (majorVersion >= 4) {
@@ -33,10 +35,14 @@ if (process.versions.electron) {
   }
 }
 
-app.disableHardwareAcceleration();
-app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
-app.whenReady().then(function () {
-  var buildInfo = require(path.join(process.resourcesPath, 'build_info.json'));
+_electron.app.disableHardwareAcceleration();
+
+_electron.app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
+
+_electron.app.whenReady().then(function () {
+  // @ts-expect-error
+  var buildInfo = require(_path["default"].join(_process["default"].resourcesPath, 'build_info.json')); // eslint-disable import/no-unresolved
+
 
   require('discord_desktop_core/core.asar/app/discord_native/browser/accessibility');
 
@@ -48,8 +54,8 @@ app.whenReady().then(function () {
 
   require('discord_desktop_core/core.asar/app/discord_native/browser/constants');
 
-  var _require3 = require('discord_desktop_core/core.asar/app/bootstrapModules/crashReporterSetup'),
-      crashReporterSetup = _require3.crashReporterSetup;
+  var _require = require('discord_desktop_core/core.asar/app/bootstrapModules/crashReporterSetup'),
+      crashReporterSetup = _require.crashReporterSetup;
 
   crashReporterSetup.init(buildInfo);
 
@@ -77,10 +83,10 @@ app.whenReady().then(function () {
 
   require('discord_desktop_core/core.asar/app/discord_native/browser/window');
 
-  Overlay._initializeHostProcess({
-    createRenderer: createRenderer,
-    destroyRenderer: destroyRenderer
+  _overlay_module["default"]._initializeHostProcess({
+    createRenderer: _host.createRenderer,
+    destroyRenderer: _host.destroyRenderer
   });
 
-  Overlay._setEventHandler(eventHandler);
+  _overlay_module["default"]._setEventHandler(_host.eventHandler);
 });
