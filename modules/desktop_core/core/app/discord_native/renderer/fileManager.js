@@ -133,20 +133,17 @@ async function combineWebRtcLogs(path1, path2, destinationPath) {
   const webRtcFile2 = _path.default.join(voicePath, path2);
   const combinedFilePath = _path.default.join(voicePath, destinationPath);
   const [file1Data, file2Data] = await Promise.all([_fs.default.promises.readFile(webRtcFile1).catch(_ => null), _fs.default.promises.readFile(webRtcFile2).catch(_ => null)]);
-  await _fs.default.promises.open(combinedFilePath, 'w');
   if (file1Data !== null && file2Data === null) {
-    await _fs.default.promises.appendFile(combinedFilePath, file1Data);
+    await _fs.default.promises.writeFile(combinedFilePath, file1Data);
   } else if (file1Data === null && file2Data !== null) {
-    await _fs.default.promises.appendFile(combinedFilePath, file2Data);
+    await _fs.default.promises.writeFile(combinedFilePath, file2Data);
   } else if (file1Data !== null && file2Data !== null) {
-    const webRtcFile1Stats = await promiseFs.stat(webRtcFile1);
-    const webRtcFile2Stats = await promiseFs.stat(webRtcFile2);
+    const webRtcFile1Stats = await _fs.default.promises.stat(webRtcFile1);
+    const webRtcFile2Stats = await _fs.default.promises.stat(webRtcFile2);
     if (webRtcFile1Stats.mtimeMs > webRtcFile2Stats.mtimeMs) {
-      await _fs.default.promises.appendFile(combinedFilePath, file2Data);
-      await _fs.default.promises.appendFile(combinedFilePath, file1Data);
+      await _fs.default.promises.writeFile(combinedFilePath, Buffer.concat([file2Data, file1Data]));
     } else {
-      await _fs.default.promises.appendFile(combinedFilePath, file1Data);
-      await _fs.default.promises.appendFile(combinedFilePath, file2Data);
+      await _fs.default.promises.writeFile(combinedFilePath, Buffer.concat([file1Data, file2Data]));
     }
   }
 }
