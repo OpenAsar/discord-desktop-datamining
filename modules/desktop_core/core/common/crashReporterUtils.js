@@ -10,7 +10,7 @@ exports.reconcileCrashReporterMetadata = reconcileCrashReporterMetadata;
 const {
   getElectronMajorVersion
 } = require('./processUtils');
-function flatten(metadata, prefix, root) {
+function flatten(metadata, prefix = null, root = null) {
   root = root ? root : {};
   prefix = prefix ? prefix : '';
   if (typeof metadata === 'object') {
@@ -19,7 +19,7 @@ function flatten(metadata, prefix, root) {
       flatten(metadata[key], next_prefix, root);
     }
   } else {
-    root[prefix] = metadata;
+    root[prefix] = String(metadata);
   }
   return root;
 }

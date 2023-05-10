@@ -37,32 +37,24 @@ exports.readTimeSeriesLogFiles = readTimeSeriesLogFiles;
 exports.saveWithDialog = saveWithDialog;
 exports.showItemInFolder = showItemInFolder;
 exports.showOpenDialog = showOpenDialog;
+exports.uploadDiscordHookCrashes = uploadDiscordHookCrashes;
 var _fs = _interopRequireDefault(require("fs"));
-var _originalFs = _interopRequireDefault(require("original-fs"));
 var _path = _interopRequireWildcard(require("path"));
-var _util = _interopRequireDefault(require("util"));
 var _DiscordIPC = require("../common/DiscordIPC");
 var _fileutils = require("../common/fileutils");
 var _paths = require("../common/paths");
+var _utils = require("../common/utils");
+var _crashReporter = require("./crashReporter");
 var _files = require("./files");
+var _minidump = require("./minidump");
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 /* eslint-disable no-console */
 
-// eslint-disable-line import/no-unresolved
-
 // Reason for original-fs being import/no-unresolved: https://github.com/discord/discord/pull/74159#discussion_r893733771
 
-const promiseFs = {
-  readdir: _util.default.promisify(_originalFs.default.readdir),
-  open: _util.default.promisify(_originalFs.default.open),
-  fstat: _util.default.promisify(_originalFs.default.fstat),
-  stat: _util.default.promisify(_originalFs.default.stat),
-  unlink: _util.default.promisify(_originalFs.default.unlink),
-  read: _util.default.promisify(_originalFs.default.read),
-  close: _util.default.promisify(_originalFs.default.close)
-};
+const uploadHookCrashSequence = (0, _utils.createLock)();
 async function saveWithDialog(fileContents, fileName) {
   if ((0, _files.containsInvalidFileChar)(fileName)) {
     throw new Error('fileName has invalid characters');
@@ -110,7 +102,7 @@ async function readTimeSeriesLogFiles(maxSize, blindChannelId) {
   // Example filename: "channel.17812072731293278934.16605628624321906260.tsi"
   const filter = new RegExp(`^channel\\.${blindChannelId}\\.\\d+\\.(?:tsi|tsd)$`, 'i');
   const filenames = [];
-  for (const file of await promiseFs.readdir(voicePath)) {
+  for (const file of await _fileutils.promiseFs.readdir(voicePath)) {
     if (filter.test(file)) {
       filenames.push(_path.default.join(voicePath, file));
     }
@@ -123,7 +115,7 @@ async function readTimeSeriesLogFiles(maxSize, blindChannelId) {
   }
   const readfiles = await (0, _fileutils.readFulfilledFiles)(filenames, maxSize, false);
   // Delete the files after they've been read.
-  await Promise.all(allLogFiles.map(filename => promiseFs.unlink(filename)));
+  await Promise.all(allLogFiles.map(filename => _fileutils.promiseFs.unlink(filename)));
   return readfiles;
 }
 async function combineWebRtcLogs(path1, path2, destinationPath) {
@@ -154,25 +146,84 @@ async function cleanupTempFiles() {
     const voicePath = _path.default.join(modulePath, 'discord_voice');
     const deleteAgeTimeSpan = 1 * 24 * 60 * 60 * 1000; // 1 day.
     const deleteAge = new Date(Date.now() - deleteAgeTimeSpan);
-    for (const filename of await promiseFs.readdir(voicePath)) {
+    for (const filename of await _fileutils.promiseFs.readdir(voicePath)) {
       if (!(0, _files.isTempFile)(filename)) {
         continue;
       }
       const fullpath = _path.default.join(voicePath, filename);
-      const stat = await promiseFs.stat(fullpath);
+      const stat = await _fileutils.promiseFs.stat(fullpath);
       if (!stat.isFile() || stat.mtime > deleteAge) {
         continue;
       }
       console.log(`cleanupTempFiles: Deleting "${fullpath}" due to age.`);
       try {
-        await promiseFs.unlink(fullpath);
+        await _fileutils.promiseFs.unlink(fullpath);
       } catch (e) {
-        console.error(`cleanupTempFiles: Failed to unlink ${fullpath}: ${e}`);
+        console.error(`cleanupTempFiles: unlink failed ${fullpath}: ${e}`);
       }
     }
   } catch (e) {
     console.error(`cleanupTempFiles: Failed ${e}`);
   }
+}
+async function uploadHookMinidumpFile(filename, fullpath, metadata) {
+  // 10mb is an arbitrary number and this can be moved up or down as needed.
+  const maxFileSize = 10 * 1024 * 1024;
+  const file = (await (0, _fileutils.readFulfilledFiles)([fullpath], maxFileSize, true))[0];
+  const blob = new Blob([file.data], {
+    type: 'text/plain'
+  });
+  const minidump = await (0, _minidump.readMinidump)(fullpath);
+  const formData = new FormData();
+  for (const key of Object.keys(metadata)) {
+    formData.append(key, String(metadata[key]));
+  }
+  formData.append('sentry[tags][game]', (minidump === null || minidump === void 0 ? void 0 : minidump.processName) ?? 'Unknown');
+  formData.append('game', (minidump === null || minidump === void 0 ? void 0 : minidump.processName) ?? 'Unknown');
+  formData.append('upload_file_minidump', blob, filename);
+
+  // https://discord.sentry.io/projects/discord-desktop-overlay
+  return fetch('https://o64374.ingest.sentry.io/api/4505053715759104/minidump/?sentry_key=a6d1a1ca54ed4a729c6949f0237969e3', {
+    method: 'POST',
+    body: formData
+  });
+}
+async function uploadDiscordHookCrashes() {
+  // Since this can be called multiple times, their execution being sequenced it critical to
+  // prevent the same log from being uploaded multiple times.
+  const metadata = (0, _crashReporter.getFlattenedMetadata)();
+  let crashCount = 0;
+  await uploadHookCrashSequence(async () => {
+    try {
+      const modulePath = await getModulePath();
+      const hookPath = _path.default.join(modulePath, 'discord_hook');
+      for (const filename of await _fileutils.promiseFs.readdir(hookPath)) {
+        if (!(0, _files.isHookMinidumpFile)(filename)) {
+          continue;
+        }
+        ++crashCount;
+        const fullpath = _path.default.join(hookPath, filename);
+        try {
+          console.log(`uploadDiscordHookCrashes: Uploading "${fullpath}".`);
+          const response = await uploadHookMinidumpFile(filename, fullpath, metadata);
+          console.log(`uploadDiscordHookCrashes: Uploaded "${response.status}".`);
+        } catch (e) {
+          console.error(`uploadDiscordHookCrashes: uploadHookMinidumpFile failed ${fullpath}: ${e}`);
+        }
+        console.log(`uploadDiscordHookCrashes: Deleting.`);
+        try {
+          await _fileutils.promiseFs.unlink(fullpath);
+        } catch (e) {
+          console.error(`uploadDiscordHookCrashes: unlink failed ${fullpath}: ${e}`);
+        }
+      }
+    } catch (e) {
+      console.error(`uploadDiscordHookCrashes: Failed ${e}`);
+    }
+    if (crashCount === 0) {
+      console.log(`uploadDiscordHookCrashes: No crash reports found.`);
+    }
+  });
 }
 function showItemInFolder(path) {
   _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.FILE_MANAGER_SHOW_ITEM_IN_FOLDER, path);

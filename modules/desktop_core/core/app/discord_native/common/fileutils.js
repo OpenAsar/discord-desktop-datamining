@@ -29,6 +29,7 @@ Object.defineProperty(exports, "join", {
     return _path.join;
   }
 });
+exports.promiseFs = void 0;
 exports.readFiles = readFiles;
 exports.readFulfilledFiles = readFulfilledFiles;
 var _buffer = _interopRequireDefault(require("buffer"));
@@ -52,11 +53,13 @@ const promiseFs = {
   stat: _util.default.promisify(_originalFs.default.stat),
   unlink: _util.default.promisify(_originalFs.default.unlink),
   read: _util.default.promisify(_originalFs.default.read),
+  readFile: _util.default.promisify(_originalFs.default.readFile),
   close: _util.default.promisify(_originalFs.default.close)
 };
 
 // Perform `readFiles` but only return `fulfilled` results.
 // If [orException] is set, exception if any of the results were rejected.
+exports.promiseFs = promiseFs;
 async function readFulfilledFiles(filenames, maxSize, orException) {
   const files = await readFiles(filenames, maxSize);
   if (orException) {

@@ -3,6 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.getFlattenedMetadata = getFlattenedMetadata;
 exports.getMetadata = getMetadata;
 exports.triggerUnhandledException = triggerUnhandledException;
 exports.updateCrashReporter = updateCrashReporter;
@@ -19,6 +20,9 @@ async function updateCrashReporter(additionalMetadata) {
 }
 function getMetadata() {
   return metadata;
+}
+function getFlattenedMetadata() {
+  return (0, _crashReporterUtils.flatten)(metadata);
 }
 
 // Internal test for unhandled JS exception

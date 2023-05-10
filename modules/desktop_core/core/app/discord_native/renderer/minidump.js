@@ -421,19 +421,26 @@ async function readMinidump(file) {
     const exceptionAddrString = exceptionStream.exceptionAddress.toString(16);
     console.log(`readMinidump exceptionCode: ${info.exceptionString}, exceptionAddress ${exceptionAddrString}`);
     const moduleStreamEntry = streamLookup[MinidumpStreamType.ModuleListStream];
-    // Skip if `exceptionAddress` is 0 since there will be no crashing module.
-    if (moduleStreamEntry != null && exceptionStream.exceptionAddress !== BigInt(0)) {
-      // https://learn.microsoft.com/en-us/windows/win32/api/minidumpapiset/ns-minidumpapiset-minidump_module_list
+    if (moduleStreamEntry == null) {
+      return info;
+    }
 
-      // Do not read them all at once. This 1) allows us to exit early, 2) would require a variable sized buffer
-      // instead of our smaller fixed size buffer.
-      const moduleList = await MINIDUMP_MODULE_LIST.read(reader, moduleStreamEntry.dataOffset);
-      // Sanity check, this number is arbitrary.
-      if (moduleList.numberOfModules > 0x200) {
-        console.log(`readMinidump ModuleListstream Bad numberOfModules: 0x${moduleList.numberOfModules.toString(16)}`);
-        return info;
-      }
-      let moduleEntryOffset = moduleStreamEntry.dataOffset + 4;
+    // https://learn.microsoft.com/en-us/windows/win32/api/minidumpapiset/ns-minidumpapiset-minidump_module_list
+
+    // Do not read them all at once. This 1) allows us to exit early, 2) would require a variable sized buffer
+    // instead of our smaller fixed size buffer.
+    const moduleList = await MINIDUMP_MODULE_LIST.read(reader, moduleStreamEntry.dataOffset);
+    // Sanity check, this number is arbitrary.
+    if (moduleList.numberOfModules > 0x200) {
+      console.log(`readMinidump ModuleListstream Bad numberOfModules: 0x${moduleList.numberOfModules.toString(16)}`);
+      return info;
+    }
+    let moduleEntryOffset = moduleStreamEntry.dataOffset + 4;
+    const firstModule = await MINIDUMP_MODULE.read(reader, moduleEntryOffset);
+    info.processName = await firstModule.getModuleFileName(reader);
+
+    // Skip if `exceptionAddress` is 0 since there will be no crashing module.
+    if (exceptionStream.exceptionAddress !== BigInt(0)) {
       for (let i = 0; i < moduleList.numberOfModules; ++i) {
         const module = await MINIDUMP_MODULE.read(reader, moduleEntryOffset);
         moduleEntryOffset += MINIDUMP_MODULE.U32_SIZE * 4;
