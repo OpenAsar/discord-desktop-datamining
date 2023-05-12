@@ -19,12 +19,12 @@ const {
 } = require('../common/constants').IPCEvents;
 let devtoolsOpenedCallback = () => {};
 let devtoolsClosedCallback = () => {};
-electron.ipcRenderer.on(WINDOW_DEVTOOLS_OPENED, async _ => {
+electron.ipcRenderer.on(WINDOW_DEVTOOLS_OPENED, async () => {
   if (devtoolsOpenedCallback != null) {
     devtoolsOpenedCallback();
   }
 });
-electron.ipcRenderer.on(WINDOW_DEVTOOLS_CLOSED, async _ => {
+electron.ipcRenderer.on(WINDOW_DEVTOOLS_CLOSED, async () => {
   if (devtoolsClosedCallback != null) {
     devtoolsClosedCallback();
   }
@@ -73,8 +73,6 @@ async function setDevtoolsCallbacks(onOpened, onClosed) {
   devtoolsOpenedCallback = onOpened;
   devtoolsClosedCallback = onClosed;
 }
-
-// To synchronize web vs desktop release features
 const USE_OSX_NATIVE_TRAFFIC_LIGHTS = true;
 module.exports = {
   flashFrame,

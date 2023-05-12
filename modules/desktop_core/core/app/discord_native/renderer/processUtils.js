@@ -20,7 +20,6 @@ var _process = _interopRequireDefault(require("process"));
 var _DiscordIPC = require("../common/DiscordIPC");
 var _minidumpReader = require("./minidumpReader");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-// Note: CPU interval should be kept insync with Android's DeviceResourceUsageMonitor interval.
 const CPU_USAGE_GATHER_INTERVAL = 1000;
 const MEMORY_USAGE_GATHER_INTERVAL = 5000;
 const mainArgv = _DiscordIPC.DiscordIPC.renderer.sendSync(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_MAIN_ARGV_SYNC);
@@ -32,7 +31,6 @@ setInterval(() => {
 }, CPU_USAGE_GATHER_INTERVAL);
 let memoryUsageTimerRunning = false;
 function getCurrentMemoryUsageKB() {
-  // Lazy initialize because this is only needed when the native process_utils are not available/updated.
   if (memoryUsageTimerRunning) {
     return totalMemoryUsageKB;
   }

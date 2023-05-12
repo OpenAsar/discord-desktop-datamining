@@ -7,9 +7,6 @@ exports.readMinidump = readMinidump;
 var _fs = _interopRequireDefault(require("fs"));
 var _util = _interopRequireDefault(require("util"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-/* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/naming-convention */
-
 const exceptionTypes = {
   C0000005: 'EXCEPTION_ACCESS_VIOLATION',
   '80000002': 'EXCEPTION_DATATYPE_MISALIGNMENT',
@@ -54,8 +51,6 @@ class FileReader {
     if (rva === 0) {
       return '';
     }
-
-    // https://learn.microsoft.com/en-us/windows/win32/api/minidumpapiset/ns-minidumpapiset-minidump_string
     await this.readCore(4, rva);
     const length = this.buffer[0] | this.buffer[1] << 8 | this.buffer[2] << 16 | this.buffer[3] << 24;
     await this.readCore(Math.min(length, this.buffer.byteLength), rva + 4);
@@ -85,10 +80,6 @@ class FileReader {
 }
 class ReadResult {
   index = 0;
-  // irl, this should likely take the uint8 and work from there, but this is fine for us.
-  // Maybe just steal my other impl here https://github.com/jlennox/WebWad/blob/main/wad.ts#L8
-  // but we likely don't want to load the entire file at once. But who knows, maybe the system
-  // call reduction is better and/or it irl doesn't matter either way.
   constructor(buffer) {
     this.u8 = new Uint8Array(buffer);
     this.u16 = new Uint16Array(buffer);
@@ -122,7 +113,7 @@ class ReadResult {
 function isMinidumpFilename(filename) {
   return /\.dmp$/i.test(filename);
 }
-var MinidumpStreamType; // https://docs.microsoft.com/en-us/windows/win32/api/minidumpapiset/ns-minidumpapiset-minidump_header
+var MinidumpStreamType;
 (function (MinidumpStreamType) {
   MinidumpStreamType[MinidumpStreamType["UnusedStream"] = 0] = "UnusedStream";
   MinidumpStreamType[MinidumpStreamType["ReservedStream0"] = 1] = "ReservedStream0";
@@ -176,8 +167,6 @@ class MINIDUMP_HEADER {
     return new MINIDUMP_HEADER(await reader.read(MINIDUMP_HEADER.U32_SIZE, position));
   }
 }
-
-// https://docs.microsoft.com/en-us/windows/win32/api/minidumpapiset/ns-minidumpapiset-minidump_directory
 class MINIDUMP_DIRECTORY {
   static U32_SIZE = 3;
   constructor(reader) {
@@ -189,8 +178,6 @@ class MINIDUMP_DIRECTORY {
     return new MINIDUMP_DIRECTORY(await reader.read(MINIDUMP_DIRECTORY.U32_SIZE, position));
   }
 }
-
-// https://docs.microsoft.com/en-us/windows/win32/api/minidumpapiset/ns-minidumpapiset-minidump_exception_stream
 class MINIDUMP_EXCEPTION_STREAM {
   static U32_SIZE = 8;
   constructor(reader) {
@@ -210,16 +197,12 @@ class MINIDUMP_EXCEPTION_STREAM {
     return exceptionString;
   }
 }
-
-// https://learn.microsoft.com/en-us/windows/win32/api/minidumpapiset/ns-minidumpapiset-minidump_location_descriptor
 class MINIDUMP_LOCATION_DESCRIPTOR {
   constructor(reader) {
     this.dataSize = reader.readuint32();
     this.rva = reader.readuint32();
   }
 }
-
-// https://learn.microsoft.com/en-us/windows/win32/api/minidumpapiset/ns-minidumpapiset-minidump_module_list
 class MINIDUMP_MODULE_LIST {
   static U32_SIZE = 1;
   constructor(reader) {
@@ -229,13 +212,7 @@ class MINIDUMP_MODULE_LIST {
     return new MINIDUMP_MODULE_LIST(await reader.read(MINIDUMP_MODULE_LIST.U32_SIZE, position));
   }
 }
-
-// https://learn.microsoft.com/en-us/windows/win32/api/minidumpapiset/ns-minidumpapiset-minidump_module
 class MINIDUMP_MODULE {
-  // sizeof(MINIDUMP_MODULE)              108
-  // sizeof(VS_FIXEDFILEINFO)              52
-  // sizeof(MINIDUMP_LOCATION_DESCRIPTOR)   8
-  // sizeof(RVA)                            4
   static U32_SIZE = 108 / 4;
   constructor(reader) {
     this.baseOfImage = reader.readuint64();
@@ -272,8 +249,6 @@ class MINIDUMP_MODULE {
     return (this.timeDateStamp.toString(16).padStart(8, '0') + this.sizeOfImage.toString(16)).toUpperCase();
   }
 }
-
-// https://learn.microsoft.com/en-us/windows/win32/api/verrsrc/ns-verrsrc-vs_fixedfileinfo
 class VS_FIXEDFILEINFO {
   constructor(reader) {
     this.dwSignature = reader.readuint32();
@@ -298,17 +273,11 @@ class VS_FIXEDFILEINFO {
     return `${first}.${second}.${third}.${fourth}`;
   }
 }
-
-// This isn't spec'ed on the minidump page (from what I could tell):
-// https://github.com/rust-minidump/rust-minidump/blob/main/minidump/src/minidump.rs#L267
-// This returns the ID string that is used by the Mozilla tools for PDB lookup.
 class CV_INFO {
   static async read(reader, position) {
     if (position === 0) {
       return new CV_INFO_UNKNOWN(0);
     }
-
-    // 6 is the largest.
     const readResult = await reader.read(6, position);
     const cvSignature = readResult.readuint32();
     switch (cvSignature) {
@@ -331,13 +300,10 @@ class CV_INFO_PDB20 {
     this.age = reader.readuint32();
   }
   getIdString() {
-    // TODO: Probably uncommon at this point.
     return 'CV_INFO_PDB20';
   }
 }
 class GUID {
-  // fixed 8 length.
-
   constructor(reader) {
     this.data1 = reader.readuint32();
     this.data2 = reader.readuint16();
@@ -358,14 +324,12 @@ class CV_INFO_PDB70 {
     this.age = reader.readuint32();
   }
   getIdString() {
-    // https://randomascii.wordpress.com/2013/03/09/symbols-the-microsoft-way/
     return (this.signature.toString() + this.age.toString(16)).toUpperCase();
   }
 }
 class CV_INFO_ELF {
   static SIGNATURE = 0x4270454c;
   getIdString() {
-    // TODO: Would be needed for macOS/linux support presumably?
     return 'CV_INFO_ELF';
   }
 }
@@ -388,20 +352,14 @@ async function readMinidump(file) {
       console.log(`readMinidump Bad signature: 0x${header.signature.toString(16)}`);
       return null;
     }
-
-    // Arbitrary number. Just a sanity check.
     if (header.numberOfStreams > 0x100) {
       console.log(`readMinidump Bad numberOfStreams: 0x${header.numberOfStreams.toString(16)}`);
       return null;
     }
     const streamLookup = {};
-
-    // First create a lookup because we want to process the entries in a specific order.
     for (let i = 0; i < header.numberOfStreams; ++i) {
       const streamOffset = header.streamDirectoryOffset + i * 12;
       const entry = await MINIDUMP_DIRECTORY.read(reader, streamOffset);
-
-      // We only care about a limited amount of stream types, so lets avoid some of the overhead.
       switch (entry.streamType) {
         case MinidumpStreamType.ExceptionStream:
         case MinidumpStreamType.ModuleListStream:
@@ -424,13 +382,7 @@ async function readMinidump(file) {
     if (moduleStreamEntry == null) {
       return info;
     }
-
-    // https://learn.microsoft.com/en-us/windows/win32/api/minidumpapiset/ns-minidumpapiset-minidump_module_list
-
-    // Do not read them all at once. This 1) allows us to exit early, 2) would require a variable sized buffer
-    // instead of our smaller fixed size buffer.
     const moduleList = await MINIDUMP_MODULE_LIST.read(reader, moduleStreamEntry.dataOffset);
-    // Sanity check, this number is arbitrary.
     if (moduleList.numberOfModules > 0x200) {
       console.log(`readMinidump ModuleListstream Bad numberOfModules: 0x${moduleList.numberOfModules.toString(16)}`);
       return info;
@@ -438,8 +390,6 @@ async function readMinidump(file) {
     let moduleEntryOffset = moduleStreamEntry.dataOffset + 4;
     const firstModule = await MINIDUMP_MODULE.read(reader, moduleEntryOffset);
     info.processName = await firstModule.getModuleFileName(reader);
-
-    // Skip if `exceptionAddress` is 0 since there will be no crashing module.
     if (exceptionStream.exceptionAddress !== BigInt(0)) {
       for (let i = 0; i < moduleList.numberOfModules; ++i) {
         const module = await MINIDUMP_MODULE.read(reader, moduleEntryOffset);

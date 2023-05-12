@@ -16,16 +16,12 @@ var _originalFs = _interopRequireDefault(require("original-fs"));
 var _path = _interopRequireDefault(require("path"));
 var _rimraf = _interopRequireDefault(require("rimraf"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-/* eslint-disable no-console */
-// Determines environment-specific paths based on info provided
-
 let userDataPath = null;
 let userDataVersionedPath = null;
 let resourcesPath = null;
 let moduleDataPath = null;
 let installPath = null;
 function determineAppUserDataRoot() {
-  // Allow overwriting the user data directory. This can be important when using --multi-instance
   const userDataPath = process.env.DISCORD_USER_DATA_DIR;
   if (userDataPath) {
     return userDataPath;
@@ -38,8 +34,6 @@ function determineAppUserDataRoot() {
 function determineUserData(userDataRoot, buildInfo) {
   return _path.default.join(userDataRoot, 'discord' + (buildInfo.releaseChannel == 'stable' ? '' : buildInfo.releaseChannel));
 }
-
-// cleans old version data in the background
 function cleanOldVersions(buildInfo) {
   const entries = _fs.default.readdirSync(userDataPath) || [];
   entries.forEach(entry => {

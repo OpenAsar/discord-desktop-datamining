@@ -15,9 +15,7 @@ let moduleVersions = {};
 _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.APP_GET_MODULE_VERSIONS).then(versions => {
   moduleVersions = versions;
 });
-
-// TODO: Fix this .on to be part of our typing.
-_electron.default.ipcRenderer.on('DISCORD_MODULE_INSTALLED', async _ => {
+_electron.default.ipcRenderer.on('DISCORD_MODULE_INSTALLED', async () => {
   moduleVersions = await _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.APP_GET_MODULE_VERSIONS);
 });
 function getReleaseChannel() {
@@ -77,7 +75,6 @@ module.exports = {
   getModuleVersions,
   getBuildNumber,
   getPath: _paths.getPath,
-  // used via DiscordNative.remoteApp.getPath
   setBadgeCount,
   dock: {
     setBadge: dockSetBadge,

@@ -50,10 +50,6 @@ var _minidump = require("./minidump");
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-/* eslint-disable no-console */
-
-// Reason for original-fs being import/no-unresolved: https://github.com/discord/discord/pull/74159#discussion_r893733771
-
 const uploadHookCrashSequence = (0, _utils.createLock)();
 async function saveWithDialog(fileContents, fileName) {
   if ((0, _files.containsInvalidFileChar)(fileName)) {
@@ -78,7 +74,6 @@ async function showOpenDialog({
   return results.filePaths;
 }
 async function readLogFiles(maxSize) {
-  // MAX_DEBUG_LOG_FILES may need to be increased as more files are added.
   await combineWebRtcLogs('discord-webrtc_0', 'discord-webrtc_1', 'discord-webrtc');
   await combineWebRtcLogs('discord-last-webrtc_0', 'discord-last-webrtc_1', 'discord-webrtc-last');
   const modulePath = await getModulePath();
@@ -99,7 +94,6 @@ async function readTimeSeriesLogFiles(maxSize, blindChannelId) {
   }
   const modulePath = await getModulePath();
   const voicePath = _path.default.join(modulePath, 'discord_voice');
-  // Example filename: "channel.17812072731293278934.16605628624321906260.tsi"
   const filter = new RegExp(`^channel\\.${blindChannelId}\\.\\d+\\.(?:tsi|tsd)$`, 'i');
   const filenames = [];
   for (const file of await _fileutils.promiseFs.readdir(voicePath)) {
@@ -108,13 +102,12 @@ async function readTimeSeriesLogFiles(maxSize, blindChannelId) {
     }
   }
   const allLogFiles = [...filenames];
-  const maxLogFiles = 10; // 10 is arbitrary but seems reasonable as each would be ~1mb.
+  const maxLogFiles = 10;
   if (filenames.length > maxLogFiles) {
     console.warn(`readTimeSeriesLogFiles: Exceeded limit of ${maxLogFiles} files, had ${filenames.length}.`);
     filenames.splice(maxLogFiles);
   }
   const readfiles = await (0, _fileutils.readFulfilledFiles)(filenames, maxSize, false);
-  // Delete the files after they've been read.
   await Promise.all(allLogFiles.map(filename => _fileutils.promiseFs.unlink(filename)));
   return readfiles;
 }
@@ -124,7 +117,7 @@ async function combineWebRtcLogs(path1, path2, destinationPath) {
   const webRtcFile1 = _path.default.join(voicePath, path1);
   const webRtcFile2 = _path.default.join(voicePath, path2);
   const combinedFilePath = _path.default.join(voicePath, destinationPath);
-  const [file1Data, file2Data] = await Promise.all([_fs.default.promises.readFile(webRtcFile1).catch(_ => null), _fs.default.promises.readFile(webRtcFile2).catch(_ => null)]);
+  const [file1Data, file2Data] = await Promise.all([_fs.default.promises.readFile(webRtcFile1).catch(() => null), _fs.default.promises.readFile(webRtcFile2).catch(() => null)]);
   if (file1Data !== null && file2Data === null) {
     await _fs.default.promises.writeFile(combinedFilePath, file1Data);
   } else if (file1Data === null && file2Data !== null) {
@@ -140,12 +133,10 @@ async function combineWebRtcLogs(path1, path2, destinationPath) {
   }
 }
 async function cleanupTempFiles() {
-  // Since this runs on startup, handle and report all errors as cleanly as possible.
   try {
     const modulePath = await getModulePath();
     const voicePath = _path.default.join(modulePath, 'discord_voice');
-    const deleteAgeTimeSpan = 1 * 24 * 60 * 60 * 1000; // 1 day.
-    const deleteAge = new Date(Date.now() - deleteAgeTimeSpan);
+    const deleteAge = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000);
     for (const filename of await _fileutils.promiseFs.readdir(voicePath)) {
       if (!(0, _files.isTempFile)(filename)) {
         continue;
@@ -167,9 +158,7 @@ async function cleanupTempFiles() {
   }
 }
 async function uploadHookMinidumpFile(filename, fullpath, metadata) {
-  // 10mb is an arbitrary number and this can be moved up or down as needed.
-  const maxFileSize = 10 * 1024 * 1024;
-  const file = (await (0, _fileutils.readFulfilledFiles)([fullpath], maxFileSize, true))[0];
+  const file = (await (0, _fileutils.readFulfilledFiles)([fullpath], 10 * 1024 * 1024, true))[0];
   const blob = new Blob([file.data], {
     type: 'text/plain'
   });
@@ -181,16 +170,12 @@ async function uploadHookMinidumpFile(filename, fullpath, metadata) {
   formData.append('sentry[tags][game]', (minidump === null || minidump === void 0 ? void 0 : minidump.processName) ?? 'Unknown');
   formData.append('game', (minidump === null || minidump === void 0 ? void 0 : minidump.processName) ?? 'Unknown');
   formData.append('upload_file_minidump', blob, filename);
-
-  // https://discord.sentry.io/projects/discord-desktop-overlay
   return fetch('https://o64374.ingest.sentry.io/api/4505053715759104/minidump/?sentry_key=a6d1a1ca54ed4a729c6949f0237969e3', {
     method: 'POST',
     body: formData
   });
 }
 async function uploadDiscordHookCrashes() {
-  // Since this can be called multiple times, their execution being sequenced it critical to
-  // prevent the same log from being uploaded multiple times.
   const metadata = (0, _crashReporter.getFlattenedMetadata)();
   let crashCount = 0;
   await uploadHookCrashSequence(async () => {

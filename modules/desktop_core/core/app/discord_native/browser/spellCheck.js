@@ -12,7 +12,7 @@ let _hasLoadedLearnedWords = false;
 electron.ipcMain.handle(SPELLCHECK_REPLACE_MISSPELLING, async (event, correction) => {
   event.sender.replaceMisspelling(correction);
 });
-electron.ipcMain.handle(SPELLCHECK_GET_AVAILABLE_DICTIONARIES, async _ => {
+electron.ipcMain.handle(SPELLCHECK_GET_AVAILABLE_DICTIONARIES, async () => {
   return electron.session.defaultSession.availableSpellCheckerLanguages;
 });
 electron.ipcMain.handle(SPELLCHECK_SET_LOCALE, async (_, locale) => {

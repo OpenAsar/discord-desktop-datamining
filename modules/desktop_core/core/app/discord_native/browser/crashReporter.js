@@ -16,9 +16,7 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.CRASH_REPORTER_UPDATE_M
     metadata: finalMetadata
   });
 });
-
-// Internal test for unhandled JS exception
-_electron.default.ipcMain.handle(_DiscordIPC.IPCEvents.UNHANDLED_JS_EXCEPTION, _ => {
+_electron.default.ipcMain.handle(_DiscordIPC.IPCEvents.UNHANDLED_JS_EXCEPTION, () => {
   setTimeout(() => {
     throw new Error('UNHANDLED_EXCEPTION ' + process.type);
   }, 50);

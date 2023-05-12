@@ -9,10 +9,6 @@ exports.metadata = void 0;
 var processUtils = _interopRequireWildcard(require("./processUtils"));
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-// @ts-nocheck
-/* eslint-disable */
-/* eslint-disable no-console */
-
 const electron = require('electron');
 const childProcess = require('child_process');
 const {
@@ -31,8 +27,6 @@ const CHANNEL_SENTRY_KEYS = {
   development: TEST_SENTRY_KEY
 };
 function getCrashReporterArgs(metadata) {
-  // NB: we need to flatten the metadata because modern electron caps metadata values at 127 bytes,
-  // which our sentry subobject can easily exceed.
   const flatMetadata = flatten(metadata);
   const channel = metadata['channel'];
   const sentryKey = CHANNEL_SENTRY_KEYS[channel] != null ? CHANNEL_SENTRY_KEYS[channel] : DEFAULT_SENTRY_KEY;
@@ -52,10 +46,8 @@ function initializeSentrySdk(sentry) {
     dsn: sentryDsn,
     beforeSend(event) {
       var _metadata$sentry, _metadata$sentry2;
-      // Currently beforeSend is only fired for discord-desktop-js project,
-      // due to outdated sentry/electron sdk
-      event.release = metadata === null || metadata === void 0 ? void 0 : (_metadata$sentry = metadata['sentry']) === null || _metadata$sentry === void 0 ? void 0 : _metadata$sentry['release'];
-      event.environment = metadata === null || metadata === void 0 ? void 0 : (_metadata$sentry2 = metadata['sentry']) === null || _metadata$sentry2 === void 0 ? void 0 : _metadata$sentry2['environment'];
+      event.release = (_metadata$sentry = metadata['sentry']) === null || _metadata$sentry === void 0 ? void 0 : _metadata$sentry['release'];
+      event.environment = (_metadata$sentry2 = metadata['sentry']) === null || _metadata$sentry2 === void 0 ? void 0 : _metadata$sentry2['environment'];
       return event;
     }
   });
@@ -65,8 +57,6 @@ function init(buildInfo, sentry) {
     console.warn('Ignoring double initialization of crash reporter.');
     return;
   }
-
-  // It's desirable for test runs to have the stacktrace print to the console (and thusly, be shown in buildkite logs).
   if (process.env.ELECTRON_ENABLE_STACK_DUMPING === 'true') {
     console.warn('Not initializing crash reporter because ELECTRON_ENABLE_STACK_DUMPING is set.');
     return;
@@ -89,9 +79,8 @@ function init(buildInfo, sentry) {
         maxBuffer: 512,
         encoding: 'utf-8'
       }).trim();
-    } catch (_) {} // just in case lsb_release doesn't exist
+    } catch (_) {}
   }
-
   const config = getCrashReporterArgs(metadata);
   electron.crashReporter.start(config);
   initialized = true;

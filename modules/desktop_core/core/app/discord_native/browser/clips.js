@@ -7,8 +7,6 @@ var _DiscordIPC = require("../common/DiscordIPC");
 var _fileutils = require("../common/fileutils");
 var _utils = require("../common/utils");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-/* eslint-disable no-console */
-
 const MAX_LENGTH = _buffer.default.constants.MAX_LENGTH;
 const DISCORD_HEADER_NAME = 'dscl';
 const INVALID_FILE_ERROR = 'Invalid file';
@@ -37,7 +35,6 @@ function verifyValidClip(buffer) {
       return;
     }
     const boxSize = getBoxSize(buffer, currIndex);
-    //box size must be at least 8 to account for header, so return false for malformed file
     if (boxSize < 8) {
       throw new InvalidFileError(INVALID_FILE_ERROR);
     }

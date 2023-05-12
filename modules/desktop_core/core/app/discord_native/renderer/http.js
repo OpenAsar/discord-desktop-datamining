@@ -14,19 +14,6 @@ async function getAPIEndpoint() {
   return apiEndpoint;
 }
 async function makeChunkedRequest(route, chunks, options) {
-  /**
-   * Given an array of chunks, make a slow request, only writing chunks
-   * after a specified amount of time
-   *
-   * route: string
-   * options: object
-   *    method: the method of the request
-   *    contentType: the content type of the request
-   *    chunkInterval: how long to wait to upload a chunk after the last chunk was flushed
-   *    token: the token to make an authorized request from
-   * chunks: chunked body of the request to upload
-   */
-
   const {
     method,
     chunkInterval,
@@ -37,8 +24,6 @@ async function makeChunkedRequest(route, chunks, options) {
   if (route.startsWith('https')) {
     httpModule = https;
   }
-
-  // we will force the URL to hit only API_ENDPOINT
   const apiEndpoint = await getAPIEndpoint();
   if (apiEndpoint == null) {
     throw new Error('missing api endpoint setting');

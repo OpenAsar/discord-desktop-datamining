@@ -15,8 +15,6 @@ var _utils = require("./utils");
 var _Constants = require("./Constants");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 const settings = _appSettings.appSettings.getSettings();
-
-// These are lazy loaded into temp files
 const TrayIconNames = {
   DEFAULT: 'tray',
   UNREAD: 'tray-unread',
@@ -63,7 +61,6 @@ function init(_options) {
   _ipcMain.default.on('SYSTEM_TRAY_SET_APPLICATIONS', (evt, newApplications) => setApplications(newApplications));
 }
 function generateTrayIconPaths() {
-  // Load in the icons for current platform
   const resourcePath = `app/images/systemtray/${process.platform}`;
   const suffix = process.platform === 'darwin' ? 'Template' : '';
   for (const key of Object.keys(TrayIconNames)) {
@@ -135,25 +132,18 @@ function buildContextMenu() {
   contextMenu = [menuItems[MenuItems.SECRET], separator, ...(hasApplications ? [...applications, separator] : []), menuItems[MenuItems.OPEN], menuItems[MenuItems.MUTE], menuItems[MenuItems.DEAFEN], menuItems[MenuItems.VOICE_SETTINGS], menuItems[MenuItems.CHECK_UPDATE], menuItems[MenuItems.ACKNOWLEDGEMENTS], separator, menuItems[MenuItems.QUIT]];
 }
 function setTrayIcon(icon) {
-  // Keep track of last set icon
   currentIcon = trayIcons[icon];
-
-  // If icon is null, hide the tray icon.  Otherwise show
-  // These calls also check for tray existence, so minimal cost.
   if (icon == null) {
     hide();
     return;
   } else {
     show();
   }
-
-  // Keep mute/deafen menu items in sync with client, based on icon states
   const muteIndex = contextMenu.indexOf(menuItems[MenuItems.MUTE]);
   const deafenIndex = contextMenu.indexOf(menuItems[MenuItems.DEAFEN]);
   const voiceConnected = contextMenu[muteIndex].visible;
   let shouldSetContextMenu = false;
   if (currentIcon !== trayIcons.DEFAULT && currentIcon !== trayIcons.UNREAD) {
-    // Show mute/deaf controls
     if (!voiceConnected) {
       contextMenu[muteIndex].visible = true;
       contextMenu[deafenIndex].visible = true;
@@ -197,13 +187,9 @@ function setContextMenu() {
 }
 function show() {
   if (atomTray != null) return;
-  atomTray = new _electron.Tray(_electron.nativeImage.createFromPath(currentIcon)); // Initialize with last set icon
+  atomTray = new _electron.Tray(_electron.nativeImage.createFromPath(currentIcon));
   atomTray.setToolTip(_Constants.APP_NAME);
-
-  // Set tray context menu
   setContextMenu();
-
-  // Set Tray click behavior
   atomTray.on('click', options.onTrayClicked);
 }
 function hide() {
@@ -217,13 +203,10 @@ function displayHowToCloseHint() {
   if (settings.get('trayBalloonShown') != null || atomTray == null) {
     return;
   }
-
-  // TODO: localize
-  const balloonMessage = 'Hi! Discord will run in the background to keep you in touch with your friends.' + ' You can right-click here to quit.';
   settings.set('trayBalloonShown', true);
   settings.save();
   atomTray.displayBalloon({
     title: 'Discord',
-    content: balloonMessage
+    content: 'Hi! Discord will run in the background to keep you in touch with your friends.' + ' You can right-click here to quit.'
   });
 }

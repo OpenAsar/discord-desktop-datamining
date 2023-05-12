@@ -12,9 +12,6 @@ const {
 } = require('electron');
 let mainScreen;
 function startup(bootstrapModules) {
-  // below modules are required and initted
-  // in this order to prevent dependency conflicts
-  // please don't tamper with the order unless you know what you're doing
   require('./bootstrapModules/bootstrapModules').init(bootstrapModules);
   require('./bootstrapModules/paths');
   require('./bootstrapModules/splashScreen');
@@ -73,14 +70,10 @@ function startup(bootstrapModules) {
   settings.injectSettingsBackend(appSettings.getSettings());
   require('./discord_native/browser/spellCheck');
   const windowNative = require('./discord_native/browser/window');
-
-  // expose globals that will be imported by the webapp
-  // global.releaseChannel is set in bootstrap
   global.crashReporterMetadata = crashReporterSetup.metadata;
   global.mainAppDirname = Constants.MAIN_APP_DIRNAME;
   global.features = appFeatures.getFeatures();
   global.appSettings = appSettings.getSettings();
-  // this gets updated when launching a new main app window
   global.mainWindowId = Constants.DEFAULT_MAIN_WINDOW_ID;
   global.moduleUpdater = moduleUpdater;
   const enableDevtoolsSetting = global.appSettings.get('DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING', false);

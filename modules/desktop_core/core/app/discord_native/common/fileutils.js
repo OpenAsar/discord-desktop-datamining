@@ -39,12 +39,6 @@ var _util = _interopRequireDefault(require("util"));
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-/* eslint-disable no-console */
-
-// eslint-disable-line import/no-unresolved
-
-// Reason for original-fs being import/no-unresolved: https://github.com/discord/discord/pull/74159#discussion_r893733771
-
 const MAX_LENGTH = _buffer.default.constants.MAX_LENGTH;
 const promiseFs = {
   readdir: _util.default.promisify(_originalFs.default.readdir),
@@ -56,9 +50,6 @@ const promiseFs = {
   readFile: _util.default.promisify(_originalFs.default.readFile),
   close: _util.default.promisify(_originalFs.default.close)
 };
-
-// Perform `readFiles` but only return `fulfilled` results.
-// If [orException] is set, exception if any of the results were rejected.
 exports.promiseFs = promiseFs;
 async function readFulfilledFiles(filenames, maxSize, orException) {
   const files = await readFiles(filenames, maxSize);
@@ -78,9 +69,6 @@ function readFiles(filenames, maxSize) {
     try {
       const stats = await promiseFs.fstat(handle);
       if (maxSize != null && stats.size > maxSize) {
-        // Used to help determine why openFiles failed.
-        // Cannot use an error here because context bridge will remove the code field.
-        // eslint-disable-next-line no-throw-literal
         throw {
           code: 'ETOOLARGE',
           message: 'upload too large',
@@ -95,11 +83,10 @@ function readFiles(filenames, maxSize) {
         filename: _path.default.basename(filename)
       };
     } finally {
-      promiseFs.close(handle); // No reason to await?
+      promiseFs.close(handle);
     }
   }));
 }
-
 function getFilesnamesFromDirectory(path) {
   return promiseFs.readdir(path);
 }

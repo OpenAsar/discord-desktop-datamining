@@ -17,7 +17,6 @@ function send(ev, ...args) {
 }
 function on(ev, callback) {
   ipcRenderer.on(getDiscordIPCEvent(ev), function () {
-    // Sender is dangerous, do not expose.
     callback.apply(callback, [null, ...[...arguments].slice(1)]);
   });
 }

@@ -22,7 +22,7 @@ function init() {
   _ipcMain.default.on('TOGGLE_MINIMIZE_TO_TRAY', (_event, value) => setMinimizeOnClose(value));
   _ipcMain.default.on('TOGGLE_OPEN_ON_STARTUP', (_event, value) => toggleRunOnStartup(value));
   _ipcMain.default.on('TOGGLE_START_MINIMIZED', (_event, value) => toggleStartMinimized(value));
-  _ipcMain.default.on('UPDATE_OPEN_ON_STARTUP', _event => updateOpenOnStartup());
+  _ipcMain.default.on('UPDATE_OPEN_ON_STARTUP', () => updateOpenOnStartup());
 }
 function setMinimizeOnClose(minimizeToTray) {
   settings.set('MINIMIZE_TO_TRAY', minimizeToTray);
@@ -38,7 +38,6 @@ function toggleRunOnStartup(openOnStartup) {
 function toggleStartMinimized(startMinimized) {
   settings.set('START_MINIMIZED', startMinimized);
   _autoStart.autoStart.isInstalled(installed => {
-    // Only update the registry for this toggle if the app was already set to autorun
     if (installed) {
       _autoStart.autoStart.install(NOOP);
     }

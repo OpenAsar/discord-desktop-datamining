@@ -1,7 +1,5 @@
 "use strict";
 
-// @ts-nocheck
-/* eslint-disable */
 const electron = require('electron');
 const {
   GPU_SETTINGS_SET_ENABLE_HWACCEL,

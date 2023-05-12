@@ -48,7 +48,7 @@ _electron.default.ipcMain.handle(USER_DATA_CACHE_GET, () => {
 _electron.default.ipcMain.on(USER_DATA_CACHE_SAVE, (_event, userData) => {
   cacheUserData(userData);
 });
-_electron.default.ipcMain.on(USER_DATA_CACHE_DELETE, _event => {
+_electron.default.ipcMain.on(USER_DATA_CACHE_DELETE, () => {
   deleteCachedUserData();
 });
 features.declareSupported('user_data_cache');

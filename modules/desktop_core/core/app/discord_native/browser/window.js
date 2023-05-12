@@ -20,7 +20,7 @@ const {
   WINDOW_IS_ALWAYS_ON_TOP,
   WINDOW_SET_ALWAYS_ON_TOP
 } = require('../common/constants').IPCEvents;
-let injectedGetWindow = _key => {
+let injectedGetWindow = () => {
   return null;
 };
 function injectGetWindow(getWindow) {

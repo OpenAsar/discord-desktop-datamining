@@ -24,8 +24,6 @@ function getMetadata() {
 function getFlattenedMetadata() {
   return (0, _crashReporterUtils.flatten)(metadata);
 }
-
-// Internal test for unhandled JS exception
 async function triggerUnhandledException() {
   await _electron.default.ipcRenderer.invoke(_DiscordIPC.IPCEvents.UNHANDLED_JS_EXCEPTION);
 }
