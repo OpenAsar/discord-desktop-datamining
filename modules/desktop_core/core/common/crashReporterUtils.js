@@ -5,9 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.flatten = flatten;
 exports.reconcileCrashReporterMetadata = reconcileCrashReporterMetadata;
-const {
-  getElectronMajorVersion
-} = require('./processUtils');
+var _processUtils = require("./processUtils");
 function flatten(metadata, prefix = null, root = null) {
   root = root ? root : {};
   prefix = prefix ? prefix : '';
@@ -22,7 +20,7 @@ function flatten(metadata, prefix = null, root = null) {
   return root;
 }
 function reconcileCrashReporterMetadata(crashReporter, metadata) {
-  if (getElectronMajorVersion() < 8) {
+  if ((0, _processUtils.getElectronMajorVersion)() < 8) {
     return;
   }
   const new_metadata = flatten(metadata);
