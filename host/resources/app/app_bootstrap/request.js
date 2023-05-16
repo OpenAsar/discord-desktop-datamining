@@ -34,8 +34,6 @@ function handleHTTPResponse(resolve, reject, response, stream) {
   const totalBytes = parseInt(response.headers['content-length'] || 1, 10);
   let receivedBytes = 0;
   const chunks = [];
-
-  // don't stream response if it's a failure
   if (response.statusCode >= 300) {
     stream = null;
   }
@@ -152,9 +150,6 @@ async function requestWithMethod(method, options) {
   }
   return nodeRequest(options);
 }
-
-// only supports get for now, since retrying is non-idempotent and
-// we'd want to grovel the errors to make sure it's safe to retry
 var _default = {
   get: requestWithMethod.bind(null, 'GET')
 };

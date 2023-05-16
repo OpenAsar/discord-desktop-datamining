@@ -12,8 +12,6 @@ var _path = _interopRequireDefault(require("path"));
 var _electron = require("electron");
 var _buildInfo = _interopRequireDefault(require("../buildInfo"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-// TODO: We should use Constant's APP_NAME, but only once
-//       we set up backwards compat with this.
 const appName = _path.default.basename(process.execPath, '.exe');
 const exePath = _electron.app.getPath('exe');
 const exeDir = _path.default.dirname(exePath);
@@ -35,23 +33,18 @@ function ensureDir() {
   try {
     _fs.default.mkdirSync(autostartDir);
     return true;
-  } catch (e) {
-    // catch for when it already exists.
-  }
+  } catch (e) {}
   return false;
 }
 function install(callback) {
-  // TODO: This could fail. We should read its return value
   ensureDir();
   try {
     return _fs.default.writeFile(autostartFileName, desktopFile, callback);
   } catch (e) {
-    // I guess we don't autostart then
     return callback();
   }
 }
 function update(callback) {
-  // TODO: We might need to implement this later on
   return callback();
 }
 function isInstalled(callback) {

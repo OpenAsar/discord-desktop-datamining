@@ -14,9 +14,6 @@ function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "functio
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 const settings = (0, _appSettings.getSettings)();
-
-// TODO: We should use Constant's APP_NAME, but only once
-//       we set up backwards compat with this.
 const appName = _path.default.basename(process.execPath, '.exe');
 const fullExeName = _path.default.basename(process.execPath);
 const updatePath = _path.default.join(_path.default.dirname(process.execPath), '..', 'Update.exe');
@@ -49,7 +46,7 @@ function isInstalled(callback) {
 function uninstall(callback) {
   const queryValue = ['HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run', '/v', appName, '/f'];
   queryValue.unshift('delete');
-  windowsUtils.spawnReg(queryValue, (error, stdout) => {
+  windowsUtils.spawnReg(queryValue, () => {
     callback();
   });
 }

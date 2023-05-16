@@ -187,6 +187,7 @@ const ITEM_TYPE_TO_DATA_CATEGORY_MAP = {
   profile: 'profile',
   replay_event: 'replay',
   replay_recording: 'replay',
+  check_in: 'monitor',
 };
 
 /**
@@ -216,16 +217,14 @@ function createEventEnvelopeHeaders(
   dsn,
 ) {
   const dynamicSamplingContext = event.sdkProcessingMetadata && event.sdkProcessingMetadata.dynamicSamplingContext;
-
   return {
     event_id: event.event_id ,
     sent_at: new Date().toISOString(),
     ...(sdkInfo && { sdk: sdkInfo }),
     ...(!!tunnel && { dsn: dsnToString(dsn) }),
-    ...(event.type === 'transaction' &&
-      dynamicSamplingContext && {
-        trace: dropUndefinedKeys({ ...dynamicSamplingContext }),
-      }),
+    ...(dynamicSamplingContext && {
+      trace: dropUndefinedKeys({ ...dynamicSamplingContext }),
+    }),
   };
 }
 

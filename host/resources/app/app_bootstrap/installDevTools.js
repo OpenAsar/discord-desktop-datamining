@@ -4,9 +4,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-// used in devtools to hook in additional dev tools
-// require('electron').remote.require('./installDevTools')()
-
 function installDevTools() {
   console.log(`Installing Devtron`);
   const devtron = require('devtron');

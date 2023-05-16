@@ -1,10 +1,6 @@
 "use strict";
 
 var _appSettings = require("./appSettings");
-// bootstrap constants
-// after startup, these constants will be merged into core module constants
-// since they are used in both locations (see app/Constants.js)
-
 const {
   releaseChannel
 } = require('./buildInfo');

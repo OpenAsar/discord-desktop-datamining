@@ -34,11 +34,9 @@ function updateShortcuts(updater) {
   const iconPath = copyIconToRoot();
   for (const shortcutPath of shortcutPaths) {
     if (!_fs.default.existsSync(shortcutPath)) {
-      // If the user deleted the shortcut, don't recreate it.
       continue;
     }
     updater.createShortcut({
-      /* eslint-disable camelcase */
       target_path: updateExe,
       shortcut_path: shortcutPath,
       arguments: `--processStart ${exeName}`,
@@ -47,11 +45,9 @@ function updateShortcuts(updater) {
       description: _Constants.APP_DESCRIPTION,
       app_user_model_id: _Constants.APP_ID,
       working_directory: appFolder
-      /* eslint-enable camelcase */
     });
   }
 }
-
 function performFirstRunTasks(updater) {
   const firstRunCompletePath = _path.default.join(paths.getUserDataVersioned(), '.first-run');
   if (!_fs.default.existsSync(firstRunCompletePath)) {

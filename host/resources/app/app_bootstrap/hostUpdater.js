@@ -11,8 +11,6 @@ var squirrelUpdate = _interopRequireWildcard(require("./squirrelUpdate"));
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-/* eslint-disable no-console */
-
 function versionParse(verString) {
   return verString.split('.').map(i => parseInt(i));
 }
@@ -47,7 +45,6 @@ class AutoUpdaterWin32 extends _events.EventEmitter {
     if (squirrelUpdate.updateExistsSync()) {
       squirrelUpdate.restart(_electron.app, this.updateVersion ?? _electron.app.getVersion());
     } else {
-      /* eslint-disable-next-line */
       require('auto-updater').quitAndInstall();
     }
   }
@@ -71,7 +68,6 @@ class AutoUpdaterWin32 extends _events.EventEmitter {
         return;
       }
       try {
-        // Last line of the output is JSON details about the releases
         const json = stdout.trim().split('\n').pop();
         const releasesFound = JSON.parse(json).releasesToApply;
         if (releasesFound == null || releasesFound.length === 0) {
@@ -95,8 +91,6 @@ class AutoUpdaterWin32 extends _events.EventEmitter {
     });
   }
 }
-
-// todo
 class AutoUpdaterLinux extends _events.EventEmitter {
   constructor() {
     super();
@@ -106,8 +100,6 @@ class AutoUpdaterLinux extends _events.EventEmitter {
     this.updateUrl = url;
   }
   quitAndInstall() {
-    // Just restart. The splash screen will hit the update manually state and
-    // prompt the user to download the new package.
     _electron.app.relaunch();
     _electron.app.quit();
   }
@@ -117,7 +109,6 @@ class AutoUpdaterLinux extends _events.EventEmitter {
     try {
       const response = await _request.default.get(this.updateUrl);
       if (response.statusCode === 204) {
-        // you are up to date
         this.emit('update-not-available');
         return;
       }
@@ -130,7 +121,6 @@ class AutoUpdaterLinux extends _events.EventEmitter {
       } catch (_) {}
       if (versionNewer(latestVersion, currVersion)) {
         console.log('[Updates] You are out of date!');
-        // you need to update
         this.emit('update-manually', latestVerStr);
       } else {
         console.log('[Updates] You are living in the future!');
@@ -143,11 +133,6 @@ class AutoUpdaterLinux extends _events.EventEmitter {
   }
 }
 let autoUpdater;
-
-// TODO
-// events: checking-for-update, update-available, update-not-available, update-manually, update-downloaded, error
-// also, checkForUpdates, setFeedURL, quitAndInstall
-// also, see electron.autoUpdater, and its API
 switch (process.platform) {
   case 'darwin':
     autoUpdater = require('electron').autoUpdater;

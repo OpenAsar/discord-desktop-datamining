@@ -1,13 +1,6 @@
 "use strict";
 
-// bootstrap, or what runs before the rest of desktop does
-// responsible for handling updates and updating modules before continuing startup
-
 if (process.platform === 'linux') {
-  // Some people are reporting audio problems on Linux that are fixed by setting
-  // an environment variable PULSE_LATENCY_MSEC=30 -- the "real" fix is to see
-  // what conditions require this and set this then (also to set it directly in
-  // our webrtc setup code rather than here) but this should fix the bug for now.
   if (process.env.PULSE_LATENCY_MSEC === undefined) {
     process.env.PULSE_LATENCY_MSEC = 30;
   }
@@ -16,11 +9,9 @@ const {
   app,
   Menu
 } = require('electron');
-const sentry = require('@sentry/node');
+const sentry = require('@sentry/electron');
 const buildInfo = require('./buildInfo');
 app.setVersion(buildInfo.version);
-
-// expose releaseChannel to a global, since it's used by splash screen
 global.releaseChannel = buildInfo.releaseChannel;
 const errorHandler = require('./errorHandler');
 errorHandler.init();
@@ -35,18 +26,12 @@ const Constants = require('./Constants');
 const GPUSettings = require('./GPUSettings');
 function setupHardwareAcceleration() {
   const settings = appSettings.getSettings();
-  // TODO: this is a copy of gpuSettings.getEnableHardwareAcceleration
   if (!settings.get('enableHardwareAcceleration', true)) {
     app.disableHardwareAcceleration();
   }
 }
 setupHardwareAcceleration();
-
-// [adill] work around chrome 66 disabling autoplay by default
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
-
-// WinRetrieveSuggestionsOnlyOnDemand: Work around electron 13 bug w/ async spellchecking on Windows.
-// HardwareMediaKeyHandling,MediaSessionService: Prevent Discord from registering as a media service.
 app.commandLine.appendSwitch('disable-features', 'WinRetrieveSuggestionsOnlyOnDemand,HardwareMediaKeyHandling,MediaSessionService');
 function hasArgvFlag(flag) {
   return (process.argv || []).slice(1).includes(flag);
@@ -54,15 +39,11 @@ function hasArgvFlag(flag) {
 console.log(`${Constants.APP_NAME} ${app.getVersion()}`);
 let pendingAppQuit = false;
 if (process.platform === 'win32') {
-  // this tells Windows (in particular Windows 10) which icon to associate your app with, important for correctly
-  // pinning app to task bar.
   app.setAppUserModelId(Constants.APP_ID);
   const {
     handleStartupEvent
   } = require('./squirrelUpdate');
-  // TODO: Isn't using argv[1] fragile?
   const squirrelCommand = process.argv[1];
-  // TODO: Is protocol case sensitive?
   if (handleStartupEvent(Constants.APP_PROTOCOL, app, squirrelCommand)) {
     pendingAppQuit = true;
   }
@@ -93,14 +74,13 @@ function extractUrlFromArgs(args) {
 }
 let initialUrl = extractUrlFromArgs(process.argv);
 if (!allowMultipleInstances) {
-  app.on('second-instance', (_event, args, _workingDirectory) => {
+  app.on('second-instance', (_event, args) => {
     if (args != null && args.indexOf('--squirrel-uninstall') > -1) {
       app.quit();
       return;
     }
     const url = extractUrlFromArgs(args);
     if (coreModule) {
-      // url can be null, as a user opening the executable again will focus the app from background
       coreModule.handleOpenUrl(url);
     } else if (url != null) {
       initialUrl = url;
@@ -111,7 +91,6 @@ if (!allowMultipleInstances) {
   });
 }
 app.on('will-finish-launching', () => {
-  // on macos protocol links are handled entirely through this event
   app.on('open-url', (event, url) => {
     event.preventDefault();
     if (coreModule) {
