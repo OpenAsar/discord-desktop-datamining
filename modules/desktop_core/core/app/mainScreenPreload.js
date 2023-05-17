@@ -48,6 +48,15 @@ if (window.opener === null) {
     remoteApp: app,
     remotePowerMonitor: powerMonitor
   };
+  const crashReporterSetup = require('../common/crashReporterSetup');
+  const sentry = require('@sentry/electron');
+  if (crashReporterSetup && !crashReporterSetup.isInitialized()) {
+    const buildInfo = {
+      releaseChannel: app.getReleaseChannel(),
+      version: app.getVersion()
+    };
+    crashReporterSetup.init(buildInfo, sentry);
+  }
   contextBridge.exposeInMainWorld('DiscordNative', DiscordNative);
   process.once('loaded', () => {
     global.DiscordNative = DiscordNative;

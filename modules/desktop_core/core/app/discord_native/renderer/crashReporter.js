@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.getFlattenedMetadata = getFlattenedMetadata;
 exports.getMetadata = getMetadata;
-exports.triggerUnhandledException = triggerUnhandledException;
+exports.triggerJSException = triggerJSException;
 exports.updateCrashReporter = updateCrashReporter;
 var _electron = _interopRequireDefault(require("electron"));
 var _crashReporterUtils = require("../../../common/crashReporterUtils");
@@ -24,6 +24,17 @@ function getMetadata() {
 function getFlattenedMetadata() {
   return (0, _crashReporterUtils.flatten)(metadata);
 }
-async function triggerUnhandledException() {
-  await _electron.default.ipcRenderer.invoke(_DiscordIPC.IPCEvents.UNHANDLED_JS_EXCEPTION);
+async function triggerJSException(exceptionLocation) {
+  switch (exceptionLocation) {
+    case 0:
+      setTimeout(() => {
+        throw new Error('Delayed UNHANDLED_EXCEPTION ' + process.type);
+      }, 50);
+      break;
+    case 1:
+      throw new Error('UNHANDLED_EXCEPTION ' + process.type);
+    case 2:
+      await _electron.default.ipcRenderer.invoke(_DiscordIPC.IPCEvents.UNHANDLED_JS_EXCEPTION);
+      break;
+  }
 }
