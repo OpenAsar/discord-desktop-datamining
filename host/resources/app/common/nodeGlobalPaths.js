@@ -11,7 +11,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 const resolveLookupPaths = _module.default._resolveLookupPaths;
 _module.default._resolveLookupPaths = (request, parent) => {
   var _parent$paths;
-  if (parent === null || parent === void 0 ? void 0 : (_parent$paths = parent.paths) === null || _parent$paths === void 0 ? void 0 : _parent$paths.length) {
+  const length = parent === null || parent === void 0 ? void 0 : (_parent$paths = parent.paths) === null || _parent$paths === void 0 ? void 0 : _parent$paths.length;
+  if (length != null && length !== 0) {
     parent.paths = parent.paths.concat(_module.default.globalPaths);
   } else {
     parent.paths = _module.default.globalPaths;

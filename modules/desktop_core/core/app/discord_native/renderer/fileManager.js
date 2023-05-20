@@ -170,14 +170,19 @@ async function uploadHookMinidumpFile(filename, fullpath, metadata) {
   formData.append('sentry[tags][game]', (minidump === null || minidump === void 0 ? void 0 : minidump.processName) ?? 'Unknown');
   formData.append('game', (minidump === null || minidump === void 0 ? void 0 : minidump.processName) ?? 'Unknown');
   formData.append('upload_file_minidump', blob, filename);
-  return fetch('https://o64374.ingest.sentry.io/api/4505053715759104/minidump/?sentry_key=a6d1a1ca54ed4a729c6949f0237969e3', {
+  const response = await fetch('https://o64374.ingest.sentry.io/api/4505053715759104/minidump/?sentry_key=a6d1a1ca54ed4a729c6949f0237969e3', {
     method: 'POST',
     body: formData
   });
+  return {
+    response,
+    minidump
+  };
 }
 async function uploadDiscordHookCrashes() {
   const metadata = (0, _crashReporter.getFlattenedMetadata)();
   let crashCount = 0;
+  const minidumps = [];
   await uploadHookCrashSequence(async () => {
     try {
       const modulePath = await getModulePath();
@@ -189,9 +194,13 @@ async function uploadDiscordHookCrashes() {
         ++crashCount;
         const fullpath = _path.default.join(hookPath, filename);
         try {
+          var _uploadResult$respons;
           console.log(`uploadDiscordHookCrashes: Uploading "${fullpath}".`);
-          const response = await uploadHookMinidumpFile(filename, fullpath, metadata);
-          console.log(`uploadDiscordHookCrashes: Uploaded "${response.status}".`);
+          const uploadResult = await uploadHookMinidumpFile(filename, fullpath, metadata);
+          console.log(`uploadDiscordHookCrashes: Uploaded "${(_uploadResult$respons = uploadResult.response) === null || _uploadResult$respons === void 0 ? void 0 : _uploadResult$respons.status}".`);
+          if (uploadResult.minidump != null) {
+            minidumps.push(uploadResult.minidump);
+          }
         } catch (e) {
           console.error(`uploadDiscordHookCrashes: uploadHookMinidumpFile failed ${fullpath}: ${e}`);
         }
@@ -209,6 +218,7 @@ async function uploadDiscordHookCrashes() {
       console.log(`uploadDiscordHookCrashes: No crash reports found.`);
     }
   });
+  return minidumps;
 }
 function showItemInFolder(path) {
   _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.FILE_MANAGER_SHOW_ITEM_IN_FOLDER, path);
