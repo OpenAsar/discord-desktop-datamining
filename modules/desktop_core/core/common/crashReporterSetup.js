@@ -96,7 +96,7 @@ function getGlobalSentry() {
   return gSentry;
 }
 function isKnownNoisyJSException(errorMsg) {
-  if (errorMsg == 'ResizeObserver loop limit exceeded' || errorMsg == 'listen EADDRINUSE: address already in use 127.0.0.1:6463') {
+  if (errorMsg && (errorMsg.startsWith('ResizeObserver loop limit exceeded') || errorMsg.startsWith('listen EADDRINUSE: address already in use'))) {
     return true;
   } else return false;
 }
