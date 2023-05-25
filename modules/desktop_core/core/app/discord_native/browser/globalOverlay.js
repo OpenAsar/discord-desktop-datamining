@@ -58,7 +58,7 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_OPEN, (_
       interactiveWindow = null;
       console.log('GLOBAL_OVERLAY_OPEN: closed');
     });
-    interactiveWindow.loadURL(url + '#global_overlay');
+    void interactiveWindow.loadURL(url + '#global_overlay');
   } catch (e) {
     console.log(`GLOBAL_OVERLAY_OPEN: Error "${e.text}"\n${e.stack}`);
   }

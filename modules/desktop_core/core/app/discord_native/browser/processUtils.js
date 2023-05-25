@@ -57,7 +57,7 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_SYSTE
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_FLUSH_DNS_CACHE, () => {
   const defaultSession = _electron.default.session.defaultSession;
   if (defaultSession != null && defaultSession.clearHostResolverCache != null) {
-    defaultSession.clearHostResolverCache();
+    return defaultSession.clearHostResolverCache();
   }
   return Promise.resolve();
 });

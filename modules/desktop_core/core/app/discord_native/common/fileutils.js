@@ -83,7 +83,7 @@ function readFiles(filenames, maxSize) {
         filename: _path.default.basename(filename)
       };
     } finally {
-      promiseFs.close(handle);
+      void promiseFs.close(handle);
     }
   }));
 }

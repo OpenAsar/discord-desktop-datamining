@@ -408,7 +408,7 @@ async function readMinidump(file) {
     return null;
   } finally {
     var _reader;
-    (_reader = reader) === null || _reader === void 0 ? void 0 : _reader.close();
+    void ((_reader = reader) === null || _reader === void 0 ? void 0 : _reader.close());
   }
   console.log(`readMinidump result ${JSON.stringify(info)}`);
   return info;

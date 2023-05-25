@@ -221,8 +221,7 @@ async function uploadDiscordHookCrashes() {
   return minidumps;
 }
 function showItemInFolder(path) {
-  _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.FILE_MANAGER_SHOW_ITEM_IN_FOLDER, path);
-  return Promise.resolve();
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.FILE_MANAGER_SHOW_ITEM_IN_FOLDER, path);
 }
 async function openFiles(dialogOptions, maxSize) {
   const filenames = await showOpenDialog(dialogOptions);

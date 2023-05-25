@@ -60,7 +60,7 @@ if (window.opener === null) {
   contextBridge.exposeInMainWorld('DiscordNative', DiscordNative);
   process.once('loaded', () => {
     global.DiscordNative = DiscordNative;
-    DiscordNative.fileManager.cleanupTempFiles();
+    void DiscordNative.fileManager.cleanupTempFiles();
   });
   process.on('uncaughtException', (err, origin) => {
     var _uncaughtExceptionHan;

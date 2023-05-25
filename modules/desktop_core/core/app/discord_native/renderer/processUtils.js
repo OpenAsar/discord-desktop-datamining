@@ -27,7 +27,7 @@ let totalProcessorUsagePercent = 0;
 let totalMemoryUsageKB = 0;
 const cpuCoreCount = _os.default.cpus().length;
 setInterval(() => {
-  _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_CPU_USAGE).then(usage => totalProcessorUsagePercent = usage);
+  void _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_CPU_USAGE).then(usage => totalProcessorUsagePercent = usage);
 }, CPU_USAGE_GATHER_INTERVAL);
 let memoryUsageTimerRunning = false;
 function getCurrentMemoryUsageKB() {
@@ -92,5 +92,5 @@ function getMainArgvSync() {
   return mainArgv;
 }
 function setCrashInformation(crashInformation, state) {
-  _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_SET_CRASH_INFORMATION, crashInformation, state);
+  void _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_SET_CRASH_INFORMATION, crashInformation, state);
 }

@@ -8,11 +8,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 const releaseChannel = _DiscordIPC.DiscordIPC.renderer.sendSync(_DiscordIPC.IPCEvents.APP_GET_RELEASE_CHANNEL_SYNC);
 const hostVersion = _DiscordIPC.DiscordIPC.renderer.sendSync(_DiscordIPC.IPCEvents.APP_GET_HOST_VERSION_SYNC);
 const buildNumber = _DiscordIPC.DiscordIPC.renderer.sendSync(_DiscordIPC.IPCEvents.APP_GET_BUILD_NUMBER);
-(0, _crashReporter.updateCrashReporter)({
+void (0, _crashReporter.updateCrashReporter)({
   nativeBuildNumber: (buildNumber === null || buildNumber === void 0 ? void 0 : buildNumber.toString()) ?? 'null'
 });
 let moduleVersions = {};
-_DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.APP_GET_MODULE_VERSIONS).then(versions => {
+void _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.APP_GET_MODULE_VERSIONS).then(versions => {
   moduleVersions = versions;
 });
 _electron.default.ipcRenderer.on('DISCORD_MODULE_INSTALLED', async () => {
@@ -31,24 +31,19 @@ function getModuleVersions() {
   return moduleVersions;
 }
 function setBadgeCount(count) {
-  _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.APP_SET_BADGE_COUNT, count);
-  return Promise.resolve();
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.APP_SET_BADGE_COUNT, count);
 }
 function dockSetBadge(badge) {
-  _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.APP_DOCK_SET_BADGE, badge);
-  return Promise.resolve();
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.APP_DOCK_SET_BADGE, badge);
 }
-function dockBounce(type) {
-  _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.APP_DOCK_BOUNCE, type);
-  return Promise.resolve();
+async function dockBounce(type) {
+  await _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.APP_DOCK_BOUNCE, type);
 }
 function dockCancelBounce(id) {
-  _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.APP_DOCK_CANCEL_BOUNCE, id);
-  return Promise.resolve();
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.APP_DOCK_CANCEL_BOUNCE, id);
 }
 function relaunch() {
-  _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.APP_RELAUNCH);
-  return Promise.resolve();
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.APP_RELAUNCH);
 }
 function getDefaultDoubleClickAction() {
   return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.APP_GET_DEFAULT_DOUBLE_CLICK_ACTION);
