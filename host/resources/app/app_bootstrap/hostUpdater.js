@@ -49,7 +49,7 @@ class AutoUpdaterWin32 extends _events.EventEmitter {
     }
   }
   downloadAndInstallUpdate(callback) {
-    squirrelUpdate.spawnUpdateInstall(this.updateUrl, progress => {
+    void squirrelUpdate.spawnUpdateInstall(this.updateUrl, progress => {
       this.emit('update-progress', progress);
     }).catch(err => callback(err)).then(() => callback());
   }

@@ -33,16 +33,11 @@ function initializeSentrySdk(sentry, buildInfo) {
     dsn: getSentryDSN(buildInfo.releaseChannel),
     environment: buildInfo.releaseChannel,
     release: buildInfo.version,
-    beforeSend(event, hint) {
-      if (event.exception) {
-        const error = hint.originalException;
-        if (error && isKnownNoisyJSException(error.message)) {
-          return null;
-        }
-      }
+    beforeSend(event) {
       event.extra = metadata;
       return event;
-    }
+    },
+    ignoreErrors: ['EADDRINUSE', 'ResizeObserver loop limit exceeded']
   });
   gSentry = sentry;
 }
@@ -94,9 +89,4 @@ function isInitialized() {
 }
 function getGlobalSentry() {
   return gSentry;
-}
-function isKnownNoisyJSException(errorMsg) {
-  if (errorMsg && (errorMsg.startsWith('ResizeObserver loop limit exceeded') || errorMsg.startsWith('listen EADDRINUSE: address already in use'))) {
-    return true;
-  } else return false;
 }
