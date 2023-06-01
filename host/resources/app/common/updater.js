@@ -93,6 +93,9 @@ class Updater extends EventEmitter {
             throw e;
           }
         } else {
+          if (details && details.includes('code: -2146762487')) {
+            e = new Error(`(${kind}) (cert_chain_failed): Cert chain processed, root cert not trusted by trust provider`);
+          }
           this.emit('update-error', e);
           request.reject(e);
           this.requests.delete(id);

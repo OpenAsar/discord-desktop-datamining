@@ -57,6 +57,14 @@ function handled(err) {
   if (global.releaseChannel !== 'ptb' && global.releaseChannel !== 'canary' && global.releaseChannel !== 'development') {
     return;
   }
+  if (err && err.message) {
+    if (err.message.includes('cert_chain_failed')) {
+      if (Math.floor(Math.random() * 1000) > 0) {
+        console.warn(`Skipping Sentry report for client cert chain failure`);
+        return;
+      }
+    }
+  }
   if (totalHandledErrors < HANDLED_ERROR_LIMIT && handledErrorCounter++ % HANDLED_ERROR_INTERVAL == 0) {
     console.warn('Reporting non-fatal error', err);
     Sentry.captureException(err);
