@@ -1,7 +1,5 @@
 "use strict";
 
-// @ts-nocheck
-/* eslint-disable */
 const electron = require('electron');
 const {
   CONSTANTS_GET

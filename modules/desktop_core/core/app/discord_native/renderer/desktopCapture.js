@@ -6,8 +6,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 async function getDesktopCaptureSources(options) {
   let sources = null;
   if (_electron.default.desktopCapturer != null) {
-    // TODO(atlante45): For backwards compatibility with Electron 13, remove once we've fully
-    // transitionned off of Electron 13
     sources = await _electron.default.desktopCapturer.getSources(options);
   } else {
     sources = await _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.DESKTOP_CAPTURER_GET_SOURCES, options);

@@ -50,8 +50,6 @@ function init() {
 }
 function focusWindow(window) {
   if (window == null) return;
-  // The focus call is not always respected.
-  // This uses a hack defined in https://github.com/electron/electron/issues/2867
   window.setAlwaysOnTop(true);
   window.focus();
   window.setAlwaysOnTop(false);
@@ -112,36 +110,19 @@ function openOrFocusWindow(windowURL, key, features) {
 function setupPopout(popoutWindow, key, options, webappEndpoint) {
   popoutWindow.windowKey = key;
   popoutWindows[popoutWindow.windowKey] = popoutWindow;
-
-  /**
-   * Do not allow navigation to arbitrary domains.
-   */
   popoutWindow.webContents.on('will-navigate', (evt, url) => {
     if (!(0, _securityUtils.checkUrlOriginMatches)(url, webappEndpoint)) {
       evt.preventDefault();
     }
   });
-
-  /**
-   * Any window.open or links within the popout window should just open externally.
-   */
   popoutWindow.webContents.setWindowOpenHandler(({
     url
   }) => {
     (0, _securityUtils.saferShellOpenExternal)(url);
-    // Even if this opens the url, we still want to deny since we want to open in the user's browser,
-    // not the electron app
     return {
       action: 'deny'
     };
   });
-
-  /**
-   * Handle events for our new window
-   *
-   * NOTE: Wanted to handle 'always-on-top-changed' and send to client but currently
-   * the event seems to not fire.
-   * */
   popoutWindow.once('closed', () => {
     popoutWindow.removeAllListeners();
     delete popoutWindows[popoutWindow.windowKey];

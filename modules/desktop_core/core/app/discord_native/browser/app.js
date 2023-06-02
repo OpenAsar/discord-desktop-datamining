@@ -9,8 +9,6 @@ exports.injectUpdater = injectUpdater;
 var _electron = _interopRequireDefault(require("electron"));
 var _DiscordIPC = require("../common/DiscordIPC");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-/* eslint-disable require-await */
-
 let injectedBuildInfo = null;
 let injectedModuleUpdater = null;
 let injectedUpdater = null;
@@ -30,12 +28,10 @@ _DiscordIPC.DiscordIPC.main.on(_DiscordIPC.IPCEvents.APP_GET_HOST_VERSION_SYNC, 
   event.returnValue = _electron.default.app.getVersion();
 });
 async function newUpdaterGetModuleVersions(updater) {
-  // eslint-disable-next-line camelcase
   return (await updater.queryCurrentVersions()).current_modules;
 }
 function newUpdaterGetBuildNumber(updater) {
   const version = updater.queryCurrentVersionsSync();
-  // eslint-disable-next-line camelcase
   if (version.running_update != null) {
     return version.running_update.metadata_version;
   }
@@ -50,7 +46,7 @@ _DiscordIPC.DiscordIPC.main.on(_DiscordIPC.IPCEvents.APP_GET_BUILD_NUMBER, event
   }
   event.returnValue = null;
 });
-_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.APP_GET_MODULE_VERSIONS, async _ => {
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.APP_GET_MODULE_VERSIONS, async () => {
   var _injectedUpdater2;
   const newUpdater = (_injectedUpdater2 = injectedUpdater) === null || _injectedUpdater2 === void 0 ? void 0 : _injectedUpdater2.getUpdater();
   if (newUpdater != null) {
@@ -64,7 +60,6 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.APP_GET_MODULE_VERSIONS
   return versions;
 });
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.APP_GET_PATH, async (_, path) => {
-  // TODO: Fix argument in AsyncIPCEventMap.
   return _electron.default.app.getPath(path);
 });
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.APP_SET_BADGE_COUNT, async (_, count) => {
@@ -87,10 +82,10 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.APP_DOCK_CANCEL_BOUNCE,
     _electron.default.app.dock.cancelBounce(id);
   }
 });
-_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.APP_RELAUNCH, async _ => {
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.APP_RELAUNCH, async () => {
   _electron.default.app.relaunch();
   _electron.default.app.exit(0);
 });
-_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.APP_GET_DEFAULT_DOUBLE_CLICK_ACTION, async _ => {
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.APP_GET_DEFAULT_DOUBLE_CLICK_ACTION, async () => {
   return _electron.default.systemPreferences.getUserDefault('AppleActionOnDoubleClick', 'string');
 });

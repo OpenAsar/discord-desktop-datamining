@@ -9,8 +9,6 @@ const discordPrefixRegex = /^DISCORD_/;
 function getDiscordIPCEvent(ev) {
   return discordPrefixRegex.test(ev) ? ev : `DISCORD_${ev}`;
 }
-
-// Namespace all event names with DISCORD_
 let IPCEvents;
 exports.IPCEvents = IPCEvents;
 (function (IPCEvents) {

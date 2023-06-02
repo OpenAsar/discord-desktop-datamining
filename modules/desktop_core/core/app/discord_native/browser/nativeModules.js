@@ -73,19 +73,11 @@ electron.ipcMain.on(NATIVE_MODULES_GET_HAS_NEW_UPDATER, event => {
   var _injectedUpdater2;
   event.returnValue = ((_injectedUpdater2 = injectedUpdater) === null || _injectedUpdater2 === void 0 ? void 0 : _injectedUpdater2.getUpdater()) != null;
 });
-
-// This endpoint is a bit special in the sense that it's exposed from
-// discord_updater_bootstrap instead of discord_desktop_core. The reason for
-// this is so that a malicious app can't pass in an arbitrary version number to
-// launch.
 electron.ipcMain.on(NATIVE_MODULES_FINISH_UPDATER_BOOTSTRAP, async (_, [major, minor, revision]) => {
-  // TODO(eiz): This code is currently duplicated between the updater and here
-  // due to bootstrapping reasons. I'd like to not have it be that way.
   if (typeof major !== 'number' || typeof minor !== 'number' || typeof revision !== 'number') {
     throw new Error('You tried.');
   }
-  const hostVersionStr = `${major}.${minor}.${revision}`;
-  const hostExePath = path.join(path.dirname(process.execPath), '..', `app-${hostVersionStr}`, path.basename(process.execPath));
+  const hostExePath = path.join(path.dirname(process.execPath), '..', `app-${`${major}.${minor}.${revision}`}`, path.basename(process.execPath));
   electron.app.once('will-quit', () => {
     childProcess.spawn(hostExePath, [], {
       detached: true,

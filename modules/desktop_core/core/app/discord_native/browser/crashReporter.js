@@ -12,13 +12,23 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.CRASH_REPORTER_UPDATE_M
   (0, _assert.default)(metadata != null, 'Metadata imported improperly.');
   const finalMetadata = _lodash.default.defaultsDeep(metadata, additionalMetadata ?? {});
   (0, _crashReporterUtils.reconcileCrashReporterMetadata)(_electron.default.crashReporter, finalMetadata);
+  const sentry = _crashReporterSetup.crashReporterSetup.getGlobalSentry();
+  if (sentry != null) {
+    var _additionalMetadata$s;
+    const user = (_additionalMetadata$s = additionalMetadata.sentry) === null || _additionalMetadata$s === void 0 ? void 0 : _additionalMetadata$s.user;
+    if (user != null) {
+      sentry.setUser(user);
+    }
+    const nativeBuildNumber = additionalMetadata.nativeBuildNumber;
+    if (nativeBuildNumber != null) {
+      sentry.setTag('nativeBuildNumber', nativeBuildNumber);
+    }
+  }
   return Promise.resolve({
     metadata: finalMetadata
   });
 });
-
-// Internal test for unhandled JS exception
-_electron.default.ipcMain.handle(_DiscordIPC.IPCEvents.UNHANDLED_JS_EXCEPTION, _ => {
+_electron.default.ipcMain.handle(_DiscordIPC.IPCEvents.UNHANDLED_JS_EXCEPTION, () => {
   setTimeout(() => {
     throw new Error('UNHANDLED_EXCEPTION ' + process.type);
   }, 50);

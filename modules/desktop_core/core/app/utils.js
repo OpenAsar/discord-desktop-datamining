@@ -10,8 +10,6 @@ var _os = _interopRequireDefault(require("os"));
 var _path = _interopRequireDefault(require("path"));
 var _paths = require("./bootstrapModules/paths");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-// Miscellaneous utility functions.
-
 function exposeModuleResource(asarPath, fileName) {
   const appPath = _path.default.resolve(__dirname, '..');
   const fullPathToAsarFile = _path.default.join(appPath, asarPath, fileName);

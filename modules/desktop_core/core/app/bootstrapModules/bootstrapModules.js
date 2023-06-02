@@ -7,10 +7,6 @@ exports.crashReporterSetup = exports.buildInfo = exports.autoStart = exports.app
 exports.init = init;
 exports.updater = exports.splashScreen = exports.requireNative = exports.paths = exports.moduleUpdater = void 0;
 let hasInit = false;
-
-// NOTE: We may want to instead of initializing these to null, instead initialize them to their normal files.
-// This way each one (see `crashReporterSetup`) would not need to do their own self-detection of loading when
-// inside the overlay (or any future relevant code).
 let paths = null;
 exports.paths = paths;
 let splashScreen = null;

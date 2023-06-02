@@ -8,7 +8,7 @@ const {
   POWER_MONITOR_UNLOCK_SCREEN,
   POWER_MONITOR_GET_SYSTEM_IDLE_TIME
 } = require('../common/constants').IPCEvents;
-electron.ipcMain.handle(POWER_MONITOR_GET_SYSTEM_IDLE_TIME, async _ => {
+electron.ipcMain.handle(POWER_MONITOR_GET_SYSTEM_IDLE_TIME, async () => {
   return electron.powerMonitor.getSystemIdleTime() * 1000;
 });
 function sendToAllWindows(channel) {

@@ -11,8 +11,6 @@ function setUncaughtExceptionHandler(handler) {
   uncaughtExceptionHandler = handler;
 }
 if (window.opener === null) {
-  // App preload script, used to provide a replacement native API now that
-  // we turned off node integration.
   const {
     contextBridge,
     discord
@@ -47,28 +45,33 @@ if (window.opener === null) {
     thumbar: require('./discord_native/renderer/thumbar'),
     safeStorage: require('./discord_native/renderer/safeStorage'),
     globalOverlay: require('./discord_native/renderer/globalOverlay'),
-    // TODO: remove these once web no longer uses them
     remoteApp: app,
-    // TODO:  Fix. This is a hack to get typing done.
     remotePowerMonitor: powerMonitor
   };
+  const crashReporterSetup = require('../common/crashReporterSetup');
+  const sentry = require('@sentry/electron');
+  if (crashReporterSetup && !crashReporterSetup.isInitialized()) {
+    const buildInfo = {
+      releaseChannel: app.getReleaseChannel(),
+      version: app.getVersion()
+    };
+    crashReporterSetup.init(buildInfo, sentry);
+  }
   contextBridge.exposeInMainWorld('DiscordNative', DiscordNative);
   process.once('loaded', () => {
-    // ensures native module `require` context has access to DiscordNative
     global.DiscordNative = DiscordNative;
-    DiscordNative.fileManager.cleanupTempFiles(); // No need to await.
+    void DiscordNative.fileManager.cleanupTempFiles();
   });
-
   process.on('uncaughtException', (err, origin) => {
     var _uncaughtExceptionHan;
     (_uncaughtExceptionHan = uncaughtExceptionHandler) === null || _uncaughtExceptionHan === void 0 ? void 0 : _uncaughtExceptionHan(err, origin);
   });
   window.popouts = new Map();
 } else {
-  window.addEventListener('load', _ => {
+  window.addEventListener('load', () => {
     window.opener.popouts.set(window.name, window);
   });
-  window.addEventListener('beforeunload', _ => {
+  window.addEventListener('beforeunload', () => {
     window.opener.popouts.delete(window.name);
   });
 }

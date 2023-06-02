@@ -5,12 +5,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.flatten = flatten;
 exports.reconcileCrashReporterMetadata = reconcileCrashReporterMetadata;
-// @ts-nocheck
-/* eslint-disable */
-const {
-  getElectronMajorVersion
-} = require('./processUtils');
-function flatten(metadata, prefix, root) {
+var _processUtils = require("./processUtils");
+function flatten(metadata, prefix = null, root = null) {
   root = root ? root : {};
   prefix = prefix ? prefix : '';
   if (typeof metadata === 'object') {
@@ -19,12 +15,12 @@ function flatten(metadata, prefix, root) {
       flatten(metadata[key], next_prefix, root);
     }
   } else {
-    root[prefix] = metadata;
+    root[prefix] = String(metadata);
   }
   return root;
 }
 function reconcileCrashReporterMetadata(crashReporter, metadata) {
-  if (getElectronMajorVersion() < 8) {
+  if ((0, _processUtils.getElectronMajorVersion)() < 8) {
     return;
   }
   const new_metadata = flatten(metadata);

@@ -15,16 +15,10 @@ var _events = require("events");
 var _url = _interopRequireDefault(require("url"));
 var _ipcMain = _interopRequireDefault(require("./ipcMain"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-// TODO: transparency detection?
-// TODO: SHQueryUserNotificationState
-
-// ipcMain events
 const IPC_NOTIFICATIONS_CLEAR = 'NOTIFICATIONS_CLEAR';
 const IPC_NOTIFICATION_SHOW = 'NOTIFICATION_SHOW';
 const IPC_NOTIFICATION_CLICK = 'NOTIFICATION_CLICK';
 const IPC_NOTIFICATION_CLOSE = 'NOTIFICATION_CLOSE';
-
-// events
 const events = new _events.EventEmitter();
 exports.events = events;
 const NOTIFICATION_CLICK = 'notification-click';
@@ -117,9 +111,6 @@ function updateNotifications() {
         x,
         y
       } = calculateBoundingBox();
-      // [adill] this order is important. if you setPosition before you setSize electron
-      // incorrectly computes the window size. i haven't investigated the root cause
-      // further than this observation.
       notificationWindow.setSize(width, height);
       notificationWindow.setPosition(x, y);
       notificationWindow.showInactive();

@@ -28,14 +28,7 @@ var _processUtils = require("./processUtils");
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-// Manages additional module installation and management.
-// We add the module folder path to require() lookup paths here.
-
-// undocumented node API
-
 const originalFs = require('original-fs');
-
-// events
 const CHECKING_FOR_UPDATES = 'checking-for-updates';
 exports.CHECKING_FOR_UPDATES = CHECKING_FOR_UPDATES;
 const INSTALLED_MODULE = 'installed-module';
@@ -59,8 +52,6 @@ exports.INSTALLING_MODULE = INSTALLING_MODULE;
 const INSTALLING_MODULE_PROGRESS = 'installing-module-progress';
 exports.INSTALLING_MODULE_PROGRESS = INSTALLING_MODULE_PROGRESS;
 const NO_PENDING_UPDATES = 'no-pending-updates';
-
-// settings
 exports.NO_PENDING_UPDATES = NO_PENDING_UPDATES;
 const ALWAYS_ALLOW_UPDATES = 'ALWAYS_ALLOW_UPDATES';
 const SKIP_HOST_UPDATE = 'SKIP_HOST_UPDATE';
@@ -145,10 +136,6 @@ function initPathsOnly(_buildInfo) {
   if (locallyInstalledModules || moduleInstallPath) {
     return;
   }
-
-  // If we have `localModulesRoot` in our buildInfo file, we do not fetch modules
-  // from remote, and rely on our locally bundled ones.
-  // Typically used for development mode, or private builds.
   locallyInstalledModules = _buildInfo.localModulesRoot != null;
   if (locallyInstalledModules) {
     (0, _nodeGlobalPaths.addGlobalPath)(_buildInfo.localModulesRoot);
@@ -175,23 +162,15 @@ function init(_endpoint, _settings, _buildInfo) {
   remoteModuleVersions = {};
   newInstallInProgress = {};
   download = {
-    // currently downloading
     active: false,
-    // {name, version}
     queue: [],
-    // current queue index being downloaded
     next: 0,
-    // download failure count
     failures: 0
   };
   unzip = {
-    // currently unzipping
     active: false,
-    // {name, version, zipfile}
     queue: [],
-    // current queue index being unzipped
     next: 0,
-    // unzip failure count
     failures: 0
   };
   logger.log(`Modules initializing`);
@@ -215,7 +194,6 @@ function init(_endpoint, _settings, _buildInfo) {
     bootstrapping = failedLoadingInstalledModules || settings.get(ALWAYS_BOOTSTRAP_MODULES);
   }
   hostUpdater = require('../app_bootstrap/hostUpdater');
-  // TODO: hostUpdater constants
   hostUpdater.on('checking-for-update', () => events.append({
     type: CHECKING_FOR_UPDATES
   }));
@@ -227,20 +205,15 @@ function init(_endpoint, _settings, _buildInfo) {
   hostUpdater.on('error', err => hostOnError(err));
   const setFeedURL = hostUpdater.setFeedURL.bind(hostUpdater);
   remoteBaseURL = `${endpoint}/modules/${buildInfo.releaseChannel}`;
-  // eslint-disable-next-line camelcase
   remoteQuery = {
     host_version: buildInfo.version
   };
-
-  // For OSX platform try to move installer to Application folder, if currently running
-  // from read-only volume to avoid installation problems.
   if (_processUtils.IS_OSX) {
     const appFolder = _path.default.resolve(process.execPath);
     _fs.default.access(appFolder, _fs.default.constants.W_OK, err => {
       if (err) {
         logger.log(`Installer is in read-only volume in OSX, moving to Application folder ${err}`);
         try {
-          // On a successful move the app will quit and relaunch.
           app.moveToApplicationsFolder();
         } catch (err) {
           logger.log(`Could not move installer file to Application folder: ${err}`);
@@ -254,8 +227,6 @@ function init(_endpoint, _settings, _buildInfo) {
       remoteQuery.platform = 'osx';
       break;
     case 'win32':
-      // Squirrel for Windows can't handle query params
-      // https://github.com/Squirrel/Squirrel.Windows/issues/132
       setFeedURL(`${endpoint}/updates/${buildInfo.releaseChannel}`);
       remoteQuery.platform = 'win';
       break;
@@ -357,9 +328,6 @@ function hostOnUpdateDownloaded() {
 }
 function hostOnError(err) {
   logger.log(`Host update failed: ${err}`);
-
-  // [adill] osx unsigned builds will fire this code signing error inside setFeedURL and
-  // if we don't do anything about it hostUpdater.checkForUpdates() will never respond.
   if (err && String(err).indexOf('Could not get code signature for running application') !== -1) {
     console.warn('Skipping host updates due to code signing failure.');
     skipHostUpdate = true;
@@ -401,11 +369,6 @@ function checkForUpdates() {
     hostUpdater.checkForUpdates();
   }
 }
-
-// Indicates that the initial update process is complete and that future updates
-// are background updates. This merely affects the content of the events sent to
-// the app so that analytics can correctly attribute module download/installs
-// depending on whether they were ui-blocking or not.
 function setInBackground() {
   runningInBackground = true;
 }
@@ -647,8 +610,6 @@ function processUnzipQueue() {
         name: queuedModule.name,
         progress: percent
       });
-
-      // skip directories
       if (/\/$/.test(entry.fileName)) {
         zipfile.readEntry();
         return;
@@ -664,9 +625,6 @@ function processUnzipQueue() {
             onError(err, zipfile);
             return;
           }
-
-          // [adill] createWriteStream via original-fs is broken in Electron 4.0.0-beta.6 with .asar files
-          // so we unzip to a temporary filename and rename it afterwards
           const tempFileName = _path.default.join(extractRoot, entry.fileName + '.tmp');
           const finalFileName = _path.default.join(extractRoot, entry.fileName);
           const writeStream = originalFs.createWriteStream(tempFileName);

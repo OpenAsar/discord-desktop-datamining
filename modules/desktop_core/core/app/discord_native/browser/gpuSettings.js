@@ -4,8 +4,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.injectGpuSettingsBackend = injectGpuSettingsBackend;
-// @ts-nocheck
-/* eslint-disable */
 const electron = require('electron');
 const {
   GPU_SETTINGS_SET_ENABLE_HWACCEL,

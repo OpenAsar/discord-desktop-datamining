@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const hook = require('./discord_hook.node');
 const fs = require('fs');
 const path = require('path');
@@ -9,14 +10,14 @@ try {
     ? path.join(window.DiscordNative.fileManager.getModuleDataPathSync(), 'discord_hook')
     : null;
 } catch (e) {
-  console.error('Failed to get data directory: ', e);
+  console.error('Failed to get data directory.', e);
 }
 
 if (dataDirectory != null) {
   try {
     fs.mkdirSync(dataDirectory, {recursive: true});
   } catch (e) {
-    console.warn("Couldn't create hook data directory ", dataDirectory, ':', e);
+    console.warn(`Couldn't create hook data directory "${dataDirectory}"`, e);
   }
 }
 

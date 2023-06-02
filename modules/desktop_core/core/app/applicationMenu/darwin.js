@@ -128,7 +128,6 @@ var _default = enableDevtools => [{
     label: 'Close',
     accelerator: 'Command+W',
     click: (_, window) => {
-      // Main window
       if (window == null || window.windowKey == null) {
         _electron.Menu.sendActionToFirstResponder('hide:');
       } else {
