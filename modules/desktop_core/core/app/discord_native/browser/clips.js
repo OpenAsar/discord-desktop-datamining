@@ -8,8 +8,11 @@ var _fileutils = require("../common/fileutils");
 var _utils = require("../common/utils");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 const MAX_LENGTH = _buffer.default.constants.MAX_LENGTH;
-const DISCORD_HEADER_NAME = 'dscl';
+const UUID_BOX_NAME = 'uuid';
+const DISCORD_UUID = 'a1c8529933464db888f083f57a75a5ef';
 const INVALID_FILE_ERROR = 'Invalid file';
+const BOX_HEADER_SIZE_BYTES = 8;
+const UUID_SIZE_BYTES = 16;
 class InvalidFileError extends Error {}
 function verifyIsMP4(buffer) {
   if (getBoxHeaderName(buffer, 0) !== 'ftyp') {
@@ -25,17 +28,22 @@ function getBoxSize(buffer, startIndex) {
   return buffer.readUInt32BE(startIndex);
 }
 function getBoxHeaderName(buffer, startIndex) {
-  return buffer.toString('ascii', startIndex + 4, startIndex + 8);
+  return buffer.toString('ascii', startIndex + 4, startIndex + BOX_HEADER_SIZE_BYTES);
+}
+function getUUID(buffer, startIndex) {
+  return buffer.toString('hex', startIndex + BOX_HEADER_SIZE_BYTES, startIndex + BOX_HEADER_SIZE_BYTES + UUID_SIZE_BYTES);
+}
+function isDiscordUUIDBox(buffer, startIndex) {
+  return getBoxHeaderName(buffer, startIndex) === UUID_BOX_NAME && getUUID(buffer, startIndex) === DISCORD_UUID;
 }
 function verifyValidClip(buffer) {
   let currIndex = 0;
   while (currIndex < buffer.byteLength) {
-    const boxHeaderName = getBoxHeaderName(buffer, currIndex);
-    if (boxHeaderName === DISCORD_HEADER_NAME) {
+    if (isDiscordUUIDBox(buffer, currIndex)) {
       return;
     }
     const boxSize = getBoxSize(buffer, currIndex);
-    if (boxSize < 8) {
+    if (boxSize < BOX_HEADER_SIZE_BYTES) {
       throw new InvalidFileError(INVALID_FILE_ERROR);
     }
     currIndex += boxSize;
@@ -69,7 +77,7 @@ async function getClipMetadata(filename, dirPath) {
   const handle = await _promises.default.open(filepath, 'r');
   const stats = await handle.stat();
   let currIndex = 0;
-  const mp4HeaderBuffer = Buffer.alloc(8);
+  const mp4HeaderBuffer = Buffer.alloc(BOX_HEADER_SIZE_BYTES + UUID_SIZE_BYTES);
   try {
     await handle.read({
       buffer: mp4HeaderBuffer,
@@ -83,15 +91,15 @@ async function getClipMetadata(filename, dirPath) {
         position: currIndex
       });
       const boxSize = getBoxSize(mp4HeaderBuffer, 0);
-      if (boxSize < 8) {
+      if (boxSize < BOX_HEADER_SIZE_BYTES) {
         return null;
       }
-      const header = getBoxHeaderName(mp4HeaderBuffer, 0);
-      if (header === DISCORD_HEADER_NAME) {
-        const metadataBuffer = Buffer.alloc(boxSize - 8);
+      if (isDiscordUUIDBox(mp4HeaderBuffer, 0)) {
+        const metadataOffset = BOX_HEADER_SIZE_BYTES + UUID_SIZE_BYTES;
+        const metadataBuffer = Buffer.alloc(boxSize - metadataOffset);
         await handle.read({
           buffer: metadataBuffer,
-          position: currIndex + 8
+          position: currIndex + metadataOffset
         });
         const metadata = JSON.parse(metadataBuffer.toString('utf-8'));
         return {
