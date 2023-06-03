@@ -3,14 +3,17 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.IPCEvents = void 0;
 exports.getDiscordIPCEvent = getDiscordIPCEvent;
+exports.IPCEvents = void 0;
 const discordPrefixRegex = /^DISCORD_/;
+
 function getDiscordIPCEvent(ev) {
   return discordPrefixRegex.test(ev) ? ev : `DISCORD_${ev}`;
 }
+
 let IPCEvents;
 exports.IPCEvents = IPCEvents;
+
 (function (IPCEvents) {
   IPCEvents["ACCESSIBILITY_GET_ENABLED"] = "DISCORD_ACCESSIBILITY_GET_ENABLED";
   IPCEvents["APP_BADGE_SET"] = "DISCORD_APP_BADGE_SET";

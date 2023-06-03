@@ -1,12 +1,15 @@
 "use strict";
 
 const electron = require('electron');
+
 const {
   NATIVE_MODULES_GET_PATHS,
   NATIVE_MODULES_INSTALL,
   NATIVE_MODULES_GET_HAS_NEW_UPDATER
 } = require('../common/constants').IPCEvents;
+
 const modulePromises = {};
+
 function getSanitizedModulePaths() {
   let sanitizedModulePaths = [];
   const {
@@ -18,17 +21,22 @@ function getSanitizedModulePaths() {
       sanitizedModulePaths.push(modulePath);
     }
   });
+
   const rendererModulePaths = require('module')._nodeModulePaths(mainAppDirname);
+
   sanitizedModulePaths = sanitizedModulePaths.concat(rendererModulePaths.slice(0, 2));
   return sanitizedModulePaths;
 }
+
 function getHasNewUpdater() {
   return electron.ipcRenderer.sendSync(NATIVE_MODULES_GET_HAS_NEW_UPDATER);
 }
+
 async function ensureModule(name) {
   if (modulePromises[name] == null) {
     modulePromises[name] = electron.ipcRenderer.invoke(NATIVE_MODULES_INSTALL, name);
   }
+
   const moduleInstall = modulePromises[name];
   await moduleInstall.catch(e => {
     modulePromises[name] = null;
@@ -36,12 +44,15 @@ async function ensureModule(name) {
   });
   module.paths = getSanitizedModulePaths();
 }
+
 function requireModule(name) {
   if (!/^discord_[a-z0-9_-]+$/.test(name) && name !== 'erlpack') {
     throw new Error('"' + String(name) + '" is not a whitelisted native module');
   }
+
   return require(name);
 }
+
 module.paths = getSanitizedModulePaths();
 module.exports = {
   ensureModule,
