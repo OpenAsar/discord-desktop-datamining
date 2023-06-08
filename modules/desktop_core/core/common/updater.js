@@ -113,8 +113,16 @@ class Updater extends EventEmitter {
             throw e;
           }
         } else {
-          if (details && details.includes('code: -2146762487')) {
-            e = new Error(`(${kind}) (cert_chain_failed): Cert chain processed, root cert not trusted by trust provider`);
+          if (details) {
+            if (details.includes('code: 10013')) {
+              e = new Error(`(${kind}) (network_error): An attempt was made to access a socket in a way forbidden by its access permissions`);
+            } else if (details.includes('code: 10054')) {
+              e = new Error(`(${kind}) (network_error): An existing connection was forcibly closed by the remote host`);
+            } else if (details.includes('code: 11001')) {
+              e = new Error(`(${kind}) (network_error): No such host is known`);
+            } else if (details.includes('code: -2146762487')) {
+              e = new Error(`(${kind}) (cert_chain_failed): Cert chain processed, root cert not trusted by trust provider`);
+            }
           }
 
           this.emit('update-error', e);
