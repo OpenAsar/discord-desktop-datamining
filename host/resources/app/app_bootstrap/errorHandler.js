@@ -79,8 +79,8 @@ function handled(err) {
   }
 
   if (err && err.message) {
-    if (err.message.includes('cert_chain_failed')) {
-      if (Math.floor(Math.random() * 1000) > 0) {
+    if (err.message.includes('cert_chain_failed') || err.message.includes('network_error')) {
+      if (Math.floor(Math.random() * 1000) > 1) {
         console.warn(`Skipping Sentry report for client cert chain failure`);
         return;
       }
