@@ -104,7 +104,7 @@ class Updater extends EventEmitter {
           details,
           severity
         } = detail['Error'];
-        const e = new Error(`(${kind}) ${details}`);
+        let e = new Error(`(${kind}) ${details}`);
 
         if (severity === 'Fatal') {
           const handled = this.emit(kind, e);
