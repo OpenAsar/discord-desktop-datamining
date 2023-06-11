@@ -1,47 +1,76 @@
 "use strict";
 
 var _buffer = _interopRequireDefault(require("buffer"));
+
 var _promises = _interopRequireDefault(require("fs/promises"));
+
 var _path = _interopRequireDefault(require("path"));
+
 var _DiscordIPC = require("../common/DiscordIPC");
+
 var _fileutils = require("../common/fileutils");
+
 var _utils = require("../common/utils");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 const MAX_LENGTH = _buffer.default.constants.MAX_LENGTH;
-const DISCORD_HEADER_NAME = 'dscl';
+const UUID_BOX_NAME = 'uuid';
+const DISCORD_UUID = 'a1c8529933464db888f083f57a75a5ef';
 const INVALID_FILE_ERROR = 'Invalid file';
+const BOX_HEADER_SIZE_BYTES = 8;
+const UUID_SIZE_BYTES = 16;
+
 class InvalidFileError extends Error {}
+
 function verifyIsMP4(buffer) {
   if (getBoxHeaderName(buffer, 0) !== 'ftyp') {
     throw new InvalidFileError(INVALID_FILE_ERROR);
   }
 }
+
 function verifyHasMP4Extension(filename) {
   if (_path.default.parse(filename).ext !== '.mp4') {
     throw new InvalidFileError(INVALID_FILE_ERROR);
   }
 }
+
 function getBoxSize(buffer, startIndex) {
   return buffer.readUInt32BE(startIndex);
 }
+
 function getBoxHeaderName(buffer, startIndex) {
-  return buffer.toString('ascii', startIndex + 4, startIndex + 8);
+  return buffer.toString('ascii', startIndex + 4, startIndex + BOX_HEADER_SIZE_BYTES);
 }
+
+function getUUID(buffer, startIndex) {
+  return buffer.toString('hex', startIndex + BOX_HEADER_SIZE_BYTES, startIndex + BOX_HEADER_SIZE_BYTES + UUID_SIZE_BYTES);
+}
+
+function isDiscordUUIDBox(buffer, startIndex) {
+  return getBoxHeaderName(buffer, startIndex) === UUID_BOX_NAME && getUUID(buffer, startIndex) === DISCORD_UUID;
+}
+
 function verifyValidClip(buffer) {
   let currIndex = 0;
+
   while (currIndex < buffer.byteLength) {
-    const boxHeaderName = getBoxHeaderName(buffer, currIndex);
-    if (boxHeaderName === DISCORD_HEADER_NAME) {
+    if (isDiscordUUIDBox(buffer, currIndex)) {
       return;
     }
+
     const boxSize = getBoxSize(buffer, currIndex);
-    if (boxSize < 8) {
+
+    if (boxSize < BOX_HEADER_SIZE_BYTES) {
       throw new InvalidFileError(INVALID_FILE_ERROR);
     }
+
     currIndex += boxSize;
   }
+
   throw new InvalidFileError(INVALID_FILE_ERROR);
 }
+
 async function loadClip(filename) {
   try {
     verifyHasMP4Extension(filename);
@@ -56,20 +85,25 @@ async function loadClip(filename) {
     } else {
       console.error(`Invalid clips file: ${e}`);
     }
+
     throw new Error(INVALID_FILE_ERROR);
   }
 }
+
 async function getClipMetadata(filename, dirPath) {
   try {
     verifyHasMP4Extension(filename);
   } catch (e) {
     return null;
   }
+
   const filepath = _path.default.join(dirPath, filename);
+
   const handle = await _promises.default.open(filepath, 'r');
   const stats = await handle.stat();
   let currIndex = 0;
-  const mp4HeaderBuffer = Buffer.alloc(8);
+  const mp4HeaderBuffer = Buffer.alloc(BOX_HEADER_SIZE_BYTES + UUID_SIZE_BYTES);
+
   try {
     await handle.read({
       buffer: mp4HeaderBuffer,
@@ -77,21 +111,24 @@ async function getClipMetadata(filename, dirPath) {
     });
     verifyIsMP4(mp4HeaderBuffer);
     currIndex += getBoxSize(mp4HeaderBuffer, currIndex);
+
     while (currIndex < stats.size) {
       await handle.read({
         buffer: mp4HeaderBuffer,
         position: currIndex
       });
       const boxSize = getBoxSize(mp4HeaderBuffer, 0);
-      if (boxSize < 8) {
+
+      if (boxSize < BOX_HEADER_SIZE_BYTES) {
         return null;
       }
-      const header = getBoxHeaderName(mp4HeaderBuffer, 0);
-      if (header === DISCORD_HEADER_NAME) {
-        const metadataBuffer = Buffer.alloc(boxSize - 8);
+
+      if (isDiscordUUIDBox(mp4HeaderBuffer, 0)) {
+        const metadataOffset = BOX_HEADER_SIZE_BYTES + UUID_SIZE_BYTES;
+        const metadataBuffer = Buffer.alloc(boxSize - metadataOffset);
         await handle.read({
           buffer: metadataBuffer,
-          position: currIndex + 8
+          position: currIndex + metadataOffset
         });
         const metadata = JSON.parse(metadataBuffer.toString('utf-8'));
         return {
@@ -99,8 +136,10 @@ async function getClipMetadata(filename, dirPath) {
           metadata: metadata
         };
       }
+
       currIndex += boxSize;
     }
+
     return null;
   } catch (e) {
     console.log(`error: ${e}`);
@@ -109,6 +148,7 @@ async function getClipMetadata(filename, dirPath) {
     await handle.close();
   }
 }
+
 async function deleteClip(path) {
   try {
     await loadClip(path);
@@ -118,14 +158,17 @@ async function deleteClip(path) {
     throw new Error(INVALID_FILE_ERROR);
   }
 }
+
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.LOAD_CLIP, (_, path) => {
   return loadClip(path);
 });
+
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.LOAD_CLIPS_DIRECTORY, async (_, dirPath) => {
   const filenames = await (0, _fileutils.getFilesnamesFromDirectory)(dirPath);
   const filteredFiles = (await Promise.all(filenames.map(filename => getClipMetadata(filename, dirPath)))).filter(_utils.isNotNullish);
   return filteredFiles;
 });
+
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.DELETE_CLIP, (_, path) => {
   return deleteClip(path);
 });

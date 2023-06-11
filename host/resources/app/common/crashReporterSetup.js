@@ -5,97 +5,110 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.init = init;
 exports.isInitialized = isInitialized;
+exports.getGlobalSentry = getGlobalSentry;
 exports.metadata = void 0;
-var processUtils = _interopRequireWildcard(require("./processUtils"));
-function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-// @ts-nocheck
-/* eslint-disable */
-/* eslint-disable no-console */
 
-const electron = require('electron');
+var processUtils = _interopRequireWildcard(require("./processUtils"));
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
 const childProcess = require('child_process');
-const {
-  flatten
-} = require('./crashReporterUtils');
+
+let gSentry = null;
 let initialized = false;
 const metadata = {};
 exports.metadata = metadata;
 const supportsTls13 = processUtils.supportsTls13();
-const DEFAULT_SENTRY_KEY = '384ce4413de74fe0be270abe03b2b35a';
-const TEST_SENTRY_KEY = '1a27a96457b24ff286a000266c573919';
-const CHANNEL_SENTRY_KEYS = {
-  stable: DEFAULT_SENTRY_KEY,
-  ptb: TEST_SENTRY_KEY,
-  canary: TEST_SENTRY_KEY,
-  development: TEST_SENTRY_KEY
+const SENTRY_PROJECT_ID = '146342';
+const SENTRY_PROJECT_HOST = 'o64374';
+const DEFAULT_SENTRY_DSN_KEY = '384ce4413de74fe0be270abe03b2b35a';
+const STAFF_SENTRY_DSN_KEY = 'de156ff7a3f544cca369e77e3f1f5743';
+const TEST_SENTRY_DSN_KEY = '1a27a96457b24ff286a000266c573919';
+const DEFAULT_SENTRY_DSN = buildSentryDSN(DEFAULT_SENTRY_DSN_KEY);
+const CHANNEL_SENTRY_DSN = {
+  stable: buildSentryDSN(DEFAULT_SENTRY_DSN_KEY),
+  ptb: buildSentryDSN(TEST_SENTRY_DSN_KEY),
+  canary: buildSentryDSN(TEST_SENTRY_DSN_KEY),
+  development: buildSentryDSN(TEST_SENTRY_DSN_KEY)
 };
-function getCrashReporterArgs(metadata) {
-  // NB: we need to flatten the metadata because modern electron caps metadata values at 127 bytes,
-  // which our sentry subobject can easily exceed.
-  const flatMetadata = flatten(metadata);
-  const channel = metadata['channel'];
-  const sentryKey = CHANNEL_SENTRY_KEYS[channel] != null ? CHANNEL_SENTRY_KEYS[channel] : DEFAULT_SENTRY_KEY;
-  const sentryHost = supportsTls13 ? 'sentry.io' : 'insecure.sentry.io';
-  return {
-    productName: 'Discord',
-    companyName: 'Discord Inc.',
-    submitURL: `https://${sentryHost}/api/146342/minidump/?sentry_key=${sentryKey}`,
-    uploadToServer: true,
-    ignoreSystemCrashHandler: false,
-    extra: flatMetadata
-  };
-}
-function initializeSentrySdk(sentry) {
-  const sentryDsn = supportsTls13 ? 'https://8405981abe5045908f0d88135eba7ba5@o64374.ingest.sentry.io/1197903' : 'https://8405981abe5045908f0d88135eba7ba5@o64374.insecure.sentry.io/1197903';
+
+function initializeSentrySdk(sentry, buildInfo) {
   sentry.init({
-    dsn: sentryDsn,
+    dsn: getSentryDSN(buildInfo.releaseChannel),
+    environment: buildInfo.releaseChannel,
+    release: buildInfo.version,
+    maxValueLength: 768,
+
     beforeSend(event) {
-      var _metadata$sentry, _metadata$sentry2;
-      // Currently beforeSend is only fired for discord-desktop-js project,
-      // due to outdated sentry/electron sdk
-      event.release = metadata === null || metadata === void 0 ? void 0 : (_metadata$sentry = metadata['sentry']) === null || _metadata$sentry === void 0 ? void 0 : _metadata$sentry['release'];
-      event.environment = metadata === null || metadata === void 0 ? void 0 : (_metadata$sentry2 = metadata['sentry']) === null || _metadata$sentry2 === void 0 ? void 0 : _metadata$sentry2['environment'];
+      event.extra = metadata;
       return event;
-    }
+    },
+
+    ignoreErrors: ['EADDRINUSE', 'ResizeObserver loop limit exceeded']
   });
+  gSentry = sentry;
 }
+
 function init(buildInfo, sentry) {
   if (initialized) {
     console.warn('Ignoring double initialization of crash reporter.');
     return;
   }
 
-  // It's desirable for test runs to have the stacktrace print to the console (and thusly, be shown in buildkite logs).
   if (process.env.ELECTRON_ENABLE_STACK_DUMPING === 'true') {
     console.warn('Not initializing crash reporter because ELECTRON_ENABLE_STACK_DUMPING is set.');
     return;
   }
+
   if (sentry != null) {
-    initializeSentrySdk(sentry);
+    initializeSentrySdk(sentry, buildInfo);
   }
-  metadata['channel'] = buildInfo.releaseChannel;
+
+  metadata['release_channel'] = buildInfo.releaseChannel;
   const sentryMetadata = metadata['sentry'] != null ? metadata['sentry'] : {};
   sentryMetadata['environment'] = buildInfo.releaseChannel;
   sentryMetadata['release'] = buildInfo.version;
   metadata['sentry'] = sentryMetadata;
+
   if (processUtils.IS_LINUX) {
     const XDG_CURRENT_DESKTOP = process.env.XDG_CURRENT_DESKTOP || 'unknown';
     const GDMSESSION = process.env.GDMSESSION || 'unknown';
     metadata['wm'] = `${XDG_CURRENT_DESKTOP},${GDMSESSION}`;
+
     try {
       metadata['distro'] = childProcess.execFileSync('lsb_release', ['-ds'], {
         timeout: 100,
         maxBuffer: 512,
         encoding: 'utf-8'
       }).trim();
-    } catch (_) {} // just in case lsb_release doesn't exist
+    } catch (_) {}
   }
 
-  const config = getCrashReporterArgs(metadata);
-  electron.crashReporter.start(config);
   initialized = true;
 }
+
+function buildSentryDSN(dsnKey) {
+  if (supportsTls13) {
+    return 'https://' + dsnKey + '@' + SENTRY_PROJECT_HOST + '.ingest.sentry.io/' + SENTRY_PROJECT_ID;
+  }
+
+  return 'https://' + dsnKey + '@' + SENTRY_PROJECT_HOST + '.insecure.sentry.io/' + SENTRY_PROJECT_ID;
+}
+
+function getSentryDSN(release_channel) {
+  if (release_channel != null && CHANNEL_SENTRY_DSN[release_channel] != null) {
+    return CHANNEL_SENTRY_DSN[release_channel];
+  }
+
+  return DEFAULT_SENTRY_DSN;
+}
+
 function isInitialized() {
   return initialized;
+}
+
+function getGlobalSentry() {
+  return gSentry;
 }

@@ -1,17 +1,23 @@
 "use strict";
 
 const childProcess = require('child_process');
+
 const {
   app
 } = require('electron');
+
 const {
   EventEmitter
 } = require('events');
+
 const NodeModule = require('module');
+
 const path = require('path');
+
 const {
   hrtime
 } = require('process');
+
 let instance;
 const TASK_STATE_COMPLETE = 'Complete';
 const TASK_STATE_FAILED = 'Failed';
@@ -19,10 +25,12 @@ const TASK_STATE_WAITING = 'Waiting';
 const TASK_STATE_WORKING = 'Working';
 const INCONSISTENT_INSTALLER_STATE_ERROR = 'InconsistentInstallerState';
 const INVALID_UPDATER_ERROR = "Can't send request to updater because the native updater isn't loaded.";
+
 class Updater extends EventEmitter {
   constructor(options) {
     super();
     let nativeUpdaterModule = options.nativeUpdaterModule;
+
     if (nativeUpdaterModule == null) {
       try {
         nativeUpdaterModule = require('../../../updater');
@@ -30,9 +38,11 @@ class Updater extends EventEmitter {
         if (e.code === 'MODULE_NOT_FOUND') {
           return;
         }
+
         throw e;
       }
     }
+
     this.committedHostVersion = null;
     this.committedModules = new Set();
     this.rootPath = options.root_path;
@@ -48,13 +58,16 @@ class Updater extends EventEmitter {
       ...options
     });
   }
+
   get valid() {
     return this.nativeUpdater != null;
   }
+
   _sendRequest(detail, progressCallback = null) {
     if (!this.valid) {
       throw new Error(INVALID_UPDATER_ERROR);
     }
+
     const requestId = this.nextRequestId++;
     return new Promise((resolve, reject) => {
       this.requests.set(requestId, {
@@ -65,21 +78,26 @@ class Updater extends EventEmitter {
       this.nativeUpdater.command(JSON.stringify([requestId, detail]));
     });
   }
+
   _sendRequestSync(detail) {
     if (!this.valid) {
       throw new Error(INVALID_UPDATER_ERROR);
     }
+
     const requestId = this.nextRequestId++;
     return this.nativeUpdater.command_blocking(JSON.stringify([requestId, detail]));
   }
+
   _handleResponse(response) {
     try {
       const [id, detail] = JSON.parse(response);
       const request = this.requests.get(id);
+
       if (request == null) {
         console.error('Received response ', detail, ' for a request (', id, ') not in the updater request map.');
         return;
       }
+
       if (detail['Error'] != null) {
         const {
           kind,
@@ -87,15 +105,26 @@ class Updater extends EventEmitter {
           severity
         } = detail['Error'];
         const e = new Error(`(${kind}) ${details}`);
+
         if (severity === 'Fatal') {
           const handled = this.emit(kind, e);
+
           if (!handled) {
             throw e;
           }
         } else {
-          if (details && details.includes('code: -2146762487')) {
-            e = new Error(`(${kind}) (cert_chain_failed): Cert chain processed, root cert not trusted by trust provider`);
+          if (details) {
+            if (details.includes('code: 10013')) {
+              e = new Error(`(${kind}) (network_error): An attempt was made to access a socket in a way forbidden by its access permissions`);
+            } else if (details.includes('code: 10054')) {
+              e = new Error(`(${kind}) (network_error): An existing connection was forcibly closed by the remote host`);
+            } else if (details.includes('code: 11001')) {
+              e = new Error(`(${kind}) (network_error): No such host is known`);
+            } else if (details.includes('code: -2146762487')) {
+              e = new Error(`(${kind}) (cert_chain_failed): Cert chain processed, root cert not trusted by trust provider`);
+            }
           }
+
           this.emit('update-error', e);
           request.reject(e);
           this.requests.delete(id);
@@ -117,10 +146,13 @@ class Updater extends EventEmitter {
           percent: msg[2],
           bytesProcessed: msg[3]
         };
+
         this._recordTaskProgress(progress);
+
         if (request.progressCallback != null) {
           request.progressCallback(progress);
         }
+
         if (progress.task['HostInstall'] != null && progress.state === TASK_STATE_COMPLETE) {
           this.emit('host-updated');
         }
@@ -129,14 +161,17 @@ class Updater extends EventEmitter {
       }
     } catch (e) {
       console.error('Unhandled exception in updater response handler:', e);
+
       if (!this.hasEmittedUnhandledException) {
         this.hasEmittedUnhandledException = true;
         this.emit('unhandled-exception', e);
       }
     }
   }
+
   _handleSyncResponse(response) {
     const detail = JSON.parse(response);
+
     if (detail['Error'] != null) {
       throw new Error(detail['Error']);
     } else if (detail === 'Ok') {
@@ -144,18 +179,24 @@ class Updater extends EventEmitter {
     } else if (detail['VersionInfo'] != null) {
       return detail['VersionInfo'];
     }
+
     console.warn('Unknown updater response', detail);
   }
+
   _getHostPath() {
     const [major, minor, revision] = this.committedHostVersion;
     return path.join(this.rootPath, `app-${`${major}.${minor}.${revision}`}`);
   }
+
   _startCurrentVersionInner(options, versions) {
     if (this.committedHostVersion == null) {
       this.committedHostVersion = versions.current_host;
     }
+
     const hostPath = this._getHostPath();
+
     const hostExePath = path.join(hostPath, path.basename(process.execPath));
+
     if (path.resolve(hostExePath) != path.resolve(process.execPath) && !(options === null || options === void 0 ? void 0 : options.allowObsoleteHost)) {
       app.once('will-quit', () => {
         childProcess.spawn(hostExePath, [], {
@@ -168,26 +209,34 @@ class Updater extends EventEmitter {
       this.emit('starting-new-host');
       return;
     }
+
     this._commitModulesInner(versions);
   }
+
   _commitModulesInner(versions) {
     const {
       addGlobalPath,
       globalPathExists
     } = require('./nodeGlobalPaths');
+
     const hostPath = this._getHostPath();
+
     const modulesPath = path.join(hostPath, 'modules');
+
     for (const module in versions.current_modules) {
       const moduleVersion = versions.current_modules[module];
       const moduleSearchPath = path.join(modulesPath, `${module}-${moduleVersion}`);
+
       if (!this.committedModules.has(module) && !globalPathExists(moduleSearchPath)) {
         this.committedModules.add(module);
         addGlobalPath(moduleSearchPath);
       }
     }
   }
+
   _recordDownloadProgress(name, progress) {
     const now = String(hrtime.bigint());
+
     if (progress.state === TASK_STATE_WORKING && !this.currentlyDownloading[name]) {
       this.currentlyDownloading[name] = true;
       this.updateEventHistory.push({
@@ -206,8 +255,10 @@ class Updater extends EventEmitter {
       });
     }
   }
+
   _recordInstallProgress(name, progress, newVersion, isDelta) {
     const now = String(hrtime.bigint());
+
     if (progress.state === TASK_STATE_WORKING && !this.currentlyInstalling[name]) {
       this.currentlyInstalling[name] = true;
       this.updateEventHistory.push({
@@ -230,6 +281,7 @@ class Updater extends EventEmitter {
       });
     }
   }
+
   _recordTaskProgress(progress) {
     if (progress.task.HostDownload != null) {
       this._recordDownloadProgress('host', progress);
@@ -241,15 +293,19 @@ class Updater extends EventEmitter {
       this._recordInstallProgress(progress.task.ModuleInstall.version.module.name, progress, progress.task.ModuleInstall.version.version, progress.task.ModuleInstall.from_version != null);
     }
   }
+
   queryCurrentVersions() {
     return this._sendRequest('QueryCurrentVersions');
   }
+
   queryCurrentVersionsSync() {
     return this._handleSyncResponse(this._sendRequestSync('QueryCurrentVersions'));
   }
+
   repair(progressCallback) {
     return this.repairWithOptions(null, progressCallback);
   }
+
   repairWithOptions(options, progressCallback) {
     return this._sendRequest({
       Repair: {
@@ -257,22 +313,27 @@ class Updater extends EventEmitter {
       }
     }, progressCallback);
   }
+
   collectGarbage() {
     return this._sendRequest('CollectGarbage');
   }
+
   setRunningManifest(manifest) {
     return this._sendRequest({
       SetManifests: ['Running', manifest]
     });
   }
+
   setPinnedManifestSync(manifest) {
     return this._handleSyncResponse(this._sendRequestSync({
       SetManifests: ['Pinned', manifest]
     }));
   }
+
   installModule(name, progressCallback) {
     return this.installModuleWithOptions(name, null, progressCallback);
   }
+
   installModuleWithOptions(name, options, progressCallback) {
     return this._sendRequest({
       InstallModule: {
@@ -281,9 +342,11 @@ class Updater extends EventEmitter {
       }
     }, progressCallback);
   }
+
   updateToLatest(progressCallback) {
     return this.updateToLatestWithOptions(null, progressCallback);
   }
+
   updateToLatestWithOptions(options, progressCallback) {
     return this._sendRequest({
       UpdateToLatest: {
@@ -291,61 +354,82 @@ class Updater extends EventEmitter {
       }
     }, progressCallback);
   }
+
   async startCurrentVersion(options) {
     const versions = await this.queryCurrentVersions();
     await this.setRunningManifest(versions.last_successful_update);
+
     this._startCurrentVersionInner(options, versions);
   }
+
   startCurrentVersionSync(options) {
     const versions = this.queryCurrentVersionsSync();
+
     this._startCurrentVersionInner(options, versions);
   }
+
   async commitModules(versions) {
     if (this.committedHostVersion == null) {
       throw new Error('Cannot commit modules before host version.');
     }
+
     if (versions == null) {
       versions = await this.queryCurrentVersions();
     }
+
     this._commitModulesInner(versions);
   }
+
   setRunningInBackground() {
     this.isRunningInBackground = true;
   }
+
   queryAndTruncateHistory() {
     const history = this.updateEventHistory;
     this.updateEventHistory = [];
     return history;
   }
+
   getKnownFolder(name) {
     if (!this.valid) {
       throw new Error(INVALID_UPDATER_ERROR);
     }
+
     return this.nativeUpdater.known_folder(name);
   }
+
   createShortcut(options) {
     if (!this.valid) {
       throw new Error(INVALID_UPDATER_ERROR);
     }
+
     return this.nativeUpdater.create_shortcut(options);
   }
+
 }
+
 function getUpdaterPlatformName(platform) {
   switch (platform) {
     case 'darwin':
       return 'osx';
+
     case 'win32':
       return 'win';
+
     default:
       return platform;
   }
 }
+
 function tryInitUpdater(buildInfo, repositoryUrl) {
   const paths = require('./paths');
+
   const rootPath = paths.getInstallPath();
+
   if (rootPath == null) {
     return false;
   }
+
   instance = new Updater({
     release_channel: buildInfo.releaseChannel,
     platform: getUpdaterPlatformName(process.platform),
@@ -354,11 +438,13 @@ function tryInitUpdater(buildInfo, repositoryUrl) {
   });
   return instance.valid;
 }
+
 function getUpdater() {
   if (instance != null && instance.valid) {
     return instance;
   }
 }
+
 module.exports = {
   Updater,
   tryInitUpdater,
