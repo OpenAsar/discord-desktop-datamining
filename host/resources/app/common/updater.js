@@ -118,10 +118,24 @@ class Updater extends EventEmitter {
               e = new Error(`(${kind}) (network_error): An attempt was made to access a socket in a way forbidden by its access permissions`);
             } else if (details.includes('code: 10054')) {
               e = new Error(`(${kind}) (network_error): An existing connection was forcibly closed by the remote host`);
+            } else if (details.includes('code: 10055')) {
+              e = new Error(`(${kind}) (network_error): An operation on a socket could not be performed because the system lacked sufficient buffer space or because a queue was full`);
+            } else if (details.includes('code: 10060')) {
+              e = new Error(`(${kind}) (network_error): A connection attempt failed because the connected party did not properly respond after a period of time`);
+            } else if (details.includes('code: 10061')) {
+              e = new Error(`(${kind}) (network_error): No connection could be made because the target machine actively refused it`);
             } else if (details.includes('code: 11001')) {
               e = new Error(`(${kind}) (network_error): No such host is known`);
+            } else if (details.includes('code: 11002')) {
+              e = new Error(`(${kind}) (network_error): This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server`);
+            } else if (details.includes('code: 11004')) {
+              e = new Error(`(${kind}) (network_error): The requested name is valid, but no data of the requested type was found`);
+            } else if (details.includes('kind: UnexpectedEof')) {
+              e = new Error(`(${kind}) (network_error): Unexpected EOF during handshake`);
             } else if (details.includes('code: -2146762487')) {
               e = new Error(`(${kind}) (cert_chain_failed): Cert chain processed, root cert not trusted by trust provider`);
+            } else if (details.includes('kind: StorageFull')) {
+              e = new Error(`(${kind}) (storage_error): Storage full`);
             }
           }
 
