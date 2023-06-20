@@ -130,10 +130,18 @@ class Updater extends EventEmitter {
               e = new Error(`(${kind}) (network_error): This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server`);
             } else if (details.includes('code: 11004')) {
               e = new Error(`(${kind}) (network_error): The requested name is valid, but no data of the requested type was found`);
+            } else if (details.includes('kind: Status(500)')) {
+              e = new Error(`(${kind}) (network_error): Status 500`);
+            } else if (details.includes('kind: Status(502)')) {
+              e = new Error(`(${kind}) (network_error): Status 502`);
             } else if (details.includes('kind: UnexpectedEof')) {
               e = new Error(`(${kind}) (network_error): Unexpected EOF during handshake`);
             } else if (details.includes('code: -2146762487')) {
               e = new Error(`(${kind}) (cert_chain_failed): Cert chain processed, root cert not trusted by trust provider`);
+            } else if (details.includes('code: -2146893018')) {
+              e = new Error(`(${kind}) (cert_chain_failed): The message received was unexpected or badly formatted`);
+            } else if (details.includes('code: -2146762481')) {
+              e = new Error(`(${kind}) (cert_chain_failed): The certificate's CN name does not match the passed value`);
             } else if (details.includes('kind: StorageFull')) {
               e = new Error(`(${kind}) (storage_error): Storage full`);
             }
