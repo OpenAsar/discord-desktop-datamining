@@ -46,7 +46,7 @@ function initializeSentrySdk(sentry, buildInfo) {
       return event;
     },
 
-    ignoreErrors: ['EADDRINUSE', 'ResizeObserver loop limit exceeded', 'EACCES: permission denied', 'BetterDiscord'],
+    ignoreErrors: ['EADDRINUSE', 'ResizeObserver loop limit exceeded', 'EACCES: permission denied', 'BetterDiscord', 'mwittrien.github.io', 'Error: getaddrinfo ENOTFOUND raw.githubusercontent.com'],
     denyUrls: [/betterdiscord:\/\//]
   });
   gSentry = sentry;
