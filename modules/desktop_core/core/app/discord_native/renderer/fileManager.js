@@ -73,11 +73,24 @@ async function saveWithDialog(fileContents, fileName) {
     throw new Error('fileName has invalid characters');
   }
 
-  const defaultPath = _path.default.join(await (0, _paths.getPath)('downloads'), fileName);
+  const options = {
+    defaultPath: _path.default.join(await (0, _paths.getPath)('downloads'), fileName)
+  };
 
-  const results = await _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.FILE_MANAGER_SHOW_SAVE_DIALOG, {
-    defaultPath
-  });
+  const extension = _path.default.extname(fileName);
+
+  if (extension != null && extension !== '' && extension !== '.') {
+    const trimmedExtension = extension.slice(1);
+    options.filters = [{
+      name: trimmedExtension,
+      extensions: [trimmedExtension]
+    }, {
+      name: 'All',
+      extensions: ['*']
+    }];
+  }
+
+  const results = await _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.FILE_MANAGER_SHOW_SAVE_DIALOG, options);
 
   if (results != null && results.filePath != null) {
     _fs.default.writeFileSync(results.filePath, fileContents);
