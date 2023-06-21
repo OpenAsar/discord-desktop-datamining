@@ -4,29 +4,40 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+
 var _electron = require("electron");
+
 var _securityUtils = require("../../common/securityUtils");
+
 var Constants = _interopRequireWildcard(require("../Constants"));
+
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
 const {
   MenuEvents
 } = Constants;
 const SEPARATOR = {
   type: 'separator'
 };
+
 function getWindow() {
   let window = _electron.BrowserWindow.getFocusedWindow();
+
   if (!window) {
     const windowList = _electron.BrowserWindow.getAllWindows();
+
     if (windowList && windowList[0]) {
       window = windowList[0];
       window.show();
       window.focus();
     }
   }
+
   return window;
 }
+
 var _default = enableDevtools => [{
   label: 'Discord',
   submenu: [{
@@ -88,6 +99,7 @@ var _default = enableDevtools => [{
     label: 'Reload',
     click: () => {
       const window = getWindow();
+
       if (window) {
         window.webContents.reloadIgnoringCache();
       }
@@ -97,6 +109,7 @@ var _default = enableDevtools => [{
     label: 'Toggle Full Screen',
     click: () => {
       const window = getWindow();
+
       if (window) {
         window.setFullScreen(!window.isFullScreen());
       }
@@ -108,6 +121,7 @@ var _default = enableDevtools => [{
       label: 'Toggle Developer Tools',
       click: () => {
         const window = getWindow();
+
         if (window) {
           window.toggleDevTools();
         }
@@ -128,7 +142,6 @@ var _default = enableDevtools => [{
     label: 'Close',
     accelerator: 'Command+W',
     click: (_, window) => {
-      // Main window
       if (window == null || window.windowKey == null) {
         _electron.Menu.sendActionToFirstResponder('hide:');
       } else {
@@ -146,5 +159,6 @@ var _default = enableDevtools => [{
     click: () => _electron.app.emit(MenuEvents.OPEN_HELP)
   }]
 }];
+
 exports.default = _default;
 module.exports = exports.default;

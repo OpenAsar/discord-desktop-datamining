@@ -4,13 +4,17 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.injectSettingsBackend = injectSettingsBackend;
+
 const electron = require('electron');
+
 const {
   SETTINGS_GET,
   SETTINGS_SET,
   SETTINGS_GET_SYNC
 } = require('../common/constants').IPCEvents;
+
 let injectedSettings = null;
+
 function getSettings() {
   return injectedSettings != null ? injectedSettings : {
     get: () => {},
@@ -18,9 +22,11 @@ function getSettings() {
     save: () => {}
   };
 }
+
 function injectSettingsBackend(settings) {
   injectedSettings = settings;
 }
+
 electron.ipcMain.handle(SETTINGS_GET, (_, name, defaultValue) => {
   const settings = getSettings();
   return settings.get(name, defaultValue);

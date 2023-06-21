@@ -1,17 +1,17 @@
 "use strict";
 
 var _appSettings = require("./appSettings");
-// bootstrap constants
-// after startup, these constants will be merged into core module constants
-// since they are used in both locations (see app/Constants.js)
 
 const {
   releaseChannel
 } = require('./buildInfo');
+
 const settings = (0, _appSettings.getSettings)();
+
 function capitalizeFirstLetter(s) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
+
 const appNameSuffix = releaseChannel === 'stable' ? '' : capitalizeFirstLetter(releaseChannel);
 const APP_COMPANY = 'Discord Inc';
 const APP_DESCRIPTION = 'Discord - https://discord.com';

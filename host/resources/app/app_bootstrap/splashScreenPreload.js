@@ -5,12 +5,15 @@ const {
   contextBridge,
   ipcRenderer
 } = require('electron');
+
 const {
   saferShellOpenExternal
 } = require('../common/securityUtils');
+
 contextBridge.exposeInMainWorld('DiscordSplash', {
   getReleaseChannel: () => {
     const buildInfo = require('./buildInfo');
+
     return buildInfo.releaseChannel;
   },
   signalReady: () => {
