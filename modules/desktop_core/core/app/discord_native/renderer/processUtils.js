@@ -3,7 +3,6 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getCurrentMemoryUsageKB = getCurrentMemoryUsageKB;
 exports.flushDNSCache = flushDNSCache;
 exports.getLastCrash = getLastCrash;
 exports.flushCookies = flushCookies;
@@ -14,12 +13,11 @@ exports.getCurrentCPUUsagePercent = getCurrentCPUUsagePercent;
 exports.getCPUCoreCount = getCPUCoreCount;
 exports.getMainArgvSync = getMainArgvSync;
 exports.setCrashInformation = setCrashInformation;
+exports.setMemoryInformation = setMemoryInformation;
 
 var _electron = _interopRequireDefault(require("electron"));
 
 var _os = _interopRequireDefault(require("os"));
-
-var _process = _interopRequireDefault(require("process"));
 
 var _DiscordIPC = require("../common/DiscordIPC");
 
@@ -28,39 +26,16 @@ var _minidumpReader = require("./minidumpReader");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const CPU_USAGE_GATHER_INTERVAL = 1000;
-const MEMORY_USAGE_GATHER_INTERVAL = 5000;
 
 const mainArgv = _DiscordIPC.DiscordIPC.renderer.sendSync(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_MAIN_ARGV_SYNC);
 
 let totalProcessorUsagePercent = 0;
-let totalMemoryUsageKB = 0;
 
 const cpuCoreCount = _os.default.cpus().length;
 
 setInterval(() => {
   void _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_CPU_USAGE).then(usage => totalProcessorUsagePercent = usage);
 }, CPU_USAGE_GATHER_INTERVAL);
-let memoryUsageTimerRunning = false;
-
-function getCurrentMemoryUsageKB() {
-  if (memoryUsageTimerRunning) {
-    return totalMemoryUsageKB;
-  }
-
-  memoryUsageTimerRunning = true;
-
-  function computeMemoryUsage() {
-    const memoryUsage = _process.default.memoryUsage();
-
-    return (memoryUsage.heapTotal + memoryUsage.external) / 1024;
-  }
-
-  setInterval(() => {
-    totalMemoryUsageKB = computeMemoryUsage();
-  }, MEMORY_USAGE_GATHER_INTERVAL);
-  totalMemoryUsageKB = computeMemoryUsage();
-  return totalMemoryUsageKB;
-}
 
 function flushDNSCache() {
   return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_FLUSH_DNS_CACHE);
@@ -75,7 +50,9 @@ async function getLastCrash() {
     rendererCrashReason: lastCrash.rendererCrashReason,
     rendererCrashExitCode: lastCrash.rendererCrashExitCode,
     minidumpInformation,
-    storedInformation: lastCrash.storedInformation
+    storedInformation: lastCrash.storedInformation,
+    lastMemoryInformation: lastCrash.lastMemoryInformation,
+    highestMemoryInformation: lastCrash.highestMemoryInformation
   };
 }
 
@@ -119,4 +96,12 @@ function getMainArgvSync() {
 
 function setCrashInformation(crashInformation, state) {
   void _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_SET_CRASH_INFORMATION, crashInformation, state);
+}
+
+function setMemoryInformation(memoryInformation) {
+  void _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_SET_MEMORY_INFORMATION, {
+    uptimeSeconds: Math.floor(process.uptime()),
+    memoryUsageKB: memoryInformation.memoryUsageKB,
+    usedJSHeapSizeKB: memoryInformation.usedJSHeapSizeKB
+  });
 }

@@ -21,7 +21,9 @@ const processUtilsSettings = {
   rendererCrashReason: null,
   rendererCrashExitCode: null,
   lastRunsStoredInformation: {},
-  currentStoredInformation: {}
+  currentStoredInformation: {},
+  lastMemoryInformation: null,
+  highestMemoryInformation: null
 };
 exports.processUtilsSettings = processUtilsSettings;
 
@@ -39,12 +41,10 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_LAST_
   return Promise.resolve({ ..._electron.default.crashReporter.getLastCrashReport(),
     rendererCrashReason: processUtilsSettings.rendererCrashReason,
     rendererCrashExitCode: processUtilsSettings.rendererCrashExitCode,
-    storedInformation: processUtilsSettings.lastRunsStoredInformation
+    storedInformation: processUtilsSettings.lastRunsStoredInformation,
+    lastMemoryInformation: processUtilsSettings.lastMemoryInformation,
+    highestMemoryInformation: processUtilsSettings.highestMemoryInformation
   });
-});
-
-_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_MEMORY_INFO, () => {
-  return _process.default.getProcessMemoryInfo();
 });
 
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_SYSTEM_INFO, async () => {
@@ -93,5 +93,16 @@ _DiscordIPC.DiscordIPC.main.on(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_MAIN_ARGV
 
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_SET_CRASH_INFORMATION, (_, crashInformation, state) => {
   processUtilsSettings.currentStoredInformation[crashInformation] = state;
+  return Promise.resolve();
+});
+
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_SET_MEMORY_INFORMATION, (_, memoryInformation) => {
+  processUtilsSettings.lastMemoryInformation = memoryInformation;
+  const highest = processUtilsSettings.highestMemoryInformation;
+
+  if (highest == null || highest.memoryUsageKB < memoryInformation.memoryUsageKB) {
+    processUtilsSettings.highestMemoryInformation = memoryInformation;
+  }
+
   return Promise.resolve();
 });
