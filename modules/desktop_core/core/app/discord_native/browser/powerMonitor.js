@@ -1,6 +1,7 @@
 "use strict";
 
 const electron = require('electron');
+
 const {
   POWER_MONITOR_RESUME,
   POWER_MONITOR_SUSPEND,
@@ -8,17 +9,21 @@ const {
   POWER_MONITOR_UNLOCK_SCREEN,
   POWER_MONITOR_GET_SYSTEM_IDLE_TIME
 } = require('../common/constants').IPCEvents;
-electron.ipcMain.handle(POWER_MONITOR_GET_SYSTEM_IDLE_TIME, async _ => {
+
+electron.ipcMain.handle(POWER_MONITOR_GET_SYSTEM_IDLE_TIME, async () => {
   return electron.powerMonitor.getSystemIdleTime() * 1000;
 });
+
 function sendToAllWindows(channel) {
   electron.BrowserWindow.getAllWindows().forEach(win => {
     const contents = win.webContents;
+
     if (contents != null) {
       contents.send(channel);
     }
   });
 }
+
 electron.powerMonitor.on('resume', () => {
   sendToAllWindows(POWER_MONITOR_RESUME);
 });

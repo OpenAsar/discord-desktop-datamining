@@ -3,14 +3,9 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.crashReporterSetup = exports.buildInfo = exports.autoStart = exports.appSettings = exports.GPUSettings = exports.Constants = void 0;
 exports.init = init;
-exports.updater = exports.splashScreen = exports.requireNative = exports.paths = exports.moduleUpdater = void 0;
+exports.crashReporterSetup = exports.updater = exports.moduleUpdater = exports.buildInfo = exports.GPUSettings = exports.Constants = exports.appSettings = exports.requireNative = exports.autoStart = exports.splashScreen = exports.paths = void 0;
 let hasInit = false;
-
-// NOTE: We may want to instead of initializing these to null, instead initialize them to their normal files.
-// This way each one (see `crashReporterSetup`) would not need to do their own self-detection of loading when
-// inside the overlay (or any future relevant code).
 let paths = null;
 exports.paths = paths;
 let splashScreen = null;
@@ -33,10 +28,12 @@ let updater = null;
 exports.updater = updater;
 let crashReporterSetup = null;
 exports.crashReporterSetup = crashReporterSetup;
+
 function init(bootstrapModules) {
   if (hasInit) {
     throw new Error(`bootstrapModules has already init`);
   }
+
   exports.paths = paths = bootstrapModules.paths;
   exports.splashScreen = splashScreen = bootstrapModules.splashScreen;
   exports.autoStart = autoStart = bootstrapModules.autoStart;
