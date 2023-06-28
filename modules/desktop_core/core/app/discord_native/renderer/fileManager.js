@@ -238,7 +238,7 @@ async function cleanupTempFiles() {
 
 async function getCallscopeLogFileResult(filenames) {
   try {
-    const result = (0, _fileutils.readFulfilledFiles)(filenames, MAX_CALLSCOPE_LOG_SIZE, false);
+    const result = await (0, _fileutils.readFulfilledFiles)(filenames, MAX_CALLSCOPE_LOG_SIZE, false);
     await Promise.all(filenames.map(filename => _fs.default.promises.unlink(filename)));
     return result;
   } catch (e) {
