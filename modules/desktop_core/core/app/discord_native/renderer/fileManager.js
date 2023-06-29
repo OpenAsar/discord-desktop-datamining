@@ -110,7 +110,7 @@ async function showOpenDialog({
 
 async function readLogFiles(maxSize) {
   await combineWebRtcLogs('discord-webrtc_0', 'discord-webrtc_1', 'discord-webrtc');
-  await combineWebRtcLogs('discord-last-webrtc_0', 'discord-last-webrtc_1', 'discord-webrtc-last');
+  await combineWebRtcLogs('discord-last-webrtc_0', 'discord-last-webrtc_1', 'discord-last-webrtc');
   const modulePath = await getModulePath();
 
   const voicePath = _path.default.join(modulePath, 'discord_voice');
@@ -119,7 +119,7 @@ async function readLogFiles(maxSize) {
 
   const utilsPath = _path.default.join(modulePath, 'discord_utils');
 
-  const filesToUpload = [_path.default.join(voicePath, 'discord-webrtc'), _path.default.join(voicePath, 'discord-webrtc-last'), _path.default.join(voicePath, 'audio_state.json'), _path.default.join(hookPath, 'hook.log'), _path.default.join(utilsPath, 'live_minidump.dmp')];
+  const filesToUpload = [_path.default.join(voicePath, 'discord-webrtc'), _path.default.join(voicePath, 'discord-last-webrtc'), _path.default.join(voicePath, 'audio_state.json'), _path.default.join(hookPath, 'hook.log'), _path.default.join(utilsPath, 'live_minidump.dmp')];
   const crashFiles = await (0, _paths.getCrashFiles)();
 
   if (crashFiles.length > 0) {
@@ -128,6 +128,8 @@ async function readLogFiles(maxSize) {
 
   return (0, _fileutils.readFulfilledFiles)(filesToUpload, maxSize, false);
 }
+
+let combineWebRtcLogsMutex = Promise.resolve();
 
 async function combineWebRtcLogs(path1, path2, destinationPath) {
   const modulePath = await getModulePath();
@@ -140,22 +142,32 @@ async function combineWebRtcLogs(path1, path2, destinationPath) {
 
   const combinedFilePath = _path.default.join(voicePath, destinationPath);
 
-  const [file1Data, file2Data] = await Promise.all([_fs.default.promises.readFile(webRtcFile1).catch(() => null), _fs.default.promises.readFile(webRtcFile2).catch(() => null)]);
+  try {
+    await combineWebRtcLogsMutex;
+  } catch {}
 
-  if (file1Data !== null && file2Data === null) {
-    await _fs.default.promises.writeFile(combinedFilePath, file1Data);
-  } else if (file1Data === null && file2Data !== null) {
-    await _fs.default.promises.writeFile(combinedFilePath, file2Data);
-  } else if (file1Data !== null && file2Data !== null) {
-    const webRtcFile1Stats = await _fs.default.promises.stat(webRtcFile1);
-    const webRtcFile2Stats = await _fs.default.promises.stat(webRtcFile2);
+  combineWebRtcLogsMutex = new Promise(async resolve => {
+    try {
+      const [file1Data, file2Data] = await Promise.all([_fs.default.promises.readFile(webRtcFile1).catch(() => null), _fs.default.promises.readFile(webRtcFile2).catch(() => null)]);
 
-    if (webRtcFile1Stats.mtimeMs > webRtcFile2Stats.mtimeMs) {
-      await _fs.default.promises.writeFile(combinedFilePath, Buffer.concat([file2Data, file1Data]));
-    } else {
-      await _fs.default.promises.writeFile(combinedFilePath, Buffer.concat([file1Data, file2Data]));
+      if (file1Data !== null && file2Data === null) {
+        await _fs.default.promises.writeFile(combinedFilePath, file1Data);
+      } else if (file1Data === null && file2Data !== null) {
+        await _fs.default.promises.writeFile(combinedFilePath, file2Data);
+      } else if (file1Data !== null && file2Data !== null) {
+        const webRtcFile1Stats = await _fs.default.promises.stat(webRtcFile1);
+        const webRtcFile2Stats = await _fs.default.promises.stat(webRtcFile2);
+
+        if (webRtcFile1Stats.mtimeMs > webRtcFile2Stats.mtimeMs) {
+          await _fs.default.promises.writeFile(combinedFilePath, Buffer.concat([file2Data, file1Data]));
+        } else {
+          await _fs.default.promises.writeFile(combinedFilePath, Buffer.concat([file1Data, file2Data]));
+        }
+      }
+    } finally {
+      resolve();
     }
-  }
+  });
 }
 
 async function getCallscopeLogFiles(blindChannelId) {
