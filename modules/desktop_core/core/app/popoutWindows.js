@@ -10,8 +10,6 @@ exports.setupPopout = setupPopout;
 exports.closePopouts = closePopouts;
 exports.hasInit = void 0;
 
-var _electron = require("electron");
-
 var _securityUtils = require("../common/securityUtils");
 
 var _appFeatures = require("./appFeatures");

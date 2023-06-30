@@ -41,6 +41,12 @@ class DiscordRendererIPC {
     return _electron.default.ipcRenderer.invoke.apply(_electron.default.ipcRenderer, args);
   }
 
+  static on(channel, listener) {
+    _electron.default.ipcRenderer.on(channel, (...args) => {
+      return listener.apply(this, args);
+    });
+  }
+
 }
 
 const DiscordIPC = {
