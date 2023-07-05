@@ -39,7 +39,8 @@ function initializeSentrySdk(sentry, buildInfo) {
     dsn: getSentryDSN(buildInfo.releaseChannel),
     environment: buildInfo.releaseChannel,
     release: buildInfo.version,
-    maxValueLength: 768,
+    autoSessionTracking: false,
+    maxValueLength: 250,
 
     beforeSend(event) {
       event.extra = metadata;
