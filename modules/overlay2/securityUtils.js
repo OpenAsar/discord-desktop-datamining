@@ -13,6 +13,9 @@ var _url = _interopRequireDefault(require("url"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
+// @ts-nocheck
+
+/* eslint-disable */
 var BLOCKED_URL_PROTOCOLS = ['file:', 'javascript:', 'vbscript:', 'data:', 'about:', 'chrome:', 'ms-cxh:', 'ms-cxh-full:', 'ms-word:'];
 
 function shouldOpenExternalUrl(externalUrl) {
