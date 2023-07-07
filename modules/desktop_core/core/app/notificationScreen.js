@@ -134,20 +134,26 @@ function updateNotifications() {
     clearTimeout(hideTimeout);
     hideTimeout = null;
 
-    if (notificationWindow != null) {
-      const {
-        width,
-        height,
-        x,
-        y
-      } = calculateBoundingBox();
-      notificationWindow.setSize(width, height);
-      notificationWindow.setPosition(x, y);
-      notificationWindow.showInactive();
-    } else {
+    if (notificationWindow == null) {
       createWindow();
       return;
     }
+
+    const boundingBox = calculateBoundingBox();
+
+    if (boundingBox == null) {
+      return;
+    }
+
+    const {
+      width,
+      height,
+      x,
+      y
+    } = boundingBox;
+    notificationWindow.setSize(width, height);
+    notificationWindow.setPosition(x, y);
+    notificationWindow.showInactive();
   } else if (hideTimeout == null) {
     hideTimeout = setTimeout(() => destroyWindow(), VARIABLES.outDuration * 1.1);
   }
@@ -158,6 +164,10 @@ function updateNotifications() {
 }
 
 function calculateBoundingBox() {
+  if (mainWindow == null || mainWindow.isDestroyed()) {
+    return null;
+  }
+
   const [positionX, positionY] = mainWindow.getPosition();
   const [windowWidth, windowHeight] = mainWindow.getSize();
   const centerPoint = {

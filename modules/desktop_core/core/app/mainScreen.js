@@ -177,7 +177,7 @@ function saveWindowConfig(browserWindow) {
 }
 
 function setWindowVisible(isVisible, andUnminimize) {
-  if (mainWindow == null) {
+  if (mainWindow == null || mainWindow.isDestroyed()) {
     return;
   }
 
