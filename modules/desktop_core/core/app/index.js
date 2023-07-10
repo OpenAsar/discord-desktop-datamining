@@ -132,12 +132,15 @@ function startup(bootstrapModules) {
   mainScreen.init();
 
   const {
-    getWindow: getPopoutWindowByKey
+    getWindow: getPopoutWindowByKey,
+    getAllWindows: getAllPopoutWindows,
+    setNewWindowEvent
   } = require('./popoutWindows');
 
   windowNative.injectGetWindow(key => {
     return getPopoutWindowByKey(key) || BrowserWindow.fromId(mainScreen.getMainWindowId());
-  });
+  }, () => [...getAllPopoutWindows(), BrowserWindow.fromId(mainScreen.getMainWindowId())]);
+  setNewWindowEvent(window => windowNative.newWindowEvent(window));
 }
 
 function handleOpenUrl(url) {

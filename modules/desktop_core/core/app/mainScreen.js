@@ -30,27 +30,27 @@ var _appSettings = require("./bootstrapModules/appSettings");
 
 var _buildInfo = require("./bootstrapModules/buildInfo");
 
+var _moduleUpdater = require("./bootstrapModules/moduleUpdater");
+
+var _paths = require("./bootstrapModules/paths");
+
+var _splashScreen = require("./bootstrapModules/splashScreen");
+
+var _updater = require("./bootstrapModules/updater");
+
 var _processUtils = require("./discord_native/browser/processUtils");
 
 var _ipcMain = _interopRequireDefault(require("./ipcMain"));
-
-var _moduleUpdater = require("./bootstrapModules/moduleUpdater");
 
 var mouse = _interopRequireWildcard(require("./mouse"));
 
 var notificationScreen = _interopRequireWildcard(require("./notificationScreen"));
 
-var _paths = require("./bootstrapModules/paths");
-
 var popoutWindows = _interopRequireWildcard(require("./popoutWindows"));
-
-var _splashScreen = require("./bootstrapModules/splashScreen");
 
 var systemTray = _interopRequireWildcard(require("./systemTray"));
 
 var thumbarButtons = _interopRequireWildcard(require("./thumbarButtons"));
-
-var _updater = require("./bootstrapModules/updater");
 
 var _Constants = require("./Constants");
 

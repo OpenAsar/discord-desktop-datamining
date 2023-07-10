@@ -17,9 +17,13 @@ exports.close = close;
 exports.setZoomFactor = setZoomFactor;
 exports.setBackgroundThrottling = setBackgroundThrottling;
 exports.setDevtoolsCallbacks = setDevtoolsCallbacks;
+exports.supportsContentProtection = supportsContentProtection;
+exports.setContentProtection = setContentProtection;
 exports.USE_OSX_NATIVE_TRAFFIC_LIGHTS = void 0;
 
 var _electron = _interopRequireDefault(require("electron"));
+
+var _processUtils = require("../../../common/processUtils");
 
 var _DiscordIPC = require("../common/DiscordIPC");
 
@@ -96,6 +100,19 @@ function setBackgroundThrottling(enabled) {
 function setDevtoolsCallbacks(onOpened, onClosed) {
   devtoolsOpenedCallback = onOpened;
   devtoolsClosedCallback = onClosed;
+}
+
+function supportsContentProtection() {
+  return _processUtils.IS_WIN;
+}
+
+function setContentProtection(enabled) {
+  if (!supportsContentProtection()) {
+    console.log('setContentProtection: Unsupported platform.');
+    return Promise.resolve();
+  }
+
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.WINDOW_SET_CONTENT_PROTCTION, enabled);
 }
 
 const USE_OSX_NATIVE_TRAFFIC_LIGHTS = true;

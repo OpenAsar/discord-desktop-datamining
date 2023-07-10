@@ -1,16 +1,24 @@
 "use strict";
 
-const os = require('os');
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.release = exports.arch = void 0;
 
-const process = require('process');
+var _os = _interopRequireDefault(require("os"));
 
-let arch = os.arch();
+var _process = _interopRequireDefault(require("process"));
 
-if (process.platform === 'win32' && process.env['PROCESSOR_ARCHITEW6432'] != null) {
-  arch = 'x64';
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+let arch = _os.default.arch();
+
+exports.arch = arch;
+
+if (_process.default.platform === 'win32' && _process.default.env['PROCESSOR_ARCHITEW6432'] != null) {
+  exports.arch = arch = 'x64';
 }
 
-module.exports = {
-  release: os.release(),
-  arch
-};
+const release = _os.default.release();
+
+exports.release = release;

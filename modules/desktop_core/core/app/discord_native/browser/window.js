@@ -4,6 +4,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.injectGetWindow = injectGetWindow;
+exports.newWindowEvent = newWindowEvent;
 
 var _electron = _interopRequireDefault(require("electron"));
 
@@ -13,12 +14,22 @@ var _DiscordIPC = require("../common/DiscordIPC");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-let injectedGetWindow = () => {
-  return null;
-};
+let injectedGetWindow = () => null;
 
-function injectGetWindow(getWindow) {
+let injectedGetAllWindows = () => [];
+
+let contentProtectionEnabled = false;
+
+function injectGetWindow(getWindow, getAllWindows) {
   injectedGetWindow = getWindow;
+  injectedGetAllWindows = getAllWindows;
+}
+
+function newWindowEvent(window) {
+  if (contentProtectionEnabled) {
+    window.setContentProtection(true);
+    console.log(`window: WINDOW_SET_CONTENT_PROTCTION ${window.id} = true`);
+  }
 }
 
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_FLASH_FRAME, (_, flag) => {
@@ -142,5 +153,19 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_SET_BACKGROUND_T
     win.webContents.setBackgroundThrottling(enabled);
   }
 
+  return Promise.resolve();
+});
+
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_SET_CONTENT_PROTCTION, (_, enabled) => {
+  const windows = injectedGetAllWindows();
+
+  for (const window of windows) {
+    if (window != null) {
+      window.setContentProtection(enabled);
+      console.log(`window: WINDOW_SET_CONTENT_PROTCTION ${window.id} = ${enabled}`);
+    }
+  }
+
+  contentProtectionEnabled = enabled;
   return Promise.resolve();
 });

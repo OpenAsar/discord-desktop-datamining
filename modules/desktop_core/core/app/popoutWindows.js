@@ -5,6 +5,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.init = init;
 exports.getWindow = getWindow;
+exports.getAllWindows = getAllWindows;
+exports.setNewWindowEvent = setNewWindowEvent;
 exports.openOrFocusWindow = openOrFocusWindow;
 exports.setupPopout = setupPopout;
 exports.closePopouts = closePopouts;
@@ -43,6 +45,8 @@ let hasInit = false;
 exports.hasInit = hasInit;
 let popoutWindows = {};
 
+let newWindowEvent = () => {};
+
 function init() {
   if (hasInit) {
     console.warn('popoutWindows: Has already init! Cancelling init.');
@@ -62,6 +66,14 @@ function focusWindow(window) {
 
 function getWindow(key) {
   return popoutWindows[key];
+}
+
+function getAllWindows() {
+  return Object.values(popoutWindows);
+}
+
+function setNewWindowEvent(event) {
+  newWindowEvent = event;
 }
 
 function parseFeatureValue(feature) {
@@ -141,6 +153,7 @@ function setupPopout(popoutWindow, key, options, webappEndpoint) {
     popoutWindow.removeAllListeners();
     delete popoutWindows[popoutWindow.windowKey];
   });
+  newWindowEvent(popoutWindow);
 }
 
 function closePopouts() {
