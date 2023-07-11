@@ -1,27 +1,28 @@
 "use strict";
 
-const electron = require('electron');
+var _DiscordIPC = require("../common/DiscordIPC");
 
-const {
-  SPELLCHECK_REPLACE_MISSPELLING,
-  SPELLCHECK_GET_AVAILABLE_DICTIONARIES,
-  SPELLCHECK_SET_LOCALE,
-  SPELLCHECK_SET_LEARNED_WORDS
-} = require('../common/constants').IPCEvents;
+const electron = require('electron');
 
 let _learnedWords = new Set();
 
 let _hasLoadedLearnedWords = false;
-electron.ipcMain.handle(SPELLCHECK_REPLACE_MISSPELLING, async (event, correction) => {
+
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.SPELLCHECK_REPLACE_MISSPELLING, (event, correction) => {
   event.sender.replaceMisspelling(correction);
+  return Promise.resolve();
 });
-electron.ipcMain.handle(SPELLCHECK_GET_AVAILABLE_DICTIONARIES, async () => {
-  return electron.session.defaultSession.availableSpellCheckerLanguages;
+
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.SPELLCHECK_GET_AVAILABLE_DICTIONARIES, () => {
+  return Promise.resolve(electron.session.defaultSession.availableSpellCheckerLanguages);
 });
-electron.ipcMain.handle(SPELLCHECK_SET_LOCALE, async (_, locale) => {
+
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.SPELLCHECK_SET_LOCALE, (_, locale) => {
   electron.session.defaultSession.setSpellCheckerLanguages([locale]);
+  return Promise.resolve();
 });
-electron.ipcMain.handle(SPELLCHECK_SET_LEARNED_WORDS, async (_, newLearnedWords) => {
+
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.SPELLCHECK_SET_LEARNED_WORDS, async (_, newLearnedWords) => {
   const session = electron.session.defaultSession;
 
   if (!_hasLoadedLearnedWords) {
