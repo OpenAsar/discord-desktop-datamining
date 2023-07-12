@@ -28,10 +28,7 @@ electron.ipcRenderer.on(POWER_MONITOR_UNLOCK_SCREEN, () => {
 
 function on() {
   events.on.apply(events, arguments);
-}
-
-function removeListener() {
-  events.removeListener.apply(events, arguments);
+  return () => events.removeListener.apply(events, arguments);
 }
 
 function removeAllListeners() {
@@ -44,7 +41,6 @@ async function getSystemIdleTimeMs() {
 
 module.exports = {
   on,
-  removeListener,
   removeAllListeners,
   getSystemIdleTimeMs
 };

@@ -4,7 +4,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.on = on;
-exports.removeListener = removeListener;
 exports.getAvailableDictionaries = getAvailableDictionaries;
 exports.setLocale = setLocale;
 exports.setLearnedWords = setLearnedWords;
@@ -24,10 +23,7 @@ _DiscordIPC.DiscordIPC.renderer.on(_DiscordIPC.IPCEvents.SPELLCHECK_RESULT, (_, 
 
 function on(eventName, callback) {
   events.on(eventName, callback);
-}
-
-function removeListener(eventName, callback) {
-  events.removeListener(eventName, callback);
+  return () => events.removeListener(eventName, callback);
 }
 
 function getAvailableDictionaries() {
