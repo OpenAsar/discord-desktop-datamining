@@ -32,7 +32,7 @@ let installPath = null;
 function determineAppUserDataRoot() {
   const userDataPath = process.env.DISCORD_USER_DATA_DIR;
 
-  if (userDataPath) {
+  if (userDataPath != null) {
     return userDataPath;
   }
 
@@ -44,12 +44,21 @@ function determineAppUserDataRoot() {
 }
 
 function determineUserData(userDataRoot, buildInfo) {
-  return _path.default.join(userDataRoot, 'discord' + (buildInfo.releaseChannel == 'stable' ? '' : buildInfo.releaseChannel));
+  return _path.default.join(userDataRoot, 'discord' + (buildInfo.releaseChannel === 'stable' ? '' : buildInfo.releaseChannel));
 }
 
 function cleanOldVersions(buildInfo) {
-  const entries = _fs.default.readdirSync(userDataPath) || [];
+  if (userDataPath == null) {
+    return;
+  }
+
+  const entries = _fs.default.readdirSync(userDataPath);
+
   entries.forEach(entry => {
+    if (userDataPath == null) {
+      return;
+    }
+
     const fullPath = _path.default.join(userDataPath, entry);
 
     let stat;
@@ -64,7 +73,7 @@ function cleanOldVersions(buildInfo) {
       if (entry.match('^[0-9]+.[0-9]+.[0-9]+') != null) {
         console.log('Removing old directory ', entry);
         (0, _rimraf.default)(fullPath, _originalFs.default, error => {
-          if (error) {
+          if (error != null) {
             console.warn('...failed with error: ', error);
           }
         });

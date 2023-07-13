@@ -23,7 +23,13 @@ function exposeModuleResource(asarPath, fileName) {
 
   const data = _fs.default.readFileSync(fullPathToAsarFile);
 
-  const nativeFilePath = _path.default.join(_paths.paths.getUserData(), fileName);
+  const userDataPath = _paths.paths.getUserData();
+
+  if (userDataPath == null) {
+    return null;
+  }
+
+  const nativeFilePath = _path.default.join(userDataPath, fileName);
 
   _fs.default.writeFileSync(nativeFilePath, data);
 

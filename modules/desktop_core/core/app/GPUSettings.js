@@ -13,10 +13,18 @@ var _appSettings = require("./bootstrapModules/appSettings");
 const settings = _appSettings.appSettings.getSettings();
 
 function getEnableHardwareAcceleration() {
+  if (settings == null) {
+    return false;
+  }
+
   return settings.get('enableHardwareAcceleration', true);
 }
 
 function setEnableHardwareAcceleration(enableHardwareAcceleration) {
+  if (settings == null) {
+    return;
+  }
+
   settings.set('enableHardwareAcceleration', enableHardwareAcceleration);
   settings.save();
 

@@ -16,7 +16,7 @@ class Settings {
     this.path = _path.default.join(root, 'settings.json');
 
     try {
-      this.lastSaved = _fs.default.readFileSync(this.path);
+      this.lastSaved = _fs.default.readFileSync(this.path, 'utf-8');
       this.settings = JSON.parse(this.lastSaved);
     } catch (e) {
       this.lastSaved = '';
@@ -47,23 +47,24 @@ class Settings {
   }
 
   save() {
-    if (this.lastModified && this.lastModified !== this._lastModified()) {
-      console.warn('Not saving settings, it has been externally modified.');
-      return;
+    if (this.lastModified !== 0 && this.lastModified !== this._lastModified()) {
+      return false;
     }
 
     try {
       const toSave = JSON.stringify(this.settings, null, 2);
 
-      if (this.lastSaved != toSave) {
+      if (this.lastSaved !== toSave) {
         this.lastSaved = toSave;
 
         _fs.default.writeFileSync(this.path, toSave);
 
         this.lastModified = this._lastModified();
       }
+
+      return true;
     } catch (err) {
-      console.warn('Failed saving settings with error: ', err);
+      return false;
     }
   }
 
