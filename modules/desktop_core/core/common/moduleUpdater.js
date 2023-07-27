@@ -254,9 +254,18 @@ function init(_endpoint, _settings, _buildInfo) {
         logger.log(`Installer is in read-only volume in OSX, moving to Application folder ${err}`);
 
         try {
-          app.moveToApplicationsFolder();
+          const moveResult = app.moveToApplicationsFolder({
+            conflictHandler: conflictErr => {
+              logger.error(`moveToApplicationsFolder: conflicted: ${conflictErr}`);
+              return true;
+            }
+          });
+
+          if (!moveResult) {
+            logger.error('moveToApplicationsFolder: failed.');
+          }
         } catch (err) {
-          logger.log(`Could not move installer file to Application folder: ${err}`);
+          logger.log(`moveToApplicationsFolder: Could not move installer file to Application folder: ${err}`);
         }
       }
     });
