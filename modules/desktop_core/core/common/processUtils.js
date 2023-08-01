@@ -3,7 +3,6 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getElectronMajorVersion = getElectronMajorVersion;
 exports.supportsTls13 = supportsTls13;
 exports.IS_LINUX = exports.IS_OSX = exports.IS_WIN = void 0;
 
@@ -12,10 +11,6 @@ var _os = _interopRequireDefault(require("os"));
 var _process = _interopRequireDefault(require("process"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function getElectronMajorVersion() {
-  return _process.default.versions.electron != null ? parseInt(_process.default.versions.electron.split('.')[0]) : 0;
-}
 
 const IS_WIN = _process.default.platform === 'win32';
 exports.IS_WIN = IS_WIN;

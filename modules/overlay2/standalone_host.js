@@ -24,16 +24,7 @@ _process["default"].on('uncaughtException', function (e) {
 
 global.features = new _FeatureFlags["default"]();
 global.mainAppDirname = __dirname;
-
-if (_process["default"].versions.electron) {
-  var versionBits = _process["default"].versions.electron.split('.');
-
-  var majorVersion = parseInt(versionBits[0], 10);
-
-  if (majorVersion >= 4) {
-    global.features.declareSupported('overlay-hidpi');
-  }
-}
+global.features.declareSupported('overlay-hidpi');
 
 _electron.app.disableHardwareAcceleration();
 
