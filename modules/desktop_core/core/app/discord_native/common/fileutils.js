@@ -32,21 +32,13 @@ Object.defineProperty(exports, "join", {
   }
 });
 exports.promiseFs = void 0;
-
 var _buffer = _interopRequireDefault(require("buffer"));
-
 var _originalFs = _interopRequireDefault(require("original-fs"));
-
 var _path = _interopRequireWildcard(require("path"));
-
 var _util = _interopRequireDefault(require("util"));
-
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 const MAX_LENGTH = _buffer.default.constants.MAX_LENGTH;
 const promiseFs = {
   readdir: _util.default.promisify(_originalFs.default.readdir),
@@ -59,10 +51,8 @@ const promiseFs = {
   close: _util.default.promisify(_originalFs.default.close)
 };
 exports.promiseFs = promiseFs;
-
 async function readFulfilledFiles(filenames, maxSize, orException) {
   const files = await readFiles(filenames, maxSize);
-
   if (orException) {
     files.forEach(result => {
       if (result.status === 'rejected') {
@@ -70,18 +60,14 @@ async function readFulfilledFiles(filenames, maxSize, orException) {
       }
     });
   }
-
   return files.filter(result => result.status === 'fulfilled').map(result => result.value);
 }
-
 function readFiles(filenames, maxSize) {
   maxSize = Math.min(maxSize, MAX_LENGTH);
   return Promise.allSettled(filenames.map(async filename => {
     const handle = await promiseFs.open(filename, 'r');
-
     try {
       const stats = await promiseFs.fstat(handle);
-
       if (maxSize != null && stats.size > maxSize) {
         throw {
           code: 'ETOOLARGE',
@@ -90,7 +76,6 @@ function readFiles(filenames, maxSize) {
           maxSize
         };
       }
-
       const buffer = Buffer.alloc(stats.size);
       const data = await promiseFs.read(handle, buffer, 0, stats.size, 0);
       return {
@@ -102,11 +87,9 @@ function readFiles(filenames, maxSize) {
     }
   }));
 }
-
 function getFilesnamesFromDirectory(path) {
   return promiseFs.readdir(path);
 }
-
 function deleteFile(filename) {
   return promiseFs.unlink(filename);
 }

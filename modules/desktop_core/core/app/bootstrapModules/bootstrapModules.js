@@ -28,12 +28,10 @@ let updater = null;
 exports.updater = updater;
 let crashReporterSetup = null;
 exports.crashReporterSetup = crashReporterSetup;
-
 function init(bootstrapModules) {
   if (hasInit) {
     throw new Error(`bootstrapModules has already init`);
   }
-
   exports.paths = paths = bootstrapModules.paths;
   exports.splashScreen = splashScreen = bootstrapModules.splashScreen;
   exports.autoStart = autoStart = bootstrapModules.autoStart;

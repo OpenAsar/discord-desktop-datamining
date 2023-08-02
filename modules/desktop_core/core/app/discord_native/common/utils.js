@@ -5,11 +5,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.isNotNullish = isNotNullish;
 exports.createLock = createLock;
-
 function isNotNullish(value) {
   return value != null;
 }
-
 function createLock() {
   let p = Promise.resolve(null);
   return criticalSection => new Promise((resolve, reject) => {

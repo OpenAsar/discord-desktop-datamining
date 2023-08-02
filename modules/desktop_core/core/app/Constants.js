@@ -3,7 +3,6 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
 function init(bootstrapConstants) {
   const APP_NAME = bootstrapConstants.APP_NAME;
   const API_ENDPOINT = bootstrapConstants.API_ENDPOINT;
@@ -41,12 +40,10 @@ function init(bootstrapConstants) {
       CHECK_FOR_UPDATES: 'menu:check-for-updates'
     }
   };
-
   for (const [k, v] of Object.entries(exported)) {
     module.exports[k] = v;
   }
 }
-
 module.exports = {
   init
 };

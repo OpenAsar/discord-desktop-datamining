@@ -1,25 +1,18 @@
 "use strict";
 
 const electron = require('electron');
-
 const http = require('http');
-
 const https = require('https');
-
 const {
   CONSTANTS_GET
 } = require('../common/constants').IPCEvents;
-
 async function getAPIEndpoint() {
   const apiEndpoint = await electron.ipcRenderer.invoke(CONSTANTS_GET, 'API_ENDPOINT');
-
   if (apiEndpoint == null || apiEndpoint === '') {
     return null;
   }
-
   return apiEndpoint;
 }
-
 async function makeChunkedRequest(route, chunks, options) {
   const {
     method,
@@ -28,26 +21,20 @@ async function makeChunkedRequest(route, chunks, options) {
     contentType
   } = options;
   let httpModule = http;
-
   if (route.startsWith('https')) {
     httpModule = https;
   }
-
   const apiEndpoint = await getAPIEndpoint();
-
   if (apiEndpoint == null) {
     throw new Error('missing api endpoint setting');
   }
-
   const apiEndpointUrl = new URL(apiEndpoint);
   const url = new URL(route, apiEndpoint);
   url.protocol = apiEndpointUrl.protocol;
   url.host = apiEndpointUrl.host;
-
   if (!url.pathname.startsWith(apiEndpointUrl.pathname)) {
     url.pathname = `${apiEndpointUrl.pathname}${url.pathname}`;
   }
-
   return new Promise(async (resolve, reject) => {
     let writeTimeout;
     const req = httpModule.request(url.toString(), {
@@ -74,10 +61,8 @@ async function makeChunkedRequest(route, chunks, options) {
       if (writeTimeout != null) {
         clearTimeout(writeTimeout);
       }
-
       reject(e);
     });
-
     for (let i = 0; i < chunks.length; i++) {
       await new Promise(resolve => {
         req.write(chunks[i], () => {
@@ -85,11 +70,9 @@ async function makeChunkedRequest(route, chunks, options) {
         });
       });
     }
-
     req.end();
   });
 }
-
 module.exports = {
   getAPIEndpoint,
   makeChunkedRequest: function (route, chunks, options, callback) {
