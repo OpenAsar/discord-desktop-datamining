@@ -18,12 +18,13 @@ exports.metadata = metadata;
 const supportsTls13 = processUtils.supportsTls13();
 const SENTRY_PROJECT_ID = '146342';
 const SENTRY_PROJECT_HOST = 'o64374';
+const STABLE_SENTRY_DSN_KEY = '67a1d187a8602d62872a3d880e723741';
 const DEFAULT_SENTRY_DSN_KEY = '384ce4413de74fe0be270abe03b2b35a';
 const STAFF_SENTRY_DSN_KEY = 'de156ff7a3f544cca369e77e3f1f5743';
 const TEST_SENTRY_DSN_KEY = '1a27a96457b24ff286a000266c573919';
 const DEFAULT_SENTRY_DSN = buildSentryDSN(DEFAULT_SENTRY_DSN_KEY);
 const CHANNEL_SENTRY_DSN = {
-  stable: buildSentryDSN(DEFAULT_SENTRY_DSN_KEY),
+  stable: buildSentryDSN(STABLE_SENTRY_DSN_KEY),
   ptb: buildSentryDSN(TEST_SENTRY_DSN_KEY),
   canary: buildSentryDSN(TEST_SENTRY_DSN_KEY),
   development: buildSentryDSN(TEST_SENTRY_DSN_KEY)
