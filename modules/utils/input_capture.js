@@ -72,7 +72,7 @@ var InputCapturer = /*#__PURE__*/function () {
       }
 
       var inputSequence = this._capturedInputSequence.map(function (entry) {
-        return [entry[0], entry[1]];
+        return [entry[0], entry[1], entry[3]];
       });
 
       this._capturedInputSequence = [];
@@ -88,7 +88,7 @@ var InputCapturer = /*#__PURE__*/function () {
     }
   }, {
     key: "_handleInputEvent",
-    value: function _handleInputEvent(type, state, code) {
+    value: function _handleInputEvent(type, state, code, deviceId) {
       if (state === 0) {
         var allEntriesReleased = true;
 
@@ -115,7 +115,7 @@ var InputCapturer = /*#__PURE__*/function () {
           this.stop();
         }
       } else {
-        this._capturedInputSequence.push([type, code, true]);
+        this._capturedInputSequence.push([type, code, true, deviceId]);
 
         if (this._capturedInputSequence.length === MAX_SEQUENCE_LENGTH) {
           this.stop();
@@ -124,7 +124,7 @@ var InputCapturer = /*#__PURE__*/function () {
     }
   }], [{
     key: "_globalInputHandler",
-    value: function _globalInputHandler(type, state, code) {
+    value: function _globalInputHandler(type, state, code, deviceId) {
       if (type === MOUSE_BUTTON_TYPE && code === LEFT_MOUSE_BUTTON_CODE) {
         // ignore left click
         return;
@@ -137,7 +137,7 @@ var InputCapturer = /*#__PURE__*/function () {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
           var capturer = _step2.value;
 
-          capturer._handleInputEvent(type, state, code);
+          capturer._handleInputEvent(type, state, code, deviceId);
         }
       } catch (err) {
         _iterator2.e(err);
