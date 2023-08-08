@@ -97,6 +97,7 @@ features.declareSupported('first_frame_callback');
 features.declareSupported('remote_user_multi_stream');
 features.declareSupported('clips');
 features.declareSupported('speed_test');
+features.declareSupported('go_live_hardware');
 
 if (process.platform === 'win32' || process.platform === 'darwin') {
   features.declareSupported('soundshare');
@@ -157,6 +158,8 @@ function bindConnectionInstance(instance) {
     setVideoBroadcast: (broadcasting) => instance.setVideoBroadcast(broadcasting),
     setDesktopSource: (id, videoHook, type) => instance.setDesktopSource(id, videoHook, type),
     setDesktopSourceWithOptions: (options) => instance.setDesktopSourceWithOptions(options),
+    setGoLiveDevices: (options) => instance.setGoLiveDevices(options),
+    clearGoLiveDevices: () => instance.clearGoLiveDevices(),
     clearDesktopSource: () => instance.clearDesktopSource(),
     setDesktopSourceStatusCallback: (callback) => instance.setDesktopSourceStatusCallback(callback),
     setOnDesktopSourceEnded: (callback) => instance.setOnDesktopSourceEnded(callback),
@@ -222,7 +225,7 @@ function bindSpeedTestConnectionInstance(instance) {
 }
 
 VoiceEngine.createSpeedTestConnectionWithOptions = function (userId, connectionOptions, onConnectCallback) {
-  let instance = new VoiceEngine.SpeedTestConnection(userId, connectionOptions, onConnectCallback);
+  const instance = new VoiceEngine.SpeedTestConnection(userId, connectionOptions, onConnectCallback);
   return bindSpeedTestConnectionInstance(instance);
 };
 
