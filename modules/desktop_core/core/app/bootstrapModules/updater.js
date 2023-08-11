@@ -9,5 +9,4 @@ Object.defineProperty(exports, "updater", {
     return _bootstrapModules.updater;
   }
 });
-
 var _bootstrapModules = require("./bootstrapModules");

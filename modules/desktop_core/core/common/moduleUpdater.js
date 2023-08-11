@@ -13,35 +13,20 @@ exports.getInstalled = getInstalled;
 exports.install = install;
 exports.installPendingUpdates = installPendingUpdates;
 exports.supportsEventObjects = exports.events = exports.NO_PENDING_UPDATES = exports.INSTALLING_MODULE_PROGRESS = exports.INSTALLING_MODULE = exports.INSTALLING_MODULES_FINISHED = exports.DOWNLOADED_MODULE = exports.UPDATE_MANUALLY = exports.DOWNLOADING_MODULES_FINISHED = exports.DOWNLOADING_MODULE_PROGRESS = exports.DOWNLOADING_MODULE = exports.UPDATE_CHECK_FINISHED = exports.INSTALLED_MODULE = exports.CHECKING_FOR_UPDATES = void 0;
-
 var _fs = _interopRequireDefault(require("fs"));
-
 var _path = _interopRequireDefault(require("path"));
-
 var _nodeGlobalPaths = require("./nodeGlobalPaths");
-
 var _events = require("events");
-
 var _mkdirp = _interopRequireDefault(require("mkdirp"));
-
 var _process = require("process");
-
 var _yauzl = _interopRequireDefault(require("yauzl"));
-
 var _Backoff = _interopRequireDefault(require("./Backoff"));
-
 var paths = _interopRequireWildcard(require("./paths"));
-
 var _processUtils = require("./processUtils");
-
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 const originalFs = require('original-fs');
-
 const CHECKING_FOR_UPDATES = 'checking-for-updates';
 exports.CHECKING_FOR_UPDATES = CHECKING_FOR_UPDATES;
 const INSTALLED_MODULE = 'installed-module';
@@ -71,29 +56,22 @@ const SKIP_HOST_UPDATE = 'SKIP_HOST_UPDATE';
 const SKIP_MODULE_UPDATE = 'SKIP_MODULE_UPDATE';
 const ALWAYS_BOOTSTRAP_MODULES = 'ALWAYS_BOOTSTRAP_MODULES';
 const USE_LOCAL_MODULE_VERSIONS = 'USE_LOCAL_MODULE_VERSIONS';
-
 class Events extends _events.EventEmitter {
   constructor() {
     super();
     this.history = [];
   }
-
   append(evt) {
     evt.now = String(_process.hrtime.bigint());
-
     if (this._eventIsInteresting(evt)) {
       this.history.push(evt);
     }
-
     process.nextTick(() => this.emit(evt.type, evt));
   }
-
   _eventIsInteresting(evt) {
     return evt.type !== DOWNLOADING_MODULE_PROGRESS && evt.type !== INSTALLING_MODULE_PROGRESS;
   }
-
 }
-
 class LogStream {
   constructor(logPath) {
     try {
@@ -104,32 +82,25 @@ class LogStream {
       console.error(`Failed to create ${logPath}: ${String(e)}`);
     }
   }
-
   log(message) {
     message = `${new Date().toISOString()} [Modules] ${message}`;
     console.log(message);
-
     if (this.logStream) {
       this.logStream.write(message);
       this.logStream.write('\r\n');
     }
   }
-
   end() {
     if (this.logStream) {
       this.logStream.end();
       this.logStream = null;
     }
   }
-
 }
-
 const request = require('../app_bootstrap/request');
-
 const {
   app
 } = require('electron');
-
 const REQUEST_TIMEOUT = 15000;
 const backoff = new _Backoff.default(1000, 20000);
 const events = new Events();
@@ -159,14 +130,11 @@ let localModuleVersionsFilePath;
 let updatable;
 let bootstrapManifestFilePath;
 let runningInBackground = false;
-
 function initPathsOnly(_buildInfo) {
   if (locallyInstalledModules || moduleInstallPath) {
     return;
   }
-
   locallyInstalledModules = _buildInfo.localModulesRoot != null;
-
   if (locallyInstalledModules) {
     (0, _nodeGlobalPaths.addGlobalPath)(_buildInfo.localModulesRoot);
   } else {
@@ -174,7 +142,6 @@ function initPathsOnly(_buildInfo) {
     (0, _nodeGlobalPaths.addGlobalPath)(moduleInstallPath);
   }
 }
-
 function init(_endpoint, _settings, _buildInfo) {
   const endpoint = _endpoint;
   settings = _settings;
@@ -208,28 +175,22 @@ function init(_endpoint, _settings, _buildInfo) {
   logger.log(`Distribution: ${locallyInstalledModules ? 'local' : 'remote'}`);
   logger.log(`Host updates: ${skipHostUpdate ? 'disabled' : 'enabled'}`);
   logger.log(`Module updates: ${skipModuleUpdate ? 'disabled' : 'enabled'}`);
-
   if (!locallyInstalledModules) {
     installedModulesFilePath = _path.default.join(moduleInstallPath, 'installed.json');
     moduleDownloadPath = _path.default.join(moduleInstallPath, 'pending');
-
     _mkdirp.default.sync(moduleDownloadPath);
-
     logger.log(`Module install path: ${moduleInstallPath}`);
     logger.log(`Module installed file path: ${installedModulesFilePath}`);
     logger.log(`Module download path: ${moduleDownloadPath}`);
     let failedLoadingInstalledModules = false;
-
     try {
       installedModules = JSON.parse(_fs.default.readFileSync(installedModulesFilePath));
     } catch (err) {
       failedLoadingInstalledModules = true;
     }
-
     cleanDownloadedModules(installedModules);
     bootstrapping = failedLoadingInstalledModules || settings.get(ALWAYS_BOOTSTRAP_MODULES);
   }
-
   hostUpdater = require('../app_bootstrap/hostUpdater');
   hostUpdater.on('checking-for-update', () => events.append({
     type: CHECKING_FOR_UPDATES
@@ -245,56 +206,54 @@ function init(_endpoint, _settings, _buildInfo) {
   remoteQuery = {
     host_version: buildInfo.version
   };
-
   if (_processUtils.IS_OSX) {
     const appFolder = _path.default.resolve(process.execPath);
-
     _fs.default.access(appFolder, _fs.default.constants.W_OK, err => {
       if (err) {
         logger.log(`Installer is in read-only volume in OSX, moving to Application folder ${err}`);
-
         try {
-          app.moveToApplicationsFolder();
+          const moveResult = app.moveToApplicationsFolder({
+            conflictHandler: conflictErr => {
+              logger.error(`moveToApplicationsFolder: conflicted: ${conflictErr}`);
+              return true;
+            }
+          });
+          if (!moveResult) {
+            logger.error('moveToApplicationsFolder: failed.');
+          }
         } catch (err) {
-          logger.log(`Could not move installer file to Application folder: ${err}`);
+          logger.log(`moveToApplicationsFolder: Could not move installer file to Application folder: ${err}`);
         }
       }
     });
   }
-
   switch (process.platform) {
     case 'darwin':
       setFeedURL(`${endpoint}/updates/${buildInfo.releaseChannel}?platform=osx&version=${buildInfo.version}`);
       remoteQuery.platform = 'osx';
       break;
-
     case 'win32':
       setFeedURL(`${endpoint}/updates/${buildInfo.releaseChannel}`);
       remoteQuery.platform = 'win';
       break;
-
     case 'linux':
       setFeedURL(`${endpoint}/updates/${buildInfo.releaseChannel}?platform=linux&version=${buildInfo.version}`);
       remoteQuery.platform = 'linux';
       break;
   }
 }
-
 function cleanDownloadedModules(installedModules) {
   try {
     const entries = _fs.default.readdirSync(moduleDownloadPath) || [];
     entries.forEach(entry => {
       const entryPath = _path.default.join(moduleDownloadPath, entry);
-
       let isStale = true;
-
       for (const moduleName of Object.keys(installedModules)) {
         if (entryPath === installedModules[moduleName].updateZipfile) {
           isStale = false;
           break;
         }
       }
-
       if (isStale) {
         _fs.default.unlinkSync(_path.default.join(moduleDownloadPath, entry));
       }
@@ -304,7 +263,6 @@ function cleanDownloadedModules(installedModules) {
     logger.log(err.stack);
   }
 }
-
 function hostOnUpdateAvailable() {
   logger.log(`Host update is available.`);
   hostUpdateAvailable = true;
@@ -322,7 +280,6 @@ function hostOnUpdateAvailable() {
     foreground: !runningInBackground
   });
 }
-
 function hostOnUpdateProgress(progress) {
   logger.log(`Host update progress: ${progress}%`);
   events.append({
@@ -331,10 +288,8 @@ function hostOnUpdateProgress(progress) {
     progress: progress
   });
 }
-
 function hostOnUpdateNotAvailable() {
   logger.log(`Host is up to date.`);
-
   if (!skipModuleUpdate) {
     checkForModuleUpdates();
   } else {
@@ -346,7 +301,6 @@ function hostOnUpdateNotAvailable() {
     });
   }
 }
-
 function hostOnUpdateManually(newVersion) {
   logger.log(`Host update is available. Manual update required!`);
   hostUpdateAvailable = true;
@@ -362,7 +316,6 @@ function hostOnUpdateManually(newVersion) {
     manualRequired: true
   });
 }
-
 function hostOnUpdateDownloaded() {
   logger.log(`Host update downloaded.`);
   checkingForUpdates = false;
@@ -379,17 +332,13 @@ function hostOnUpdateDownloaded() {
     failed: 0
   });
 }
-
 function hostOnError(err) {
   logger.log(`Host update failed: ${err}`);
-
   if (err && String(err).indexOf('Could not get code signature for running application') !== -1) {
     console.warn('Skipping host updates due to code signing failure.');
     skipHostUpdate = true;
   }
-
   checkingForUpdates = false;
-
   if (!hostUpdateAvailable) {
     events.append({
       type: UPDATE_CHECK_FINISHED,
@@ -412,12 +361,10 @@ function hostOnError(err) {
     });
   }
 }
-
 function checkForUpdates() {
   if (checkingForUpdates) return;
   checkingForUpdates = true;
   hostUpdateAvailable = false;
-
   if (skipHostUpdate) {
     events.append({
       type: CHECKING_FOR_UPDATES
@@ -428,27 +375,23 @@ function checkForUpdates() {
     hostUpdater.checkForUpdates();
   }
 }
-
 function setInBackground() {
   runningInBackground = true;
 }
-
 function getRemoteModuleName(name) {
   if (_processUtils.IS_WIN && process.arch === 'x64') {
     return `${name}.x64`;
   }
-
   return name;
 }
-
 async function checkForModuleUpdates() {
-  const query = { ...remoteQuery,
+  const query = {
+    ...remoteQuery,
     _: Math.floor(Date.now() / 1000 / 60 / 5)
   };
   const url = `${remoteBaseURL}/versions.json`;
   logger.log(`Checking for module updates at ${url}`);
   let response;
-
   try {
     response = await request.get({
       url,
@@ -467,9 +410,7 @@ async function checkForModuleUpdates() {
     });
     return;
   }
-
   remoteModuleVersions = JSON.parse(response.body);
-
   if (settings.get(USE_LOCAL_MODULE_VERSIONS)) {
     try {
       remoteModuleVersions = JSON.parse(_fs.default.readFileSync(localModuleVersionsFilePath));
@@ -478,20 +419,15 @@ async function checkForModuleUpdates() {
       console.warn('Failed to parse local module versions: ', err);
     }
   }
-
   const updatesToDownload = [];
-
   for (const moduleName of Object.keys(installedModules)) {
     const installedModule = installedModules[moduleName];
     const installed = installedModule.installedVersion;
-
     if (installed === null) {
       continue;
     }
-
     const update = installedModule.updateVersion || 0;
     const remote = remoteModuleVersions[getRemoteModuleName(moduleName)] || 0;
-
     if (installed !== remote && update !== remote) {
       logger.log(`Module update available: ${moduleName}@${remote} [installed: ${installed}]`);
       updatesToDownload.push({
@@ -500,21 +436,18 @@ async function checkForModuleUpdates() {
       });
     }
   }
-
   events.append({
     type: UPDATE_CHECK_FINISHED,
     succeeded: true,
     updateCount: updatesToDownload.length,
     manualRequired: false
   });
-
   if (updatesToDownload.length === 0) {
     logger.log(`No module updates available.`);
   } else {
     updatesToDownload.forEach(e => addModuleToDownloadQueue(e.name, e.version));
   }
 }
-
 function addModuleToDownloadQueue(name, version, authToken) {
   download.queue.push({
     name,
@@ -523,7 +456,6 @@ function addModuleToDownloadQueue(name, version, authToken) {
   });
   process.nextTick(() => processDownloadQueue());
 }
-
 async function processDownloadQueue() {
   if (download.active) return;
   if (download.queue.length === 0) return;
@@ -542,22 +474,17 @@ async function processDownloadQueue() {
   const url = `${remoteBaseURL}/${encodeURIComponent(getRemoteModuleName(queuedModule.name))}/${encodeURIComponent(queuedModule.version)}`;
   logger.log(`Fetching ${queuedModule.name}@${queuedModule.version} from ${url}`);
   const headers = {};
-
   if (queuedModule.authToken) {
     headers['Authorization'] = queuedModule.authToken;
   }
-
   const moduleZipPath = _path.default.join(moduleDownloadPath, `${queuedModule.name}-${queuedModule.version}.zip`);
-
   const stream = _fs.default.createWriteStream(moduleZipPath);
-
   stream.on('progress', ({
     receivedBytes: newReceivedBytes,
     totalBytes
   }) => {
     receivedBytes = newReceivedBytes;
     const newProgress = Math.min(Math.floor(100 * (receivedBytes / totalBytes)), 100);
-
     if (progress !== newProgress) {
       progress = newProgress;
       logger.log(`Streaming ${queuedModule.name}@${queuedModule.version} to ${moduleZipPath}: ${progress}%`);
@@ -569,7 +496,6 @@ async function processDownloadQueue() {
     }
   });
   logger.log(`Streaming ${queuedModule.name}@${queuedModule.version} to ${moduleZipPath}`);
-
   try {
     const response = await request.get({
       url,
@@ -584,18 +510,14 @@ async function processDownloadQueue() {
     finishModuleDownload(queuedModule.name, queuedModule.version, null, receivedBytes, false);
   }
 }
-
 function commitInstalledModules() {
   const data = JSON.stringify(installedModules, null, 2);
-
   _fs.default.writeFileSync(installedModulesFilePath, data);
 }
-
 function finishModuleDownload(name, version, zipfile, receivedBytes, succeeded) {
   if (!installedModules[name]) {
     installedModules[name] = {};
   }
-
   if (succeeded) {
     installedModules[name].updateVersion = version;
     installedModules[name].updateZipfile = zipfile;
@@ -603,7 +525,6 @@ function finishModuleDownload(name, version, zipfile, receivedBytes, succeeded) 
   } else {
     download.failures += 1;
   }
-
   events.append({
     type: DOWNLOADED_MODULE,
     name: name,
@@ -612,7 +533,6 @@ function finishModuleDownload(name, version, zipfile, receivedBytes, succeeded) 
     succeeded: succeeded,
     receivedBytes: receivedBytes
   });
-
   if (download.next >= download.queue.length) {
     const successes = download.queue.length - download.failures;
     logger.log(`Finished module downloads. [success: ${successes}] [failure: ${download.failures}]`);
@@ -630,7 +550,6 @@ function finishModuleDownload(name, version, zipfile, receivedBytes, succeeded) 
       download.active = false;
       processDownloadQueue();
     };
-
     if (succeeded) {
       backoff.succeed();
       process.nextTick(continueDownloads);
@@ -639,12 +558,10 @@ function finishModuleDownload(name, version, zipfile, receivedBytes, succeeded) 
       backoff.fail(continueDownloads);
     }
   }
-
   if (newInstallInProgress[name]) {
     addModuleToUnzipQueue(name, version, zipfile);
   }
 }
-
 function addModuleToUnzipQueue(name, version, zipfile) {
   unzip.queue.push({
     name,
@@ -653,7 +570,6 @@ function addModuleToUnzipQueue(name, version, zipfile) {
   });
   process.nextTick(() => processUnzipQueue());
 }
-
 function processUnzipQueue() {
   if (unzip.active) return;
   if (unzip.queue.length === 0) return;
@@ -672,32 +588,24 @@ function processUnzipQueue() {
     newVersion: queuedModule.version
   });
   let hasErrored = false;
-
   const onError = (error, zipfile) => {
     if (hasErrored) return;
     hasErrored = true;
     logger.log(`Failed installing ${queuedModule.name}@${queuedModule.version}: ${String(error)}`);
     succeeded = false;
-
     if (zipfile) {
       zipfile.close();
     }
-
     finishModuleUnzip(queuedModule, succeeded);
   };
-
   let succeeded = true;
-
   const extractRoot = _path.default.join(moduleInstallPath, queuedModule.name);
-
   logger.log(`Installing ${queuedModule.name}@${queuedModule.version} from ${queuedModule.zipfile}`);
-
   const processZipfile = (err, zipfile) => {
     if (err) {
       onError(err, null);
       return;
     }
-
     const totalEntries = zipfile.entryCount;
     let processedEntries = 0;
     zipfile.on('entry', entry => {
@@ -708,51 +616,41 @@ function processUnzipQueue() {
         name: queuedModule.name,
         progress: percent
       });
-
       if (/\/$/.test(entry.fileName)) {
         zipfile.readEntry();
         return;
       }
-
       zipfile.openReadStream(entry, (err, stream) => {
         if (err) {
           onError(err, zipfile);
           return;
         }
-
         stream.on('error', e => onError(e, zipfile));
         (0, _mkdirp.default)(_path.default.join(extractRoot, _path.default.dirname(entry.fileName)), err => {
           if (err) {
             onError(err, zipfile);
             return;
           }
-
           const tempFileName = _path.default.join(extractRoot, entry.fileName + '.tmp');
-
           const finalFileName = _path.default.join(extractRoot, entry.fileName);
-
           const writeStream = originalFs.createWriteStream(tempFileName);
           writeStream.on('error', e => {
             stream.destroy();
-
             try {
               originalFs.unlinkSync(tempFileName);
             } catch (err) {}
-
             onError(e, zipfile);
           });
           writeStream.on('finish', () => {
             try {
               originalFs.unlinkSync(finalFileName);
             } catch (err) {}
-
             try {
               originalFs.renameSync(tempFileName, finalFileName);
             } catch (err) {
               onError(err, zipfile);
               return;
             }
-
             zipfile.readEntry();
           });
           stream.pipe(writeStream);
@@ -769,7 +667,6 @@ function processUnzipQueue() {
     });
     zipfile.readEntry();
   };
-
   try {
     _yauzl.default.open(queuedModule.zipfile, {
       lazyEntries: true,
@@ -779,17 +676,14 @@ function processUnzipQueue() {
     onError(err, null);
   }
 }
-
 function finishModuleUnzip(unzippedModule, succeeded) {
   delete newInstallInProgress[unzippedModule.name];
   delete installedModules[unzippedModule.name].updateZipfile;
   delete installedModules[unzippedModule.name].updateVersion;
   commitInstalledModules();
-
   if (!succeeded) {
     unzip.failures += 1;
   }
-
   events.append({
     type: INSTALLED_MODULE,
     name: unzippedModule.name,
@@ -797,7 +691,6 @@ function finishModuleUnzip(unzippedModule, succeeded) {
     total: unzip.queue.length,
     succeeded: succeeded
   });
-
   if (unzip.next >= unzip.queue.length) {
     const successes = unzip.queue.length - unzip.failures;
     bootstrapping = false;
@@ -813,57 +706,46 @@ function finishModuleUnzip(unzippedModule, succeeded) {
     });
     return;
   }
-
   process.nextTick(() => {
     unzip.active = false;
     processUnzipQueue();
   });
 }
-
 function quitAndInstallUpdates() {
   logger.log(`Relaunching to install ${hostUpdateAvailable ? 'host' : 'module'} updates...`);
-
   if (hostUpdateAvailable) {
     hostUpdater.quitAndInstall();
   } else {
     relaunch();
   }
 }
-
 function relaunch() {
   logger.end();
-
   const {
     app
   } = require('electron');
-
   app.relaunch();
   app.quit();
 }
-
 function isInstalled(name, version) {
   const metadata = installedModules[name];
   if (locallyInstalledModules) return true;
-
   if (metadata && metadata.installedVersion > 0) {
     if (!version) return true;
     if (metadata.installedVersion === version) return true;
   }
-
   return false;
 }
-
 function getInstalled() {
-  return { ...installedModules
+  return {
+    ...installedModules
   };
 }
-
 function install(name, defer, options) {
   let {
     version,
     authToken
   } = options || {};
-
   if (isInstalled(name, version)) {
     if (!defer) {
       events.append({
@@ -874,22 +756,17 @@ function install(name, defer, options) {
         succeeded: true
       });
     }
-
     return;
   }
-
   if (newInstallInProgress[name]) return;
-
   if (!updatable) {
     logger.log(`Not updatable; ignoring request to install ${name}...`);
     return;
   }
-
   if (defer) {
     if (version) {
       throw new Error(`Cannot defer install for a specific version module (${name}, ${version})`);
     }
-
     logger.log(`Deferred install for ${name}...`);
     installedModules[name] = {
       installedVersion: 0
@@ -897,33 +774,25 @@ function install(name, defer, options) {
     commitInstalledModules();
   } else {
     logger.log(`Starting to install ${name}...`);
-
     if (!version) {
       version = remoteModuleVersions[name] || 0;
     }
-
     newInstallInProgress[name] = version;
     addModuleToDownloadQueue(name, version, authToken);
   }
 }
-
 function installPendingUpdates() {
   const updatesToInstall = [];
-
   if (bootstrapping) {
     let modules = {};
-
     try {
       modules = JSON.parse(_fs.default.readFileSync(bootstrapManifestFilePath));
     } catch (err) {}
-
     for (const moduleName of Object.keys(modules)) {
       installedModules[moduleName] = {
         installedVersion: 0
       };
-
       const zipfile = _path.default.join(paths.getResources(), 'bootstrap', `${moduleName}.zip`);
-
       updatesToInstall.push({
         moduleName,
         update: modules[moduleName],
@@ -931,11 +800,9 @@ function installPendingUpdates() {
       });
     }
   }
-
   for (const moduleName of Object.keys(installedModules)) {
     const update = installedModules[moduleName].updateVersion || 0;
     const zipfile = installedModules[moduleName].updateZipfile;
-
     if (update > 0 && zipfile != null) {
       updatesToInstall.push({
         moduleName,
@@ -944,7 +811,6 @@ function installPendingUpdates() {
       });
     }
   }
-
   if (updatesToInstall.length > 0) {
     logger.log(`${bootstrapping ? 'Bootstrapping' : 'Installing updates'}...`);
     updatesToInstall.forEach(e => addModuleToUnzipQueue(e.moduleName, e.update, e.zipfile));

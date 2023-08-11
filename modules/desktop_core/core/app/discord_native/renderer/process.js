@@ -1,7 +1,6 @@
 "use strict";
 
 const process = require('process');
-
 const env = process.env;
 module.exports = {
   platform: process.platform,

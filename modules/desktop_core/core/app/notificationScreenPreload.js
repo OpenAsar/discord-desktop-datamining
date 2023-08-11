@@ -4,7 +4,6 @@ const {
   contextBridge,
   ipcRenderer
 } = require('electron');
-
 contextBridge.exposeInMainWorld('ipcRenderer', {
   send: (event, ...args) => {
     ipcRenderer.send(`DISCORD_${event}`, ...args);

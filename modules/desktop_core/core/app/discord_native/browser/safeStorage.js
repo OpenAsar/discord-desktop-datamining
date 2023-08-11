@@ -1,17 +1,14 @@
 "use strict";
 
 const electron = require('electron');
-
 const {
   IS_OSX
 } = require('../../../common/processUtils');
-
 const {
   SAFE_STORAGE_IS_ENCRYPTION_AVAILABLE,
   SAFE_STORAGE_ENCRYPT_STRING,
   SAFE_STORAGE_DECRYPT_STRING
 } = require('../common/constants').IPCEvents;
-
 electron.ipcMain.on(SAFE_STORAGE_IS_ENCRYPTION_AVAILABLE, event => {
   event.returnValue = electron.safeStorage != null && electron.safeStorage.isEncryptionAvailable();
 });
