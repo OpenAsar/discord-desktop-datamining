@@ -1,7 +1,8 @@
 "use strict";
 
-const electron = require('electron');
-const invariant = require('invariant');
+var _assert = _interopRequireDefault(require("assert"));
+var _electron = _interopRequireDefault(require("electron"));
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 const {
   CLIPBOARD_COPY,
   CLIPBOARD_CUT,
@@ -9,27 +10,27 @@ const {
 } = require('../common/constants').IPCEvents;
 function copy(text) {
   if (text) {
-    electron.clipboard.writeText(text);
+    _electron.default.clipboard.writeText(text);
   } else {
-    electron.ipcRenderer.invoke(CLIPBOARD_COPY);
+    _electron.default.ipcRenderer.invoke(CLIPBOARD_COPY);
   }
 }
 function copyImage(imageArrayBuffer, imageSrc) {
-  invariant(imageArrayBuffer != null, 'Image data is empty');
-  const nativeImg = electron.nativeImage.createFromBuffer(imageArrayBuffer);
-  electron.clipboard.write({
+  (0, _assert.default)(imageArrayBuffer != null, 'Image data is empty');
+  const nativeImg = _electron.default.nativeImage.createFromBuffer(imageArrayBuffer);
+  _electron.default.clipboard.write({
     html: `<img src="${imageSrc}">`,
     image: nativeImg
   });
 }
 function cut() {
-  electron.ipcRenderer.invoke(CLIPBOARD_CUT);
+  _electron.default.ipcRenderer.invoke(CLIPBOARD_CUT);
 }
 function paste() {
-  electron.ipcRenderer.invoke(CLIPBOARD_PASTE);
+  _electron.default.ipcRenderer.invoke(CLIPBOARD_PASTE);
 }
 function read() {
-  return electron.clipboard.readText();
+  return _electron.default.clipboard.readText();
 }
 module.exports = {
   copy,
