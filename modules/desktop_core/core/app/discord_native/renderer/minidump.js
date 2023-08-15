@@ -4,7 +4,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.readMinidump = readMinidump;
-var _fs = _interopRequireDefault(require("fs"));
+var _promises = _interopRequireDefault(require("fs/promises"));
 var _util = _interopRequireDefault(require("util"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 const exceptionTypes = {
@@ -33,16 +33,11 @@ const exceptionTypes = {
 };
 class FileReader {
   utf16Decoder = new _util.default.TextDecoder('utf-16');
-  static promiseFs = Object.freeze({
-    open: _util.default.promisify(_fs.default.open),
-    read: _util.default.promisify(_fs.default.read),
-    close: _util.default.promisify(_fs.default.close)
-  });
   constructor(path, bufferSize = 2048) {
-    this.handle = FileReader.promiseFs.open(path, 'r');
+    this.handle = _promises.default.open(path, 'r');
     this.buffer = new Uint8Array(bufferSize);
   }
-  async read(u32toReadCount, position = null) {
+  async read(u32toReadCount, position) {
     const byteSize = u32toReadCount * 4;
     await this.readCore(byteSize, position);
     return new ReadResult(this.buffer.buffer.slice(0, byteSize));
@@ -56,7 +51,7 @@ class FileReader {
     await this.readCore(Math.min(length, this.buffer.byteLength), rva + 4);
     return this.utf16Decoder.decode(this.buffer.slice(0, length));
   }
-  async readCore(byteLength, position = null) {
+  async readCore(byteLength, position) {
     if (byteLength > this.buffer.byteLength) {
       throw new Error(`Requested nuber of bytes ${byteLength} exceeds buffer size ${this.buffer.byteLength}.`);
     }
@@ -64,18 +59,25 @@ class FileReader {
       throw new Error('Cannot use FileReader once closed.');
     }
     const handle = await this.handle;
-    const readResult = await FileReader.promiseFs.read(handle, this.buffer, 0, byteLength, position);
-    if (readResult.bytesRead < byteLength) {
-      throw new Error(`FileReader failed to read enough bytes: 0x${readResult.bytesRead}`);
+    let bytesRead = 0;
+    while (bytesRead < byteLength) {
+      const readResult = await handle.read(this.buffer, bytesRead, byteLength - bytesRead, position + bytesRead);
+      if (readResult.bytesRead === 0) {
+        throw new Error('Unexpected end of file');
+      }
+      bytesRead += readResult.bytesRead;
     }
   }
   async close() {
     if (this.handle == null) {
       return;
     }
-    const handle = await this.handle;
-    this.handle = null;
-    await FileReader.promiseFs.close(handle);
+    try {
+      const handle = await this.handle;
+      await handle.close();
+    } finally {
+      this.handle = null;
+    }
   }
 }
 class ReadResult {
