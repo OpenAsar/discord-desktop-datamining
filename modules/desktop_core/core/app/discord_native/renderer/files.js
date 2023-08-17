@@ -3,10 +3,10 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.isTempFile = isTempFile;
-exports.isHookMinidumpFile = isHookMinidumpFile;
-exports.containsInvalidFileChar = containsInvalidFileChar;
 exports.CallscopeLogFiles = void 0;
+exports.containsInvalidFileChar = containsInvalidFileChar;
+exports.isHookMinidumpFile = isHookMinidumpFile;
+exports.isTempFile = isTempFile;
 const INVALID_FILENAME_CHAR_REGEX = /[^a-zA-Z0-9-_.]/;
 const IS_RTC_FILE = /^channel\.\d+\.\d+\.(?:tsi|tsd)$/i;
 const IS_TEMP_FILE = /(?:^\.tmp.+)/i;

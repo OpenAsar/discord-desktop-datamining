@@ -3,9 +3,9 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.getGlobalSentry = getGlobalSentry;
 exports.init = init;
 exports.isInitialized = isInitialized;
-exports.getGlobalSentry = getGlobalSentry;
 exports.metadata = void 0;
 var processUtils = _interopRequireWildcard(require("./processUtils"));
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }

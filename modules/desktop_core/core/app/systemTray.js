@@ -3,10 +3,10 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.init = init;
-exports.show = show;
 exports.displayHowToCloseHint = displayHowToCloseHint;
 exports.hasInit = void 0;
+exports.init = init;
+exports.show = show;
 var _electron = require("electron");
 var _securityUtils = require("../common/securityUtils");
 var _appSettings = require("./bootstrapModules/appSettings");

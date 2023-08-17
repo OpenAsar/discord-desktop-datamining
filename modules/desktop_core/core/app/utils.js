@@ -4,7 +4,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.exposeModuleResource = exposeModuleResource;
-exports.isLinux = exports.isOSX = exports.isWindows = exports.platform = void 0;
+exports.platform = exports.isWindows = exports.isOSX = exports.isLinux = void 0;
 var _fs = _interopRequireDefault(require("fs"));
 var _os = _interopRequireDefault(require("os"));
 var _path = _interopRequireDefault(require("path"));

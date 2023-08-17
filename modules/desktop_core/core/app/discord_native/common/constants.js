@@ -3,15 +3,13 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getDiscordIPCEvent = getDiscordIPCEvent;
 exports.IPCEvents = void 0;
+exports.getDiscordIPCEvent = getDiscordIPCEvent;
 const discordPrefixRegex = /^DISCORD_/;
 function getDiscordIPCEvent(ev) {
   return discordPrefixRegex.test(ev) ? ev : `DISCORD_${ev}`;
 }
-let IPCEvents;
-exports.IPCEvents = IPCEvents;
-(function (IPCEvents) {
+let IPCEvents = function (IPCEvents) {
   IPCEvents["ACCESSIBILITY_GET_ENABLED"] = "DISCORD_ACCESSIBILITY_GET_ENABLED";
   IPCEvents["APP_BADGE_SET"] = "DISCORD_APP_BADGE_SET";
   IPCEvents["APP_GET_RELEASE_CHANNEL_SYNC"] = "DISCORD_APP_GET_RELEASE_CHANNEL_SYNC";
@@ -112,4 +110,6 @@ exports.IPCEvents = IPCEvents;
   IPCEvents["WINDOW_DEVTOOLS_CLOSED"] = "DISCORD_WINDOW_DEVTOOLS_CLOSED";
   IPCEvents["WINDOW_SET_CONTENT_PROTCTION"] = "DISCORD_WINDOW_SET_CONTENT_PROTCTION";
   IPCEvents["GET_MOUSE_COORDINATES"] = "DISCORD_GET_MOUSE_COORDINATES";
-})(IPCEvents || (exports.IPCEvents = IPCEvents = {}));
+  return IPCEvents;
+}({});
+exports.IPCEvents = IPCEvents;

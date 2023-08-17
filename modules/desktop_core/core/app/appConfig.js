@@ -3,8 +3,8 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.init = init;
 exports.hasInit = void 0;
+exports.init = init;
 var _autoStart = require("./bootstrapModules/autoStart");
 var _appSettings = require("./bootstrapModules/appSettings");
 var _ipcMain = _interopRequireDefault(require("./ipcMain"));

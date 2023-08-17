@@ -3,14 +3,15 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.init = init;
+exports.NOTIFICATION_CLICK = void 0;
 exports.close = close;
+exports.hasInit = exports.events = void 0;
+exports.init = init;
 exports.setMainWindow = setMainWindow;
-exports.hasInit = exports.NOTIFICATION_CLICK = exports.events = void 0;
 var _electron = require("electron");
+var _events = require("events");
 var _fs = _interopRequireDefault(require("fs"));
 var _path = _interopRequireDefault(require("path"));
-var _events = require("events");
 var _url = _interopRequireDefault(require("url"));
 var _ipcMain = _interopRequireDefault(require("./ipcMain"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -33,8 +34,19 @@ let notifications;
 let hideTimeout;
 let notificationWindow;
 let VARIABLES;
+function isDestroyed(win) {
+  if (win == null || win.isDestroyed()) {
+    console.error(`notificationScreen.webContentsSend: win is invalid ${win.isDestroyed()}.`);
+    return true;
+  }
+  if (win.webContents == null || win.webContents.isDestroyed()) {
+    console.error(`notificationScreen.webContentsSend: webContents is invalid ${win.webContents.isDestroyed()}.`);
+    return true;
+  }
+  return false;
+}
 function webContentsSend(win, event, ...args) {
-  if (win != null && win.webContents != null) {
+  if (!isDestroyed(win)) {
     win.webContents.send(`DISCORD_${event}`, ...args);
   }
 }
@@ -105,6 +117,9 @@ function updateNotifications() {
     hideTimeout = null;
     if (notificationWindow == null) {
       createWindow();
+      return;
+    }
+    if (isDestroyed(notificationWindow)) {
       return;
     }
     const boundingBox = calculateBoundingBox();

@@ -3,41 +3,41 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.saveWithDialog = saveWithDialog;
-exports.showOpenDialog = showOpenDialog;
-exports.readLogFiles = readLogFiles;
-exports.combineWebRtcLogs = combineWebRtcLogs;
-exports.getCallscopeLogFiles = getCallscopeLogFiles;
-exports.cleanupTempFiles = cleanupTempFiles;
-exports.uploadDiscordHookCrashes = uploadDiscordHookCrashes;
-exports.showItemInFolder = showItemInFolder;
-exports.openFiles = openFiles;
-exports.getModulePath = getModulePath;
-exports.getModuleDataPathSync = getModuleDataPathSync;
-Object.defineProperty(exports, "extname", {
-  enumerable: true,
-  get: function () {
-    return _path.extname;
-  }
-});
 Object.defineProperty(exports, "basename", {
   enumerable: true,
   get: function () {
     return _path.basename;
   }
 });
+exports.cleanupTempFiles = cleanupTempFiles;
+exports.combineWebRtcLogs = combineWebRtcLogs;
 Object.defineProperty(exports, "dirname", {
   enumerable: true,
   get: function () {
     return _path.dirname;
   }
 });
+Object.defineProperty(exports, "extname", {
+  enumerable: true,
+  get: function () {
+    return _path.extname;
+  }
+});
+exports.getCallscopeLogFiles = getCallscopeLogFiles;
+exports.getModuleDataPathSync = getModuleDataPathSync;
+exports.getModulePath = getModulePath;
 Object.defineProperty(exports, "join", {
   enumerable: true,
   get: function () {
     return _path.join;
   }
 });
+exports.openFiles = openFiles;
+exports.readLogFiles = readLogFiles;
+exports.saveWithDialog = saveWithDialog;
+exports.showItemInFolder = showItemInFolder;
+exports.showOpenDialog = showOpenDialog;
+exports.uploadDiscordHookCrashes = uploadDiscordHookCrashes;
 var _fs = _interopRequireDefault(require("fs"));
 var _path = _interopRequireWildcard(require("path"));
 var _DiscordIPC = require("../common/DiscordIPC");

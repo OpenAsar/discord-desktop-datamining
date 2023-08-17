@@ -3,11 +3,11 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.on = on;
 exports.getAvailableDictionaries = getAvailableDictionaries;
-exports.setLocale = setLocale;
-exports.setLearnedWords = setLearnedWords;
+exports.on = on;
 exports.replaceMisspelling = replaceMisspelling;
+exports.setLearnedWords = setLearnedWords;
+exports.setLocale = setLocale;
 var _events = _interopRequireDefault(require("events"));
 var _DiscordIPC = require("../common/DiscordIPC");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }

@@ -4,9 +4,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.install = install;
-exports.update = update;
 exports.isInstalled = isInstalled;
 exports.uninstall = uninstall;
+exports.update = update;
 function install(callback) {
   return callback();
 }

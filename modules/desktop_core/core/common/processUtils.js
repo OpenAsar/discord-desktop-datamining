@@ -3,8 +3,8 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.IS_WIN = exports.IS_OSX = exports.IS_LINUX = void 0;
 exports.supportsTls13 = supportsTls13;
-exports.IS_LINUX = exports.IS_OSX = exports.IS_WIN = void 0;
 var _os = _interopRequireDefault(require("os"));
 var _process = _interopRequireDefault(require("process"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }

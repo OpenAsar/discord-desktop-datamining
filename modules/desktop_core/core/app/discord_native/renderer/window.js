@@ -3,23 +3,23 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.USE_OSX_NATIVE_TRAFFIC_LIGHTS = void 0;
+exports.blur = blur;
+exports.close = close;
 exports.flashFrame = flashFrame;
+exports.focus = focus;
+exports.fullscreen = fullscreen;
+exports.isAlwaysOnTop = isAlwaysOnTop;
+exports.maximize = maximize;
 exports.minimize = minimize;
 exports.restore = restore;
-exports.maximize = maximize;
-exports.focus = focus;
 exports.setAlwaysOnTop = setAlwaysOnTop;
-exports.isAlwaysOnTop = isAlwaysOnTop;
-exports.blur = blur;
-exports.setProgressBar = setProgressBar;
-exports.fullscreen = fullscreen;
-exports.close = close;
-exports.setZoomFactor = setZoomFactor;
 exports.setBackgroundThrottling = setBackgroundThrottling;
-exports.setDevtoolsCallbacks = setDevtoolsCallbacks;
-exports.supportsContentProtection = supportsContentProtection;
 exports.setContentProtection = setContentProtection;
-exports.USE_OSX_NATIVE_TRAFFIC_LIGHTS = void 0;
+exports.setDevtoolsCallbacks = setDevtoolsCallbacks;
+exports.setProgressBar = setProgressBar;
+exports.setZoomFactor = setZoomFactor;
+exports.supportsContentProtection = supportsContentProtection;
 var _electron = _interopRequireDefault(require("electron"));
 var _processUtils = require("../../../common/processUtils");
 var _DiscordIPC = require("../common/DiscordIPC");

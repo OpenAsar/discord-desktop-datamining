@@ -3,9 +3,9 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.shouldOpenExternalUrl = shouldOpenExternalUrl;
-exports.saferShellOpenExternal = saferShellOpenExternal;
 exports.checkUrlOriginMatches = checkUrlOriginMatches;
+exports.saferShellOpenExternal = saferShellOpenExternal;
+exports.shouldOpenExternalUrl = shouldOpenExternalUrl;
 var _electron = require("electron");
 var _url = _interopRequireDefault(require("url"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }

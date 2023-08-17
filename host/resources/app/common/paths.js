@@ -4,12 +4,12 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.cleanOldVersions = cleanOldVersions;
-exports.init = init;
+exports.getInstallPath = getInstallPath;
+exports.getModuleDataPath = getModuleDataPath;
+exports.getResources = getResources;
 exports.getUserData = getUserData;
 exports.getUserDataVersioned = getUserDataVersioned;
-exports.getResources = getResources;
-exports.getModuleDataPath = getModuleDataPath;
-exports.getInstallPath = getInstallPath;
+exports.init = init;
 var _fs = _interopRequireDefault(require("fs"));
 var _mkdirp = _interopRequireDefault(require("mkdirp"));
 var _originalFs = _interopRequireDefault(require("original-fs"));

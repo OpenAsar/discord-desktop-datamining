@@ -4,9 +4,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.install = install;
-exports.update = update;
 exports.isInstalled = isInstalled;
 exports.uninstall = uninstall;
+exports.update = update;
 var _path = _interopRequireDefault(require("path"));
 var windowsUtils = _interopRequireWildcard(require("../windowsUtils"));
 var _appSettings = require("../appSettings");

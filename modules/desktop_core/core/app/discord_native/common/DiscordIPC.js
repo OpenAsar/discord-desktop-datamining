@@ -3,13 +3,13 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.DiscordIPC = void 0;
 Object.defineProperty(exports, "IPCEvents", {
   enumerable: true,
   get: function () {
     return _constants.IPCEvents;
   }
 });
-exports.DiscordIPC = void 0;
 var _electron = _interopRequireDefault(require("electron"));
 var _constants = require("./constants");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }

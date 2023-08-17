@@ -3,14 +3,14 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.init = init;
-exports.getWindow = getWindow;
-exports.getAllWindows = getAllWindows;
-exports.setNewWindowEvent = setNewWindowEvent;
-exports.openOrFocusWindow = openOrFocusWindow;
-exports.setupPopout = setupPopout;
 exports.closePopouts = closePopouts;
+exports.getAllWindows = getAllWindows;
+exports.getWindow = getWindow;
 exports.hasInit = void 0;
+exports.init = init;
+exports.openOrFocusWindow = openOrFocusWindow;
+exports.setNewWindowEvent = setNewWindowEvent;
+exports.setupPopout = setupPopout;
 var _securityUtils = require("../common/securityUtils");
 var _appFeatures = require("./appFeatures");
 const ALLOWED_FEATURES = ['width', 'height', 'left', 'top', 'resizable', 'movable', 'alwaysOnTop', 'frame', 'transparent', 'hasShadow', 'closable', 'skipTaskbar', 'backgroundColor', 'menubar', 'toolbar', 'location', 'directories', 'titleBarStyle'];

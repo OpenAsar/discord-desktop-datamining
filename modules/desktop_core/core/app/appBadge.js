@@ -3,8 +3,8 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.init = init;
 exports.hasInit = void 0;
+exports.init = init;
 var _electron = require("electron");
 var _utils = require("./utils");
 var _mainScreen = require("./mainScreen");

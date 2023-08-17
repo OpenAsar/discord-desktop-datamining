@@ -3,9 +3,9 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.deleteClip = deleteClip;
 exports.loadClip = loadClip;
 exports.loadClipsDirectory = loadClipsDirectory;
-exports.deleteClip = deleteClip;
 var _DiscordIPC = require("../common/DiscordIPC");
 function loadClip(path) {
   return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.LOAD_CLIP, path);

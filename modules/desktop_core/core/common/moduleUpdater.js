@@ -3,16 +3,18 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.initPathsOnly = initPathsOnly;
-exports.init = init;
+exports.UPDATE_MANUALLY = exports.UPDATE_CHECK_FINISHED = exports.NO_PENDING_UPDATES = exports.INSTALLING_MODULE_PROGRESS = exports.INSTALLING_MODULES_FINISHED = exports.INSTALLING_MODULE = exports.INSTALLED_MODULE = exports.DOWNLOADING_MODULE_PROGRESS = exports.DOWNLOADING_MODULES_FINISHED = exports.DOWNLOADING_MODULE = exports.DOWNLOADED_MODULE = exports.CHECKING_FOR_UPDATES = void 0;
 exports.checkForUpdates = checkForUpdates;
-exports.setInBackground = setInBackground;
-exports.quitAndInstallUpdates = quitAndInstallUpdates;
-exports.isInstalled = isInstalled;
+exports.events = void 0;
 exports.getInstalled = getInstalled;
+exports.init = init;
+exports.initPathsOnly = initPathsOnly;
 exports.install = install;
 exports.installPendingUpdates = installPendingUpdates;
-exports.supportsEventObjects = exports.events = exports.NO_PENDING_UPDATES = exports.INSTALLING_MODULE_PROGRESS = exports.INSTALLING_MODULE = exports.INSTALLING_MODULES_FINISHED = exports.DOWNLOADED_MODULE = exports.UPDATE_MANUALLY = exports.DOWNLOADING_MODULES_FINISHED = exports.DOWNLOADING_MODULE_PROGRESS = exports.DOWNLOADING_MODULE = exports.UPDATE_CHECK_FINISHED = exports.INSTALLED_MODULE = exports.CHECKING_FOR_UPDATES = void 0;
+exports.isInstalled = isInstalled;
+exports.quitAndInstallUpdates = quitAndInstallUpdates;
+exports.setInBackground = setInBackground;
+exports.supportsEventObjects = void 0;
 var _fs = _interopRequireDefault(require("fs"));
 var _path = _interopRequireDefault(require("path"));
 var _nodeGlobalPaths = require("./nodeGlobalPaths");
