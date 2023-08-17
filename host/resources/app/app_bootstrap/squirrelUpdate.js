@@ -3,12 +3,12 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.spawnUpdateInstall = spawnUpdateInstall;
-exports.spawnUpdate = spawnUpdate;
-exports.installProtocol = installProtocol;
 exports.handleStartupEvent = handleStartupEvent;
-exports.updateExistsSync = updateExistsSync;
+exports.installProtocol = installProtocol;
 exports.restart = restart;
+exports.spawnUpdate = spawnUpdate;
+exports.spawnUpdateInstall = spawnUpdateInstall;
+exports.updateExistsSync = updateExistsSync;
 var _child_process = _interopRequireDefault(require("child_process"));
 var _fs = _interopRequireDefault(require("fs"));
 var _path = _interopRequireDefault(require("path"));

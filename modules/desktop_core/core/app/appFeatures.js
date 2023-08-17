@@ -3,8 +3,8 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.init = init;
 exports.getFeatures = getFeatures;
+exports.init = init;
 var _FeatureFlags = _interopRequireDefault(require("../common/FeatureFlags"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 let features;

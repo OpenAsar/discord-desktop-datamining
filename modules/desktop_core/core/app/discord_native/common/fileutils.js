@@ -3,28 +3,26 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.readFulfilledFiles = readFulfilledFiles;
-exports.readFiles = readFiles;
-exports.getFilesnamesFromDirectory = getFilesnamesFromDirectory;
-exports.deleteFile = deleteFile;
-Object.defineProperty(exports, "extname", {
-  enumerable: true,
-  get: function () {
-    return _path.extname;
-  }
-});
 Object.defineProperty(exports, "basename", {
   enumerable: true,
   get: function () {
     return _path.basename;
   }
 });
+exports.deleteFile = deleteFile;
 Object.defineProperty(exports, "dirname", {
   enumerable: true,
   get: function () {
     return _path.dirname;
   }
 });
+Object.defineProperty(exports, "extname", {
+  enumerable: true,
+  get: function () {
+    return _path.extname;
+  }
+});
+exports.getFilesnamesFromDirectory = getFilesnamesFromDirectory;
 Object.defineProperty(exports, "join", {
   enumerable: true,
   get: function () {
@@ -32,6 +30,9 @@ Object.defineProperty(exports, "join", {
   }
 });
 exports.promiseFs = void 0;
+exports.readExactly = readExactly;
+exports.readFiles = readFiles;
+exports.readFulfilledFiles = readFulfilledFiles;
 var _buffer = _interopRequireDefault(require("buffer"));
 var _originalFs = _interopRequireDefault(require("original-fs"));
 var _path = _interopRequireWildcard(require("path"));
@@ -92,4 +93,20 @@ function getFilesnamesFromDirectory(path) {
 }
 function deleteFile(filename) {
   return promiseFs.unlink(filename);
+}
+async function readExactly({
+  handle,
+  buffer,
+  position,
+  length
+}) {
+  let bytesRead = 0;
+  if (length == null) length = buffer.byteLength;
+  while (bytesRead < length) {
+    const result = await handle.read(buffer, bytesRead, length - bytesRead, position + bytesRead);
+    if (result.bytesRead === 0) {
+      throw new Error('Unexpected end of file');
+    }
+    bytesRead += result.bytesRead;
+  }
 }

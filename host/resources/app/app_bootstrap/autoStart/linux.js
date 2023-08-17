@@ -4,9 +4,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.install = install;
-exports.update = update;
 exports.isInstalled = isInstalled;
 exports.uninstall = uninstall;
+exports.update = update;
 var _fs = _interopRequireDefault(require("fs"));
 var _path = _interopRequireDefault(require("path"));
 var _electron = require("electron");

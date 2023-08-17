@@ -3,9 +3,9 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.init = init;
 exports.fatal = fatal;
 exports.handled = handled;
+exports.init = init;
 var Sentry = _interopRequireWildcard(require("@sentry/electron"));
 var _electron2 = require("electron");
 var _process = _interopRequireDefault(require("process"));

@@ -3,12 +3,12 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getMainWindowId = getMainWindowId;
-exports.webContentsSend = webContentsSend;
-exports.init = init;
-exports.handleOpenUrl = handleOpenUrl;
-exports.setMainWindowVisible = setMainWindowVisible;
 exports.WEBAPP_ENDPOINT = void 0;
+exports.getMainWindowId = getMainWindowId;
+exports.handleOpenUrl = handleOpenUrl;
+exports.init = init;
+exports.setMainWindowVisible = setMainWindowVisible;
+exports.webContentsSend = webContentsSend;
 var _electron = _interopRequireWildcard(require("electron"));
 var _fs = _interopRequireDefault(require("fs"));
 var _path = _interopRequireDefault(require("path"));

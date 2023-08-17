@@ -3,10 +3,10 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.initSplash = initSplash;
-exports.focusWindow = focusWindow;
-exports.pageReady = pageReady;
 exports.events = exports.APP_SHOULD_SHOW = exports.APP_SHOULD_LAUNCH = void 0;
+exports.focusWindow = focusWindow;
+exports.initSplash = initSplash;
+exports.pageReady = pageReady;
 var _electron = require("electron");
 var _events = require("events");
 var _fs = _interopRequireDefault(require("fs"));

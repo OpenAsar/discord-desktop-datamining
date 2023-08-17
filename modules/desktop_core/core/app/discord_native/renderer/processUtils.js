@@ -3,15 +3,15 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.flushDNSCache = flushDNSCache;
-exports.getLastCrash = getLastCrash;
 exports.flushCookies = flushCookies;
-exports.getSystemInfo = getSystemInfo;
+exports.flushDNSCache = flushDNSCache;
 exports.flushStorageData = flushStorageData;
-exports.purgeMemory = purgeMemory;
-exports.getCurrentCPUUsagePercent = getCurrentCPUUsagePercent;
 exports.getCPUCoreCount = getCPUCoreCount;
+exports.getCurrentCPUUsagePercent = getCurrentCPUUsagePercent;
+exports.getLastCrash = getLastCrash;
 exports.getMainArgvSync = getMainArgvSync;
+exports.getSystemInfo = getSystemInfo;
+exports.purgeMemory = purgeMemory;
 exports.setCrashInformation = setCrashInformation;
 exports.setMemoryInformation = setMemoryInformation;
 var _electron = _interopRequireDefault(require("electron"));

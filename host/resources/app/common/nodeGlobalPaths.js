@@ -3,8 +3,8 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getGlobalPaths = getGlobalPaths;
 exports.addGlobalPath = addGlobalPath;
+exports.getGlobalPaths = getGlobalPaths;
 exports.globalPathExists = globalPathExists;
 var _module = _interopRequireDefault(require("module"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }

@@ -3,8 +3,8 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getPath = getPath;
 exports.getCrashFiles = getCrashFiles;
+exports.getPath = getPath;
 var _electron = _interopRequireDefault(require("electron"));
 var _fs = _interopRequireDefault(require("fs"));
 var _originalFs = _interopRequireDefault(require("original-fs"));

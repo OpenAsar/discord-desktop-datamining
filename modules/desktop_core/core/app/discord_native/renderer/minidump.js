@@ -115,8 +115,7 @@ class ReadResult {
 function isMinidumpFilename(filename) {
   return /\.dmp$/i.test(filename);
 }
-var MinidumpStreamType;
-(function (MinidumpStreamType) {
+var MinidumpStreamType = function (MinidumpStreamType) {
   MinidumpStreamType[MinidumpStreamType["UnusedStream"] = 0] = "UnusedStream";
   MinidumpStreamType[MinidumpStreamType["ReservedStream0"] = 1] = "ReservedStream0";
   MinidumpStreamType[MinidumpStreamType["ReservedStream1"] = 2] = "ReservedStream1";
@@ -156,7 +155,8 @@ var MinidumpStreamType;
   MinidumpStreamType[MinidumpStreamType["ceStreamProcessModuleMap"] = 32779] = "ceStreamProcessModuleMap";
   MinidumpStreamType[MinidumpStreamType["ceStreamDiagnosisList"] = 32780] = "ceStreamDiagnosisList";
   MinidumpStreamType[MinidumpStreamType["LastReservedStream"] = 65535] = "LastReservedStream";
-})(MinidumpStreamType || (MinidumpStreamType = {}));
+  return MinidumpStreamType;
+}(MinidumpStreamType || {});
 class MINIDUMP_HEADER {
   static U32_SIZE = 4;
   constructor(reader) {

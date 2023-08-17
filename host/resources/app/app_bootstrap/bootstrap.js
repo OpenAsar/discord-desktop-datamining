@@ -54,6 +54,7 @@ const updater = require('../common/updater');
 const splashScreen = require('./splashScreen');
 const autoStart = require('./autoStart');
 const requireNative = require('./requireNative');
+const discordProtocols = require('./protocols');
 let coreModule;
 const allowMultipleInstances = hasArgvFlag('--multi-instance');
 const isFirstInstance = allowMultipleInstances ? true : app.requestSingleInstanceLock();
@@ -142,5 +143,6 @@ if (pendingAppQuit) {
   console.log('Quitting secondary instance.');
   app.quit();
 } else {
+  discordProtocols.beforeReadyProtocolRegistration();
   app.whenReady().then(() => startApp());
 }

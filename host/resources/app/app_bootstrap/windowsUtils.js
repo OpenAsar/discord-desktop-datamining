@@ -3,9 +3,9 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.addToRegistry = addToRegistry;
 exports.spawn = spawn;
 exports.spawnReg = spawnReg;
-exports.addToRegistry = addToRegistry;
 var _child_process = _interopRequireDefault(require("child_process"));
 var _path = _interopRequireDefault(require("path"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }

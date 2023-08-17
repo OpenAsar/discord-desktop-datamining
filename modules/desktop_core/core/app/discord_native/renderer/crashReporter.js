@@ -3,10 +3,10 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.updateCrashReporter = updateCrashReporter;
-exports.getMetadata = getMetadata;
 exports.getFlattenedMetadata = getFlattenedMetadata;
+exports.getMetadata = getMetadata;
 exports.triggerJSException = triggerJSException;
+exports.updateCrashReporter = updateCrashReporter;
 var _electron = _interopRequireDefault(require("electron"));
 var _crashReporterUtils = require("../../../common/crashReporterUtils");
 var _DiscordIPC = require("../common/DiscordIPC");

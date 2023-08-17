@@ -3,9 +3,9 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.startup = startup;
 exports.handleOpenUrl = handleOpenUrl;
 exports.setMainWindowVisible = setMainWindowVisible;
+exports.startup = startup;
 const {
   Menu,
   BrowserWindow
@@ -55,7 +55,10 @@ function startup(bootstrapModules) {
   features.injectFeaturesBackend(appFeatures.getFeatures());
   require('./discord_native/browser/fileManager');
   require('./discord_native/browser/globalOverlay');
-  require('./discord_native/browser/clips');
+  const {
+    setupClipsProtocol
+  } = require('./discord_native/browser/clips');
+  setupClipsProtocol();
   require('./discord_native/browser/userDataCache');
   const gpuSettings = require('./discord_native/browser/gpuSettings');
   gpuSettings.injectGpuSettingsBackend(GPUSettings);

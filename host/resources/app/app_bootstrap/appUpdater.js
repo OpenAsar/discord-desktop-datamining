@@ -3,8 +3,8 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.update = update;
 exports.focusSplash = focusSplash;
+exports.update = update;
 var _fs = _interopRequireDefault(require("fs"));
 var _path = _interopRequireDefault(require("path"));
 var moduleUpdater = _interopRequireWildcard(require("../common/moduleUpdater"));
