@@ -1,112 +1,91 @@
 "use strict";
 
-const electron = require('electron');
-
-const {
-  WINDOW_BLUR,
-  WINDOW_CLOSE,
-  WINDOW_FOCUS,
-  WINDOW_MAXIMIZE,
-  WINDOW_MINIMIZE,
-  WINDOW_RESTORE,
-  WINDOW_FLASH_FRAME,
-  WINDOW_TOGGLE_FULLSCREEN,
-  WINDOW_SET_BACKGROUND_THROTTLING,
-  WINDOW_SET_PROGRESS_BAR,
-  WINDOW_IS_ALWAYS_ON_TOP,
-  WINDOW_SET_ALWAYS_ON_TOP,
-  WINDOW_DEVTOOLS_OPENED,
-  WINDOW_DEVTOOLS_CLOSED
-} = require('../common/constants').IPCEvents;
-
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.USE_OSX_NATIVE_TRAFFIC_LIGHTS = void 0;
+exports.blur = blur;
+exports.close = close;
+exports.flashFrame = flashFrame;
+exports.focus = focus;
+exports.fullscreen = fullscreen;
+exports.isAlwaysOnTop = isAlwaysOnTop;
+exports.maximize = maximize;
+exports.minimize = minimize;
+exports.restore = restore;
+exports.setAlwaysOnTop = setAlwaysOnTop;
+exports.setBackgroundThrottling = setBackgroundThrottling;
+exports.setContentProtection = setContentProtection;
+exports.setDevtoolsCallbacks = setDevtoolsCallbacks;
+exports.setProgressBar = setProgressBar;
+exports.setZoomFactor = setZoomFactor;
+exports.supportsContentProtection = supportsContentProtection;
+var _electron = _interopRequireDefault(require("electron"));
+var _processUtils = require("../../../common/processUtils");
+var _DiscordIPC = require("../common/DiscordIPC");
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 let devtoolsOpenedCallback = () => {};
-
 let devtoolsClosedCallback = () => {};
-
-electron.ipcRenderer.on(WINDOW_DEVTOOLS_OPENED, async () => {
-  if (devtoolsOpenedCallback != null) {
-    devtoolsOpenedCallback();
-  }
+_DiscordIPC.DiscordIPC.renderer.on(_DiscordIPC.IPCEvents.WINDOW_DEVTOOLS_OPENED, () => {
+  var _devtoolsOpenedCallba;
+  (_devtoolsOpenedCallba = devtoolsOpenedCallback) === null || _devtoolsOpenedCallba === void 0 ? void 0 : _devtoolsOpenedCallba();
 });
-electron.ipcRenderer.on(WINDOW_DEVTOOLS_CLOSED, async () => {
-  if (devtoolsClosedCallback != null) {
-    devtoolsClosedCallback();
-  }
+_DiscordIPC.DiscordIPC.renderer.on(_DiscordIPC.IPCEvents.WINDOW_DEVTOOLS_CLOSED, () => {
+  var _devtoolsClosedCallba;
+  (_devtoolsClosedCallba = devtoolsClosedCallback) === null || _devtoolsClosedCallba === void 0 ? void 0 : _devtoolsClosedCallba();
 });
-
-async function flashFrame(flag) {
-  electron.ipcRenderer.invoke(WINDOW_FLASH_FRAME, flag);
+function flashFrame(flag) {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.WINDOW_FLASH_FRAME, flag);
 }
-
-async function minimize(key) {
-  electron.ipcRenderer.invoke(WINDOW_MINIMIZE, key);
+function minimize(key) {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.WINDOW_MINIMIZE, key);
 }
-
-async function restore(key) {
-  electron.ipcRenderer.invoke(WINDOW_RESTORE, key);
+function restore(key) {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.WINDOW_RESTORE, key);
 }
-
-async function maximize(key) {
-  electron.ipcRenderer.invoke(WINDOW_MAXIMIZE, key);
+function maximize(key) {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.WINDOW_MAXIMIZE, key);
 }
-
-async function focus(_hack, key) {
-  electron.ipcRenderer.invoke(WINDOW_FOCUS, key);
+function focus(_hack, key) {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.WINDOW_FOCUS, key);
 }
-
-async function setAlwaysOnTop(key, enabled) {
-  return electron.ipcRenderer.invoke(WINDOW_SET_ALWAYS_ON_TOP, key, enabled);
+function setAlwaysOnTop(key, enabled) {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.WINDOW_SET_ALWAYS_ON_TOP, key, enabled);
 }
-
-async function isAlwaysOnTop(key) {
-  return electron.ipcRenderer.invoke(WINDOW_IS_ALWAYS_ON_TOP, key);
+function isAlwaysOnTop(key) {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.WINDOW_IS_ALWAYS_ON_TOP, key);
 }
-
-async function blur(key) {
-  electron.ipcRenderer.invoke(WINDOW_BLUR, key);
+function blur(key) {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.WINDOW_BLUR, key);
 }
-
-async function setProgressBar(progress, key) {
-  electron.ipcRenderer.invoke(WINDOW_SET_PROGRESS_BAR, key, progress);
+function setProgressBar(progress, key) {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.WINDOW_SET_PROGRESS_BAR, key ?? null, progress);
 }
-
-async function fullscreen(key) {
-  electron.ipcRenderer.invoke(WINDOW_TOGGLE_FULLSCREEN, key);
+function fullscreen(key) {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.WINDOW_TOGGLE_FULLSCREEN, key);
 }
-
-async function close(key) {
-  electron.ipcRenderer.invoke(WINDOW_CLOSE, key);
+function close(key) {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.WINDOW_CLOSE, key);
 }
-
-async function setZoomFactor(factor) {
-  if (!electron.webFrame.setZoomFactor) return;
-  electron.webFrame.setZoomFactor(factor / 100);
+function setZoomFactor(factor) {
+  _electron.default.webFrame.setZoomFactor(factor / 100);
 }
-
-async function setBackgroundThrottling(enabled) {
-  electron.ipcRenderer.invoke(WINDOW_SET_BACKGROUND_THROTTLING, enabled);
+function setBackgroundThrottling(enabled) {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.WINDOW_SET_BACKGROUND_THROTTLING, enabled);
 }
-
-async function setDevtoolsCallbacks(onOpened, onClosed) {
+function setDevtoolsCallbacks(onOpened, onClosed) {
   devtoolsOpenedCallback = onOpened;
   devtoolsClosedCallback = onClosed;
 }
-
+function supportsContentProtection() {
+  return _processUtils.IS_WIN;
+}
+function setContentProtection(enabled) {
+  if (!supportsContentProtection()) {
+    console.log('setContentProtection: Unsupported platform.');
+    return Promise.resolve();
+  }
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.WINDOW_SET_CONTENT_PROTCTION, enabled);
+}
 const USE_OSX_NATIVE_TRAFFIC_LIGHTS = true;
-module.exports = {
-  flashFrame,
-  minimize,
-  restore,
-  maximize,
-  focus,
-  blur,
-  fullscreen,
-  close,
-  setAlwaysOnTop,
-  isAlwaysOnTop,
-  setZoomFactor,
-  setBackgroundThrottling,
-  setProgressBar,
-  setDevtoolsCallbacks,
-  USE_OSX_NATIVE_TRAFFIC_LIGHTS
-};
+exports.USE_OSX_NATIVE_TRAFFIC_LIGHTS = USE_OSX_NATIVE_TRAFFIC_LIGHTS;

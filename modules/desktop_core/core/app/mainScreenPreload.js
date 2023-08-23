@@ -3,29 +3,21 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
 if (!process.isMainFrame) {
   throw new Error('Preload scripts should not be running in a subframe');
 }
-
 let uncaughtExceptionHandler;
-
 function setUncaughtExceptionHandler(handler) {
   uncaughtExceptionHandler = handler;
 }
-
 if (window.opener === null) {
   const {
     contextBridge,
     discord
   } = require('electron');
-
   discord === null || discord === void 0 ? void 0 : discord.install('createDiscordStream');
-
   const app = require('./discord_native/renderer/app');
-
   const powerMonitor = require('./discord_native/renderer/powerMonitor');
-
   const DiscordNative = {
     isRenderer: process.type === 'renderer',
     setUncaughtExceptionHandler,
@@ -56,11 +48,8 @@ if (window.opener === null) {
     remoteApp: app,
     remotePowerMonitor: powerMonitor
   };
-
   const crashReporterSetup = require('../common/crashReporterSetup');
-
   const sentry = require('@sentry/electron');
-
   if (crashReporterSetup && !crashReporterSetup.isInitialized()) {
     const buildInfo = {
       releaseChannel: app.getReleaseChannel(),
@@ -68,15 +57,12 @@ if (window.opener === null) {
     };
     crashReporterSetup.init(buildInfo, sentry);
   }
-
   contextBridge.exposeInMainWorld('DiscordNative', DiscordNative);
   process.once('loaded', () => {
     global.DiscordNative = DiscordNative;
-    void DiscordNative.fileManager.cleanupTempFiles();
   });
   process.on('uncaughtException', (err, origin) => {
     var _uncaughtExceptionHan;
-
     (_uncaughtExceptionHan = uncaughtExceptionHandler) === null || _uncaughtExceptionHan === void 0 ? void 0 : _uncaughtExceptionHan(err, origin);
   });
   window.popouts = new Map();

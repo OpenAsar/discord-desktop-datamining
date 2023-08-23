@@ -7,8 +7,7 @@
     "@sentry/electron": "4.5.0",
     "@discordapp/desktop-electron-test-rpc-protocol": "file:../../../discord_common/js/packages/desktop-electron-test-rpc-protocol",
     "@discordapp/discord-native-types": "file:../../../discord_common/js/packages/discord-native-types",
-    "invariant": "2.2.4",
-    "lodash": "4.17.19",
+    "lodash": "4.17.21",
     "mkdirp": "^0.5.1",
     "request": "2.88.0",
     "rimraf": "^2.6.3",
@@ -16,11 +15,11 @@
     "yauzl": "^2.10.0"
   },
   "devDependencies": {
-    "@types/electron": "1.6.10",
     "@types/jest": "28.1.4",
     "@types/mkdirp": "1.0.2",
     "@types/node": "17.0.8",
     "@types/rimraf": "3.0.2",
+    "electron": "22.3.12",
     "jest": "^27.1.0"
   }
 }
