@@ -64,16 +64,3 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_OPEN, (_
   }
   return Promise.resolve();
 });
-_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_CLOSE, () => {
-  if (interactiveWindow == null) {
-    console.log('GLOBAL_OVERLAY_CLOSE: Window not open.');
-    return Promise.resolve();
-  }
-  if (interactiveWindow.isDestroyed()) {
-    console.log('GLOBAL_OVERLAY_CLOSE: Window isDestroyed.');
-    return Promise.resolve();
-  }
-  interactiveWindow.close();
-  interactiveWindow = null;
-  return Promise.resolve();
-});
