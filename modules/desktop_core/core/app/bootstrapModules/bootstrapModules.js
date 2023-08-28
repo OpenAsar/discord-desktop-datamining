@@ -3,8 +3,9 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.crashReporterSetup = exports.buildInfo = exports.autoStart = exports.appSettings = exports.GPUSettings = exports.Constants = void 0;
 exports.init = init;
-exports.crashReporterSetup = exports.updater = exports.moduleUpdater = exports.buildInfo = exports.GPUSettings = exports.Constants = exports.appSettings = exports.requireNative = exports.autoStart = exports.splashScreen = exports.paths = void 0;
+exports.updater = exports.splashScreen = exports.requireNative = exports.paths = exports.moduleUpdater = void 0;
 let hasInit = false;
 let paths = null;
 exports.paths = paths;
@@ -28,12 +29,10 @@ let updater = null;
 exports.updater = updater;
 let crashReporterSetup = null;
 exports.crashReporterSetup = crashReporterSetup;
-
 function init(bootstrapModules) {
   if (hasInit) {
     throw new Error(`bootstrapModules has already init`);
   }
-
   exports.paths = paths = bootstrapModules.paths;
   exports.splashScreen = splashScreen = bootstrapModules.splashScreen;
   exports.autoStart = autoStart = bootstrapModules.autoStart;

@@ -4,17 +4,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-
 var _electron = require("electron");
-
 var _querystring = _interopRequireDefault(require("querystring"));
-
 var _request = _interopRequireDefault(require("request"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 const DEFAULT_REQUEST_TIMEOUT = 30000;
-
 function makeHTTPResponse({
   method,
   url,
@@ -31,22 +25,18 @@ function makeHTTPResponse({
     body
   };
 }
-
 function makeHTTPStatusError(response) {
   const err = new Error(`HTTP Error: Status Code ${response.statusCode}`);
   err.response = response;
   return err;
 }
-
 function handleHTTPResponse(resolve, reject, response, stream) {
   const totalBytes = parseInt(response.headers['content-length'] || 1, 10);
   let receivedBytes = 0;
   const chunks = [];
-
   if (response.statusCode >= 300) {
     stream = null;
   }
-
   response.on('data', chunk => {
     if (stream != null) {
       receivedBytes += chunk.length;
@@ -57,7 +47,6 @@ function handleHTTPResponse(resolve, reject, response, stream) {
       });
       return;
     }
-
     chunks.push(chunk);
   });
   response.on('end', () => {
@@ -66,18 +55,14 @@ function handleHTTPResponse(resolve, reject, response, stream) {
       stream.end();
       return;
     }
-
     const res = makeHTTPResponse(response, Buffer.concat(chunks));
-
     if (res.statusCode >= 300) {
       reject(makeHTTPStatusError(res));
       return;
     }
-
     resolve(res);
   });
 }
-
 function nodeRequest({
   method,
   url,
@@ -102,7 +87,6 @@ function nodeRequest({
     req.on('error', err => reject(err));
   });
 }
-
 async function electronRequest({
   method,
   url,
@@ -113,29 +97,24 @@ async function electronRequest({
   stream
 }) {
   await _electron.app.whenReady();
-
   const {
     net,
     session
   } = require('electron');
-
   const req = net.request({
     method,
     url: `${url}${qs != null ? `?${_querystring.default.stringify(qs)}` : ''}`,
     redirect: 'follow',
     session: session.defaultSession
   });
-
   if (headers != null) {
     for (const headerKey of Object.keys(headers)) {
       req.setHeader(headerKey, headers[headerKey]);
     }
   }
-
   if (body != null) {
     req.write(body, 'utf-8');
   }
-
   return new Promise((resolve, reject) => {
     const reqTimeout = setTimeout(() => {
       req.abort();
@@ -153,28 +132,24 @@ async function electronRequest({
     req.end();
   });
 }
-
 async function requestWithMethod(method, options) {
   if (typeof options === 'string') {
     options = {
       url: options
     };
   }
-
-  options = { ...options,
+  options = {
+    ...options,
     method
   };
-
   try {
     return await electronRequest(options);
   } catch (err) {
     console.log(`Error downloading with electron net: ${err.message}`);
     console.log('Falling back to node net library..');
   }
-
   return nodeRequest(options);
 }
-
 var _default = {
   get: requestWithMethod.bind(null, 'GET')
 };

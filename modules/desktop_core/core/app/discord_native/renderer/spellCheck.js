@@ -1,61 +1,39 @@
 "use strict";
 
-const electron = require('electron');
-
-const EventEmitter = require('events');
-
-const {
-  SPELLCHECK_RESULT,
-  SPELLCHECK_REPLACE_MISSPELLING,
-  SPELLCHECK_GET_AVAILABLE_DICTIONARIES,
-  SPELLCHECK_SET_LOCALE,
-  SPELLCHECK_SET_LEARNED_WORDS
-} = require('../common/constants').IPCEvents;
-
-const events = new EventEmitter();
-electron.ipcRenderer.on(SPELLCHECK_RESULT, handleSpellcheckData);
-
-function handleSpellcheckData(_, misspelledWord, dictionarySuggestions) {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getAvailableDictionaries = getAvailableDictionaries;
+exports.on = on;
+exports.replaceMisspelling = replaceMisspelling;
+exports.setLearnedWords = setLearnedWords;
+exports.setLocale = setLocale;
+var _events = _interopRequireDefault(require("events"));
+var _DiscordIPC = require("../common/DiscordIPC");
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+const events = new _events.default();
+_DiscordIPC.DiscordIPC.renderer.on(_DiscordIPC.IPCEvents.SPELLCHECK_RESULT, (_, misspelledWord, dictionarySuggestions) => {
   events.emit('spellcheck-result', misspelledWord, dictionarySuggestions);
+});
+function on(eventName, callback) {
+  events.on(eventName, callback);
+  return () => events.removeListener(eventName, callback);
 }
-
-function on() {
-  events.on.apply(events, arguments);
+function getAvailableDictionaries() {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.SPELLCHECK_GET_AVAILABLE_DICTIONARIES);
 }
-
-function removeListener() {
-  events.removeListener.apply(events, arguments);
-}
-
-async function getAvailableDictionaries() {
-  return electron.ipcRenderer.invoke(SPELLCHECK_GET_AVAILABLE_DICTIONARIES);
-}
-
 async function setLocale(locale) {
   let succeeded = true;
-
   try {
-    await electron.ipcRenderer.invoke(SPELLCHECK_SET_LOCALE, locale);
+    await _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.SPELLCHECK_SET_LOCALE, locale);
   } catch (_) {
     succeeded = false;
   }
-
   return succeeded;
 }
-
-async function setLearnedWords(learnedWords) {
-  return electron.ipcRenderer.invoke(SPELLCHECK_SET_LEARNED_WORDS, learnedWords);
+function setLearnedWords(learnedWords) {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.SPELLCHECK_SET_LEARNED_WORDS, learnedWords);
 }
-
-async function replaceMisspelling(correction) {
-  return electron.ipcRenderer.invoke(SPELLCHECK_REPLACE_MISSPELLING, correction);
+function replaceMisspelling(correction) {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.SPELLCHECK_REPLACE_MISSPELLING, correction);
 }
-
-module.exports = {
-  on,
-  removeListener,
-  getAvailableDictionaries,
-  setLocale,
-  setLearnedWords,
-  replaceMisspelling
-};

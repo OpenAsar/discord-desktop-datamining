@@ -4,102 +4,124 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.injectGetWindow = injectGetWindow;
-
-const electron = require('electron');
-
-const process = require('process');
-
-const {
-  WINDOW_BLUR,
-  WINDOW_CLOSE,
-  WINDOW_FOCUS,
-  WINDOW_MAXIMIZE,
-  WINDOW_MINIMIZE,
-  WINDOW_RESTORE,
-  WINDOW_FLASH_FRAME,
-  WINDOW_TOGGLE_FULLSCREEN,
-  WINDOW_SET_BACKGROUND_THROTTLING,
-  WINDOW_SET_PROGRESS_BAR,
-  WINDOW_IS_ALWAYS_ON_TOP,
-  WINDOW_SET_ALWAYS_ON_TOP
-} = require('../common/constants').IPCEvents;
-
-let injectedGetWindow = () => {
-  return null;
-};
-
-function injectGetWindow(getWindow) {
+exports.newWindowEvent = newWindowEvent;
+var _electron = _interopRequireDefault(require("electron"));
+var _process = _interopRequireDefault(require("process"));
+var _DiscordIPC = require("../common/DiscordIPC");
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+let injectedGetWindow = () => null;
+let injectedGetAllWindows = () => [];
+let contentProtectionEnabled = false;
+function injectGetWindow(getWindow, getAllWindows) {
   injectedGetWindow = getWindow;
+  injectedGetAllWindows = getAllWindows;
 }
-
-electron.ipcMain.handle(WINDOW_FLASH_FRAME, async (_, flag) => {
-  const currentWindow = injectedGetWindow();
-  if (currentWindow == null || currentWindow.flashFrame == null) return;
-  currentWindow.flashFrame(!currentWindow.isFocused() && flag);
-});
-electron.ipcMain.handle(WINDOW_MINIMIZE, async (_, key) => {
-  const win = injectedGetWindow(key);
-  if (win == null) return;
-  win.minimize();
-});
-electron.ipcMain.handle(WINDOW_RESTORE, async (_, key) => {
-  const win = injectedGetWindow(key);
-  if (win == null) return;
-  win.restore();
-});
-electron.ipcMain.handle(WINDOW_MAXIMIZE, async (_, key) => {
-  const win = injectedGetWindow(key);
-  if (win == null) return;
-
-  if (win.isMaximized()) {
-    win.unmaximize();
-  } else {
-    win.maximize();
+function newWindowEvent(window) {
+  if (contentProtectionEnabled) {
+    window.setContentProtection(true);
+    console.log(`window: WINDOW_SET_CONTENT_PROTCTION ${window.id} = true`);
   }
+}
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_FLASH_FRAME, (_, flag) => {
+  const currentWindow = injectedGetWindow(null);
+  if (currentWindow == null || currentWindow.flashFrame == null) return Promise.resolve();
+  currentWindow.flashFrame(!currentWindow.isFocused() && flag);
+  return Promise.resolve();
 });
-electron.ipcMain.handle(WINDOW_FOCUS, async (_, key) => {
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_MINIMIZE, (_, key) => {
   const win = injectedGetWindow(key);
-  if (win == null) return;
-  win.show();
-  win.setSkipTaskbar(false);
+  if (win != null) {
+    win.minimize();
+  }
+  return Promise.resolve();
 });
-electron.ipcMain.handle(WINDOW_SET_ALWAYS_ON_TOP, async (_, key, enabled) => {
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_RESTORE, (_, key) => {
   const win = injectedGetWindow(key);
-  if (win == null) return;
-  win.setAlwaysOnTop(enabled);
+  if (win != null) {
+    win.restore();
+  }
+  return Promise.resolve();
 });
-electron.ipcMain.handle(WINDOW_IS_ALWAYS_ON_TOP, async (_, key) => {
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_MAXIMIZE, (_, key) => {
   const win = injectedGetWindow(key);
-  if (win == null) return false;
-  return win.isAlwaysOnTop();
+  if (win != null) {
+    if (win.isMaximized()) {
+      win.unmaximize();
+    } else {
+      win.maximize();
+    }
+  }
+  return Promise.resolve();
 });
-electron.ipcMain.handle(WINDOW_BLUR, async (_, key) => {
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_FOCUS, (_, key) => {
   const win = injectedGetWindow(key);
-
+  if (win != null) {
+    win.show();
+    win.setSkipTaskbar(false);
+  }
+  return Promise.resolve();
+});
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_SET_ALWAYS_ON_TOP, (_, key, enabled) => {
+  const win = injectedGetWindow(key);
+  if (win != null) {
+    win.setAlwaysOnTop(enabled);
+  }
+  return Promise.resolve();
+});
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_IS_ALWAYS_ON_TOP, (_, key) => {
+  const win = injectedGetWindow(key);
+  if (win == null) return Promise.resolve(false);
+  return Promise.resolve(win.isAlwaysOnTop());
+});
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_BLUR, (_, key) => {
+  const win = injectedGetWindow(key);
   if (win != null && !win.isDestroyed()) {
     win.blur();
   }
+  return Promise.resolve();
 });
-electron.ipcMain.handle(WINDOW_SET_PROGRESS_BAR, async (_, key, progress) => {
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_SET_PROGRESS_BAR, (_, key, progress) => {
   const win = injectedGetWindow(key);
-  if (win == null) return;
-  win.setProgressBar(progress);
+  if (win != null) {
+    win.setProgressBar(progress);
+  }
+  return Promise.resolve();
 });
-electron.ipcMain.handle(WINDOW_TOGGLE_FULLSCREEN, async (_, key) => {
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_TOGGLE_FULLSCREEN, (_, key) => {
   const currentWindow = injectedGetWindow(key);
+  if (currentWindow == null) {
+    console.error(`window: Unable to find window with key ${key}`);
+    return Promise.resolve();
+  }
   currentWindow.setFullScreen(!currentWindow.isFullScreen());
+  return Promise.resolve();
 });
-electron.ipcMain.handle(WINDOW_CLOSE, async (_, key) => {
-  if (key == null && process.platform === 'darwin') {
-    electron.Menu.sendActionToFirstResponder('hide:');
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_CLOSE, (_, key) => {
+  if (key == null && _process.default.platform === 'darwin') {
+    _electron.default.Menu.sendActionToFirstResponder('hide:');
   } else {
     const win = injectedGetWindow(key);
-    if (win == null) return;
-    win.close();
+    if (win != null) {
+      win.close();
+    }
   }
+  return Promise.resolve();
 });
-electron.ipcMain.handle(WINDOW_SET_BACKGROUND_THROTTLING, async (_, enabled) => {
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_SET_BACKGROUND_THROTTLING, (_, enabled) => {
   const win = injectedGetWindow();
-  if (win == null) return;
-  win.webContents.setBackgroundThrottling(enabled);
+  if (win != null) {
+    win.webContents.setBackgroundThrottling(enabled);
+  }
+  return Promise.resolve();
+});
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_SET_CONTENT_PROTCTION, (_, enabled) => {
+  const windows = injectedGetAllWindows();
+  for (const window of windows) {
+    if (window != null) {
+      window.setContentProtection(enabled);
+      console.log(`window: WINDOW_SET_CONTENT_PROTCTION ${window.id} = ${enabled}`);
+    }
+  }
+  contentProtectionEnabled = enabled;
+  return Promise.resolve();
 });
