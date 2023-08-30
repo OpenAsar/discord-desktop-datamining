@@ -212,19 +212,23 @@ function init(_endpoint, _settings, _buildInfo) {
     const appFolder = _path.default.resolve(process.execPath);
     _fs.default.access(appFolder, _fs.default.constants.W_OK, err => {
       if (err) {
-        logger.log(`Installer is in read-only volume in OSX, moving to Application folder ${err}`);
-        try {
-          const moveResult = app.moveToApplicationsFolder({
-            conflictHandler: conflictErr => {
-              logger.error(`moveToApplicationsFolder: conflicted: ${conflictErr}`);
-              return true;
+        const isInApplicationFolder = app.isInApplicationsFolder();
+        logger.log(`Installer is in read-only volume in OSX. In Application folder: ${isInApplicationFolder}. Err: ${err}`);
+        if (!isInApplicationFolder) {
+          try {
+            logger.log(`Moving to Application folder ${err}`);
+            const moveResult = app.moveToApplicationsFolder({
+              conflictHandler: conflictErr => {
+                logger.error(`moveToApplicationsFolder: conflicted: ${conflictErr}`);
+                return true;
+              }
+            });
+            if (!moveResult) {
+              logger.error('moveToApplicationsFolder: failed.');
             }
-          });
-          if (!moveResult) {
-            logger.error('moveToApplicationsFolder: failed.');
+          } catch (err) {
+            logger.log(`moveToApplicationsFolder: Could not move installer file to Application folder: ${err}`);
           }
-        } catch (err) {
-          logger.log(`moveToApplicationsFolder: Could not move installer file to Application folder: ${err}`);
         }
       }
     });
