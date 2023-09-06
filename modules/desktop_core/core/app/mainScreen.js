@@ -506,6 +506,9 @@ function launchMainAppWindow(isVisible) {
     }
     mainWindow.setMenuBarVisibility(false);
   });
+  mainWindow.on('show', () => {
+    setTimeout(() => appBadge.refreshAppBadge(), 500);
+  });
   mainWindow.webContents.on('did-navigate-in-page', (_, eventUrl) => {
     if (mainWindow == null) {
       return;

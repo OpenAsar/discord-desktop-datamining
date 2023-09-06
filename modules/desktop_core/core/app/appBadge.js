@@ -5,36 +5,47 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.hasInit = void 0;
 exports.init = init;
+exports.refreshAppBadge = refreshAppBadge;
 var _electron = require("electron");
-var _utils = require("./utils");
-var _mainScreen = require("./mainScreen");
 var _ipcMain = _interopRequireDefault(require("./ipcMain"));
+var _mainScreen = require("./mainScreen");
+var _utils = require("./utils");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 let hasInit = false;
 exports.hasInit = hasInit;
-let lastIndex;
-let appIcons;
+let lastIndex = null;
+let lastCount = null;
+const appIcons = [];
+function isSupported() {
+  return process.platform === 'win32';
+}
 function init() {
-  if (process.platform !== 'win32') return;
+  if (!isSupported()) return;
   if (hasInit) {
     console.warn('appBadge: Has already init! Cancelling init.');
     return;
   }
   exports.hasInit = hasInit = true;
   lastIndex = null;
-  appIcons = [];
   for (let i = 1; i <= 11; i++) {
     appIcons.push((0, _utils.exposeModuleResource)(`app/images/badges`, `badge-${i}.ico`));
   }
-  _ipcMain.default.on('APP_BADGE_SET', (_event, count) => setAppBadge(count));
+  _ipcMain.default.on('APP_BADGE_SET', (_event, count) => setAppBadge(count, false));
 }
-function setAppBadge(count) {
+function refreshAppBadge() {
+  if (!isSupported() || lastCount == null) return;
+  setAppBadge(lastCount, true);
+}
+function setAppBadge(count, force) {
   const win = _electron.BrowserWindow.fromId((0, _mainScreen.getMainWindowId)());
+  if (win == null || win.isDestroyed()) {
+    return;
+  }
   const {
     index,
     description
   } = getOverlayIconData(count);
-  if (lastIndex !== index) {
+  if (force || lastIndex !== index) {
     if (index == null) {
       win.setOverlayIcon(null, description);
     } else {
@@ -42,6 +53,7 @@ function setAppBadge(count) {
     }
     lastIndex = index;
   }
+  lastCount = count;
 }
 function getOverlayIconData(count) {
   if (count === -1) {
