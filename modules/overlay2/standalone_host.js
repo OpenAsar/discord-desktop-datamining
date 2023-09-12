@@ -41,7 +41,7 @@ _electron.app.whenReady().then(function () {
   require('discord_desktop_core/core.asar/app/discord_native/browser/settings');
   require('discord_desktop_core/core.asar/app/discord_native/browser/spellCheck');
   require('discord_desktop_core/core.asar/app/discord_native/browser/window');
-  require('discord_desktop_core/core.asar/app/discord_native/browser/globalOverlay');
+  require('discord_desktop_core/core.asar/app/discord_native/browser/globalOverlayStub');
   _overlay_module["default"]._initializeHostProcess({
     createRenderer: _host.createRenderer,
     destroyRenderer: _host.destroyRenderer
