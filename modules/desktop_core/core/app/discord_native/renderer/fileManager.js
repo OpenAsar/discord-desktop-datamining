@@ -40,10 +40,11 @@ exports.showOpenDialog = showOpenDialog;
 exports.uploadDiscordHookCrashes = uploadDiscordHookCrashes;
 var _fs = _interopRequireDefault(require("fs"));
 var _path = _interopRequireWildcard(require("path"));
+var blackbox = _interopRequireWildcard(require("../../../common/blackbox"));
+var _utils = require("../../../common/utils");
 var _DiscordIPC = require("../common/DiscordIPC");
 var _fileutils = require("../common/fileutils");
 var _paths = require("../common/paths");
-var _utils = require("../common/utils");
 var _crashReporter = require("./crashReporter");
 var _endpoints = _interopRequireDefault(require("./endpoints"));
 var _files = require("./files");
@@ -52,6 +53,7 @@ function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "functio
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 const uploadHookCrashSequence = (0, _utils.createLock)();
+const combineWebRtcLogsSequence = (0, _utils.createLock)();
 const MAX_CALLSCOPE_LOG_SIZE = 10 * 1024 * 1024;
 async function saveWithDialog(fileContents, fileName) {
   if ((0, _files.containsInvalidFileChar)(fileName)) {
@@ -94,23 +96,28 @@ async function readLogFiles(maxSize) {
   const hookPath = _path.default.join(modulePath, 'discord_hook');
   const utilsPath = _path.default.join(modulePath, 'discord_utils');
   const filesToUpload = [_path.default.join(voicePath, 'discord-webrtc'), _path.default.join(voicePath, 'discord-last-webrtc'), _path.default.join(voicePath, 'audio_state.json'), _path.default.join(hookPath, 'hook.log'), _path.default.join(utilsPath, 'live_minidump.dmp')];
+  blackbox.initializeRenderer(modulePath);
+  const minidump = await blackbox.minidumpFiles.getNewestFile();
+  if (minidump != null) {
+    filesToUpload.push(minidump);
+  }
+  const blackboxLog = await blackbox.logFiles.getNewestFile();
+  if (blackboxLog != null) {
+    filesToUpload.push(blackboxLog);
+  }
   const crashFiles = await (0, _paths.getCrashFiles)();
   if (crashFiles.length > 0) {
     filesToUpload.push(crashFiles[0]);
   }
   return (0, _fileutils.readFulfilledFiles)(filesToUpload, maxSize, false);
 }
-let combineWebRtcLogsMutex = Promise.resolve();
 async function combineWebRtcLogs(path1, path2, destinationPath) {
   const modulePath = await getModulePath();
   const voicePath = _path.default.join(modulePath, 'discord_voice');
   const webRtcFile1 = _path.default.join(voicePath, path1);
   const webRtcFile2 = _path.default.join(voicePath, path2);
   const combinedFilePath = _path.default.join(voicePath, destinationPath);
-  try {
-    await combineWebRtcLogsMutex;
-  } catch {}
-  combineWebRtcLogsMutex = new Promise(async resolve => {
+  await combineWebRtcLogsSequence(async () => {
     try {
       const [file1Data, file2Data] = await Promise.all([_fs.default.promises.readFile(webRtcFile1).catch(() => null), _fs.default.promises.readFile(webRtcFile2).catch(() => null)]);
       if (file1Data !== null && file2Data === null) {
@@ -126,8 +133,8 @@ async function combineWebRtcLogs(path1, path2, destinationPath) {
           await _fs.default.promises.writeFile(combinedFilePath, Buffer.concat([file1Data, file2Data]));
         }
       }
-    } finally {
-      resolve();
+    } catch (e) {
+      console.error(`combineWebRtcLogs: Failed ${e === null || e === void 0 ? void 0 : e.message}`, e);
     }
   });
 }
