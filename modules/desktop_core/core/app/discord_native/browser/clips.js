@@ -10,9 +10,9 @@ var _promises = _interopRequireDefault(require("fs/promises"));
 var _path = _interopRequireDefault(require("path"));
 var _url = require("url");
 var _constants = require("../../../common/constants");
+var _utils = require("../../../common/utils");
 var _DiscordIPC = require("../common/DiscordIPC");
 var _fileutils = require("../common/fileutils");
-var _utils = require("../common/utils");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 const MAX_LENGTH = _buffer.default.constants.MAX_LENGTH;
 const INVALID_FILE_ERROR = 'Invalid file';

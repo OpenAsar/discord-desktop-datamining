@@ -7,7 +7,10 @@ exports.injectBuildInfo = injectBuildInfo;
 exports.injectModuleUpdater = injectModuleUpdater;
 exports.injectUpdater = injectUpdater;
 var _electron = _interopRequireDefault(require("electron"));
+var process = _interopRequireWildcard(require("process"));
 var _DiscordIPC = require("../common/DiscordIPC");
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 let injectedBuildInfo = null;
 let injectedModuleUpdater = null;
@@ -45,6 +48,13 @@ _DiscordIPC.DiscordIPC.main.on(_DiscordIPC.IPCEvents.APP_GET_BUILD_NUMBER, event
     return;
   }
   event.returnValue = null;
+});
+_DiscordIPC.DiscordIPC.main.on(_DiscordIPC.IPCEvents.APP_GET_ARCH, event => {
+  if (process.arch === 'ia32') {
+    event.returnValue = 'x86';
+    return;
+  }
+  event.returnValue = process.arch;
 });
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.APP_GET_MODULE_VERSIONS, async () => {
   var _injectedUpdater2;
