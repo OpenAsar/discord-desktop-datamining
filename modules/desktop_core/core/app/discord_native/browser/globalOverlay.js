@@ -191,7 +191,7 @@ function setInteractionEnabled(enabled) {
     return;
   }
   overlayWindow.setIgnoreMouseEvents(!isInteractionEnabled, {
-    forward: true
+    forward: false
   });
   if (isInteractionEnabled) {
     overlayWindow.focus();
