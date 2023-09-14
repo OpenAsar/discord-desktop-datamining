@@ -7,10 +7,12 @@ exports.getGlobalSentry = getGlobalSentry;
 exports.init = init;
 exports.isInitialized = isInitialized;
 exports.metadata = void 0;
+var _child_process = _interopRequireDefault(require("child_process"));
+var blackbox = _interopRequireWildcard(require("./blackbox"));
 var processUtils = _interopRequireWildcard(require("./processUtils"));
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-const childProcess = require('child_process');
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 let gSentry = null;
 let initialized = false;
 const metadata = {};
@@ -36,11 +38,12 @@ function initializeSentrySdk(sentry, buildInfo) {
     release: buildInfo.version,
     autoSessionTracking: false,
     maxValueLength: 250,
-    beforeSend(event) {
+    beforeSend(event, hint) {
       event.extra = metadata;
+      void blackbox.addSentryReport(event, hint);
       return event;
     },
-    ignoreErrors: ['EADDRINUSE', 'ResizeObserver loop limit exceeded', 'EACCES: permission denied', 'BetterDiscord', 'mwittrien.github.io', 'Error: getaddrinfo ENOTFOUND raw.githubusercontent.com'],
+    ignoreErrors: ['EADDRINUSE', 'ResizeObserver loop limit exceeded', 'EACCES: permission denied', 'BetterDiscord', 'VencordPatcher', 'mwittrien.github.io', 'Error: getaddrinfo ENOTFOUND raw.githubusercontent.com'],
     denyUrls: [/betterdiscord:\/\//]
   });
   gSentry = sentry;
@@ -63,11 +66,11 @@ function init(buildInfo, sentry) {
   sentryMetadata['release'] = buildInfo.version;
   metadata['sentry'] = sentryMetadata;
   if (processUtils.IS_LINUX) {
-    const XDG_CURRENT_DESKTOP = process.env.XDG_CURRENT_DESKTOP || 'unknown';
-    const GDMSESSION = process.env.GDMSESSION || 'unknown';
-    metadata['wm'] = `${XDG_CURRENT_DESKTOP},${GDMSESSION}`;
+    const xdgCurrentDesktop = process.env.XDG_CURRENT_DESKTOP ?? 'unknown';
+    const gdmSession = process.env.GDMSESSION ?? 'unknown';
+    metadata['wm'] = `${xdgCurrentDesktop},${gdmSession}`;
     try {
-      metadata['distro'] = childProcess.execFileSync('lsb_release', ['-ds'], {
+      metadata['distro'] = _child_process.default.execFileSync('lsb_release', ['-ds'], {
         timeout: 100,
         maxBuffer: 512,
         encoding: 'utf-8'
@@ -82,9 +85,9 @@ function buildSentryDSN(dsnKey) {
   }
   return 'https://' + dsnKey + '@' + SENTRY_PROJECT_HOST + '.insecure.sentry.io/' + SENTRY_PROJECT_ID;
 }
-function getSentryDSN(release_channel) {
-  if (release_channel != null && CHANNEL_SENTRY_DSN[release_channel] != null) {
-    return CHANNEL_SENTRY_DSN[release_channel];
+function getSentryDSN(releaseChannel) {
+  if (releaseChannel != null && CHANNEL_SENTRY_DSN[releaseChannel] != null) {
+    return CHANNEL_SENTRY_DSN[releaseChannel];
   }
   return DEFAULT_SENTRY_DSN;
 }

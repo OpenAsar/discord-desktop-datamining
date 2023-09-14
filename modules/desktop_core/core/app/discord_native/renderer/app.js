@@ -8,6 +8,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 const releaseChannel = _DiscordIPC.DiscordIPC.renderer.sendSync(_DiscordIPC.IPCEvents.APP_GET_RELEASE_CHANNEL_SYNC);
 const hostVersion = _DiscordIPC.DiscordIPC.renderer.sendSync(_DiscordIPC.IPCEvents.APP_GET_HOST_VERSION_SYNC);
 const buildNumber = _DiscordIPC.DiscordIPC.renderer.sendSync(_DiscordIPC.IPCEvents.APP_GET_BUILD_NUMBER);
+const appArch = _DiscordIPC.DiscordIPC.renderer.sendSync(_DiscordIPC.IPCEvents.APP_GET_ARCH);
 void (0, _crashReporter.updateCrashReporter)({
   nativeBuildNumber: (buildNumber === null || buildNumber === void 0 ? void 0 : buildNumber.toString()) ?? 'null'
 });
@@ -26,6 +27,9 @@ function getVersion() {
 }
 function getBuildNumber() {
   return buildNumber;
+}
+function getAppArch() {
+  return appArch;
 }
 function getModuleVersions() {
   return moduleVersions;
@@ -69,6 +73,7 @@ module.exports = {
   getVersion,
   getModuleVersions,
   getBuildNumber,
+  getAppArch,
   getPath: _paths.getPath,
   setBadgeCount,
   dock: {
