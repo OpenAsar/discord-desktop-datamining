@@ -38,7 +38,13 @@ function update(startMinimized, doneCallback, showCallback) {
     });
     if (usePinnedUpdateManifest) {
       const manifestPath = _path.default.join(paths.getUserData(), 'pinned_update.json');
-      updater.setPinnedManifestSync(JSON.parse(_fs.default.readFileSync(manifestPath)));
+      try {
+        const manifest = _fs.default.readFileSync(manifestPath);
+        updater.setPinnedManifestSync(JSON.parse(manifest));
+      } catch (err) {
+        console.error(`Could not read pinned manifest! (code: ${err.code})`);
+        (0, _errorHandler.fatal)(err);
+      }
     }
     firstRun.performFirstRunTasks(updater);
   } else {
