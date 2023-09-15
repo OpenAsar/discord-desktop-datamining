@@ -108,6 +108,10 @@ if (process.platform === 'win32' || (process.platform === 'darwin' && semver.gte
   features.declareSupported('mediapipe_animated');
 }
 
+if (process.platform === 'win32' || process.platform === 'darwin' || platform === 'linux') {
+  features.declareSupported('image_quality_measurement');
+}
+
 if (process.platform === 'win32') {
   features.declareSupported('voice_legacy_subsystem');
   features.declareSupported('wumpus_video');
