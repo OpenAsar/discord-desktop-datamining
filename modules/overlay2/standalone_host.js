@@ -18,7 +18,6 @@ global.features.declareSupported('overlay-hidpi');
 _electron.app.disableHardwareAcceleration();
 _electron.app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 _electron.app.whenReady().then(function () {
-  // @ts-expect-error
   var buildInfo = require(_path["default"].join(_process["default"].resourcesPath, 'build_info.json'));
 
   // eslint-disable import/no-unresolved
@@ -42,6 +41,7 @@ _electron.app.whenReady().then(function () {
   require('discord_desktop_core/core.asar/app/discord_native/browser/settings');
   require('discord_desktop_core/core.asar/app/discord_native/browser/spellCheck');
   require('discord_desktop_core/core.asar/app/discord_native/browser/window');
+  require('discord_desktop_core/core.asar/app/discord_native/browser/globalOverlayStub');
   _overlay_module["default"]._initializeHostProcess({
     createRenderer: _host.createRenderer,
     destroyRenderer: _host.destroyRenderer

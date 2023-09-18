@@ -7,10 +7,12 @@ var _processUtils = require("../../../common/processUtils");
 var _mainScreen = require("../../mainScreen");
 var _DiscordIPC = require("../common/DiscordIPC");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+const OPEN_TIMEOUT = 5 * 60 * 1000;
 let overlayWindow = null;
 let inputWindow = null;
 let isInteractionEnabled = false;
 let clickZones = [];
+let hasBoundScreenEvents = false;
 function isValidWindow(win) {
   var _win$webContents;
   return (win === null || win === void 0 ? void 0 : win.isDestroyed()) === false && (win === null || win === void 0 ? void 0 : (_win$webContents = win.webContents) === null || _win$webContents === void 0 ? void 0 : _win$webContents.isDestroyed()) === false;
@@ -34,12 +36,10 @@ function isValidUrl(url) {
 }
 function resizeOverlayWindow(bounds) {
   if (isValidWindow(overlayWindow)) {
-    var _overlayWindow;
-    (_overlayWindow = overlayWindow) === null || _overlayWindow === void 0 ? void 0 : _overlayWindow.setBounds(bounds);
+    overlayWindow.setBounds(bounds);
   }
   if (isValidWindow(inputWindow)) {
-    var _inputWindow;
-    (_inputWindow = inputWindow) === null || _inputWindow === void 0 ? void 0 : _inputWindow.setBounds(bounds);
+    inputWindow.setBounds(bounds);
   }
 }
 function handleDisplayAdded() {
@@ -53,18 +53,42 @@ function handleDisplayMetricsChanged(_event, display) {
     resizeOverlayWindow(display.bounds);
   }
 }
-function openOverlay(url) {
+function getActiveWindowList() {
+  const windows = [];
+  if (isValidWindow(overlayWindow)) {
+    windows.push({
+      type: 'overlay',
+      window: overlayWindow
+    });
+  }
+  if (isValidWindow(inputWindow)) {
+    windows.push({
+      type: 'input',
+      window: inputWindow
+    });
+  }
+  return windows;
+}
+async function openOverlay(url) {
   if (!_processUtils.IS_WIN) {
     console.log('GLOBAL_OVERLAY_OPEN: Windows only.');
     return;
   }
-  if (isValidWindow(overlayWindow)) {
-    console.log('GLOBAL_OVERLAY_OPEN: Window already open.');
+  if (!hasBoundScreenEvents) {
+    _electron.screen.on('display-added', handleDisplayAdded);
+    _electron.screen.on('display-removed', handleDisplayRemoved);
+    _electron.screen.on('display-metrics-changed', handleDisplayMetricsChanged);
+    hasBoundScreenEvents = true;
+  }
+  if (isValidWindow(overlayWindow) && isValidWindow(inputWindow)) {
+    console.log('openOverlay: Window already open.');
     return;
   }
   if (!isValidUrl(url)) {
     return;
   }
+  closeOverlay();
+  isInteractionEnabled = false;
   try {
     const {
       x,
@@ -84,6 +108,7 @@ function openOverlay(url) {
       type: 'toolbar',
       alwaysOnTop: true,
       skipTaskbar: false,
+      title: 'Discord Global Overlay',
       webPreferences: {
         preload: _path.default.join(__dirname, '..', '..', 'mainScreenPreload.js'),
         nodeIntegration: false,
@@ -94,61 +119,79 @@ function openOverlay(url) {
     overlayWindow = new _electron.BrowserWindow(overlayWindowOptions);
     overlayWindow.webContents.once('did-finish-load', () => {
       if (isValidWindow(overlayWindow)) {
-        var _overlayWindow2;
-        (_overlayWindow2 = overlayWindow) === null || _overlayWindow2 === void 0 ? void 0 : _overlayWindow2.show();
+        overlayWindow.show();
       }
     });
-    overlayWindow.once('closed', () => {
-      overlayWindow = null;
-      closeOverlay();
+    inputWindow = new _electron.BrowserWindow({
+      ...overlayWindowOptions,
+      title: 'Discord Global Overlay Input'
     });
-    const inputWindowOptions = {
-      ...overlayWindowOptions
-    };
-    inputWindow = new _electron.BrowserWindow(inputWindowOptions);
-    inputWindow.once('closed', () => {
-      inputWindow = null;
-      closeOverlay();
+    const loadingState = new Promise((accept, reject) => {
+      for (const {
+        type,
+        window
+      } of getActiveWindowList()) {
+        function failedHandler(eventName) {
+          console.error(`openOverlay: "${type}" ${eventName}.`);
+          closeOverlay();
+          reject(new Error(`openOverlay failed in ${eventName}.`));
+        }
+        window.webContents.once('did-finish-load', () => accept());
+        window.once('closed', () => failedHandler('closed'));
+        window.webContents.once('did-fail-load', () => failedHandler('did-fail-load'));
+        window.webContents.once('did-fail-provisional-load', () => failedHandler('did-fail-provisional-load'));
+        window.webContents.once('render-process-gone', () => failedHandler('render-process-gone'));
+        window.webContents.once('preload-error', () => failedHandler('preload-error'));
+        window.on('minimize', () => {
+          console.error(`openOverlay: "${type}" was minimized!.`);
+        });
+      }
     });
-    void inputWindow.loadURL(_path.default.join(__dirname, '..', '..', 'global_overlay', 'input.html'));
+    let timeoutId = null;
+    const timeoutState = new Promise((_accept, reject) => {
+      timeoutId = setTimeout(() => {
+        console.error(`openOverlay: Timeout reached.`);
+        reject(new Error('Timeout reached'));
+      }, OPEN_TIMEOUT);
+    });
+    console.log(`openOverlay: loading...`);
+    const loadingPromise = Promise.all([overlayWindow.loadURL(url), inputWindow.loadURL(_path.default.join(__dirname, '..', '..', 'global_overlay', 'input.html'))]);
+    await Promise.any([loadingState, loadingPromise, timeoutState]);
+    console.log(`openOverlay: loaded.`);
+    if (timeoutId != null) {
+      clearTimeout(timeoutId);
+    }
     setInteractionEnabled(isInteractionEnabled);
     overlayWindow.setAlwaysOnTop(true, 'screen-saver');
-    void overlayWindow.loadURL(url);
   } catch (e) {
-    console.log(`GLOBAL_OVERLAY_OPEN: Error "${e.text}"\n${e.stack}`);
+    console.log(`openOverlay: Error "${e.text}"\n${e.stack}`);
+    throw e;
   }
-  _electron.screen.on('display-added', handleDisplayAdded);
-  _electron.screen.on('display-removed', handleDisplayRemoved);
-  _electron.screen.on('display-metrics-changed', handleDisplayMetricsChanged);
 }
 function closeOverlay() {
-  _electron.screen.removeListener('display-added', handleDisplayAdded);
-  _electron.screen.removeListener('display-removed', handleDisplayRemoved);
-  _electron.screen.removeListener('display-metrics-changed', handleDisplayMetricsChanged);
-  if (isValidWindow(inputWindow)) {
-    var _inputWindow2, _inputWindow3;
-    (_inputWindow2 = inputWindow) === null || _inputWindow2 === void 0 ? void 0 : _inputWindow2.hide();
-    (_inputWindow3 = inputWindow) === null || _inputWindow3 === void 0 ? void 0 : _inputWindow3.close();
-    inputWindow = null;
-  } else {
-    console.log('GLOBAL_OVERLAY_CLOSE: Input window not open.');
+  const windows = getActiveWindowList();
+  console.log(`closeOverlay: Closing ${windows.length} windows...`);
+  for (const {
+    type,
+    window
+  } of windows) {
+    try {
+      window.hide();
+      window.close();
+    } catch (e) {
+      console.error(`closeOverlay: "${type}" Error "${e}"`);
+    }
   }
-  if (isValidWindow(overlayWindow)) {
-    var _overlayWindow3, _overlayWindow4;
-    (_overlayWindow3 = overlayWindow) === null || _overlayWindow3 === void 0 ? void 0 : _overlayWindow3.hide();
-    (_overlayWindow4 = overlayWindow) === null || _overlayWindow4 === void 0 ? void 0 : _overlayWindow4.close();
-    overlayWindow = null;
-  } else {
-    console.log('GLOBAL_OVERLAY_CLOSE: Overlay window not open.');
-  }
+  overlayWindow = null;
+  inputWindow = null;
 }
 function setInteractionEnabled(enabled) {
   isInteractionEnabled = enabled;
-  if (overlayWindow == null || !isValidWindow(overlayWindow) || inputWindow == null || !isValidWindow(inputWindow)) {
+  if (!isValidWindow(overlayWindow) || !isValidWindow(inputWindow)) {
     return;
   }
   overlayWindow.setIgnoreMouseEvents(!isInteractionEnabled, {
-    forward: true
+    forward: false
   });
   if (isInteractionEnabled) {
     overlayWindow.focus();
@@ -162,7 +205,7 @@ function setInteractionEnabled(enabled) {
   }
 }
 function setClickZones(zones) {
-  if (!isValidWindow(overlayWindow) || inputWindow == null || !isValidWindow(inputWindow)) {
+  if (!isValidWindow(overlayWindow) || !isValidWindow(inputWindow)) {
     return;
   }
   clickZones = zones;
@@ -185,8 +228,7 @@ function setClickZones(zones) {
   }
 }
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_OPEN, (_, url) => {
-  openOverlay(url);
-  return Promise.resolve();
+  return openOverlay(url);
 });
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_CLOSE, () => {
   closeOverlay();
@@ -209,8 +251,8 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_RELAY_IN
   }
   for (const zone of clickZones) {
     if (x >= zone.x && x <= zone.x + zone.width && y >= zone.y && y <= zone.y + zone.height) {
-      var _overlayWindow5;
-      (_overlayWindow5 = overlayWindow) === null || _overlayWindow5 === void 0 ? void 0 : _overlayWindow5.webContents.send(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_CLICK_ZONE_CLICKED, zone.name);
+      var _overlayWindow;
+      (_overlayWindow = overlayWindow) === null || _overlayWindow === void 0 ? void 0 : _overlayWindow.webContents.send(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_CLICK_ZONE_CLICKED, zone.name);
     }
   }
   return Promise.resolve();

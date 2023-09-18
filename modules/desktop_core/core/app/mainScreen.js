@@ -836,6 +836,13 @@ function init() {
       _electron.app.quit();
     }
   });
+  _electron.app.on('child-process-gone', (_event, details) => {
+    if (details.exitCode === 0) {
+      return;
+    }
+    const serviceDescription = `${details.type} (${details.name})`;
+    console.error(`child-process-gone! child: ${serviceDescription} exitCode: ${details.exitCode}`);
+  });
   _electron.app.on('accessibility-support-changed', (_event, accessibilitySupportEnabled) => webContentsSend('ACCESSIBILITY_SUPPORT_CHANGED', accessibilitySupportEnabled));
   _electron.app.on(_Constants.MenuEvents.OPEN_HELP, () => webContentsSend('HELP_OPEN'));
   _electron.app.on(_Constants.MenuEvents.OPEN_SETTINGS, () => webContentsSend('USER_SETTINGS_OPEN'));
