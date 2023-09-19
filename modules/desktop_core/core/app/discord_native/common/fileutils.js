@@ -29,7 +29,6 @@ Object.defineProperty(exports, "join", {
     return _path.join;
   }
 });
-exports.promiseFs = void 0;
 exports.readExactly = readExactly;
 exports.readFiles = readFiles;
 exports.readFulfilledFiles = readFulfilledFiles;
@@ -37,6 +36,7 @@ var _buffer = _interopRequireDefault(require("buffer"));
 var _originalFs = _interopRequireDefault(require("original-fs"));
 var _path = _interopRequireWildcard(require("path"));
 var _util = _interopRequireDefault(require("util"));
+var _zlib = require("zlib");
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -51,9 +51,11 @@ const promiseFs = {
   readFile: _util.default.promisify(_originalFs.default.readFile),
   close: _util.default.promisify(_originalFs.default.close)
 };
-exports.promiseFs = promiseFs;
-async function readFulfilledFiles(filenames, maxSize, orException) {
-  const files = await readFiles(filenames, maxSize);
+const promiseZlib = {
+  gzip: _util.default.promisify(_zlib.gzip)
+};
+async function readFulfilledFiles(filepaths, maxSize, orException, shouldGzip) {
+  const files = await readFiles(filepaths, maxSize, shouldGzip);
   if (orException) {
     files.forEach(result => {
       if (result.status === 'rejected') {
@@ -63,10 +65,10 @@ async function readFulfilledFiles(filenames, maxSize, orException) {
   }
   return files.filter(result => result.status === 'fulfilled').map(result => result.value);
 }
-function readFiles(filenames, maxSize) {
+function readFiles(filepaths, maxSize, shouldGzip) {
   maxSize = Math.min(maxSize, MAX_LENGTH);
-  return Promise.allSettled(filenames.map(async filename => {
-    const handle = await promiseFs.open(filename, 'r');
+  return Promise.allSettled(filepaths.map(async filepath => {
+    const handle = await promiseFs.open(filepath, 'r');
     try {
       const stats = await promiseFs.fstat(handle);
       if (maxSize != null && stats.size > maxSize) {
@@ -79,9 +81,19 @@ function readFiles(filenames, maxSize) {
       }
       const buffer = Buffer.alloc(stats.size);
       const data = await promiseFs.read(handle, buffer, 0, stats.size, 0);
+      let finalData = data.buffer.slice(0, data.bytesRead);
+      let finalFilename = _path.default.basename(filepath);
+      if (shouldGzip != null && shouldGzip(finalFilename)) {
+        try {
+          finalData = await promiseZlib.gzip(finalData);
+          finalFilename = finalFilename + '.gz';
+        } catch (e) {
+          console.error(`Failed to gzip ${finalFilename}`, e);
+        }
+      }
       return {
-        data: data.buffer.slice(0, data.bytesRead),
-        filename: _path.default.basename(filename)
+        data: finalData,
+        filename: finalFilename
       };
     } finally {
       void promiseFs.close(handle);
