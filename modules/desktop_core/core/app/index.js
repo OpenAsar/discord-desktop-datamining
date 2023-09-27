@@ -6,10 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.handleOpenUrl = handleOpenUrl;
 exports.setMainWindowVisible = setMainWindowVisible;
 exports.startup = startup;
-const {
-  Menu,
-  BrowserWindow
-} = require('electron');
+var _electron = require("electron");
 let mainScreen;
 function startup(bootstrapModules) {
   require('./bootstrapModules/bootstrapModules').init(bootstrapModules);
@@ -82,7 +79,7 @@ function startup(bootstrapModules) {
   const enableDevtoolsSetting = global.appSettings.get('DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING', false);
   const enableDevtools = buildInfo.releaseChannel === 'stable' ? enableDevtoolsSetting : true;
   const createApplicationMenu = require('./applicationMenu');
-  Menu.setApplicationMenu(createApplicationMenu(enableDevtools));
+  _electron.Menu.setApplicationMenu(createApplicationMenu(enableDevtools));
   mainScreen = require('./mainScreen');
   mainScreen.init();
   const {
@@ -91,11 +88,14 @@ function startup(bootstrapModules) {
     setNewWindowEvent
   } = require('./popoutWindows');
   windowNative.injectGetWindow(key => {
-    return getPopoutWindowByKey(key) || BrowserWindow.fromId(mainScreen.getMainWindowId());
-  }, () => [...getAllPopoutWindows(), BrowserWindow.fromId(mainScreen.getMainWindowId())]);
+    return getPopoutWindowByKey(key) || _electron.BrowserWindow.fromId(mainScreen.getMainWindowId());
+  }, () => [...getAllPopoutWindows(), _electron.BrowserWindow.fromId(mainScreen.getMainWindowId())]);
   setNewWindowEvent(window => windowNative.newWindowEvent(window));
 }
 function handleOpenUrl(url) {
+  if (mainScreen === null) {
+    return;
+  }
   mainScreen.handleOpenUrl(url);
 }
 function setMainWindowVisible(visible) {
