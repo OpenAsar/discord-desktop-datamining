@@ -46,7 +46,8 @@ if (window.opener === null) {
     safeStorage: require('./discord_native/renderer/safeStorage'),
     globalOverlay: require('./discord_native/renderer/globalOverlay'),
     remoteApp: app,
-    remotePowerMonitor: powerMonitor
+    remotePowerMonitor: powerMonitor,
+    webAuthn: require('./discord_native/renderer/webauthn')
   };
   const crashReporterSetup = require('../common/crashReporterSetup');
   const sentry = require('@sentry/electron');

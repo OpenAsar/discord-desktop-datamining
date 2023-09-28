@@ -70,6 +70,7 @@ function startup(bootstrapModules) {
   settings.injectSettingsBackend(appSettings.getSettings());
   require('./discord_native/browser/spellCheck');
   const windowNative = require('./discord_native/browser/window');
+  require('./discord_native/browser/webauthn');
   global.crashReporterMetadata = crashReporterSetup.metadata;
   global.mainAppDirname = Constants.MAIN_APP_DIRNAME;
   global.features = appFeatures.getFeatures();
