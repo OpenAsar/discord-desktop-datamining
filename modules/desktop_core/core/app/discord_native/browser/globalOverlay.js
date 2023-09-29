@@ -13,6 +13,7 @@ let inputWindow = null;
 let isInteractionEnabled = false;
 let clickZones = [];
 let hasBoundScreenEvents = false;
+let shouldBeVisible = false;
 function isValidWindow(win) {
   var _win$webContents;
   return (win === null || win === void 0 ? void 0 : win.isDestroyed()) === false && (win === null || win === void 0 ? void 0 : (_win$webContents = win.webContents) === null || _win$webContents === void 0 ? void 0 : _win$webContents.isDestroyed()) === false;
@@ -89,6 +90,7 @@ async function openOverlay(url) {
   }
   closeOverlay();
   isInteractionEnabled = false;
+  shouldBeVisible = false;
   try {
     const {
       x,
@@ -118,8 +120,8 @@ async function openOverlay(url) {
     };
     overlayWindow = new _electron.BrowserWindow(overlayWindowOptions);
     overlayWindow.webContents.once('did-finish-load', () => {
-      if (isValidWindow(overlayWindow)) {
-        overlayWindow.show();
+      if (isValidWindow(overlayWindow) && shouldBeVisible) {
+        overlayWindow.showInactive();
       }
     });
     inputWindow = new _electron.BrowserWindow({
@@ -187,25 +189,21 @@ function closeOverlay() {
 }
 function setInteractionEnabled(enabled) {
   isInteractionEnabled = enabled;
-  if (!isValidWindow(overlayWindow) || !isValidWindow(inputWindow)) {
+  if (!isValidWindow(overlayWindow) || !isValidWindow(inputWindow) || !shouldBeVisible) {
     return;
   }
   overlayWindow.setIgnoreMouseEvents(!isInteractionEnabled, {
-    forward: true
+    forward: false
   });
   if (isInteractionEnabled) {
-    overlayWindow.focus();
     inputWindow.setIgnoreMouseEvents(true);
     inputWindow.hide();
   } else {
-    if (overlayWindow.isFocused()) {
-      overlayWindow.blur();
-    }
     setClickZones(clickZones);
   }
 }
 function setClickZones(zones) {
-  if (!isValidWindow(overlayWindow) || !isValidWindow(inputWindow)) {
+  if (!isValidWindow(overlayWindow) || !isValidWindow(inputWindow) || !shouldBeVisible) {
     return;
   }
   clickZones = zones;
@@ -220,7 +218,7 @@ function setClickZones(zones) {
       };
       return rect;
     }));
-    inputWindow.show();
+    inputWindow.showInactive();
     inputWindow.setAlwaysOnTop(true, 'screen-saver');
   } else {
     inputWindow.setIgnoreMouseEvents(true);
@@ -252,8 +250,32 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_RELAY_IN
   for (const zone of clickZones) {
     if (x >= zone.x && x <= zone.x + zone.width && y >= zone.y && y <= zone.y + zone.height) {
       var _overlayWindow;
-      (_overlayWindow = overlayWindow) === null || _overlayWindow === void 0 ? void 0 : _overlayWindow.webContents.send(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_CLICK_ZONE_CLICKED, zone.name);
+      (_overlayWindow = overlayWindow) === null || _overlayWindow === void 0 ? void 0 : _overlayWindow.webContents.send(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_CLICK_ZONE_CLICKED, zone.name, x, y);
     }
   }
   return Promise.resolve();
+});
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_SET_VISIBILITY, (_, visible) => {
+  if (visible !== shouldBeVisible) {
+    shouldBeVisible = visible;
+    if (isValidWindow(overlayWindow)) {
+      if (shouldBeVisible) {
+        overlayWindow.showInactive();
+      } else {
+        overlayWindow.hide();
+      }
+    }
+    setInteractionEnabled(isInteractionEnabled);
+  }
+  return Promise.resolve();
+});
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_GET_WINDOW_HANDLES, () => {
+  const windowHandles = [];
+  if (isValidWindow(overlayWindow)) {
+    windowHandles.push(overlayWindow.getNativeWindowHandle().readInt32LE().toString(10));
+  }
+  if (isValidWindow(inputWindow)) {
+    windowHandles.push(inputWindow.getNativeWindowHandle().readInt32LE().toString(10));
+  }
+  return Promise.resolve(windowHandles);
 });

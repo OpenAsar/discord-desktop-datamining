@@ -8,7 +8,6 @@ exports.addSentryReport = addSentryReport;
 exports.initialize = initialize;
 exports.initializeRenderer = initializeRenderer;
 exports.minidumpFiles = exports.logFiles = void 0;
-exports.writeMinidump = writeMinidump;
 var _electron = _interopRequireDefault(require("electron"));
 var _fs = _interopRequireDefault(require("fs"));
 var _path = _interopRequireDefault(require("path"));
@@ -153,10 +152,10 @@ async function addMessage(message) {
 async function addSentryReport(event, hint) {
   try {
     for (const attachment of (hint === null || hint === void 0 ? void 0 : hint.attachments) ?? []) {
-      if (attachment.attachmentType === 'event.minidump') {
+      if (attachment.attachmentType === 'event.minidump' && attachment.data != null) {
         const buffer = Buffer.from(attachment.data);
         const minidumpfilename = await writeMinidump(buffer);
-        await addMessage(`Wrote minidump to ${minidumpfilename}`);
+        await addMessage(`Wrote ${buffer.byteLength} byte minidump to ${minidumpfilename}`);
       }
     }
     await addMessage(`Sentry report: ${JSON.stringify(event)}`);

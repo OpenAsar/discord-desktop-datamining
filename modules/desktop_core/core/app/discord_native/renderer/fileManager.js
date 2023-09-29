@@ -109,7 +109,7 @@ async function readLogFiles(maxSize) {
   if (crashFiles.length > 0) {
     filesToUpload.push(crashFiles[0]);
   }
-  return (0, _fileutils.readFulfilledFiles)(filesToUpload, maxSize, false);
+  return (0, _fileutils.readFulfilledFiles)(filesToUpload, maxSize, false, filename => (0, _files.isMinidumpFile)(filename));
 }
 async function combineWebRtcLogs(path1, path2, destinationPath) {
   const modulePath = await getModulePath();
