@@ -265,6 +265,9 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_SET_VISI
         overlayWindow.hide();
       }
     }
+    if (isValidWindow(inputWindow) && !shouldBeVisible) {
+      inputWindow.hide();
+    }
     setInteractionEnabled(isInteractionEnabled);
   }
   return Promise.resolve();
@@ -278,4 +281,14 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_GET_WIND
     windowHandles.push(inputWindow.getNativeWindowHandle().readInt32LE().toString(10));
   }
   return Promise.resolve(windowHandles);
+});
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_RESIZE, (_, left, top, right, bottom) => {
+  const rect = {
+    x: Math.ceil(left),
+    y: Math.ceil(top),
+    width: Math.ceil(right - left),
+    height: Math.ceil(bottom - top)
+  };
+  resizeOverlayWindow(rect);
+  return Promise.resolve();
 });
