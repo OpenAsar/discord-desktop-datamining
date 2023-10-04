@@ -36,9 +36,9 @@ function prepareEvent(
   applyClientOptions(prepared, options);
   applyIntegrationsMetadata(prepared, integrations);
 
-  // Only apply debug metadata to error events.
+  // Only put debug IDs onto frames for error events.
   if (event.type === undefined) {
-    applyDebugMetadata(prepared, options.stackParser);
+    applyDebugIds(prepared, options.stackParser);
   }
 
   // If we have scope given to us, use it as the base for further modifications.
@@ -73,6 +73,14 @@ function prepareEvent(
   }
 
   return result.then(evt => {
+    if (evt) {
+      // We apply the debug_meta field only after all event processors have ran, so that if any event processors modified
+      // file names (e.g.the RewriteFrames integration) the filename -> debug ID relationship isn't destroyed.
+      // This should not cause any PII issues, since we're only moving data that is already on the event and not adding
+      // any new data
+      applyDebugMeta(evt);
+    }
+
     if (typeof normalizeDepth === 'number' && normalizeDepth > 0) {
       return normalizeEvent(evt, normalizeDepth, normalizeMaxBreadth);
     }
@@ -119,9 +127,9 @@ function applyClientOptions(event, options) {
 const debugIdStackParserCache = new WeakMap();
 
 /**
- * Applies debug metadata images to the event in order to apply source maps by looking up their debug ID.
+ * Puts debug IDs into the stack frames of an error event.
  */
-function applyDebugMetadata(event, stackParser) {
+function applyDebugIds(event, stackParser) {
   const debugIdMap = GLOBAL_OBJ._sentryDebugIds;
 
   if (!debugIdMap) {
@@ -158,15 +166,39 @@ function applyDebugMetadata(event, stackParser) {
     return acc;
   }, {});
 
-  // Get a Set of filenames in the stack trace
-  const errorFileNames = new Set();
   try {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     event.exception.values.forEach(exception => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       exception.stacktrace.frames.forEach(frame => {
         if (frame.filename) {
-          errorFileNames.add(frame.filename);
+          frame.debug_id = filenameDebugIdMap[frame.filename];
+        }
+      });
+    });
+  } catch (e) {
+    // To save bundle size we're just try catching here instead of checking for the existence of all the different objects.
+  }
+}
+
+/**
+ * Moves debug IDs from the stack frames of an error event into the debug_meta field.
+ */
+function applyDebugMeta(event) {
+  // Extract debug IDs and filenames from the stack frames on the event.
+  const filenameDebugIdMap = {};
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    event.exception.values.forEach(exception => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      exception.stacktrace.frames.forEach(frame => {
+        if (frame.debug_id) {
+          if (frame.abs_path) {
+            filenameDebugIdMap[frame.abs_path] = frame.debug_id;
+          } else if (frame.filename) {
+            filenameDebugIdMap[frame.filename] = frame.debug_id;
+          }
+          delete frame.debug_id;
         }
       });
     });
@@ -174,18 +206,20 @@ function applyDebugMetadata(event, stackParser) {
     // To save bundle size we're just try catching here instead of checking for the existence of all the different objects.
   }
 
+  if (Object.keys(filenameDebugIdMap).length === 0) {
+    return;
+  }
+
   // Fill debug_meta information
   event.debug_meta = event.debug_meta || {};
   event.debug_meta.images = event.debug_meta.images || [];
   const images = event.debug_meta.images;
-  errorFileNames.forEach(filename => {
-    if (filenameDebugIdMap[filename]) {
-      images.push({
-        type: 'sourcemap',
-        code_file: filename,
-        debug_id: filenameDebugIdMap[filename],
-      });
-    }
+  Object.keys(filenameDebugIdMap).forEach(filename => {
+    images.push({
+      type: 'sourcemap',
+      code_file: filename,
+      debug_id: filenameDebugIdMap[filename],
+    });
   });
 }
 
@@ -266,5 +300,5 @@ function normalizeEvent(event, depth, maxBreadth) {
   return normalized;
 }
 
-export { applyDebugMetadata, prepareEvent };
+export { applyDebugIds, applyDebugMeta, prepareEvent };
 //# sourceMappingURL=prepareEvent.js.map

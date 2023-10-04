@@ -1,7 +1,7 @@
 import { logger } from '@sentry/utils';
 
 /** Deduplication filter */
-class Dedupe  {constructor() { Dedupe.prototype.__init.call(this); }
+class Dedupe  {
   /**
    * @inheritDoc
    */
@@ -10,11 +10,14 @@ class Dedupe  {constructor() { Dedupe.prototype.__init.call(this); }
   /**
    * @inheritDoc
    */
-   __init() {this.name = Dedupe.id;}
 
   /**
    * @inheritDoc
    */
+
+   constructor() {
+    this.name = Dedupe.id;
+  }
 
   /**
    * @inheritDoc

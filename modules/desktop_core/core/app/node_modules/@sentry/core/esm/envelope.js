@@ -31,7 +31,7 @@ function createSessionEnvelope(
   };
 
   const envelopeItem =
-    'aggregates' in session ? [{ type: 'sessions' }, session] : [{ type: 'session' }, session];
+    'aggregates' in session ? [{ type: 'sessions' }, session] : [{ type: 'session' }, session.toJSON()];
 
   return createEnvelope(envelopeHeaders, [envelopeItem]);
 }

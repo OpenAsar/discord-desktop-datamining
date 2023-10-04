@@ -1,5 +1,4 @@
-import { getCurrentHub, addGlobalEventProcessor } from '@sentry/core';
-import { isInstanceOf } from '@sentry/utils';
+import { applyAggregateErrorsToEvent } from '@sentry/utils';
 import { exceptionFromError } from '../eventbuilder.js';
 
 const DEFAULT_KEY = 'cause';
@@ -15,7 +14,6 @@ class LinkedErrors  {
   /**
    * @inheritDoc
    */
-    __init() {this.name = LinkedErrors.id;}
 
   /**
    * @inheritDoc
@@ -28,7 +26,8 @@ class LinkedErrors  {
   /**
    * @inheritDoc
    */
-   constructor(options = {}) {LinkedErrors.prototype.__init.call(this);
+   constructor(options = {}) {
+    this.name = LinkedErrors.id;
     this._key = options.key || DEFAULT_KEY;
     this._limit = options.limit || DEFAULT_LIMIT;
   }
@@ -36,52 +35,31 @@ class LinkedErrors  {
   /**
    * @inheritDoc
    */
-   setupOnce() {
-    const client = getCurrentHub().getClient();
-    if (!client) {
-      return;
-    }
+   setupOnce(addGlobalEventProcessor, getCurrentHub) {
     addGlobalEventProcessor((event, hint) => {
-      const self = getCurrentHub().getIntegration(LinkedErrors);
-      return self ? _handler(client.getOptions().stackParser, self._key, self._limit, event, hint) : event;
+      const hub = getCurrentHub();
+      const client = hub.getClient();
+      const self = hub.getIntegration(LinkedErrors);
+
+      if (!client || !self) {
+        return event;
+      }
+
+      const options = client.getOptions();
+      applyAggregateErrorsToEvent(
+        exceptionFromError,
+        options.stackParser,
+        options.maxValueLength,
+        self._key,
+        self._limit,
+        event,
+        hint,
+      );
+
+      return event;
     });
   }
 } LinkedErrors.__initStatic();
 
-/**
- * @inheritDoc
- */
-function _handler(
-  parser,
-  key,
-  limit,
-  event,
-  hint,
-) {
-  if (!event.exception || !event.exception.values || !hint || !isInstanceOf(hint.originalException, Error)) {
-    return event;
-  }
-  const linkedErrors = _walkErrorTree(parser, limit, hint.originalException , key);
-  event.exception.values = [...linkedErrors, ...event.exception.values];
-  return event;
-}
-
-/**
- * JSDOC
- */
-function _walkErrorTree(
-  parser,
-  limit,
-  error,
-  key,
-  stack = [],
-) {
-  if (!isInstanceOf(error[key], Error) || stack.length + 1 >= limit) {
-    return stack;
-  }
-  const exception = exceptionFromError(parser, error[key]);
-  return _walkErrorTree(parser, limit, error[key], key, [exception, ...stack]);
-}
-
-export { LinkedErrors, _handler, _walkErrorTree };
+export { LinkedErrors };
 //# sourceMappingURL=linkederrors.js.map

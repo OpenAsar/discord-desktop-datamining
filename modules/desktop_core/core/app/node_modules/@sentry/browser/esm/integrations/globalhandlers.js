@@ -15,7 +15,6 @@ class GlobalHandlers  {
   /**
    * @inheritDoc
    */
-   __init() {this.name = GlobalHandlers.id;}
 
   /** JSDoc */
 
@@ -23,17 +22,19 @@ class GlobalHandlers  {
    * Stores references functions to installing handlers. Will set to undefined
    * after they have been run so that they are not used twice.
    */
-   __init2() {this._installFunc = {
-    onerror: _installGlobalOnErrorHandler,
-    onunhandledrejection: _installGlobalOnUnhandledRejectionHandler,
-  };}
 
   /** JSDoc */
-   constructor(options) {GlobalHandlers.prototype.__init.call(this);GlobalHandlers.prototype.__init2.call(this);
+   constructor(options) {
+    this.name = GlobalHandlers.id;
     this._options = {
       onerror: true,
       onunhandledrejection: true,
       ...options,
+    };
+
+    this._installFunc = {
+      onerror: _installGlobalOnErrorHandler,
+      onunhandledrejection: _installGlobalOnUnhandledRejectionHandler,
     };
   }
   /**

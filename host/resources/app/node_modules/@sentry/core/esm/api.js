@@ -55,6 +55,10 @@ function getReportDialogEndpoint(
 ,
 ) {
   const dsn = makeDsn(dsnLike);
+  if (!dsn) {
+    return '';
+  }
+
   const endpoint = `${getBaseApiEndpoint(dsn)}embed/error-page/`;
 
   let encodedOptions = `dsn=${dsnToString(dsn)}`;

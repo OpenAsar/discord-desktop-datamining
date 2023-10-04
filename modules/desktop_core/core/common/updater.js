@@ -154,6 +154,8 @@ class Updater extends EventEmitter {
         if (progress.task['HostInstall'] != null && progress.state === TASK_STATE_COMPLETE) {
           this.emit('host-updated');
         }
+      } else if (detail['Analytics'] != null) {
+        this._reportAnalytics(detail['Analytics']);
       } else {
         console.warn('Unknown updater response', detail);
       }
@@ -164,6 +166,18 @@ class Updater extends EventEmitter {
         this.emit('unhandled-exception', e);
       }
     }
+  }
+  _reportAnalytics(analytics) {
+    this.updateEventHistory.push({
+      type: 'analytics',
+      ...this._transformAnalyticEvent(analytics)
+    });
+  }
+  _transformAnalyticEvent(event) {
+    if (event['name'] === 'updater_metrics_download') {
+      event['data']['background'] = this.isRunningInBackground;
+    }
+    return event;
   }
   _handleSyncResponse(response) {
     const detail = JSON.parse(response);
