@@ -2,7 +2,7 @@ import { addGlobalEventProcessor, getCurrentHub } from '@sentry/core';
 import { WINDOW } from '../helpers.js';
 
 /** HttpContext integration collects information about HTTP request headers */
-class HttpContext  {constructor() { HttpContext.prototype.__init.call(this); }
+class HttpContext  {
   /**
    * @inheritDoc
    */
@@ -11,7 +11,10 @@ class HttpContext  {constructor() { HttpContext.prototype.__init.call(this); }
   /**
    * @inheritDoc
    */
-   __init() {this.name = HttpContext.id;}
+
+   constructor() {
+    this.name = HttpContext.id;
+  }
 
   /**
    * @inheritDoc

@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.CallscopeLogFiles = void 0;
 exports.containsInvalidFileChar = containsInvalidFileChar;
 exports.isHookMinidumpFile = isHookMinidumpFile;
+exports.isMinidumpFile = isMinidumpFile;
 exports.isTempFile = isTempFile;
 const INVALID_FILENAME_CHAR_REGEX = /[^a-zA-Z0-9-_.]/;
 const IS_RTC_FILE = /^channel\.\d+\.\d+\.(?:tsi|tsd)$/i;
@@ -15,6 +16,9 @@ function isTempFile(filename) {
 }
 function isHookMinidumpFile(filename) {
   return /^.{8}-.{4}-.{4}-.{4}-.{12}.dmp$/i.test(filename);
+}
+function isMinidumpFile(filename) {
+  return /\.dmp$/i.test(filename);
 }
 function containsInvalidFileChar(contents) {
   return INVALID_FILENAME_CHAR_REGEX.test(contents);

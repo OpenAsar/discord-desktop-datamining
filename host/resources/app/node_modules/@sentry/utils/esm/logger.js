@@ -1,9 +1,16 @@
-import { getGlobalSingleton, GLOBAL_OBJ } from './worldwide.js';
+import { GLOBAL_OBJ } from './worldwide.js';
 
 /** Prefix for logging strings */
 const PREFIX = 'Sentry Logger ';
 
 const CONSOLE_LEVELS = ['debug', 'info', 'warn', 'error', 'log', 'assert', 'trace'] ;
+
+/** This may be mutated by the console instrumentation. */
+const originalConsoleMethods
+
+ = {};
+
+/** JSDoc */
 
 /**
  * Temporarily disable sentry console instrumentations.
@@ -16,26 +23,24 @@ function consoleSandbox(callback) {
     return callback();
   }
 
-  const originalConsole = GLOBAL_OBJ.console ;
-  const wrappedLevels = {};
+  const console = GLOBAL_OBJ.console ;
+  const wrappedFuncs = {};
+
+  const wrappedLevels = Object.keys(originalConsoleMethods) ;
 
   // Restore all wrapped console methods
-  CONSOLE_LEVELS.forEach(level => {
-    // TODO(v7): Remove this check as it's only needed for Node 6
-    const originalWrappedFunc =
-      originalConsole[level] && (originalConsole[level] ).__sentry_original__;
-    if (level in originalConsole && originalWrappedFunc) {
-      wrappedLevels[level] = originalConsole[level] ;
-      originalConsole[level] = originalWrappedFunc ;
-    }
+  wrappedLevels.forEach(level => {
+    const originalConsoleMethod = originalConsoleMethods[level] ;
+    wrappedFuncs[level] = console[level] ;
+    console[level] = originalConsoleMethod;
   });
 
   try {
     return callback();
   } finally {
     // Revert restoration to wrapped state
-    Object.keys(wrappedLevels).forEach(level => {
-      originalConsole[level] = wrappedLevels[level ];
+    wrappedLevels.forEach(level => {
+      console[level] = wrappedFuncs[level] ;
     });
   }
 }
@@ -71,13 +76,7 @@ function makeLogger() {
   return logger ;
 }
 
-// Ensure we only have a single logger instance, even if multiple versions of @sentry/utils are being used
-let logger;
-if ((typeof __SENTRY_DEBUG__ === 'undefined' || __SENTRY_DEBUG__)) {
-  logger = getGlobalSingleton('logger', makeLogger);
-} else {
-  logger = makeLogger();
-}
+const logger = makeLogger();
 
-export { CONSOLE_LEVELS, consoleSandbox, logger };
+export { CONSOLE_LEVELS, consoleSandbox, logger, originalConsoleMethods };
 //# sourceMappingURL=logger.js.map

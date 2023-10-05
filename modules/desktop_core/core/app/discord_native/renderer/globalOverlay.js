@@ -4,16 +4,20 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.closeOverlay = closeOverlay;
+exports.getWindowHandles = getWindowHandles;
+exports.hideOverlay = hideOverlay;
 exports.openOverlay = openOverlay;
 exports.relayInputClick = relayInputClick;
+exports.resize = resize;
 exports.setClickZoneCallback = setClickZoneCallback;
 exports.setClickZones = setClickZones;
 exports.setInteractionEnabled = setInteractionEnabled;
+exports.showOverlay = showOverlay;
 var _DiscordIPC = require("../common/DiscordIPC");
 let clickZoneCallback = null;
-_DiscordIPC.DiscordIPC.renderer.on(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_CLICK_ZONE_CLICKED, (_, name) => {
+_DiscordIPC.DiscordIPC.renderer.on(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_CLICK_ZONE_CLICKED, (_, name, x, y) => {
   if (clickZoneCallback != null) {
-    clickZoneCallback(name);
+    clickZoneCallback(name, x, y);
   }
 });
 function openOverlay(url) {
@@ -34,4 +38,16 @@ function setClickZoneCallback(callback) {
 }
 function relayInputClick(button, x, y) {
   return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_RELAY_INPUT_CLICK, button, x, y);
+}
+function showOverlay() {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_SET_VISIBILITY, true);
+}
+function hideOverlay() {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_SET_VISIBILITY, false);
+}
+function getWindowHandles() {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_GET_WINDOW_HANDLES);
+}
+function resize(left, top, right, bottom) {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_RESIZE, left, top, right, bottom);
 }
