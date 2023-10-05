@@ -292,3 +292,19 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_RESIZE, 
   resizeOverlayWindow(rect);
   return Promise.resolve();
 });
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_OPEN_DEV_CONSOLE, (_, modifier) => {
+  if (modifier === 1) {
+    if (isValidWindow(inputWindow)) {
+      inputWindow.webContents.openDevTools({
+        mode: 'detach'
+      });
+    }
+  } else {
+    if (isValidWindow(overlayWindow)) {
+      overlayWindow.webContents.openDevTools({
+        mode: 'detach'
+      });
+    }
+  }
+  return Promise.resolve();
+});
