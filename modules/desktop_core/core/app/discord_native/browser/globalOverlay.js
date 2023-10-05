@@ -203,10 +203,10 @@ function setInteractionEnabled(enabled) {
   }
 }
 function setClickZones(zones) {
+  clickZones = zones;
   if (!isValidWindow(overlayWindow) || !isValidWindow(inputWindow) || !shouldBeVisible) {
     return;
   }
-  clickZones = zones;
   if (!isInteractionEnabled && zones.length > 0) {
     inputWindow.setIgnoreMouseEvents(false);
     inputWindow.setShape(zones.map(zone => {
