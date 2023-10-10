@@ -1,9 +1,9 @@
 import { isString } from './is.js';
-import { logger, CONSOLE_LEVELS } from './logger.js';
+import { logger, CONSOLE_LEVELS, originalConsoleMethods } from './logger.js';
 import { fill } from './object.js';
 import { getFunctionName } from './stacktrace.js';
 import { supportsNativeFetch } from './supports.js';
-import { getGlobalObject } from './worldwide.js';
+import { getGlobalObject, GLOBAL_OBJ } from './worldwide.js';
 import { supportsHistory } from './vendor/supportsHistory.js';
 
 // eslint-disable-next-line deprecation/deprecation
@@ -72,6 +72,16 @@ function addInstrumentationHandler(type, callback) {
   instrument(type);
 }
 
+/**
+ * Reset all instrumentation handlers.
+ * This can be used by tests to ensure we have a clean slate of instrumentation handlers.
+ */
+function resetInstrumentationHandlers() {
+  Object.keys(handlers).forEach(key => {
+    handlers[key ] = undefined;
+  });
+}
+
 /** JSDoc */
 function triggerHandlers(type, data) {
   if (!type || !handlers[type]) {
@@ -93,23 +103,23 @@ function triggerHandlers(type, data) {
 
 /** JSDoc */
 function instrumentConsole() {
-  if (!('console' in WINDOW)) {
+  if (!('console' in GLOBAL_OBJ)) {
     return;
   }
 
   CONSOLE_LEVELS.forEach(function (level) {
-    if (!(level in WINDOW.console)) {
+    if (!(level in GLOBAL_OBJ.console)) {
       return;
     }
 
-    fill(WINDOW.console, level, function (originalConsoleMethod) {
+    fill(GLOBAL_OBJ.console, level, function (originalConsoleMethod) {
+      originalConsoleMethods[level] = originalConsoleMethod;
+
       return function (...args) {
         triggerHandlers('console', { args, level });
 
-        // this fails for some browsers. :(
-        if (originalConsoleMethod) {
-          originalConsoleMethod.apply(WINDOW.console, args);
-        }
+        const log = originalConsoleMethods[level];
+        log && log.apply(GLOBAL_OBJ.console, args);
       };
     });
   });
@@ -121,7 +131,7 @@ function instrumentFetch() {
     return;
   }
 
-  fill(WINDOW, 'fetch', function (originalFetch) {
+  fill(GLOBAL_OBJ, 'fetch', function (originalFetch) {
     return function (...args) {
       const { method, url } = parseFetchArgs(args);
 
@@ -139,7 +149,7 @@ function instrumentFetch() {
       });
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      return originalFetch.apply(WINDOW, args).then(
+      return originalFetch.apply(GLOBAL_OBJ, args).then(
         (response) => {
           triggerHandlers('fetch', {
             ...handlerData,
@@ -214,7 +224,8 @@ function parseFetchArgs(fetchArgs) {
 
 /** JSDoc */
 function instrumentXHR() {
-  if (!('XMLHttpRequest' in WINDOW)) {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  if (!(WINDOW ).XMLHttpRequest) {
     return;
   }
 
@@ -485,7 +496,7 @@ function makeDOMEventHandler(handler, globalListener = false) {
 
 /** JSDoc */
 function instrumentDOM() {
-  if (!('document' in WINDOW)) {
+  if (!WINDOW.document) {
     return;
   }
 
@@ -627,5 +638,5 @@ function instrumentUnhandledRejection() {
   WINDOW.onunhandledrejection.__SENTRY_INSTRUMENTED__ = true;
 }
 
-export { SENTRY_XHR_DATA_KEY, addInstrumentationHandler, parseFetchArgs };
+export { SENTRY_XHR_DATA_KEY, addInstrumentationHandler, instrumentDOM, instrumentXHR, parseFetchArgs, resetInstrumentationHandlers };
 //# sourceMappingURL=instrument.js.map

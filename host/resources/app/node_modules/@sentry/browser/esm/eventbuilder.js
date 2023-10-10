@@ -1,5 +1,5 @@
 import { getCurrentHub } from '@sentry/core';
-import { addExceptionMechanism, resolvedSyncPromise, isErrorEvent, isDOMError, isDOMException, addExceptionTypeValue, isError, isPlainObject, isEvent, extractExceptionKeysForMessage, normalizeToSize } from '@sentry/utils';
+import { addExceptionMechanism, resolvedSyncPromise, isErrorEvent, isDOMError, isDOMException, addExceptionTypeValue, isError, isPlainObject, isEvent, normalizeToSize, extractExceptionKeysForMessage } from '@sentry/utils';
 
 /**
  * This function creates an exception from a JavaScript Error
@@ -42,9 +42,7 @@ function eventFromPlainObject(
       values: [
         {
           type: isEvent(exception) ? exception.constructor.name : isUnhandledRejection ? 'UnhandledRejection' : 'Error',
-          value: `Non-Error ${
-            isUnhandledRejection ? 'promise rejection' : 'exception'
-          } captured with keys: ${extractExceptionKeysForMessage(exception)}`,
+          value: getNonErrorObjectExceptionValue(exception, { isUnhandledRejection }),
         },
       ],
     },
@@ -195,7 +193,7 @@ function eventFromUnknownInput(
   // https://developer.mozilla.org/en-US/docs/Web/API/DOMError
   // https://developer.mozilla.org/en-US/docs/Web/API/DOMException
   // https://webidl.spec.whatwg.org/#es-DOMException-specialness
-  if (isDOMError(exception ) || isDOMException(exception )) {
+  if (isDOMError(exception) || isDOMException(exception )) {
     const domException = exception ;
 
     if ('stack' in (exception )) {
@@ -207,6 +205,7 @@ function eventFromUnknownInput(
       addExceptionTypeValue(event, message);
     }
     if ('code' in domException) {
+      // eslint-disable-next-line deprecation/deprecation
       event.tags = { ...event.tags, 'DOMException.code': `${domException.code}` };
     }
 
@@ -269,6 +268,36 @@ function eventFromString(
   }
 
   return event;
+}
+
+function getNonErrorObjectExceptionValue(
+  exception,
+  { isUnhandledRejection },
+) {
+  const keys = extractExceptionKeysForMessage(exception);
+  const captureType = isUnhandledRejection ? 'promise rejection' : 'exception';
+
+  // Some ErrorEvent instances do not have an `error` property, which is why they are not handled before
+  // We still want to try to get a decent message for these cases
+  if (isErrorEvent(exception)) {
+    return `Event \`ErrorEvent\` captured as ${captureType} with message \`${exception.message}\``;
+  }
+
+  if (isEvent(exception)) {
+    const className = getObjectClassName(exception);
+    return `Event \`${className}\` (type=${exception.type}) captured as ${captureType}`;
+  }
+
+  return `Object captured as ${captureType} with keys: ${keys}`;
+}
+
+function getObjectClassName(obj) {
+  try {
+    const prototype = Object.getPrototypeOf(obj);
+    return prototype ? prototype.constructor.name : undefined;
+  } catch (e) {
+    // ignore errors here
+  }
 }
 
 export { eventFromError, eventFromException, eventFromMessage, eventFromPlainObject, eventFromString, eventFromUnknownInput, exceptionFromError, parseStackFrames };

@@ -108,7 +108,12 @@ const dateTimestampInSeconds = dateTimestampSource.nowSeconds.bind(dateTimestamp
  */
 const timestampInSeconds = timestampSource.nowSeconds.bind(timestampSource);
 
-// Re-exported with an old name for backwards-compatibility.
+/**
+ * Re-exported with an old name for backwards-compatibility.
+ * TODO (v8): Remove this
+ *
+ * @deprecated Use `timestampInSeconds` instead.
+ */
 const timestampWithMs = timestampInSeconds;
 
 /**
