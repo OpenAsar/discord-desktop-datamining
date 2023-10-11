@@ -9,7 +9,6 @@ exports.hideOverlay = hideOverlay;
 exports.openDevConsole = openDevConsole;
 exports.openOverlay = openOverlay;
 exports.relayInputClick = relayInputClick;
-exports.resize = resize;
 exports.setClickZoneCallback = setClickZoneCallback;
 exports.setClickZones = setClickZones;
 exports.setInteractionEnabled = setInteractionEnabled;
@@ -48,9 +47,6 @@ function hideOverlay() {
 }
 function getWindowHandles() {
   return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_GET_WINDOW_HANDLES);
-}
-function resize(left, top, right, bottom) {
-  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_RESIZE, left, top, right, bottom);
 }
 function openDevConsole(modifier) {
   return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_OPEN_DEV_CONSOLE, modifier);
