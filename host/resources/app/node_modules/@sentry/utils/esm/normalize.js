@@ -1,4 +1,4 @@
-import { isNaN, isSyntheticEvent } from './is.js';
+import { isNaN, isVueViewModel, isSyntheticEvent } from './is.js';
 import { memoBuilder } from './memo.js';
 import { convertToPlainObject } from './object.js';
 import { getFunctionName } from './stacktrace.js';
@@ -199,6 +199,10 @@ function stringifyValue(
     // eslint-disable-next-line no-restricted-globals
     if (typeof document !== 'undefined' && value === document) {
       return '[Document]';
+    }
+
+    if (isVueViewModel(value)) {
+      return '[VueViewModel]';
     }
 
     // React's SyntheticEvent thingy

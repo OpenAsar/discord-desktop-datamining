@@ -1,5 +1,6 @@
 import { uuid4, dateTimestampInSeconds, resolvedSyncPromise, truncate, GLOBAL_OBJ, normalize } from '@sentry/utils';
 import { DEFAULT_ENVIRONMENT } from '../constants.js';
+import { notifyEventProcessors, getGlobalEventProcessors } from '../eventProcessors.js';
 import { Scope } from '../scope.js';
 
 /**
@@ -24,6 +25,7 @@ function prepareEvent(
   event,
   hint,
   scope,
+  client,
 ) {
   const { normalizeDepth = 3, normalizeMaxBreadth = 1000 } = options;
   const prepared = {
@@ -51,6 +53,8 @@ function prepareEvent(
   // We prepare the result here with a resolved Event.
   let result = resolvedSyncPromise(prepared);
 
+  const clientEventProcessors = client && client.getEventProcessors ? client.getEventProcessors() : [];
+
   // This should be the last thing called, since we want that
   // {@link Hub.addEventProcessor} gets the finished prepared event.
   //
@@ -69,7 +73,11 @@ function prepareEvent(
     }
 
     // In case we have a hub we reassign it.
-    result = finalScope.applyToEvent(prepared, hint);
+    result = finalScope.applyToEvent(prepared, hint, clientEventProcessors);
+  } else {
+    // Apply client & global event processors even if there is no scope
+    // TODO (v8): Update the order to be Global > Client
+    result = notifyEventProcessors([...clientEventProcessors, ...getGlobalEventProcessors()], prepared, hint);
   }
 
   return result.then(evt => {

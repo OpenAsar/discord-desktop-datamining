@@ -1,4 +1,5 @@
 import { node } from './node-stack-trace.js';
+export { filenameIsInApp } from './node-stack-trace.js';
 
 const STACKTRACE_FRAME_LIMIT = 50;
 // Used to sanitize webpack (error: *) wrapped stack errors
