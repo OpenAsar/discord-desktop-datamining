@@ -1,6 +1,6 @@
 import { arrayify, logger } from '@sentry/utils';
+import { addGlobalEventProcessor } from './eventProcessors.js';
 import { getCurrentHub } from './hub.js';
-import { addGlobalEventProcessor } from './scope.js';
 
 const installedIntegrations = [];
 
@@ -73,13 +73,13 @@ function getIntegrationsToSetup(options) {
  * @param integrations array of integration instances
  * @param withDefault should enable default integrations
  */
-function setupIntegrations(integrations) {
+function setupIntegrations(client, integrations) {
   const integrationIndex = {};
 
   integrations.forEach(integration => {
     // guard against empty provided integrations
     if (integration) {
-      setupIntegration(integration, integrationIndex);
+      setupIntegration(client, integration, integrationIndex);
     }
   });
 
@@ -87,14 +87,30 @@ function setupIntegrations(integrations) {
 }
 
 /** Setup a single integration.  */
-function setupIntegration(integration, integrationIndex) {
+function setupIntegration(client, integration, integrationIndex) {
   integrationIndex[integration.name] = integration;
 
   if (installedIntegrations.indexOf(integration.name) === -1) {
     integration.setupOnce(addGlobalEventProcessor, getCurrentHub);
     installedIntegrations.push(integration.name);
-    (typeof __SENTRY_DEBUG__ === 'undefined' || __SENTRY_DEBUG__) && logger.log(`Integration installed: ${integration.name}`);
   }
+
+  if (client.on && typeof integration.preprocessEvent === 'function') {
+    const callback = integration.preprocessEvent.bind(integration) ;
+    client.on('preprocessEvent', (event, hint) => callback(event, hint, client));
+  }
+
+  if (client.addEventProcessor && typeof integration.processEvent === 'function') {
+    const callback = integration.processEvent.bind(integration) ;
+
+    const processor = Object.assign((event, hint) => callback(event, hint, client), {
+      id: integration.name,
+    });
+
+    client.addEventProcessor(processor);
+  }
+
+  (typeof __SENTRY_DEBUG__ === 'undefined' || __SENTRY_DEBUG__) && logger.log(`Integration installed: ${integration.name}`);
 }
 
 // Polyfill for Array.findIndex(), which is not supported in ES5

@@ -19,36 +19,30 @@ class Dedupe  {
     this.name = Dedupe.id;
   }
 
+  /** @inheritDoc */
+   setupOnce(_addGlobaleventProcessor, _getCurrentHub) {
+    // noop
+  }
+
   /**
    * @inheritDoc
    */
-   setupOnce(addGlobalEventProcessor, getCurrentHub) {
-    const eventProcessor = currentEvent => {
-      // We want to ignore any non-error type events, e.g. transactions or replays
-      // These should never be deduped, and also not be compared against as _previousEvent.
-      if (currentEvent.type) {
-        return currentEvent;
-      }
-
-      const self = getCurrentHub().getIntegration(Dedupe);
-      if (self) {
-        // Juuust in case something goes wrong
-        try {
-          if (_shouldDropEvent(currentEvent, self._previousEvent)) {
-            (typeof __SENTRY_DEBUG__ === 'undefined' || __SENTRY_DEBUG__) && logger.warn('Event dropped due to being a duplicate of previously captured event.');
-            return null;
-          }
-        } catch (_oO) {
-          return (self._previousEvent = currentEvent);
-        }
-
-        return (self._previousEvent = currentEvent);
-      }
+   processEvent(currentEvent) {
+    // We want to ignore any non-error type events, e.g. transactions or replays
+    // These should never be deduped, and also not be compared against as _previousEvent.
+    if (currentEvent.type) {
       return currentEvent;
-    };
+    }
 
-    eventProcessor.id = this.name;
-    addGlobalEventProcessor(eventProcessor);
+    // Juuust in case something goes wrong
+    try {
+      if (_shouldDropEvent(currentEvent, this._previousEvent)) {
+        (typeof __SENTRY_DEBUG__ === 'undefined' || __SENTRY_DEBUG__) && logger.warn('Event dropped due to being a duplicate of previously captured event.');
+        return null;
+      }
+    } catch (_oO) {} // eslint-disable-line no-empty
+
+    return (this._previousEvent = currentEvent);
   }
 } Dedupe.__initStatic();
 
@@ -201,7 +195,7 @@ function _getFramesFromEvent(event) {
 
   if (exception) {
     try {
-      // @ts-ignore Object could be undefined
+      // @ts-expect-error Object could be undefined
       return exception.values[0].stacktrace.frames;
     } catch (_oO) {
       return undefined;

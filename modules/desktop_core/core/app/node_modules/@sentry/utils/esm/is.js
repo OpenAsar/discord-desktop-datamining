@@ -175,5 +175,16 @@ function isInstanceOf(wat, base) {
   }
 }
 
-export { isDOMError, isDOMException, isElement, isError, isErrorEvent, isEvent, isInstanceOf, isNaN, isPlainObject, isPrimitive, isRegExp, isString, isSyntheticEvent, isThenable };
+/**
+ * Checks whether given value's type is a Vue ViewModel.
+ *
+ * @param wat A value to be checked.
+ * @returns A boolean representing the result.
+ */
+function isVueViewModel(wat) {
+  // Not using Object.prototype.toString because in Vue 3 it would read the instance's Symbol(Symbol.toStringTag) property.
+  return !!(typeof wat === 'object' && wat !== null && ((wat ).__isVue || (wat )._isVue));
+}
+
+export { isDOMError, isDOMException, isElement, isError, isErrorEvent, isEvent, isInstanceOf, isNaN, isPlainObject, isPrimitive, isRegExp, isString, isSyntheticEvent, isThenable, isVueViewModel };
 //# sourceMappingURL=is.js.map
