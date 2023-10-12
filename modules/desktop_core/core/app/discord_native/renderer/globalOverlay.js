@@ -6,7 +6,6 @@ Object.defineProperty(exports, "__esModule", {
 exports.closeOverlay = closeOverlay;
 exports.getWindowHandles = getWindowHandles;
 exports.hideOverlay = hideOverlay;
-exports.openDevConsole = openDevConsole;
 exports.openOverlay = openOverlay;
 exports.relayInputClick = relayInputClick;
 exports.resize = resize;
@@ -51,7 +50,4 @@ function getWindowHandles() {
 }
 function resize(left, top, right, bottom) {
   return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_RESIZE, left, top, right, bottom);
-}
-function openDevConsole(modifier) {
-  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_OPEN_DEV_CONSOLE, modifier);
 }

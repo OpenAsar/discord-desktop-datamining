@@ -203,10 +203,10 @@ function setInteractionEnabled(enabled) {
   }
 }
 function setClickZones(zones) {
-  clickZones = zones;
   if (!isValidWindow(overlayWindow) || !isValidWindow(inputWindow) || !shouldBeVisible) {
     return;
   }
+  clickZones = zones;
   if (!isInteractionEnabled && zones.length > 0) {
     inputWindow.setIgnoreMouseEvents(false);
     inputWindow.setShape(zones.map(zone => {
@@ -290,21 +290,5 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_RESIZE, 
     height: Math.ceil(bottom - top)
   };
   resizeOverlayWindow(rect);
-  return Promise.resolve();
-});
-_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_OPEN_DEV_CONSOLE, (_, modifier) => {
-  if (modifier === 1) {
-    if (isValidWindow(inputWindow)) {
-      inputWindow.webContents.openDevTools({
-        mode: 'detach'
-      });
-    }
-  } else {
-    if (isValidWindow(overlayWindow)) {
-      overlayWindow.webContents.openDevTools({
-        mode: 'detach'
-      });
-    }
-  }
   return Promise.resolve();
 });
