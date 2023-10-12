@@ -10,12 +10,14 @@ exports.getCPUCoreCount = getCPUCoreCount;
 exports.getCurrentCPUUsagePercent = getCurrentCPUUsagePercent;
 exports.getLastCrash = getLastCrash;
 exports.getMainArgvSync = getMainArgvSync;
+exports.getProcessUptime = getProcessUptime;
 exports.getSystemInfo = getSystemInfo;
 exports.purgeMemory = purgeMemory;
 exports.setCrashInformation = setCrashInformation;
 exports.setMemoryInformation = setMemoryInformation;
 var _electron = _interopRequireDefault(require("electron"));
 var _os = _interopRequireDefault(require("os"));
+var _process = _interopRequireDefault(require("process"));
 var _DiscordIPC = require("../common/DiscordIPC");
 var _minidumpReader = require("./minidumpReader");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -65,6 +67,9 @@ async function flushStorageData(callback) {
 function purgeMemory() {
   _electron.default.webFrame.clearCache();
 }
+function getProcessUptime() {
+  return _process.default.uptime();
+}
 function getCurrentCPUUsagePercent() {
   return totalProcessorUsagePercent;
 }
@@ -79,7 +84,7 @@ function setCrashInformation(crashInformation, state) {
 }
 function setMemoryInformation(memoryInformation) {
   void _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_SET_MEMORY_INFORMATION, {
-    uptimeSeconds: Math.floor(process.uptime()),
+    uptimeSeconds: Math.floor(_process.default.uptime()),
     memoryUsageKB: memoryInformation.memoryUsageKB,
     usedJSHeapSizeKB: memoryInformation.usedJSHeapSizeKB
   });
