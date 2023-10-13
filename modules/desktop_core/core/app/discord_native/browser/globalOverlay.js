@@ -12,7 +12,6 @@ let overlayWindow = null;
 let inputWindow = null;
 let isInteractionEnabled = false;
 let clickZones = [];
-let hasBoundScreenEvents = false;
 let shouldBeVisible = false;
 function isValidWindow(win) {
   var _win$webContents;
@@ -35,25 +34,6 @@ function isValidUrl(url) {
     return false;
   }
 }
-function resizeOverlayWindow(bounds) {
-  if (isValidWindow(overlayWindow)) {
-    overlayWindow.setBounds(bounds);
-  }
-  if (isValidWindow(inputWindow)) {
-    inputWindow.setBounds(bounds);
-  }
-}
-function handleDisplayAdded() {
-  resizeOverlayWindow(_electron.screen.getPrimaryDisplay().bounds);
-}
-function handleDisplayRemoved() {
-  resizeOverlayWindow(_electron.screen.getPrimaryDisplay().bounds);
-}
-function handleDisplayMetricsChanged(_event, display) {
-  if (display.id === _electron.screen.getPrimaryDisplay().id) {
-    resizeOverlayWindow(display.bounds);
-  }
-}
 function getActiveWindowList() {
   const windows = [];
   if (isValidWindow(overlayWindow)) {
@@ -74,12 +54,6 @@ async function openOverlay(url) {
   if (!_processUtils.IS_WIN) {
     console.log('GLOBAL_OVERLAY_OPEN: Windows only.');
     return;
-  }
-  if (!hasBoundScreenEvents) {
-    _electron.screen.on('display-added', handleDisplayAdded);
-    _electron.screen.on('display-removed', handleDisplayRemoved);
-    _electron.screen.on('display-metrics-changed', handleDisplayMetricsChanged);
-    hasBoundScreenEvents = true;
   }
   if (isValidWindow(overlayWindow) && isValidWindow(inputWindow)) {
     console.log('openOverlay: Window already open.');
@@ -106,7 +80,7 @@ async function openOverlay(url) {
       show: false,
       transparent: true,
       frame: false,
-      resizable: false,
+      resizable: true,
       type: 'toolbar',
       alwaysOnTop: true,
       skipTaskbar: false,
@@ -203,10 +177,10 @@ function setInteractionEnabled(enabled) {
   }
 }
 function setClickZones(zones) {
+  clickZones = zones;
   if (!isValidWindow(overlayWindow) || !isValidWindow(inputWindow) || !shouldBeVisible) {
     return;
   }
-  clickZones = zones;
   if (!isInteractionEnabled && zones.length > 0) {
     inputWindow.setIgnoreMouseEvents(false);
     inputWindow.setShape(zones.map(zone => {
@@ -282,13 +256,19 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_GET_WIND
   }
   return Promise.resolve(windowHandles);
 });
-_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_RESIZE, (_, left, top, right, bottom) => {
-  const rect = {
-    x: Math.ceil(left),
-    y: Math.ceil(top),
-    width: Math.ceil(right - left),
-    height: Math.ceil(bottom - top)
-  };
-  resizeOverlayWindow(rect);
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_OPEN_DEV_CONSOLE, (_, modifier) => {
+  if (modifier === 1) {
+    if (isValidWindow(inputWindow)) {
+      inputWindow.webContents.openDevTools({
+        mode: 'detach'
+      });
+    }
+  } else {
+    if (isValidWindow(overlayWindow)) {
+      overlayWindow.webContents.openDevTools({
+        mode: 'detach'
+      });
+    }
+  }
   return Promise.resolve();
 });

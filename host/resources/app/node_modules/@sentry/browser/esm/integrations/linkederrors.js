@@ -32,32 +32,26 @@ class LinkedErrors  {
     this._limit = options.limit || DEFAULT_LIMIT;
   }
 
+  /** @inheritdoc */
+   setupOnce() {
+    // noop
+  }
+
   /**
    * @inheritDoc
    */
-   setupOnce(addGlobalEventProcessor, getCurrentHub) {
-    addGlobalEventProcessor((event, hint) => {
-      const hub = getCurrentHub();
-      const client = hub.getClient();
-      const self = hub.getIntegration(LinkedErrors);
+   preprocessEvent(event, hint, client) {
+    const options = client.getOptions();
 
-      if (!client || !self) {
-        return event;
-      }
-
-      const options = client.getOptions();
-      applyAggregateErrorsToEvent(
-        exceptionFromError,
-        options.stackParser,
-        options.maxValueLength,
-        self._key,
-        self._limit,
-        event,
-        hint,
-      );
-
-      return event;
-    });
+    applyAggregateErrorsToEvent(
+      exceptionFromError,
+      options.stackParser,
+      options.maxValueLength,
+      this._key,
+      this._limit,
+      event,
+      hint,
+    );
   }
 } LinkedErrors.__initStatic();
 

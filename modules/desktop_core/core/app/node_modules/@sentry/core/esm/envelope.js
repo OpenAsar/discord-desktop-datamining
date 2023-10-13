@@ -27,7 +27,7 @@ function createSessionEnvelope(
   const envelopeHeaders = {
     sent_at: new Date().toISOString(),
     ...(sdkInfo && { sdk: sdkInfo }),
-    ...(!!tunnel && { dsn: dsnToString(dsn) }),
+    ...(!!tunnel && dsn && { dsn: dsnToString(dsn) }),
   };
 
   const envelopeItem =

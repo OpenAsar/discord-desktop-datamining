@@ -1,5 +1,6 @@
 import { htmlTreeAsString } from './browser.js';
 import { isError, isEvent, isInstanceOf, isElement, isPlainObject, isPrimitive } from './is.js';
+import { logger } from './logger.js';
 import { truncate } from './string.js';
 
 /**
@@ -24,12 +25,7 @@ function fill(source, name, replacementFactory) {
   // Make sure it's a function first, as we need to attach an empty prototype for `defineProperties` to work
   // otherwise it'll throw "TypeError: Object.defineProperties called on non-object"
   if (typeof wrapped === 'function') {
-    try {
-      markFunctionWrapped(wrapped, original);
-    } catch (_Oo) {
-      // This can throw if multiple fill happens on a global object like XMLHttpRequest
-      // Fixes https://github.com/getsentry/sentry-javascript/issues/2043
-    }
+    markFunctionWrapped(wrapped, original);
   }
 
   source[name] = wrapped;
@@ -43,12 +39,16 @@ function fill(source, name, replacementFactory) {
  * @param value The value to which to set the property
  */
 function addNonEnumerableProperty(obj, name, value) {
-  Object.defineProperty(obj, name, {
-    // enumerable: false, // the default, so we can save on bundle size by not explicitly setting it
-    value: value,
-    writable: true,
-    configurable: true,
-  });
+  try {
+    Object.defineProperty(obj, name, {
+      // enumerable: false, // the default, so we can save on bundle size by not explicitly setting it
+      value: value,
+      writable: true,
+      configurable: true,
+    });
+  } catch (o_O) {
+    (typeof __SENTRY_DEBUG__ === 'undefined' || __SENTRY_DEBUG__) && logger.log(`Failed to add non-enumerable property "${name}" to object`, obj);
+  }
 }
 
 /**
@@ -59,9 +59,11 @@ function addNonEnumerableProperty(obj, name, value) {
  * @param original the original function that gets wrapped
  */
 function markFunctionWrapped(wrapped, original) {
-  const proto = original.prototype || {};
-  wrapped.prototype = original.prototype = proto;
-  addNonEnumerableProperty(wrapped, '__sentry_original__', original);
+  try {
+    const proto = original.prototype || {};
+    wrapped.prototype = original.prototype = proto;
+    addNonEnumerableProperty(wrapped, '__sentry_original__', original);
+  } catch (o_O) {} // eslint-disable-line no-empty
 }
 
 /**
