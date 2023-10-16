@@ -102,6 +102,7 @@ class BrowserClient extends BaseClient {
       return;
     }
 
+    // This is really the only place where we want to check for a DSN and only send outcomes then
     if (!this._dsn) {
       (typeof __SENTRY_DEBUG__ === 'undefined' || __SENTRY_DEBUG__) && logger.log('No dsn provided, will not send outcomes');
       return;

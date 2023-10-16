@@ -1,4 +1,4 @@
-import { isString, isRegExp } from './is.js';
+import { isVueViewModel, isString, isRegExp } from './is.js';
 
 /**
  * Truncates given string to the maximum characters count
@@ -74,7 +74,16 @@ function safeJoin(input, delimiter) {
   for (let i = 0; i < input.length; i++) {
     const value = input[i];
     try {
-      output.push(String(value));
+      // This is a hack to fix a Vue3-specific bug that causes an infinite loop of
+      // console warnings. This happens when a Vue template is rendered with
+      // an undeclared variable, which we try to stringify, ultimately causing
+      // Vue to issue another warning which repeats indefinitely.
+      // see: https://github.com/getsentry/sentry-javascript/pull/8981
+      if (isVueViewModel(value)) {
+        output.push('[VueViewModel]');
+      } else {
+        output.push(String(value));
+      }
     } catch (e) {
       output.push('[value cannot be serialized]');
     }

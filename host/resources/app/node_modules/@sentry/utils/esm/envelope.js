@@ -221,7 +221,7 @@ function createEventEnvelopeHeaders(
     event_id: event.event_id ,
     sent_at: new Date().toISOString(),
     ...(sdkInfo && { sdk: sdkInfo }),
-    ...(!!tunnel && { dsn: dsnToString(dsn) }),
+    ...(!!tunnel && dsn && { dsn: dsnToString(dsn) }),
     ...(dynamicSamplingContext && {
       trace: dropUndefinedKeys({ ...dynamicSamplingContext }),
     }),

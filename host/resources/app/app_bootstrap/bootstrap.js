@@ -25,7 +25,6 @@ global.moduleDataPath = paths.getModuleDataPath();
 const appSettings = require('./appSettings');
 appSettings.init();
 const Constants = require('./Constants');
-const GPUSettings = require('./GPUSettings');
 function setupHardwareAcceleration() {
   const settings = appSettings.getSettings();
   if (!settings.get('enableHardwareAcceleration', true)) {
@@ -117,7 +116,6 @@ function startUpdate() {
         buildInfo,
         appSettings,
         Constants,
-        GPUSettings,
         updater,
         crashReporterSetup
       });
