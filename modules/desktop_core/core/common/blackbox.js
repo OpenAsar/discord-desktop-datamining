@@ -222,5 +222,8 @@ async function initializeCore(modulepath, buildInfo) {
   }
   _electron.default.app.on('child-process-gone', (_, details) => addMessage(`❌ child-process-gone ${_util.default.inspect(details)}`));
   _electron.default.app.on('render-process-gone', (_, __, details) => addMessage(`❌ render-process-gone ${_util.default.inspect(details)}`));
+  _electron.default.app.on('before-quit', () => addMessage(`before-quit`));
+  _electron.default.app.on('will-quit', () => addMessage(`will-quit`));
+  _electron.default.app.on('quit', (_, exitCode) => addMessage(`quit ${exitCode}`));
   initialized = true;
 }
