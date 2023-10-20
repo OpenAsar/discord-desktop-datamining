@@ -1,7 +1,6 @@
 const execa = require('execa');
 const fs = require('fs');
 const path = require('path');
-const superagent = require('superagent');
 const {
   inputCaptureSetWatcher,
   inputCaptureRegisterElement,
@@ -77,17 +76,33 @@ module.exports.getGPUDriverVersions = async () => {
 };
 
 module.exports.submitLiveCrashReport = async (channel, sentryMetadata) => {
+  console.log('submitLiveCrashReport: submitting...');
   const path = module.exports._generateLiveMinidump(dataDirectory);
 
   if (!path) {
+    console.log('submitLiveCrashReport: Minidump not created.');
     return null;
   }
 
-  await superagent
-    .post('https://sentry.io/api/146342/minidump/?sentry_key=f11e8c3e62cb46b5a006c339b2086ba3')
-    .attach('upload_file_minidump', path)
-    .field('channel', channel)
-    .field('sentry', JSON.stringify(sentryMetadata));
+  try {
+    const fileData = await fs.promises.readFile(path);
+    const blob = new Blob([fileData], {type: 'text/plain'});
+
+    const formData = new FormData();
+    formData.append('upload_file_minidump', blob, 'live_minidump.dmp');
+    formData.append('channel', channel);
+    formData.append('sentry', JSON.stringify(sentryMetadata));
+
+    const sentryEndPoint = 'https://sentry.io/api/146342/minidump/?sentry_key=f11e8c3e62cb46b5a006c339b2086ba3';
+    const response = await fetch(sentryEndPoint, {
+      method: 'POST',
+      body: formData,
+    });
+
+    console.log('submitLiveCrashReport: completed.', response);
+  } catch (e) {
+    console.error("submitLiveCrashReport: error", e);
+  }
 };
 
 module.exports.shouldDisplayNotifications = () => {
