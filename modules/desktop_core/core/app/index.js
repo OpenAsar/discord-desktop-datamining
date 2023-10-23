@@ -50,6 +50,7 @@ function startup(bootstrapModules) {
   features.injectFeaturesBackend(appFeatures.getFeatures());
   require('./discord_native/browser/fileManager');
   require('./discord_native/browser/globalOverlay');
+  require('./discord_native/browser/hardware');
   const {
     setupClipsProtocol
   } = require('./discord_native/browser/clips');
