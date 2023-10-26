@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.crashReporterSetup = exports.buildInfo = exports.autoStart = exports.appSettings = exports.Constants = void 0;
+exports.crashReporterSetup = exports.buildInfo = exports.autoStart = exports.appSettings = exports.GPUSettings = exports.Constants = void 0;
 exports.init = init;
 exports.updater = exports.splashScreen = exports.requireNative = exports.paths = exports.moduleUpdater = void 0;
 let hasInit = false;
@@ -19,6 +19,8 @@ let appSettings = null;
 exports.appSettings = appSettings;
 let Constants = null;
 exports.Constants = Constants;
+let GPUSettings = null;
+exports.GPUSettings = GPUSettings;
 let buildInfo = null;
 exports.buildInfo = buildInfo;
 let moduleUpdater = null;
@@ -37,6 +39,7 @@ function init(bootstrapModules) {
   exports.requireNative = requireNative = bootstrapModules.requireNative;
   exports.appSettings = appSettings = bootstrapModules.appSettings;
   exports.Constants = Constants = bootstrapModules.Constants;
+  exports.GPUSettings = GPUSettings = bootstrapModules.GPUSettings;
   exports.buildInfo = buildInfo = bootstrapModules.buildInfo;
   exports.moduleUpdater = moduleUpdater = bootstrapModules.moduleUpdater;
   exports.updater = updater = bootstrapModules.updater;
