@@ -100,6 +100,10 @@ features.declareSupported('speed_test');
 features.declareSupported('go_live_hardware');
 features.declareSupported('bandwidth_estimation_experiments');
 
+if (process.platform === 'darwin') {
+  features.declareSupported('screen_capture_kit');
+}
+
 if (process.platform === 'win32' || process.platform === 'darwin') {
   features.declareSupported('soundshare');
 }

@@ -45,6 +45,7 @@ if (window.opener === null) {
     thumbar: require('./discord_native/renderer/thumbar'),
     safeStorage: require('./discord_native/renderer/safeStorage'),
     globalOverlay: require('./discord_native/renderer/globalOverlay'),
+    hardware: require('./discord_native/renderer/hardware'),
     remoteApp: app,
     remotePowerMonitor: powerMonitor,
     webAuthn: require('./discord_native/renderer/webauthn')
