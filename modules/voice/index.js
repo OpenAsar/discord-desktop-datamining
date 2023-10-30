@@ -132,6 +132,7 @@ if (process.platform === 'win32') {
   // add one and want to re-enable the UI for them.
   // features.declareSupported('experimental_encoders');
   features.declareSupported('amd_experimental_rate_control');
+  features.declareSupported('capture_timeout_experiments');
 }
 
 function bindConnectionInstance(instance) {
