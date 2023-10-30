@@ -98,6 +98,11 @@ features.declareSupported('remote_user_multi_stream');
 features.declareSupported('clips');
 features.declareSupported('speed_test');
 features.declareSupported('go_live_hardware');
+features.declareSupported('bandwidth_estimation_experiments');
+
+if (process.platform === 'darwin') {
+  features.declareSupported('screen_capture_kit');
+}
 
 if (process.platform === 'win32' || process.platform === 'darwin') {
   features.declareSupported('soundshare');
@@ -127,6 +132,7 @@ if (process.platform === 'win32') {
   // add one and want to re-enable the UI for them.
   // features.declareSupported('experimental_encoders');
   features.declareSupported('amd_experimental_rate_control');
+  features.declareSupported('capture_timeout_experiments');
 }
 
 function bindConnectionInstance(instance) {
