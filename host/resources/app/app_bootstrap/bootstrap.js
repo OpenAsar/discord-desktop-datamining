@@ -5,6 +5,15 @@ if (process.platform === 'linux') {
     process.env.PULSE_LATENCY_MSEC = 30;
   }
 }
+const electronMajor = parseInt(process.versions.electron.split('.')[0]);
+if (electronMajor === 22) {
+  const path = require('path');
+  const fs = require('fs');
+  const tzdata_path = path.join(process.resourcesPath, 'tzdata');
+  if (fs.existsSync(tzdata_path)) {
+    process.env.ICU_TIMEZONE_FILES_DIR = tzdata_path;
+  }
+}
 const {
   app,
   Menu
