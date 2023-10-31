@@ -28,7 +28,9 @@ function init() {
   exports.hasInit = hasInit = true;
   lastIndex = null;
   for (let i = 1; i <= 11; i++) {
-    appIcons.push((0, _utils.exposeModuleResource)(`app/images/badges`, `badge-${i}.ico`));
+    const fullPath = (0, _utils.exposeModuleResource)(`app/images/badges`, `badge-${i}.ico`);
+    const appIcon = fullPath !== null ? _electron.nativeImage.createFromPath(fullPath) : null;
+    appIcons.push(appIcon);
   }
   _ipcMain.default.on('APP_BADGE_SET', (_event, count) => setAppBadge(count, false));
 }
