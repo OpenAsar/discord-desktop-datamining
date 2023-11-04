@@ -80,7 +80,7 @@ module.exports.submitLiveCrashReport = async (channel, sentryMetadata) => {
   const path = module.exports._generateLiveMinidump(dataDirectory);
 
   if (!path) {
-    console.log('submitLiveCrashReport: Minidump not created.');
+    console.log('submitLiveCrashReport: minidump not created.');
     return null;
   }
 
