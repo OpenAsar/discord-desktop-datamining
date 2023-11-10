@@ -146,6 +146,10 @@ function bindConnectionInstance(instance) {
     mergeUsers: (users) => instance.mergeUsers(users),
     destroyUser: (userId) => instance.destroyUser(userId),
 
+    prepareSecureFramesTransition: (transitionId, version, callback) =>
+      instance.prepareSecureFramesTransition(transitionId, version, callback),
+    executeSecureFramesTransition: (transitionId) => instance.executeSecureFramesTransition(transitionId),
+
     setLocalVolume: (userId, volume) => instance.setLocalVolume(userId, volume),
     setLocalMute: (userId, mute) => instance.setLocalMute(userId, mute),
     fastUdpReconnect: () => instance.fastUdpReconnect(),
