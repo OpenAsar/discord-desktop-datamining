@@ -95,7 +95,6 @@ features.declareSupported('electron_video');
 features.declareSupported('fixed_keyframe_interval');
 features.declareSupported('first_frame_callback');
 features.declareSupported('remote_user_multi_stream');
-features.declareSupported('clips');
 features.declareSupported('speed_test');
 features.declareSupported('go_live_hardware');
 features.declareSupported('bandwidth_estimation_experiments');
@@ -133,6 +132,7 @@ if (process.platform === 'win32') {
   // features.declareSupported('experimental_encoders');
   features.declareSupported('amd_experimental_rate_control');
   features.declareSupported('capture_timeout_experiments');
+  features.declareSupported('clips');
 }
 
 function bindConnectionInstance(instance) {
