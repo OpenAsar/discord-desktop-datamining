@@ -80,7 +80,7 @@ async function openOverlay(url) {
       show: false,
       transparent: true,
       frame: false,
-      resizable: true,
+      resizable: false,
       type: 'toolbar',
       alwaysOnTop: true,
       skipTaskbar: false,
