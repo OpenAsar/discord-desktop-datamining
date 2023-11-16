@@ -64,7 +64,7 @@ module.exports.getGPUDriverVersions = async () => {
   }
 
   const result = {};
-  const nvidiaSmiPath = `${process.env['ProgramW6432']}/NVIDIA Corporation/NVSMI/nvidia-smi.exe`;
+  const nvidiaSmiPath = `${process.env['SystemRoot']}/System32/nvidia-smi.exe`;
 
   try {
     result.nvidia = parseNvidiaSmiOutput(await execa(nvidiaSmiPath, []));
