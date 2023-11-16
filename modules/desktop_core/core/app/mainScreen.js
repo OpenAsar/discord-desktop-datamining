@@ -103,7 +103,10 @@ let lastCrashed = 0;
 let lastPageLoadFailed = false;
 const retryUpdateOptions = {
   skip_host_delta: false,
-  skip_module_delta: {}
+  skip_module_delta: {},
+  skip_all_module_delta: false,
+  skip_windows_arch_update: _Constants.DISABLE_WINDOWS_64BIT_TRANSITION,
+  optin_windows_transition_progression: _Constants.OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION
 };
 function getMainWindowId() {
   return mainWindowId;
@@ -843,7 +846,6 @@ function init() {
     const serviceDescription = `${details.type} (${details.name})`;
     console.error(`child-process-gone! child: ${serviceDescription} exitCode: ${details.exitCode}`);
   });
-  _electron.app.on('accessibility-support-changed', (_event, accessibilitySupportEnabled) => webContentsSend('ACCESSIBILITY_SUPPORT_CHANGED', accessibilitySupportEnabled));
   _electron.app.on(_Constants.MenuEvents.OPEN_HELP, () => webContentsSend('HELP_OPEN'));
   _electron.app.on(_Constants.MenuEvents.OPEN_SETTINGS, () => webContentsSend('USER_SETTINGS_OPEN'));
   _electron.app.on('second-instance', (_event, args) => {

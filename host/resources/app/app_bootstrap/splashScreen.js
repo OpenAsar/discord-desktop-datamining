@@ -106,7 +106,10 @@ class TaskProgress {
 async function updateUntilCurrent() {
   const retryOptions = {
     skip_host_delta: false,
-    skip_module_delta: {}
+    skip_module_delta: {},
+    skip_all_module_delta: false,
+    skip_windows_arch_update: false,
+    optin_windows_transition_progression: false
   };
   while (true) {
     updateSplashState(CHECKING_FOR_UPDATES);

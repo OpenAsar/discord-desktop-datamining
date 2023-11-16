@@ -29,6 +29,8 @@ function startup(bootstrapModules) {
   Constants.init(bootstrapModules.Constants);
   const appFeatures = require('./appFeatures');
   appFeatures.init();
+  const GPUSettings = require('./GPUSettings');
+  bootstrapModules.GPUSettings.replace(GPUSettings);
   const rootCertificates = require('./rootCertificates');
   rootCertificates.init();
   require('./discord_native/browser/accessibility');
@@ -50,11 +52,14 @@ function startup(bootstrapModules) {
   features.injectFeaturesBackend(appFeatures.getFeatures());
   require('./discord_native/browser/fileManager');
   require('./discord_native/browser/globalOverlay');
+  require('./discord_native/browser/hardware');
   const {
     setupClipsProtocol
   } = require('./discord_native/browser/clips');
   setupClipsProtocol();
   require('./discord_native/browser/userDataCache');
+  const gpuSettings = require('./discord_native/browser/gpuSettings');
+  gpuSettings.injectGpuSettingsBackend(GPUSettings);
   const nativeModules = require('./discord_native/browser/nativeModules');
   nativeModules.injectModuleUpdater(moduleUpdater);
   nativeModules.injectUpdater(updater);
@@ -64,11 +69,6 @@ function startup(bootstrapModules) {
   require('./discord_native/browser/safeStorage');
   const settings = require('./discord_native/browser/settings');
   settings.injectSettingsBackend(appSettings.getSettings());
-  const gpuSettings = require('./discord_native/browser/gpuSettings');
-  const backendSettings = appSettings.getSettings();
-  if (backendSettings != null) {
-    gpuSettings.init(backendSettings);
-  }
   require('./discord_native/browser/spellCheck');
   const windowNative = require('./discord_native/browser/window');
   require('./discord_native/browser/webauthn');

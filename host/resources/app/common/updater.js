@@ -12,6 +12,7 @@ const path = require('path');
 const {
   hrtime
 } = require('process');
+const arch = require('arch');
 let instance;
 const TASK_STATE_COMPLETE = 'Complete';
 const TASK_STATE_FAILED = 'Failed';
@@ -387,14 +388,23 @@ function getUpdaterPlatformName(platform) {
 function tryInitUpdater(buildInfo, repositoryUrl) {
   const paths = require('./paths');
   const rootPath = paths.getInstallPath();
+  const userDataPath = paths.getUserData();
   if (rootPath == null) {
     return false;
   }
+  const platform = getUpdaterPlatformName(process.platform);
+  let currentArch = null;
+  if (platform === 'win') {
+    currentArch = arch();
+    console.log(`Determined current Windows architecture: ${currentArch}`);
+  }
   instance = new Updater({
     release_channel: buildInfo.releaseChannel,
-    platform: getUpdaterPlatformName(process.platform),
+    platform: platform,
     repository_url: repositoryUrl,
-    root_path: rootPath
+    root_path: rootPath,
+    current_os_arch: currentArch,
+    user_data_path: userDataPath
   });
   return instance.valid;
 }

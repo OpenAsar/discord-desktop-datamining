@@ -65,28 +65,34 @@ async function readFulfilledFiles(filepaths, maxSize, orException, shouldGzip) {
   }
   return files.filter(result => result.status === 'fulfilled').map(result => result.value);
 }
-function readFiles(filepaths, maxSize, shouldGzip) {
-  maxSize = Math.min(maxSize, MAX_LENGTH);
+function readFiles(filepaths, dataMaxSize, shouldGzip) {
+  dataMaxSize = Math.min(dataMaxSize, MAX_LENGTH);
   return Promise.allSettled(filepaths.map(async filepath => {
     const handle = await promiseFs.open(filepath, 'r');
     try {
+      let finalFilename = _path.default.basename(filepath);
+      const willGzip = shouldGzip != null && shouldGzip(finalFilename);
+      const fileMaxSize = willGzip ? dataMaxSize * 10 : dataMaxSize;
       const stats = await promiseFs.fstat(handle);
-      if (maxSize != null && stats.size > maxSize) {
-        throw {
-          code: 'ETOOLARGE',
-          message: 'upload too large',
-          filesize: stats.size,
-          maxSize
-        };
+      const resultError = {
+        code: 'ETOOLARGE',
+        message: 'upload too large',
+        filesize: stats.size,
+        maxSize: dataMaxSize
+      };
+      if (stats.size > fileMaxSize) {
+        throw resultError;
       }
       const buffer = Buffer.alloc(stats.size);
       const data = await promiseFs.read(handle, buffer, 0, stats.size, 0);
       let finalData = data.buffer.slice(0, data.bytesRead);
-      let finalFilename = _path.default.basename(filepath);
-      if (shouldGzip != null && shouldGzip(finalFilename)) {
+      if (willGzip) {
         try {
           finalData = await promiseZlib.gzip(finalData);
           finalFilename = finalFilename + '.gz';
+          if (finalData.byteLength > dataMaxSize) {
+            throw resultError;
+          }
         } catch (e) {
           console.error(`Failed to gzip ${finalFilename}`, e);
         }
