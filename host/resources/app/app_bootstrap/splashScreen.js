@@ -141,7 +141,9 @@ async function updateUntilCurrent() {
         }
       });
       if (!installedAnything) {
-        await newUpdater.startCurrentVersion();
+        await newUpdater.startCurrentVersion({
+          optin_windows_transition_progression: _Constants.OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION
+        });
         newUpdater.setRunningInBackground();
         newUpdater.collectGarbage();
         launchMainWindow();

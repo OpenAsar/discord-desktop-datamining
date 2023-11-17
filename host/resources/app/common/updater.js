@@ -287,10 +287,24 @@ class Updater extends EventEmitter {
     }
   }
   queryCurrentVersions() {
-    return this._sendRequest('QueryCurrentVersions');
+    return this.queryCurrentVersionsWithOptions(null);
+  }
+  queryCurrentVersionsWithOptions(options) {
+    return this._sendRequest({
+      QueryCurrentVersions: {
+        options
+      }
+    });
   }
   queryCurrentVersionsSync() {
-    return this._handleSyncResponse(this._sendRequestSync('QueryCurrentVersions'));
+    return this.queryCurrentVersionsWithOptionsSync(null);
+  }
+  queryCurrentVersionsWithOptionsSync(options) {
+    return this._handleSyncResponse(this._sendRequestSync({
+      QueryCurrentVersions: {
+        options
+      }
+    }));
   }
   repair(progressCallback) {
     return this.repairWithOptions(null, progressCallback);
@@ -336,8 +350,8 @@ class Updater extends EventEmitter {
       }
     }, progressCallback);
   }
-  async startCurrentVersion(options) {
-    const versions = await this.queryCurrentVersions();
+  async startCurrentVersion(queryOptions, options) {
+    const versions = await this.queryCurrentVersions(queryOptions);
     await this.setRunningManifest(versions.last_successful_update);
     this._startCurrentVersionInner(options, versions);
   }
