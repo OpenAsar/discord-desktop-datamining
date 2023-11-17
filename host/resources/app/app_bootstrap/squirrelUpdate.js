@@ -94,7 +94,11 @@ function maybeInstallNewUpdaterSeedDb() {
   const installerDbSrc = _path.default.join(appFolder, 'installer.db');
   const installerDbDest = _path.default.join(rootFolder, 'installer.db');
   if (_fs.default.existsSync(installerDbSrc)) {
-    _fs.default.renameSync(installerDbSrc, installerDbDest);
+    try {
+      _fs.default.renameSync(installerDbSrc, installerDbDest);
+    } catch (e) {
+      console.log(`Failed to rename '${installerDbSrc}' to '${installerDbDest}'`);
+    }
   }
 }
 function handleStartupEvent(protocol, app, squirrelCommand) {
