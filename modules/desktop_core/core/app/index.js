@@ -35,6 +35,7 @@ function startup(bootstrapModules) {
   rootCertificates.init();
   require('./discord_native/browser/accessibility');
   const app = require('./discord_native/browser/app');
+  app.injectOptinWindowsTransitionProgression(Constants.OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION);
   app.injectBuildInfo(buildInfo);
   app.injectModuleUpdater(moduleUpdater);
   app.injectUpdater(updater);

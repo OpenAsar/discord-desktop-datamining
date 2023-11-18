@@ -5,6 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.injectModuleUpdater = injectModuleUpdater;
 exports.injectUpdater = injectUpdater;
+var _Constants = require("../../Constants");
 const childProcess = require('child_process');
 const electron = require('electron');
 const {
@@ -38,7 +39,9 @@ electron.ipcMain.on(NATIVE_MODULES_GET_PATHS, event => {
 async function newUpdaterInstall(updater, moduleName) {
   try {
     await updater.installModule(moduleName);
-    await updater.commitModules();
+    await updater.commitModules({
+      optin_windows_transition_progression: _Constants.OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION
+    });
   } catch (e) {
     throw new Error(`Failed to install ${moduleName}: ${e}`);
   }

@@ -359,12 +359,12 @@ class Updater extends EventEmitter {
     const versions = this.queryCurrentVersionsSync();
     this._startCurrentVersionInner(options, versions);
   }
-  async commitModules(versions) {
+  async commitModules(versions, queryOptions) {
     if (this.committedHostVersion == null) {
       throw new Error('Cannot commit modules before host version.');
     }
     if (versions == null) {
-      versions = await this.queryCurrentVersions();
+      versions = await this.queryCurrentVersions(queryOptions);
     }
     this._commitModulesInner(versions);
   }
