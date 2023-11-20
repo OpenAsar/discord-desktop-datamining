@@ -40,6 +40,7 @@ async function newUpdaterInstall(updater, moduleName) {
   try {
     await updater.installModule(moduleName);
     await updater.commitModules({
+      skip_windows_arch_update: _Constants.DISABLE_WINDOWS_64BIT_TRANSITION,
       optin_windows_transition_progression: _Constants.OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION
     });
   } catch (e) {

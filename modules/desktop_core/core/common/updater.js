@@ -351,7 +351,7 @@ class Updater extends EventEmitter {
     }, progressCallback);
   }
   async startCurrentVersion(queryOptions, options) {
-    const versions = await this.queryCurrentVersions(queryOptions);
+    const versions = await this.queryCurrentVersionsWithOptions(queryOptions);
     await this.setRunningManifest(versions.last_successful_update);
     this._startCurrentVersionInner(options, versions);
   }
@@ -359,12 +359,12 @@ class Updater extends EventEmitter {
     const versions = this.queryCurrentVersionsSync();
     this._startCurrentVersionInner(options, versions);
   }
-  async commitModules(versions, queryOptions) {
+  async commitModules(queryOptions, versions) {
     if (this.committedHostVersion == null) {
       throw new Error('Cannot commit modules before host version.');
     }
     if (versions == null) {
-      versions = await this.queryCurrentVersions(queryOptions);
+      versions = await this.queryCurrentVersionsWithOptions(queryOptions);
     }
     this._commitModulesInner(versions);
   }

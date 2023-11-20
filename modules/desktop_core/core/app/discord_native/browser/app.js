@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.injectBuildInfo = injectBuildInfo;
 exports.injectModuleUpdater = injectModuleUpdater;
 exports.injectOptinWindowsTransitionProgression = injectOptinWindowsTransitionProgression;
+exports.injectSkipWindowsArchUpdate = injectSkipWindowsArchUpdate;
 exports.injectUpdater = injectUpdater;
 var _electron = _interopRequireDefault(require("electron"));
 var process = _interopRequireWildcard(require("process"));
@@ -13,10 +14,14 @@ var _DiscordIPC = require("../common/DiscordIPC");
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+let injectedSkipWindowsArchUpdate = null;
 let injectedOptinWindowsTransition = null;
 let injectedBuildInfo = null;
 let injectedModuleUpdater = null;
 let injectedUpdater = null;
+function injectSkipWindowsArchUpdate(skipArchUpdate) {
+  injectedSkipWindowsArchUpdate = skipArchUpdate;
+}
 function injectOptinWindowsTransitionProgression(optin) {
   injectedOptinWindowsTransition = optin;
 }
@@ -37,21 +42,23 @@ _DiscordIPC.DiscordIPC.main.on(_DiscordIPC.IPCEvents.APP_GET_HOST_VERSION_SYNC, 
 });
 async function newUpdaterGetModuleVersions(updater) {
   let queryOptions;
-  if (injectedOptinWindowsTransition != null) {
+  if (injectedSkipWindowsArchUpdate != null && injectedOptinWindowsTransition != null) {
     queryOptions = {
+      skip_windows_arch_update: injectedSkipWindowsArchUpdate,
       optin_windows_transition_progression: injectedOptinWindowsTransition
     };
   }
-  return (await updater.queryCurrentVersions(queryOptions)).current_modules;
+  return (await updater.queryCurrentVersionsWithOptions(queryOptions)).current_modules;
 }
 function newUpdaterGetBuildNumber(updater) {
   let queryOptions;
-  if (injectedOptinWindowsTransition != null) {
+  if (injectedSkipWindowsArchUpdate != null && injectedOptinWindowsTransition != null) {
     queryOptions = {
+      skip_windows_arch_update: injectedSkipWindowsArchUpdate,
       optin_windows_transition_progression: injectedOptinWindowsTransition
     };
   }
-  const version = updater.queryCurrentVersionsSync(queryOptions);
+  const version = updater.queryCurrentVersionsWithOptionsSync(queryOptions);
   if (version.running_update != null) {
     return version.running_update.metadata_version;
   }

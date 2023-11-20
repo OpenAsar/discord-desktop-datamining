@@ -142,6 +142,7 @@ async function updateUntilCurrent() {
       });
       if (!installedAnything) {
         await newUpdater.startCurrentVersion({
+          skip_windows_arch_update: _Constants.DISABLE_WINDOWS_64BIT_TRANSITION,
           optin_windows_transition_progression: _Constants.OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION
         });
         newUpdater.setRunningInBackground();
