@@ -12,7 +12,6 @@ const path = require('path');
 const {
   hrtime
 } = require('process');
-const arch = require('arch');
 let instance;
 const TASK_STATE_COMPLETE = 'Complete';
 const TASK_STATE_FAILED = 'Failed';
@@ -287,24 +286,10 @@ class Updater extends EventEmitter {
     }
   }
   queryCurrentVersions() {
-    return this.queryCurrentVersionsWithOptions(null);
-  }
-  queryCurrentVersionsWithOptions(options) {
-    return this._sendRequest({
-      QueryCurrentVersions: {
-        options
-      }
-    });
+    return this._sendRequest('QueryCurrentVersions');
   }
   queryCurrentVersionsSync() {
-    return this.queryCurrentVersionsWithOptionsSync(null);
-  }
-  queryCurrentVersionsWithOptionsSync(options) {
-    return this._handleSyncResponse(this._sendRequestSync({
-      QueryCurrentVersions: {
-        options
-      }
-    }));
+    return this._handleSyncResponse(this._sendRequestSync('QueryCurrentVersions'));
   }
   repair(progressCallback) {
     return this.repairWithOptions(null, progressCallback);
@@ -350,8 +335,8 @@ class Updater extends EventEmitter {
       }
     }, progressCallback);
   }
-  async startCurrentVersion(queryOptions, options) {
-    const versions = await this.queryCurrentVersionsWithOptions(queryOptions);
+  async startCurrentVersion(options) {
+    const versions = await this.queryCurrentVersions();
     await this.setRunningManifest(versions.last_successful_update);
     this._startCurrentVersionInner(options, versions);
   }
@@ -359,12 +344,12 @@ class Updater extends EventEmitter {
     const versions = this.queryCurrentVersionsSync();
     this._startCurrentVersionInner(options, versions);
   }
-  async commitModules(queryOptions, versions) {
+  async commitModules(versions) {
     if (this.committedHostVersion == null) {
       throw new Error('Cannot commit modules before host version.');
     }
     if (versions == null) {
-      versions = await this.queryCurrentVersionsWithOptions(queryOptions);
+      versions = await this.queryCurrentVersions();
     }
     this._commitModulesInner(versions);
   }
@@ -402,23 +387,14 @@ function getUpdaterPlatformName(platform) {
 function tryInitUpdater(buildInfo, repositoryUrl) {
   const paths = require('./paths');
   const rootPath = paths.getInstallPath();
-  const userDataPath = paths.getUserData();
   if (rootPath == null) {
     return false;
   }
-  const platform = getUpdaterPlatformName(process.platform);
-  let currentArch = null;
-  if (platform === 'win') {
-    currentArch = arch();
-    console.log(`Determined current Windows architecture: ${currentArch}`);
-  }
   instance = new Updater({
     release_channel: buildInfo.releaseChannel,
-    platform: platform,
+    platform: getUpdaterPlatformName(process.platform),
     repository_url: repositoryUrl,
-    root_path: rootPath,
-    current_os_arch: currentArch,
-    user_data_path: userDataPath
+    root_path: rootPath
   });
   return instance.valid;
 }
