@@ -40,7 +40,7 @@ export default async (channel, mod, version) => {
   const domain = `https://dl${channel === 'stable' ? '' : `-${channel}`}.discordapp.net`;
 
   // const downloadUrl = (mod === 'host' ? manifest : manifest.modules['discord_' + mod]).full.url;
-  const downloadUrl = mod === 'host' ? `${domain}/distro/app/${channel}/win/x86/${channel === 'development' ? 0 : 1}.0.${version}/full.distro` : `${domain}/distro/app/${channel}/win/x86/${hostVersion}/discord_${mod}/${version}/full.distro`;
+  const downloadUrl = mod === 'host' ? `${domain}/distro/app/${channel}/win/x86/1.0.${version}/full.distro` : `${domain}/distro/app/${channel}/win/x86/${hostVersion}/discord_${mod}/${version}/full.distro`;
   console.log('DOWNLOADING', mod, version, '|', downloadUrl);
 
   const outDir = join(baseOutDir, hostVersion, mod === 'host' ? 'host' : `modules`, mod === 'host' ? '' : mod);
