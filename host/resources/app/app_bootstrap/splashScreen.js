@@ -18,6 +18,7 @@ var paths = _interopRequireWildcard(require("../common/paths"));
 var _securityUtils = require("../common/securityUtils");
 var _updater = require("../common/updater");
 var _ipcMain = _interopRequireDefault(require("./ipcMain"));
+var _Constants = require("./Constants");
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -106,7 +107,10 @@ class TaskProgress {
 async function updateUntilCurrent() {
   const retryOptions = {
     skip_host_delta: false,
-    skip_module_delta: {}
+    skip_module_delta: {},
+    skip_all_module_delta: false,
+    skip_windows_arch_update: _Constants.DISABLE_WINDOWS_64BIT_TRANSITION,
+    optin_windows_transition_progression: _Constants.OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION
   };
   while (true) {
     updateSplashState(CHECKING_FOR_UPDATES);
@@ -137,7 +141,10 @@ async function updateUntilCurrent() {
         }
       });
       if (!installedAnything) {
-        await newUpdater.startCurrentVersion();
+        await newUpdater.startCurrentVersion({
+          skip_windows_arch_update: _Constants.DISABLE_WINDOWS_64BIT_TRANSITION,
+          optin_windows_transition_progression: _Constants.OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION
+        });
         newUpdater.setRunningInBackground();
         newUpdater.collectGarbage();
         launchMainWindow();

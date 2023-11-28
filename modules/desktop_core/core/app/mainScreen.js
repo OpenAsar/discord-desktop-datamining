@@ -103,7 +103,10 @@ let lastCrashed = 0;
 let lastPageLoadFailed = false;
 const retryUpdateOptions = {
   skip_host_delta: false,
-  skip_module_delta: {}
+  skip_module_delta: {},
+  skip_all_module_delta: false,
+  skip_windows_arch_update: _Constants.DISABLE_WINDOWS_64BIT_TRANSITION,
+  optin_windows_transition_progression: _Constants.OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION
 };
 function getMainWindowId() {
   return mainWindowId;
