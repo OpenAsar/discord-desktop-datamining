@@ -190,6 +190,7 @@ function bindConnectionInstance(instance) {
     stopSamplesPlayback: () => instance.stopSamplesPlayback(),
     setClipRecordSsrc: (ssrc, type, direction, shouldRecord) =>
       instance.setClipRecordSsrc(ssrc, type, direction, shouldRecord),
+    setClipRecordSsrc2: (ssrc, sourceType, shouldRecord) => instance.setClipRecordSsrc2(ssrc, sourceType, shouldRecord),
     setRtcLogMarker: (marker) => instance.setRtcLogMarker(marker),
     startSamplesLocalPlayback: (samplesId, options, channels, callback) =>
       instance.startSamplesLocalPlayback(samplesId, options, channels, callback),
