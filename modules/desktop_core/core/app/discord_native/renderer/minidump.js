@@ -6,31 +6,8 @@ Object.defineProperty(exports, "__esModule", {
 exports.readMinidump = readMinidump;
 var _promises = _interopRequireDefault(require("fs/promises"));
 var _util = _interopRequireDefault(require("util"));
+var _nativeCrashCodes = require("@discordapp/native-crash-codes");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-const exceptionTypes = {
-  C0000005: 'EXCEPTION_ACCESS_VIOLATION',
-  '80000002': 'EXCEPTION_DATATYPE_MISALIGNMENT',
-  '80000003': 'EXCEPTION_BREAKPOINT',
-  '80000004': 'EXCEPTION_SINGLE_STEP',
-  C000008C: 'EXCEPTION_ARRAY_BOUNDS_EXCEEDED',
-  C000008D: 'EXCEPTION_FLT_DENORMAL_OPERAND',
-  C000008E: 'EXCEPTION_FLT_DIVIDE_BY_ZERO',
-  C000008F: 'EXCEPTION_FLT_INEXACT_RESULT',
-  C0000090: 'EXCEPTION_FLT_INVALID_OPERATION',
-  C0000091: 'EXCEPTION_FLT_OVERFLOW',
-  C0000092: 'EXCEPTION_FLT_STACK_CHECK',
-  C0000093: 'EXCEPTION_FLT_UNDERFLOW',
-  C0000094: 'EXCEPTION_INT_DIVIDE_BY_ZERO',
-  C0000095: 'EXCEPTION_INT_OVERFLOW',
-  C0000096: 'EXCEPTION_PRIV_INSTRUCTION',
-  C0000006: 'EXCEPTION_IN_PAGE_ERROR',
-  C000001D: 'EXCEPTION_ILLEGAL_INSTRUCTION',
-  C0000025: 'EXCEPTION_NONCONTINUABLE_EXCEPTION',
-  C00000FD: 'EXCEPTION_STACK_OVERFLOW',
-  C0000026: 'EXCEPTION_INVALID_DISPOSITION',
-  '80000001': 'EXCEPTION_GUARD_PAGE',
-  C0000008: 'EXCEPTION_INVALID_HANDLE'
-};
 class FileReader {
   utf16Decoder = new _util.default.TextDecoder('utf-16');
   constructor(path, bufferSize = 2048) {
@@ -194,9 +171,7 @@ class MINIDUMP_EXCEPTION_STREAM {
     return new MINIDUMP_EXCEPTION_STREAM(await reader.read(MINIDUMP_EXCEPTION_STREAM.U32_SIZE, position));
   }
   getExceptionCodeString() {
-    const exceptionCode = this.exceptionCode.toString(16).toUpperCase().padStart(8, '0');
-    const exceptionString = exceptionTypes[exceptionCode] ?? exceptionCode;
-    return exceptionString;
+    return (0, _nativeCrashCodes.getExceptionCode)(this.exceptionCode);
   }
 }
 class MINIDUMP_LOCATION_DESCRIPTOR {
