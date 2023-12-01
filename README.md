@@ -2,26 +2,26 @@
 
 ## canary versions
 
-**host: 1.0.120**
+**host: 1.0.121**
 
 | module | version |
 | ------ | :-----: |
-| utils | 3 |
-| rpc | 3 |
-| dispatch | 3 |
-| erlpack | 3 |
-| game_utils | 4 |
-| modules | 3 |
-| krisp | 3 |
-| media | 3 |
-| overlay2 | 3 |
-| desktop_core | 4 |
-| sekrit | 3 |
-| hook | 3 |
-| cloudsync | 3 |
-| spellcheck | 3 |
-| voice | 6 |
-| vigilante | 3 |
+| vigilante | 1 |
+| rpc | 1 |
+| hook | 1 |
+| krisp | 1 |
+| overlay2 | 1 |
+| media | 1 |
+| spellcheck | 1 |
+| dispatch | 1 |
+| cloudsync | 1 |
+| desktop_core | 1 |
+| sekrit | 1 |
+| modules | 1 |
+| voice | 1 |
+| utils | 1 |
+| erlpack | 1 |
+| game_utils | 1 |
 
 ## branches
 
