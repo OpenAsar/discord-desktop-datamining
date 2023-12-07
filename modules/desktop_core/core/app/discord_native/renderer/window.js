@@ -9,6 +9,7 @@ exports.close = close;
 exports.flashFrame = flashFrame;
 exports.focus = focus;
 exports.fullscreen = fullscreen;
+exports.getNativeHandle = getNativeHandle;
 exports.isAlwaysOnTop = isAlwaysOnTop;
 exports.maximize = maximize;
 exports.minimize = minimize;
@@ -86,6 +87,9 @@ function setContentProtection(enabled) {
     return Promise.resolve();
   }
   return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.WINDOW_SET_CONTENT_PROTCTION, enabled);
+}
+function getNativeHandle(key) {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.WINDOW_GET_NATIVE_HANDLE, key);
 }
 const USE_OSX_NATIVE_TRAFFIC_LIGHTS = true;
 exports.USE_OSX_NATIVE_TRAFFIC_LIGHTS = USE_OSX_NATIVE_TRAFFIC_LIGHTS;

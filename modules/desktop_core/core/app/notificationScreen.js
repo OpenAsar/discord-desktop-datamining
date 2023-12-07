@@ -74,7 +74,9 @@ function init({
   _ipcMain.default.on(IPC_NOTIFICATION_CLOSE, handleNotificationClose);
 }
 function destroyWindow() {
-  if (notificationWindow == null) return;
+  if (isDestroyed(notificationWindow)) {
+    return;
+  }
   notificationWindow.hide();
   notificationWindow.close();
   notificationWindow = null;
