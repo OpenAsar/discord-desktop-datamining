@@ -36,7 +36,7 @@ let notificationWindow;
 let VARIABLES;
 function isDestroyed(win) {
   if (win == null || win.isDestroyed()) {
-    console.error(`notificationScreen.webContentsSend: win is invalid ${win.isDestroyed()}.`);
+    console.error(`notificationScreen.webContentsSend: win is invalid: ${win === null || win === void 0 ? void 0 : win.isDestroyed()}.`);
     return true;
   }
   if (win.webContents == null || win.webContents.isDestroyed()) {
