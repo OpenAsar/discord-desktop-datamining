@@ -53,7 +53,7 @@ function startup(bootstrapModules) {
   const features = require('./discord_native/browser/features');
   features.injectFeaturesBackend(appFeatures.getFeatures());
   require('./discord_native/browser/fileManager');
-  require('./discord_native/browser/globalOverlay');
+  const globalOverlay = require('./discord_native/browser/globalOverlay');
   require('./discord_native/browser/hardware');
   const {
     setupClipsProtocol
@@ -92,7 +92,10 @@ function startup(bootstrapModules) {
     setNewWindowEvent
   } = require('./popoutWindows');
   windowNative.injectGetWindow(key => {
-    return getPopoutWindowByKey(key) || _electron.BrowserWindow.fromId(mainScreen.getMainWindowId());
+    if (key == null) {
+      return _electron.BrowserWindow.fromId(mainScreen.getMainWindowId());
+    }
+    return getPopoutWindowByKey(key) || globalOverlay.getWindow(key);
   }, () => [...getAllPopoutWindows(), _electron.BrowserWindow.fromId(mainScreen.getMainWindowId())]);
   setNewWindowEvent(window => windowNative.newWindowEvent(window));
 }

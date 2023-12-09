@@ -1,4 +1,5 @@
-const execa = require('execa');
+const util = require('util');
+const exec = util.promisify(require('child_process').exec);
 const fs = require('fs');
 const path = require('path');
 const {
@@ -64,10 +65,10 @@ module.exports.getGPUDriverVersions = async () => {
   }
 
   const result = {};
-  const nvidiaSmiPath = `${process.env['SystemRoot']}/System32/nvidia-smi.exe`;
+  const nvidiaSmiPath = `"${process.env['SystemRoot']}/System32/nvidia-smi.exe"`;
 
   try {
-    result.nvidia = parseNvidiaSmiOutput(await execa(nvidiaSmiPath, []));
+    result.nvidia = parseNvidiaSmiOutput(await exec(nvidiaSmiPath));
   } catch (e) {
     result.nvidia = {error: e.toString()};
   }
