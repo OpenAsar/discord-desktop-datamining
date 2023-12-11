@@ -1,26 +1,18 @@
 "use strict";
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.getWindow = getWindow;
 var _electron = require("electron");
 var _path = _interopRequireDefault(require("path"));
 var _url = require("url");
 var _processUtils = require("../../../common/processUtils");
 var _mainScreen = require("../../mainScreen");
 var _DiscordIPC = require("../common/DiscordIPC");
-var _constants = require("../common/constants");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 const OPEN_TIMEOUT = 5 * 60 * 1000;
 let overlayWindow = null;
-let overlayUrl = null;
-function getWindow(key) {
-  if (key === _constants.OVERLAY_WINDOW_KEY && isValidWindow(overlayWindow)) {
-    return overlayWindow;
-  }
-  return null;
-}
+let inputWindow = null;
+let isInteractionEnabled = false;
+let clickZones = [];
+let shouldBeVisible = false;
 function isValidWindow(win) {
   var _win$webContents;
   return (win === null || win === void 0 ? void 0 : win.isDestroyed()) === false && (win === null || win === void 0 ? void 0 : (_win$webContents = win.webContents) === null || _win$webContents === void 0 ? void 0 : _win$webContents.isDestroyed()) === false;
@@ -42,76 +34,92 @@ function isValidUrl(url) {
     return false;
   }
 }
-_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_OPEN_WINDOW, async (_, url) => {
+function getActiveWindowList() {
+  const windows = [];
+  if (isValidWindow(overlayWindow)) {
+    windows.push({
+      type: 'overlay',
+      window: overlayWindow
+    });
+  }
+  if (isValidWindow(inputWindow)) {
+    windows.push({
+      type: 'input',
+      window: inputWindow
+    });
+  }
+  return windows;
+}
+async function openOverlay(url) {
   if (!_processUtils.IS_WIN) {
-    console.log('GLOBAL_OVERLAY_OPEN_WINDOW: Windows only.');
-    return Promise.resolve();
+    console.log('GLOBAL_OVERLAY_OPEN: Windows only.');
+    return;
+  }
+  if (isValidWindow(overlayWindow) && isValidWindow(inputWindow)) {
+    console.log('openOverlay: Window already open.');
+    return;
   }
   if (!isValidUrl(url)) {
-    return Promise.resolve();
+    return;
   }
-  if (isValidWindow(overlayWindow) && overlayUrl === url) {
-    return Promise.resolve();
-  }
+  closeOverlay();
+  isInteractionEnabled = false;
+  shouldBeVisible = false;
   try {
-    if (!isValidWindow(overlayWindow)) {
-      console.log('openOverlay: creating window.');
-      const rect = {
-        x: 0,
-        y: 0,
-        width: 1280,
-        height: 720
-      };
-      for (const {
-        bounds
-      } of _electron.screen.getAllDisplays()) {
-        rect.x = Math.min(bounds.x, rect.x);
-        rect.y = Math.min(bounds.y, rect.y);
+    const {
+      x,
+      y,
+      width,
+      height
+    } = _electron.screen.getPrimaryDisplay().bounds;
+    const overlayWindowOptions = {
+      x,
+      y,
+      width,
+      height,
+      show: false,
+      transparent: true,
+      frame: false,
+      resizable: true,
+      type: 'toolbar',
+      alwaysOnTop: true,
+      skipTaskbar: false,
+      title: 'Discord Global Overlay',
+      webPreferences: {
+        preload: _path.default.join(__dirname, '..', '..', 'mainScreenPreload.js'),
+        nodeIntegration: false,
+        sandbox: false,
+        contextIsolation: true
       }
-      const overlayWindowOptions = {
-        x: rect.x - rect.width,
-        y: rect.y - rect.height,
-        width: rect.width,
-        height: rect.height,
-        show: false,
-        transparent: true,
-        frame: false,
-        resizable: true,
-        type: 'toolbar',
-        alwaysOnTop: true,
-        skipTaskbar: false,
-        title: 'Discord Overlay',
-        webPreferences: {
-          preload: _path.default.join(__dirname, '..', '..', 'mainScreenPreload.js'),
-          nodeIntegration: false,
-          sandbox: false,
-          contextIsolation: true
-        }
-      };
-      overlayWindow = new _electron.BrowserWindow(overlayWindowOptions);
-      overlayWindow.on('will-resize', event => {
-        event.preventDefault();
-      });
-      overlayWindow.webContents.once('did-finish-load', () => {
-        if (isValidWindow(overlayWindow)) {
-          overlayWindow.showInactive();
-        }
-      });
-    }
+    };
+    overlayWindow = new _electron.BrowserWindow(overlayWindowOptions);
+    overlayWindow.webContents.once('did-finish-load', () => {
+      if (isValidWindow(overlayWindow) && shouldBeVisible) {
+        overlayWindow.showInactive();
+      }
+    });
+    inputWindow = new _electron.BrowserWindow({
+      ...overlayWindowOptions,
+      title: 'Discord Global Overlay Input'
+    });
     const loadingState = new Promise((accept, reject) => {
-      if (isValidWindow(overlayWindow)) {
+      for (const {
+        type,
+        window
+      } of getActiveWindowList()) {
         function failedHandler(eventName) {
-          console.error(`openOverlay: ${eventName}.`);
+          console.error(`openOverlay: "${type}" ${eventName}.`);
+          closeOverlay();
           reject(new Error(`openOverlay failed in ${eventName}.`));
         }
-        overlayWindow.webContents.once('did-finish-load', () => accept());
-        overlayWindow.once('closed', () => failedHandler('closed'));
-        overlayWindow.webContents.once('did-fail-load', () => failedHandler('did-fail-load'));
-        overlayWindow.webContents.once('did-fail-provisional-load', () => failedHandler('did-fail-provisional-load'));
-        overlayWindow.webContents.once('render-process-gone', () => failedHandler('render-process-gone'));
-        overlayWindow.webContents.once('preload-error', () => failedHandler('preload-error'));
-        overlayWindow.on('minimize', () => {
-          console.error(`openOverlay: was minimized!.`);
+        window.webContents.once('did-finish-load', () => accept());
+        window.once('closed', () => failedHandler('closed'));
+        window.webContents.once('did-fail-load', () => failedHandler('did-fail-load'));
+        window.webContents.once('did-fail-provisional-load', () => failedHandler('did-fail-provisional-load'));
+        window.webContents.once('render-process-gone', () => failedHandler('render-process-gone'));
+        window.webContents.once('preload-error', () => failedHandler('preload-error'));
+        window.on('minimize', () => {
+          console.error(`openOverlay: "${type}" was minimized!.`);
         });
       }
     });
@@ -123,16 +131,144 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_OPEN_WIN
       }, OPEN_TIMEOUT);
     });
     console.log(`openOverlay: loading...`);
-    const loadingPromise = Promise.all([overlayWindow.loadURL(url)]);
+    const loadingPromise = Promise.all([overlayWindow.loadURL(url), inputWindow.loadURL(_path.default.join(__dirname, '..', '..', 'global_overlay', 'input.html'))]);
     await Promise.any([loadingState, loadingPromise, timeoutState]);
     console.log(`openOverlay: loaded.`);
     if (timeoutId != null) {
       clearTimeout(timeoutId);
     }
+    setInteractionEnabled(isInteractionEnabled);
+    overlayWindow.setAlwaysOnTop(true, 'screen-saver');
   } catch (e) {
     console.log(`openOverlay: Error "${e.text}"\n${e.stack}`);
     throw e;
   }
-  overlayUrl = url;
+}
+function closeOverlay() {
+  const windows = getActiveWindowList();
+  console.log(`closeOverlay: Closing ${windows.length} windows...`);
+  for (const {
+    type,
+    window
+  } of windows) {
+    try {
+      window.hide();
+      window.close();
+    } catch (e) {
+      console.error(`closeOverlay: "${type}" Error "${e}"`);
+    }
+  }
+  overlayWindow = null;
+  inputWindow = null;
+}
+function setInteractionEnabled(enabled) {
+  isInteractionEnabled = enabled;
+  if (!isValidWindow(overlayWindow) || !isValidWindow(inputWindow) || !shouldBeVisible) {
+    return;
+  }
+  overlayWindow.setIgnoreMouseEvents(!isInteractionEnabled, {
+    forward: false
+  });
+  if (isInteractionEnabled) {
+    inputWindow.setIgnoreMouseEvents(true);
+    inputWindow.hide();
+  } else {
+    setClickZones(clickZones);
+  }
+}
+function setClickZones(zones) {
+  clickZones = zones;
+  if (!isValidWindow(overlayWindow) || !isValidWindow(inputWindow) || !shouldBeVisible) {
+    return;
+  }
+  if (!isInteractionEnabled && zones.length > 0) {
+    inputWindow.setIgnoreMouseEvents(false);
+    inputWindow.setShape(zones.map(zone => {
+      const rect = {
+        x: Math.ceil(zone.x),
+        y: Math.ceil(zone.y),
+        width: Math.ceil(zone.width),
+        height: Math.ceil(zone.height)
+      };
+      return rect;
+    }));
+    inputWindow.showInactive();
+    inputWindow.setAlwaysOnTop(true, 'screen-saver');
+  } else {
+    inputWindow.setIgnoreMouseEvents(true);
+    inputWindow.hide();
+  }
+}
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_OPEN, (_, url) => {
+  return openOverlay(url);
+});
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_CLOSE, () => {
+  closeOverlay();
+  return Promise.resolve();
+});
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_INTERACT_TOGGLE, (_, enabled) => {
+  setInteractionEnabled(enabled);
+  return Promise.resolve();
+});
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_SET_CLICK_ZONES, (_, zones) => {
+  setClickZones(zones);
+  return Promise.resolve();
+});
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_RELAY_INPUT_CLICK, (_, button, x, y) => {
+  if (button !== 0) {
+    return Promise.resolve();
+  }
+  if (!isValidWindow(overlayWindow)) {
+    return Promise.resolve();
+  }
+  for (const zone of clickZones) {
+    if (x >= zone.x && x <= zone.x + zone.width && y >= zone.y && y <= zone.y + zone.height) {
+      var _overlayWindow;
+      (_overlayWindow = overlayWindow) === null || _overlayWindow === void 0 ? void 0 : _overlayWindow.webContents.send(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_CLICK_ZONE_CLICKED, zone.name, x, y);
+    }
+  }
+  return Promise.resolve();
+});
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_SET_VISIBILITY, (_, visible) => {
+  if (visible !== shouldBeVisible) {
+    shouldBeVisible = visible;
+    if (isValidWindow(overlayWindow)) {
+      if (shouldBeVisible) {
+        overlayWindow.showInactive();
+      } else {
+        overlayWindow.hide();
+      }
+    }
+    if (isValidWindow(inputWindow) && !shouldBeVisible) {
+      inputWindow.hide();
+    }
+    setInteractionEnabled(isInteractionEnabled);
+  }
+  return Promise.resolve();
+});
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_GET_WINDOW_HANDLES, () => {
+  const windowHandles = [];
+  if (isValidWindow(overlayWindow)) {
+    windowHandles.push(overlayWindow.getNativeWindowHandle().readInt32LE().toString(10));
+  }
+  if (isValidWindow(inputWindow)) {
+    windowHandles.push(inputWindow.getNativeWindowHandle().readInt32LE().toString(10));
+  }
+  return Promise.resolve(windowHandles);
+});
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_OPEN_DEV_CONSOLE, (_, modifier) => {
+  if (modifier === 1) {
+    if (isValidWindow(inputWindow)) {
+      inputWindow.webContents.openDevTools({
+        mode: 'detach'
+      });
+    }
+  } else {
+    if (isValidWindow(overlayWindow)) {
+      overlayWindow.webContents.openDevTools({
+        mode: 'detach'
+      });
+    }
+  }
   return Promise.resolve();
 });
