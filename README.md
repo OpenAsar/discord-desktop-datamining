@@ -7,21 +7,21 @@
 | module | version |
 | ------ | :-----: |
 | erlpack | 4 |
-| cloudsync | 4 |
-| utils | 4 |
-| dispatch | 4 |
-| game_utils | 4 |
-| desktop_core | 4 |
-| modules | 4 |
-| sekrit | 4 |
 | vigilante | 4 |
-| krisp | 4 |
+| hook | 4 |
+| desktop_core | 4 |
 | rpc | 4 |
+| voice | 6 |
 | overlay2 | 4 |
 | spellcheck | 4 |
-| voice | 6 |
+| utils | 5 |
+| cloudsync | 4 |
+| sekrit | 4 |
 | media | 4 |
-| hook | 4 |
+| game_utils | 4 |
+| modules | 4 |
+| krisp | 4 |
+| dispatch | 4 |
 
 ## branches
 
