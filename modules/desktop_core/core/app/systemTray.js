@@ -183,7 +183,13 @@ function setApplications(newApplications) {
   setContextMenu();
 }
 function setContextMenu() {
-  atomTray != null && atomTray.setContextMenu(_electron.Menu.buildFromTemplate(contextMenu));
+  let menu = null;
+  try {
+    menu = _electron.Menu.buildFromTemplate(contextMenu);
+  } catch (_) {}
+  if (atomTray != null) {
+    atomTray.setContextMenu(menu);
+  }
 }
 function show() {
   if (atomTray != null) return;

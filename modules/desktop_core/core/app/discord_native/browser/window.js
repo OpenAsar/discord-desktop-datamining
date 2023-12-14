@@ -125,3 +125,10 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_SET_CONTENT_PROT
   contentProtectionEnabled = enabled;
   return Promise.resolve();
 });
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_GET_NATIVE_HANDLE, (_, key) => {
+  const win = injectedGetWindow(key);
+  if (win != null) {
+    return Promise.resolve(win.getNativeWindowHandle().readInt32LE().toString(10));
+  }
+  return Promise.resolve(null);
+});

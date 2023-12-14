@@ -13,12 +13,14 @@ const {
   hrtime
 } = require('process');
 const arch = require('arch');
+const fs = require('fs');
 let instance;
 const TASK_STATE_COMPLETE = 'Complete';
 const TASK_STATE_FAILED = 'Failed';
 const TASK_STATE_WAITING = 'Waiting';
 const TASK_STATE_WORKING = 'Working';
 const INCONSISTENT_INSTALLER_STATE_ERROR = 'InconsistentInstallerState';
+const EVENT_CACHE_FILENAME = 'updater_events.json';
 const INVALID_UPDATER_ERROR = "Can't send request to updater because the native updater isn't loaded.";
 class Updater extends EventEmitter {
   constructor(options) {
@@ -208,6 +210,22 @@ class Updater extends EventEmitter {
           stdio: 'inherit'
         });
       });
+      console.log(`Will Restart from ${path.resolve(process.execPath)} to ${path.resolve(hostExePath)}`);
+      try {
+        const paths = require('./paths');
+        const userDataPath = paths.getUserData();
+        const eventCachePath = path.join(userDataPath, EVENT_CACHE_FILENAME);
+        const updaterEvents = this.queryAndTruncateHistory();
+        if (updaterEvents.length > 0) {
+          fs.writeFile(eventCachePath, JSON.stringify(updaterEvents), e => {
+            if (e) {
+              console.warn('splashScreen: Failed writing updaterEvents with error: ', e);
+            }
+          });
+        }
+      } catch (e) {
+        console.error(`Error caching updater events: ${e}`);
+      }
       console.log(`Restarting from ${path.resolve(process.execPath)} to ${path.resolve(hostExePath)}`);
       app.quit();
       this.emit('starting-new-host');
@@ -420,6 +438,19 @@ function tryInitUpdater(buildInfo, repositoryUrl) {
     current_os_arch: currentArch,
     user_data_path: userDataPath
   });
+  const eventCachePath = path.join(userDataPath, EVENT_CACHE_FILENAME);
+  if (fs.existsSync(eventCachePath)) {
+    try {
+      instance.updateEventHistory = JSON.parse(fs.readFileSync(eventCachePath));
+    } catch (e) {
+      console.log('Failed to read updater events cache with error ', e);
+    }
+    try {
+      fs.unlinkSync(eventCachePath);
+    } catch (e) {
+      console.log('Failed to remove updater events cache with error ', e);
+    }
+  }
   return instance.valid;
 }
 function getUpdater() {
