@@ -105,6 +105,7 @@ if (process.platform === 'darwin') {
 
 if (process.platform === 'win32' || process.platform === 'darwin') {
   features.declareSupported('soundshare');
+  features.declareSupported('screen_soundshare');
 }
 
 if (process.platform === 'win32' || (process.platform === 'darwin' && semver.gte(os.release(), '16.0.0'))) {
