@@ -148,7 +148,14 @@ function bindConnectionInstance(instance) {
 
     prepareSecureFramesTransition: (transitionId, version, callback) =>
       instance.prepareSecureFramesTransition(transitionId, version, callback),
+    prepareSecureFramesEpoch: (epoch, version, groupId) => instance.prepareSecureFramesEpoch(epoch, version, groupId),
     executeSecureFramesTransition: (transitionId) => instance.executeSecureFramesTransition(transitionId),
+    
+    updateMLSExternalSender: (externalSenderPackage) => instance.updateMLSExternalSender(externalSenderPackage),
+    getMLSKeyPackage: (callback) => instance.getMLSKeyPackage(callback),
+    processMLSProposals: (message, callback) => instance.processMLSProposals(message, callback),
+    prepareMLSCommitTransition: (transitionId, commit, callback) => instance.prepareMLSCommitTransition(transitionId, commit, callback),
+    processMLSWelcome: (transitionId, welcome, callback) => instance.processMLSWelcome(transitionId, welcome, callback),
 
     setLocalVolume: (userId, volume) => instance.setLocalVolume(userId, volume),
     setLocalMute: (userId, mute) => instance.setLocalMute(userId, mute),
