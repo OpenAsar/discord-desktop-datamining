@@ -29,24 +29,25 @@ const variablesFilePath = _path.default.join(__dirname, 'notifications', 'variab
 let mainWindow;
 let title;
 let maxVisible;
-let screenPosition;
 let notifications;
+let screenPosition;
 let hideTimeout;
 let notificationWindow;
 let VARIABLES;
-function isDestroyed(win) {
+function isValidWindow(win) {
   if (win == null || win.isDestroyed()) {
-    console.error(`notificationScreen.webContentsSend: win is invalid ${win.isDestroyed()}.`);
-    return true;
+    console.error(`notificationScreen.webContentsSend: win is invalid ${win === null || win === void 0 ? void 0 : win.isDestroyed()}.`);
+    return false;
   }
   if (win.webContents == null || win.webContents.isDestroyed()) {
-    console.error(`notificationScreen.webContentsSend: webContents is invalid ${win.webContents.isDestroyed()}.`);
-    return true;
+    var _win$webContents;
+    console.error(`notificationScreen.webContentsSend: webContents is invalid ${(_win$webContents = win.webContents) === null || _win$webContents === void 0 ? void 0 : _win$webContents.isDestroyed()}.`);
+    return false;
   }
-  return false;
+  return true;
 }
 function webContentsSend(win, event, ...args) {
-  if (!isDestroyed(win)) {
+  if (isValidWindow(win)) {
     win.webContents.send(`DISCORD_${event}`, ...args);
   }
 }
@@ -74,7 +75,7 @@ function init({
   _ipcMain.default.on(IPC_NOTIFICATION_CLOSE, handleNotificationClose);
 }
 function destroyWindow() {
-  if (isDestroyed(notificationWindow)) {
+  if (!isValidWindow(notificationWindow)) {
     return;
   }
   notificationWindow.hide();
@@ -96,16 +97,16 @@ function handleNotificationsClear() {
   notifications = [];
   updateNotifications();
 }
-function handleNotificationShow(e, notification) {
+function handleNotificationShow(_e, notification) {
   notifications.push(notification);
   updateNotifications();
 }
-function handleNotificationClick(e, notificationId) {
+function handleNotificationClick(_e, notificationId) {
   webContentsSend(mainWindow, IPC_NOTIFICATION_CLICK, notificationId);
   events.emit(NOTIFICATION_CLICK);
 }
-function handleNotificationClose(e, notificationId) {
-  if (notificationWindow) {
+function handleNotificationClose(_e, notificationId) {
+  if (isValidWindow(notificationWindow)) {
     webContentsSend(notificationWindow, 'FADE_OUT', notificationId);
   }
   setTimeout(() => {
@@ -115,13 +116,15 @@ function handleNotificationClose(e, notificationId) {
 }
 function updateNotifications() {
   if (notifications.length > 0) {
-    clearTimeout(hideTimeout);
+    if (hideTimeout != null) {
+      clearTimeout(hideTimeout);
+    }
     hideTimeout = null;
     if (notificationWindow == null) {
       createWindow();
       return;
     }
-    if (isDestroyed(notificationWindow)) {
+    if (!isValidWindow(notificationWindow)) {
       return;
     }
     const boundingBox = calculateBoundingBox();
@@ -154,7 +157,7 @@ function calculateBoundingBox() {
     x: Math.round(positionX + windowWidth / 2),
     y: Math.round(positionY + windowHeight / 2)
   };
-  const activeDisplay = _electron.screen.getDisplayNearestPoint(centerPoint) || _electron.screen.getPrimaryDisplay();
+  const activeDisplay = _electron.screen.getDisplayNearestPoint(centerPoint) ?? _electron.screen.getPrimaryDisplay();
   const workArea = activeDisplay.workArea;
   const width = VARIABLES.width;
   const height = maxVisible * VARIABLES.height;
@@ -200,6 +203,6 @@ function createWindow() {
     slashes: true,
     pathname: _path.default.join(__dirname, 'notifications', 'index.html')
   });
-  notificationWindow.loadURL(notificationUrl);
+  void notificationWindow.loadURL(notificationUrl);
   notificationWindow.webContents.on('did-finish-load', () => updateNotifications());
 }
