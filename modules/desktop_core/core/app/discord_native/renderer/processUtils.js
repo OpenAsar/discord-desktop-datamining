@@ -12,6 +12,7 @@ exports.getLastCrash = getLastCrash;
 exports.getMainArgvSync = getMainArgvSync;
 exports.getProcessUptime = getProcessUptime;
 exports.getSystemInfo = getSystemInfo;
+exports.getUsedHeapSize = getUsedHeapSize;
 exports.purgeMemory = purgeMemory;
 exports.setCrashInformation = setCrashInformation;
 exports.setMemoryInformation = setMemoryInformation;
@@ -78,6 +79,10 @@ function getCPUCoreCount() {
 }
 function getMainArgvSync() {
   return mainArgv;
+}
+function getUsedHeapSize() {
+  const heapStats = _process.default.getHeapStatistics();
+  return heapStats.usedHeapSize;
 }
 function setCrashInformation(crashInformation, state) {
   void _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_SET_CRASH_INFORMATION, crashInformation, state);
