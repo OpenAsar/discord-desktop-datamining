@@ -1,11 +1,9 @@
+/* eslint-disable no-console */
 const VoiceEngine = require('./discord_voice.node');
-const ChildProcess = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const process = require('process');
 const path = require('path');
-const semver = require('semver');
-const yargs = require('yargs');
 
 const isElectronRenderer =
   typeof window !== 'undefined' && window != null && window.DiscordNative && window.DiscordNative.isRenderer;
@@ -30,17 +28,76 @@ const audioSubsystemSelected = appSettings ? appSettings.getSync('audioSubsystem
 const audioSubsystem = useLegacyAudioDevice || audioSubsystemSelected;
 const debugLogging = appSettings ? appSettings.getSync('debugLogging', true) : true;
 
-const argv = yargs(mainArgv.slice(1))
-  .describe('log-level', 'Logging level.')
-  .default('log-level', -1)
-  .help('h')
-  .alias('h', 'help')
-  .describe('use-fake-video-capture', 'Use fake video capture device.')
-  .describe('use-file-for-fake-video-capture', 'Use local file for fake video capture.')
-  .describe('use-fake-audio-capture', 'Use fake audio capture device.')
-  .describe('use-file-for-fake-audio-capture', 'Use local file for fake audio capture.')
-  .exitProcess(false).argv;
-const logLevel = argv['log-level'] == -1 ? (debugLogging ? 2 : -1) : argv['log-level'];
+function versionGreaterThanOrEqual(v1, v2) {
+  const v1parts = v1.split('.').map(Number);
+  const v2parts = v2.split('.').map(Number);
+
+  for (let i = 0; i < Math.max(v1parts.length, v2parts.length); i++) {
+    const num1 = i < v1parts.length ? v1parts[i] : 0;
+    const num2 = i < v2parts.length ? v2parts[i] : 0;
+    if (num1 > num2) return true;
+    if (num1 < num2) return false;
+  }
+  return true;
+}
+
+function parseArguments(args) {
+  const parsed = {
+    'log-level': -1,
+  };
+
+  const descriptions = {
+    'log-level': 'Logging level.',
+    'use-fake-video-capture': 'Use fake video capture device.',
+    'use-file-for-fake-video-capture': 'Use local file for fake video capture.',
+    'use-fake-audio-capture': 'Use fake audio capture device.',
+    'use-file-for-fake-audio-capture': 'Use local file for fake audio capture.',
+  };
+
+  for (let i = 0; i < args.length; i++) {
+    const parts = args[i].split('=');
+    const arg = parts[0];
+    const inlineValue = parts.slice(1).join('=');  // Join the rest back together in case there are '=' in the value
+
+    function getValue() {
+      if (inlineValue !== undefined) {
+        return inlineValue;
+      }
+      return args[++i];
+    }
+
+    switch (arg) {
+      case '-h':
+      case '--help':
+        console.log('Help requested:');
+        for (const [key, value] of Object.entries(descriptions)) {
+          console.log(`--${key}: ${value}`);
+        }
+        process.exit(0);
+        break;
+      case '--log-level':
+        parsed['log-level'] = parseInt(getValue(), 10);
+        break;
+      case '--use-fake-video-capture':
+        parsed['use-fake-video-capture'] = true;
+        break;
+      case '--use-file-for-fake-video-capture':
+        parsed['use-file-for-fake-video-capture'] = getValue();
+        break;
+      case '--use-fake-audio-capture':
+        parsed['use-fake-audio-capture'] = true;
+        break;
+      case '--use-file-for-fake-audio-capture':
+        parsed['use-file-for-fake-audio-capture'] = getValue();
+        break;
+    }
+  }
+
+  return parsed;
+}
+
+const argv = parseArguments(mainArgv.slice(1));
+const logLevel = argv['log-level'] === -1 ? (debugLogging ? 2 : -1) : argv['log-level'];
 const useFakeVideoCapture = argv['use-fake-video-capture'];
 const useFileForFakeVideoCapture = argv['use-file-for-fake-video-capture'];
 const useFakeAudioCapture = argv['use-fake-audio-capture'];
@@ -108,7 +165,7 @@ if (process.platform === 'win32' || process.platform === 'darwin') {
   features.declareSupported('screen_soundshare');
 }
 
-if (process.platform === 'win32' || (process.platform === 'darwin' && semver.gte(os.release(), '16.0.0'))) {
+if (process.platform === 'win32' || (process.platform === 'darwin' && versionGreaterThanOrEqual(os.release(), '16.0.0'))) {
   features.declareSupported('mediapipe');
   features.declareSupported('mediapipe_animated');
 }
@@ -150,7 +207,7 @@ function bindConnectionInstance(instance) {
       instance.prepareSecureFramesTransition(transitionId, version, callback),
     prepareSecureFramesEpoch: (epoch, version, groupId) => instance.prepareSecureFramesEpoch(epoch, version, groupId),
     executeSecureFramesTransition: (transitionId) => instance.executeSecureFramesTransition(transitionId),
-    
+
     updateMLSExternalSender: (externalSenderPackage) => instance.updateMLSExternalSender(externalSenderPackage),
     getMLSKeyPackage: (callback) => instance.getMLSKeyPackage(callback),
     processMLSProposals: (message, callback) => instance.processMLSProposals(message, callback),
