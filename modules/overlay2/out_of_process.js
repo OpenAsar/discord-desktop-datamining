@@ -20,97 +20,71 @@ var createHostWindowCallback = function createHostWindowCallback(pid) {
 };
 var destroyHostWindowCallback = function destroyHostWindowCallback() {};
 var reloadHostWindowCallback = function reloadHostWindowCallback(pid) {};
-var focusCallback = function focusCallback(pid) {};
 var trackedGames = new Set();
-var focusedPID = 0;
-var visiblePID = null;
-var OutOfProcessOverlayInterface = _objectSpread({
+var targetGamePID = 0;
+var OutOfProcessOverlayInterface = _objectSpread(_objectSpread({}, NativeOverlay), {}, {
   setHostWindowCallbacks: function setHostWindowCallbacks(create, destroy, reload) {
     createHostWindowCallback = create;
     destroyHostWindowCallback = destroy;
     reloadHostWindowCallback = reload;
   },
-  setFocusCallback: function setFocusCallback(focus) {
-    focusCallback = focus;
+  readyToShow: function readyToShow(pid) {
+    if (pid === targetGamePID) {
+      NativeOverlay.show();
+    }
   },
-  setVisibleGame: function () {
-    var _setVisibleGame = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(pid, foo) {
-      var onGainFocus, onLostFocus, onWindowMove, onWindowSettled;
+  trackGame: function () {
+    var _trackGame = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(pid) {
+      var windowHandle;
       return _regeneratorRuntime().wrap(function _callee$(_context) {
         while (1) switch (_context.prev = _context.next) {
           case 0:
-            _context.next = 2;
-            return reloadHostWindowCallback(pid);
-          case 2:
-            onGainFocus = function onGainFocus() {
-              focusCallback(pid);
-              focusedPID = pid;
-              NativeOverlay.show();
-            };
-            onLostFocus = function onLostFocus() {
-              focusCallback(0);
-              focusedPID = 0;
-              NativeOverlay.hide();
-            };
-            onWindowMove = function onWindowMove() {
-              NativeOverlay.hide();
-            };
-            onWindowSettled = function onWindowSettled() {
-              if (focusedPID === pid) {
-                NativeOverlay.show();
-              }
-            };
-            visiblePID = pid;
-            NativeOverlay.setTrackedGame(pid, foo, onGainFocus, onLostFocus, onWindowMove, onWindowSettled);
-          case 8:
+            if (!(trackedGames.size === 0)) {
+              _context.next = 5;
+              break;
+            }
+            _context.next = 3;
+            return createHostWindowCallback(pid);
+          case 3:
+            windowHandle = _context.sent;
+            NativeOverlay.setWindowHandle(windowHandle);
+          case 5:
+            trackedGames.add(pid);
+            NativeOverlay.trackGame(pid);
+          case 7:
           case "end":
             return _context.stop();
         }
       }, _callee);
     }));
-    function setVisibleGame(_x, _x2) {
-      return _setVisibleGame.apply(this, arguments);
-    }
-    return setVisibleGame;
-  }(),
-  trackGame: function () {
-    var _trackGame = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(pid) {
-      var windowHandle;
-      return _regeneratorRuntime().wrap(function _callee2$(_context2) {
-        while (1) switch (_context2.prev = _context2.next) {
-          case 0:
-            trackedGames.add(pid);
-            if (!(trackedGames.size === 1)) {
-              _context2.next = 6;
-              break;
-            }
-            _context2.next = 4;
-            return createHostWindowCallback(pid);
-          case 4:
-            windowHandle = _context2.sent;
-            NativeOverlay.setWindowHandle(windowHandle);
-          case 6:
-          case "end":
-            return _context2.stop();
-        }
-      }, _callee2);
-    }));
-    function trackGame(_x3) {
+    function trackGame(_x) {
       return _trackGame.apply(this, arguments);
     }
     return trackGame;
   }(),
   untrackGame: function untrackGame(pid) {
+    NativeOverlay.untrackGame(pid);
     trackedGames["delete"](pid);
-    if (pid === visiblePID) {
-      NativeOverlay.clearTrackedGame();
-    }
     if (trackedGames.size === 0) {
       NativeOverlay.setWindowHandle('');
       destroyHostWindowCallback();
     }
+  },
+  setFocusCallback: function setFocusCallback(focus) {
+    var wrappedCallback = function wrappedCallback(pid) {
+      if (targetGamePID === 0) {
+        targetGamePID = pid;
+        NativeOverlay.show();
+      } else if (targetGamePID !== pid && pid !== 0) {
+        NativeOverlay.hide();
+        targetGamePID = pid;
+        reloadHostWindowCallback(targetGamePID);
+      }
+      focus(pid);
+    };
+    NativeOverlay.setFocusCallback(wrappedCallback);
   }
-}, NativeOverlay);
+});
 var _default = OutOfProcessOverlayInterface;
 exports["default"] = _default;
 module.exports = exports.default;
