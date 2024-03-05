@@ -10,6 +10,7 @@ exports.pageReady = pageReady;
 var _electron = require("electron");
 var _events = require("events");
 var _fs = _interopRequireDefault(require("fs"));
+var _os = _interopRequireDefault(require("os"));
 var _path = _interopRequireDefault(require("path"));
 var _url = _interopRequireDefault(require("url"));
 var _Backoff = _interopRequireDefault(require("../common/Backoff"));
@@ -110,7 +111,8 @@ async function updateUntilCurrent() {
     skip_module_delta: {},
     skip_all_module_delta: false,
     skip_windows_arch_update: _Constants.DISABLE_WINDOWS_64BIT_TRANSITION,
-    optin_windows_transition_progression: _Constants.OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION
+    optin_windows_transition_progression: _Constants.OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION,
+    always_allow_updates: _Constants.ALWAYS_ALLOW_UPDATES
   };
   while (true) {
     updateSplashState(CHECKING_FOR_UPDATES);
