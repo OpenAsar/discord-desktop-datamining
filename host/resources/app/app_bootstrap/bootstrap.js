@@ -43,7 +43,15 @@ function setupHardwareAcceleration() {
 }
 setupHardwareAcceleration();
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
-app.commandLine.appendSwitch('disable-features', 'WinRetrieveSuggestionsOnlyOnDemand,HardwareMediaKeyHandling,MediaSessionService');
+let disabledFeatures = ['WinRetrieveSuggestionsOnlyOnDemand', 'HardwareMediaKeyHandling', 'MediaSessionService'];
+if (process.platform === 'win32') {
+  if (buildInfo.releaseChannel === 'development' || buildInfo.releaseChannel === 'canary') {
+    disabledFeatures.push('CalculateNativeWinOcclusion');
+    app.commandLine.appendArgument('--disable-renderer-backgrounding');
+    app.commandLine.appendArgument('--disable-backgrounding-occluded-windows');
+  }
+}
+app.commandLine.appendSwitch('disable-features', disabledFeatures.join(','));
 function hasArgvFlag(flag) {
   return (process.argv || []).slice(1).includes(flag);
 }
