@@ -6,7 +6,7 @@ const {
   SETTINGS_SET,
   SETTINGS_GET_SYNC
 } = require('../common/constants').IPCEvents;
-const RENDERER_SET_WHITELIST = ['audioSubsystem', 'useLegacyAudioDevice', 'debugLogging', 'ALWAYS_ALLOW_UPDATES'];
+const RENDERER_SET_WHITELIST = ['audioSubsystem', 'useLegacyAudioDevice', 'debugLogging'];
 async function get(name, defaultValue) {
   return electron.ipcRenderer.invoke(SETTINGS_GET, name, defaultValue);
 }

@@ -4,7 +4,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 function init(bootstrapConstants) {
-  const ALWAYS_ALLOW_UPDATES = bootstrapConstants.ALWAYS_ALLOW_UPDATES;
   const APP_NAME = bootstrapConstants.APP_NAME;
   const API_ENDPOINT = bootstrapConstants.API_ENDPOINT;
   const NEW_UPDATE_ENDPOINT = bootstrapConstants.NEW_UPDATE_ENDPOINT;
@@ -14,7 +13,6 @@ function init(bootstrapConstants) {
   const OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION = bootstrapConstants.OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION;
   const MAIN_APP_DIRNAME = __dirname;
   const exported = {
-    ALWAYS_ALLOW_UPDATES,
     APP_NAME,
     DISABLE_WINDOWS_64BIT_TRANSITION,
     OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION,

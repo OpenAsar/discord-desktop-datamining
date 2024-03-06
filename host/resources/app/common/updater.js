@@ -13,7 +13,6 @@ const {
   hrtime
 } = require('process');
 const arch = require('arch');
-const os = require('os');
 const fs = require('fs');
 let instance;
 const TASK_STATE_COMPLETE = 'Complete';
@@ -431,15 +430,13 @@ function tryInitUpdater(buildInfo, repositoryUrl) {
     currentArch = arch();
     console.log(`Determined current Windows architecture: ${currentArch}`);
   }
-  const osVersion = os.release();
   instance = new Updater({
     release_channel: buildInfo.releaseChannel,
     platform: platform,
     repository_url: repositoryUrl,
     root_path: rootPath,
     current_os_arch: currentArch,
-    user_data_path: userDataPath,
-    current_os_version: osVersion
+    user_data_path: userDataPath
   });
   const eventCachePath = path.join(userDataPath, EVENT_CACHE_FILENAME);
   if (fs.existsSync(eventCachePath)) {
