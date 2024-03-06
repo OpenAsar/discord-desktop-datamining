@@ -68,6 +68,7 @@ var OutOfProcessOverlayInterface = _objectSpread(_objectSpread({}, NativeOverlay
     if (trackedGames.size === 0) {
       NativeOverlay.setWindowHandle('');
       destroyHostWindowCallback();
+      targetGamePID = 0;
     }
   },
   setFocusCallback: function setFocusCallback(focus) {
