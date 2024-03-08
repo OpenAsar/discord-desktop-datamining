@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+// eslint-disable-next-line import/no-unresolved, import/extensions
 const VoiceEngine = require('./discord_voice.node');
 const fs = require('fs');
 const os = require('os');
@@ -22,7 +23,6 @@ try {
   console.error('Failed to get data directory: ', e);
 }
 
-const releaseChannel = isElectronRenderer ? window.DiscordNative.app.getReleaseChannel() : '';
 const useLegacyAudioDevice = appSettings ? appSettings.getSync('useLegacyAudioDevice') : false;
 const audioSubsystemSelected = appSettings ? appSettings.getSync('audioSubsystem') : 'standard';
 const audioSubsystem = useLegacyAudioDevice || audioSubsystemSelected;
@@ -57,7 +57,7 @@ function parseArguments(args) {
   for (let i = 0; i < args.length; i++) {
     const parts = args[i].split('=');
     const arg = parts[0];
-    const inlineValue = parts.slice(1).join('=');  // Join the rest back together in case there are '=' in the value
+    const inlineValue = parts.slice(1).join('='); // Join the rest back together in case there are '=' in the value
 
     function getValue() {
       if (inlineValue !== undefined) {
@@ -165,7 +165,10 @@ if (process.platform === 'win32' || process.platform === 'darwin') {
   features.declareSupported('screen_soundshare');
 }
 
-if (process.platform === 'win32' || (process.platform === 'darwin' && versionGreaterThanOrEqual(os.release(), '16.0.0'))) {
+if (
+  process.platform === 'win32' ||
+  (process.platform === 'darwin' && versionGreaterThanOrEqual(os.release(), '16.0.0'))
+) {
   features.declareSupported('mediapipe');
   features.declareSupported('mediapipe_animated');
 }
@@ -211,7 +214,8 @@ function bindConnectionInstance(instance) {
     updateMLSExternalSender: (externalSenderPackage) => instance.updateMLSExternalSender(externalSenderPackage),
     getMLSKeyPackage: (callback) => instance.getMLSKeyPackage(callback),
     processMLSProposals: (message, callback) => instance.processMLSProposals(message, callback),
-    prepareMLSCommitTransition: (transitionId, commit, callback) => instance.prepareMLSCommitTransition(transitionId, commit, callback),
+    prepareMLSCommitTransition: (transitionId, commit, callback) =>
+      instance.prepareMLSCommitTransition(transitionId, commit, callback),
     processMLSWelcome: (transitionId, welcome, callback) => instance.processMLSWelcome(transitionId, welcome, callback),
 
     setLocalVolume: (userId, volume) => instance.setLocalVolume(userId, volume),
@@ -225,6 +229,7 @@ function bindConnectionInstance(instance) {
     configureConnectionRetries: (baseDelay, maxDelay, maxAttempts) =>
       instance.configureConnectionRetries(baseDelay, maxDelay, maxAttempts),
     setOnSpeakingCallback: (callback) => instance.setOnSpeakingCallback(callback),
+    setOnSetSelfMuteCallback: (callback) => instance.setOnSetSelfMuteCallback?.(callback),
     setOnSpeakingWhileMutedCallback: (callback) => instance.setOnSpeakingWhileMutedCallback(callback),
     setPingInterval: (interval) => instance.setPingInterval(interval),
     setPingCallback: (callback) => instance.setPingCallback(callback),
@@ -252,8 +257,7 @@ function bindConnectionInstance(instance) {
     startReplay: () => instance.startReplay(),
     startSamplesPlayback: (options, channels, callback) => instance.startSamplesPlayback(options, channels, callback),
     stopSamplesPlayback: () => instance.stopSamplesPlayback(),
-    setClipRecordUser: (userId, dataType, shouldRecord) =>
-      instance.setClipRecordUser(userId, dataType, shouldRecord),
+    setClipRecordUser: (userId, dataType, shouldRecord) => instance.setClipRecordUser(userId, dataType, shouldRecord),
     setRtcLogMarker: (marker) => instance.setRtcLogMarker(marker),
     startSamplesLocalPlayback: (samplesId, options, channels, callback) =>
       instance.startSamplesLocalPlayback(samplesId, options, channels, callback),
@@ -451,7 +455,7 @@ VoiceEngine.addVideoOutputSink = function (sinkId, streamId, frameCallback) {
     // window completely occludes the Discord window. Adding this tiny readback ameliorates the issue. We tried WebGL
     // rendering which did not exhibit the issue, however, the context limit of 16 was too small to be a real
     // alternative.
-    const leak = canvasContext.getImageData(0, 0, 1, 1);
+    canvasContext.getImageData(0, 0, 1, 1);
     canvasContext.putImageData(imageData, 0, 0);
   });
 };

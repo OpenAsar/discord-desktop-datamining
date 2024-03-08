@@ -7,7 +7,8 @@ exports.injectGpuSettingsBackend = injectGpuSettingsBackend;
 const electron = require('electron');
 const {
   GPU_SETTINGS_SET_ENABLE_HWACCEL,
-  GPU_SETTINGS_GET_ENABLE_HWACCEL_SYNC
+  GPU_SETTINGS_GET_ENABLE_HWACCEL_SYNC,
+  GPU_SETTINGS_SET_CHROMIUM_SWITCHES
 } = require('../common/constants').IPCEvents;
 let injectedGpuSettings = null;
 function injectGpuSettingsBackend(gpuSettings) {
@@ -20,4 +21,9 @@ electron.ipcMain.handle(GPU_SETTINGS_SET_ENABLE_HWACCEL, async (_, enable) => {
 });
 electron.ipcMain.on(GPU_SETTINGS_GET_ENABLE_HWACCEL_SYNC, event => {
   event.returnValue = injectedGpuSettings != null ? injectedGpuSettings.getEnableHardwareAcceleration() : false;
+});
+electron.ipcMain.handle(GPU_SETTINGS_SET_CHROMIUM_SWITCHES, async (_, switches) => {
+  if (injectedGpuSettings) {
+    injectedGpuSettings.setChromiumSwitches(switches);
+  }
 });
