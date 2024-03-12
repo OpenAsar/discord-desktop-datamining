@@ -16,6 +16,7 @@ exports.quitAndInstallUpdates = quitAndInstallUpdates;
 exports.setInBackground = setInBackground;
 exports.supportsEventObjects = void 0;
 var _fs = _interopRequireDefault(require("fs"));
+var _os = _interopRequireDefault(require("os"));
 var _path = _interopRequireDefault(require("path"));
 var _nodeGlobalPaths = require("./nodeGlobalPaths");
 var _events = require("events");
@@ -144,17 +145,34 @@ function initPathsOnly(_buildInfo) {
     (0, _nodeGlobalPaths.addGlobalPath)(moduleInstallPath);
   }
 }
+function checkOSVersionSupported() {
+  if (process.platform === 'darwin') {
+    try {
+      const osVersion = _os.default.release();
+      const osMajorVersion = osVersion.split('.')[0];
+      const osMinimumSupportedVersion = 19;
+      console.log(`MacOS major version was ${osMajorVersion}, minimum supported version for future updates is ${osMinimumSupportedVersion}`);
+      if (osMajorVersion < osMinimumSupportedVersion) {
+        return false;
+      }
+    } catch (e) {
+      console.error(`Failed to retrieve the MacOS version for update skips: ${e.message}`);
+    }
+  }
+  return true;
+}
 function init(_endpoint, _settings, _buildInfo) {
   const endpoint = _endpoint;
   settings = _settings;
   const buildInfo = _buildInfo;
   updatable = buildInfo.version != '0.0.0' && !buildInfo.debug || settings.get(ALWAYS_ALLOW_UPDATES);
+  let hostUpdatable = buildInfo.version != '0.0.0' && !buildInfo.debug && checkOSVersionSupported() || settings.get(ALWAYS_ALLOW_UPDATES);
   initPathsOnly(buildInfo);
   logger = new LogStream(_path.default.join(paths.getUserData(), 'modules.log'));
   bootstrapping = false;
   hostUpdateAvailable = false;
   checkingForUpdates = false;
-  skipHostUpdate = settings.get(SKIP_HOST_UPDATE) || !updatable;
+  skipHostUpdate = settings.get(SKIP_HOST_UPDATE) || !hostUpdatable;
   skipModuleUpdate = settings.get(SKIP_MODULE_UPDATE) || locallyInstalledModules || !updatable;
   localModuleVersionsFilePath = _path.default.join(paths.getUserData(), 'local_module_versions.json');
   bootstrapManifestFilePath = _path.default.join(paths.getResources(), 'bootstrap', 'manifest.json');

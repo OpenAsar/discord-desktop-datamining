@@ -43,7 +43,7 @@ function setupHardwareAcceleration() {
 }
 setupHardwareAcceleration();
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
-let disabledFeatures = ['WinRetrieveSuggestionsOnlyOnDemand', 'HardwareMediaKeyHandling', 'MediaSessionService'];
+const disabledFeatures = ['WinRetrieveSuggestionsOnlyOnDemand', 'HardwareMediaKeyHandling', 'MediaSessionService'];
 if (process.platform === 'win32') {
   if (buildInfo.releaseChannel === 'development' || buildInfo.releaseChannel === 'canary') {
     disabledFeatures.push('CalculateNativeWinOcclusion');
@@ -52,6 +52,44 @@ if (process.platform === 'win32') {
   }
 }
 app.commandLine.appendSwitch('disable-features', disabledFeatures.join(','));
+function setupSettingsFlags() {
+  const settings = appSettings.getSettings();
+  const validSwitches = {
+    disable_accelerated_h264_decode: 1,
+    disable_accelerated_h264_encode: 1,
+    disable_accelerated_hevc_decode: 1,
+    disable_d3d11: 1,
+    disable_d3d11_video_decoder: 1,
+    disable_decode_swap_chain: 1,
+    disable_dxgi_zero_copy_video: 1,
+    disable_dynamic_video_encode_framerate_update: 1,
+    disable_media_foundation_clear_playback: 1,
+    disable_media_foundation_frame_size_change: 1,
+    disable_metal: 1,
+    disable_nv12_dxgi_video: 1,
+    force_high_performance_gpu: 1,
+    force_low_power_gpu: 1
+  };
+  const switches = settings.get('chromiumSwitches', []);
+  for (const s in switches) {
+    if (validSwitches[s]) {
+      app.commandLine.appendSwitch(s, switches[s]);
+    }
+  }
+}
+setupSettingsFlags();
+async function setGPUFlags() {
+  const info = await app.getGPUInfo('basic');
+  for (const gpu of info.gpuDevice) {
+    if (gpu.active) {
+      if (gpu.vendorId === 0x1002) {
+        if (gpu.deviceId === 0x1681) {
+          app.commandLine.appendSwitch('disable_media_foundation_clear_playback', '1');
+        }
+      }
+    }
+  }
+}
 function hasArgvFlag(flag) {
   return (process.argv || []).slice(1).includes(flag);
 }
@@ -163,5 +201,5 @@ if (pendingAppQuit) {
   app.quit();
 } else {
   discordProtocols.beforeReadyProtocolRegistration();
-  app.whenReady().then(() => startApp());
+  setGPUFlags().then(app.whenReady).then(() => startApp());
 }

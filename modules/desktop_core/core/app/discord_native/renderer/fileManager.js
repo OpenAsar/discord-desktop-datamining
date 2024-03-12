@@ -9,7 +9,6 @@ Object.defineProperty(exports, "basename", {
     return _path.basename;
   }
 });
-exports.cleanupTempFiles = cleanupTempFiles;
 exports.combineWebRtcLogs = combineWebRtcLogs;
 Object.defineProperty(exports, "dirname", {
   enumerable: true,
@@ -23,7 +22,6 @@ Object.defineProperty(exports, "extname", {
     return _path.extname;
   }
 });
-exports.getCallscopeLogFiles = getCallscopeLogFiles;
 exports.getModuleDataPathSync = getModuleDataPathSync;
 exports.getModulePath = getModulePath;
 Object.defineProperty(exports, "join", {
@@ -54,7 +52,6 @@ function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 const uploadHookCrashSequence = (0, _utils.createLock)();
 const combineWebRtcLogsSequence = (0, _utils.createLock)();
-const MAX_CALLSCOPE_LOG_SIZE = 10 * 1024 * 1024;
 async function saveWithDialog(fileContents, fileName) {
   if ((0, _files.containsInvalidFileChar)(fileName)) {
     throw new Error('fileName has invalid characters');
@@ -137,73 +134,6 @@ async function combineWebRtcLogs(path1, path2, destinationPath) {
       console.error(`combineWebRtcLogs: Failed ${e === null || e === void 0 ? void 0 : e.message}`, e);
     }
   });
-}
-async function getCallscopeLogFiles(blindChannelId) {
-  const filter = _files.CallscopeLogFiles.createChannelFileFilter(blindChannelId);
-  if (filter == null) {
-    console.error('getCallscopeLogFiles: Invalid blindChannelId.', blindChannelId);
-    return [];
-  }
-  const modulePath = await getModulePath();
-  const voicePath = _path.default.join(modulePath, 'discord_voice');
-  const filenames = [];
-  for (const file of await _fs.default.promises.readdir(voicePath)) {
-    if (filter.test(file)) {
-      filenames.push(_path.default.join(voicePath, file));
-    }
-  }
-  if (filenames.length === 0) {
-    console.error(`getCallscopeLogFiles: No files found for blind channel id ${blindChannelId}.`);
-    return [];
-  }
-  const maxLogFiles = 50;
-  if (filenames.length > maxLogFiles) {
-    console.warn(`getCallscopeLogFiles: Exceeded limit of ${maxLogFiles} files, had ${filenames.length}.`);
-    filenames.splice(maxLogFiles);
-  }
-  return await getCallscopeLogFileResult(filenames);
-}
-async function cleanupTempFiles() {
-  const rtcLogFiles = [];
-  try {
-    const modulePath = await getModulePath();
-    const voicePath = _path.default.join(modulePath, 'discord_voice');
-    const deleteAge = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000);
-    for (const filename of await _fs.default.promises.readdir(voicePath)) {
-      const fullpath = _path.default.join(voicePath, filename);
-      if (_files.CallscopeLogFiles.isCallscopeLogFile(filename)) {
-        rtcLogFiles.push(fullpath);
-        continue;
-      }
-      if ((0, _files.isTempFile)(filename)) {
-        const stat = await _fs.default.promises.stat(fullpath);
-        if (!stat.isFile() || stat.mtime > deleteAge) {
-          continue;
-        }
-        console.log(`cleanupTempFiles: Deleting "${fullpath}" due to age.`);
-        try {
-          await _fs.default.promises.unlink(fullpath);
-        } catch (e) {
-          console.error(`cleanupTempFiles: Failed to unlink ${fullpath}: ${e === null || e === void 0 ? void 0 : e.message}`, e);
-        }
-      }
-    }
-  } catch (e) {
-    console.error(`cleanupTempFiles: Failed ${e === null || e === void 0 ? void 0 : e.message}`, e);
-  }
-  return {
-    callscopeLogFiles: await getCallscopeLogFileResult(rtcLogFiles)
-  };
-}
-async function getCallscopeLogFileResult(filenames) {
-  try {
-    const result = await (0, _fileutils.readFulfilledFiles)(filenames, MAX_CALLSCOPE_LOG_SIZE, false);
-    await Promise.all(filenames.map(filename => _fs.default.promises.unlink(filename)));
-    return result;
-  } catch (e) {
-    console.error(`getCallscopeLogFileResult: Exception ${e === null || e === void 0 ? void 0 : e.message}`, e);
-  }
-  return [];
 }
 async function uploadHookMinidumpFile(filename, fullpath, metadata) {
   const file = (await (0, _fileutils.readFulfilledFiles)([fullpath], 10 * 1024 * 1024, true))[0];
