@@ -19,6 +19,7 @@ var appBadge = _interopRequireWildcard(require("./appBadge"));
 var appConfig = _interopRequireWildcard(require("./appConfig"));
 var _appSettings = require("./bootstrapModules/appSettings");
 var _buildInfo = require("./bootstrapModules/buildInfo");
+var _crashReporterSetup = require("./bootstrapModules/crashReporterSetup");
 var _moduleUpdater = require("./bootstrapModules/moduleUpdater");
 var _paths = require("./bootstrapModules/paths");
 var _splashScreen = require("./bootstrapModules/splashScreen");
@@ -845,6 +846,15 @@ function init() {
     }
     const serviceDescription = `${details.type} (${details.name})`;
     console.error(`child-process-gone! child: ${serviceDescription} exitCode: ${details.exitCode}`);
+    const {
+      reason
+    } = details;
+    if (reason === 'crashed' || reason === 'oom') {
+      const sentry = _crashReporterSetup.crashReporterSetup.getGlobalSentry();
+      if (sentry != null) {
+        sentry.captureMessage(`'${details.type}' process exited with '${details.reason}' with exitcode '${details.exitCode}'`);
+      }
+    }
   });
   _electron.app.on(_Constants.MenuEvents.OPEN_HELP, () => webContentsSend('HELP_OPEN'));
   _electron.app.on(_Constants.MenuEvents.OPEN_SETTINGS, () => webContentsSend('USER_SETTINGS_OPEN'));
