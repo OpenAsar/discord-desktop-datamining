@@ -31,11 +31,18 @@ const CHANNEL_SENTRY_DSN = {
   canary: buildSentryDSN(TEST_SENTRY_DSN_KEY),
   development: buildSentryDSN(TEST_SENTRY_DSN_KEY)
 };
+const CHANNEL_SENTRY_SAMPLE = {
+  stable: 0.1,
+  ptb: 1,
+  canary: 1,
+  development: 1
+};
 function initializeSentrySdk(sentry, buildInfo) {
   sentry.init({
     dsn: getSentryDSN(buildInfo.releaseChannel),
     environment: buildInfo.releaseChannel,
     release: buildInfo.version,
+    sampleRate: getSampleRate(buildInfo.releaseChannel),
     autoSessionTracking: false,
     maxValueLength: 250,
     beforeSend(event, hint) {
@@ -90,6 +97,12 @@ function getSentryDSN(releaseChannel) {
     return CHANNEL_SENTRY_DSN[releaseChannel];
   }
   return DEFAULT_SENTRY_DSN;
+}
+function getSampleRate(releaseChannel) {
+  if (releaseChannel != null && CHANNEL_SENTRY_SAMPLE[releaseChannel] != null) {
+    return CHANNEL_SENTRY_SAMPLE[releaseChannel];
+  }
+  return 0.01;
 }
 function isInitialized() {
   return initialized;
