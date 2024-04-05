@@ -84,6 +84,9 @@ function startup(bootstrapModules) {
   const enableDevtools = buildInfo.releaseChannel === 'stable' ? enableDevtoolsSetting : true;
   const createApplicationMenu = require('./applicationMenu');
   _electron.Menu.setApplicationMenu(createApplicationMenu(enableDevtools));
+  if (process.platform === 'darwin' && (buildInfo.releaseChannel === 'development' || buildInfo.releaseChannel === 'canary')) {
+    _electron.systemPreferences.setUserDefault('SquirrelMacEnableDirectContentsWrite', 'boolean', true);
+  }
   mainScreen = require('./mainScreen');
   mainScreen.init();
   const {
