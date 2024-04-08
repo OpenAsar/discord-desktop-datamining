@@ -73,15 +73,15 @@ var OutOfProcessOverlayInterface = _objectSpread(_objectSpread({}, NativeOverlay
   },
   setFocusCallback: function setFocusCallback(focus) {
     var wrappedCallback = function wrappedCallback(pid) {
-      if (targetGamePID === 0) {
-        targetGamePID = pid;
+      var previousTargetGamePID = targetGamePID;
+      targetGamePID = pid;
+      if (previousTargetGamePID === 0) {
         NativeOverlay.show();
-      } else if (targetGamePID !== pid && pid !== 0) {
+      } else if (targetGamePID !== 0) {
         NativeOverlay.hide();
-        targetGamePID = pid;
         reloadHostWindowCallback(targetGamePID);
       }
-      focus(pid);
+      focus(targetGamePID);
     };
     NativeOverlay.setFocusCallback(wrappedCallback);
   }

@@ -52,7 +52,7 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_SYSTE
       vendor,
       memory: vram ?? -1
     })),
-    electronGPUInfo: await _electron.default.app.getGPUInfo('basic'),
+    electronGPUInfo: await _electron.default.app.getGPUInfo('complete'),
     total_memory: _os.default.totalmem()
   };
 });

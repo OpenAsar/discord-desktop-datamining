@@ -77,7 +77,7 @@ function setupSettingsFlags() {
 }
 setupSettingsFlags();
 async function setGPUFlags() {
-  const info = await app.getGPUInfo('basic');
+  const info = await app.getGPUInfo('complete');
   for (const gpu of info.gpuDevice) {
     if (gpu.active) {
       if (gpu.vendorId === 0x1002) {
