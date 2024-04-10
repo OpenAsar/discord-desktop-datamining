@@ -133,9 +133,12 @@ function createRenderer(pid, url) {
     }
     _overlay_module["default"].sendFramebuffer(renderer.pid, image.getBitmap(), image.getSize().width, image.getSize().height);
   });
-  renderer.window.webContents.on('new-window', function (e, url) {
-    e.preventDefault();
+  renderer.window.webContents.setWindowOpenHandler(function (_ref) {
+    var url = _ref.url;
     webContentsSend(renderer.window, 'REQUEST_OPEN_EXTERNAL_URL', url);
+    return {
+      action: 'deny'
+    };
   });
   renderer.window.loadURL(renderer.url);
 }
