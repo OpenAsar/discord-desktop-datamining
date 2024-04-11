@@ -876,6 +876,11 @@ function init() {
       setBackgroundColor(backgroundColor);
     }
   });
+  _ipcMain.default.on('OPEN_EXTERNAL_URL', (_event, externalUrl) => {
+    (0, _securityUtils.saferShellOpenExternal)(externalUrl).catch(() => {
+      console.error('Failed to open external URL', externalUrl);
+    });
+  });
   const updater = _updater.updater === null || _updater.updater === void 0 ? void 0 : _updater.updater.getUpdater();
   if (updater != null) {
     setupUpdaterEventsWithUpdater(updater);
