@@ -124,7 +124,7 @@ if (debugLogging && console.discordVoiceHooked == null) {
         try {
           VoiceEngine.consoleLog(
             logFn,
-            JSON.stringify(Array.from(arguments).map((v) => (v != null ? v.toString() : v)))
+            JSON.stringify(Array.from(arguments).map((v) => (v != null ? v.toString() : v))),
           );
         } catch (e) {
           // Drop errors from toString()/stringify.
@@ -230,6 +230,7 @@ function bindConnectionInstance(instance) {
       instance.configureConnectionRetries(baseDelay, maxDelay, maxAttempts),
     setOnSpeakingCallback: (callback) => instance.setOnSpeakingCallback(callback),
     setOnNativeMuteToggleCallback: (callback) => instance.setOnNativeMuteToggleCallback?.(callback),
+    setOnNativeMuteChangedCallback: (callback) => instance.setOnNativeMuteChangedCallback?.(callback),
     setOnSpeakingWhileMutedCallback: (callback) => instance.setOnSpeakingWhileMutedCallback(callback),
     setPingInterval: (interval) => instance.setPingInterval(interval),
     setPingCallback: (callback) => instance.setPingCallback(callback),
