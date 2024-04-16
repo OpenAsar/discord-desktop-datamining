@@ -97,6 +97,15 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.GLOBAL_OVERLAY_OPEN_WIN
           overlayWindow.showInactive();
         }
       });
+      overlayWindow.webContents.setWindowOpenHandler(({
+        url
+      }) => {
+        var _overlayWindow, _overlayWindow$webCon, _overlayWindow$webCon2;
+        (_overlayWindow = overlayWindow) === null || _overlayWindow === void 0 ? void 0 : (_overlayWindow$webCon = _overlayWindow.webContents) === null || _overlayWindow$webCon === void 0 ? void 0 : (_overlayWindow$webCon2 = _overlayWindow$webCon.send) === null || _overlayWindow$webCon2 === void 0 ? void 0 : _overlayWindow$webCon2.call(_overlayWindow$webCon, _DiscordIPC.IPCEvents.REQUEST_OPEN_EXTERNAL_URL, url);
+        return {
+          action: 'deny'
+        };
+      });
     }
     const loadingState = new Promise((accept, reject) => {
       if (isValidWindow(overlayWindow)) {
