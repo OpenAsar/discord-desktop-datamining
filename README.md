@@ -2,26 +2,27 @@
 
 ## ptb versions
 
-**host: 1.0.1066**
+**host: 1.0.1067**
 
 | module | version |
 | ------ | :-----: |
-| overlay2 | 1 |
-| utils | 1 |
-| rpc | 1 |
 | krisp | 1 |
-| sekrit | 1 |
-| dispatch | 1 |
-| desktop_core | 1 |
-| media | 1 |
-| hook | 1 |
-| cloudsync | 1 |
-| game_utils | 1 |
-| vigilante | 1 |
-| voice | 2 |
-| modules | 1 |
-| spellcheck | 1 |
 | erlpack | 1 |
+| cloudsync | 1 |
+| rpc | 1 |
+| media | 1 |
+| voice | 1 |
+| utils | 1 |
+| spellcheck | 1 |
+| vigilante | 1 |
+| sekrit | 1 |
+| hook | 1 |
+| overlay2 | 1 |
+| modules | 1 |
+| desktop_core | 1 |
+| dispatch | 1 |
+| game_utils | 1 |
+| zstd | 1 |
 
 ## branches
 
