@@ -22,6 +22,7 @@ const modules = [
   'rpc',
   'erlpack',
   'cloudsync',
+  'zstd',
 ];
 
 let [ channel = 'canary', oldManifest = '' ] = process.argv.slice(2);
