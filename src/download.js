@@ -35,7 +35,8 @@ export default async (channel, mod, version) => {
   const manifest = await fetchJson(`https://discord.com/api/updates/distributions/app/manifests/latest?platform=win&channel=${channel}&arch=x86`);
 
   const hostVersion = manifest.full.host_version.join('.');
-  version = version ?? (mod === 'host' ? manifest.full.host_version[2] : manifest.modules['discord_' + mod].full.module_version);
+  version = version ?? (mod === 'host' ? manifest.full.host_version[2] : manifest.modules['discord_' + mod]?.full?.module_version);
+  if (!version) return;
 
   const domain = `https://dl${channel === 'stable' ? '' : `-${channel}`}.discordapp.net`;
 
