@@ -19,12 +19,36 @@ const processUtilsSettings = {
   highestMemoryInformation: null
 };
 exports.processUtilsSettings = processUtilsSettings;
+let usageOffset = 0;
+let lastUsage = 0;
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_CPU_USAGE, () => {
   let totalProcessorUsagePercent = 0.0;
+  let totalCumulativeUsage = undefined;
+  const sampleTime = performance.now();
   for (const processMetric of _electron.default.app.getAppMetrics()) {
     totalProcessorUsagePercent += processMetric.cpu.percentCPUUsage;
+    const cpu = processMetric.cpu;
+    if (cpu.cumulativeCPUUsage !== undefined) {
+      if (totalCumulativeUsage === undefined) {
+        totalCumulativeUsage = {
+          usage: 0,
+          sampleTime
+        };
+      }
+      totalCumulativeUsage.usage += cpu.cumulativeCPUUsage;
+    }
   }
-  return Promise.resolve(totalProcessorUsagePercent);
+  if (totalCumulativeUsage != null) {
+    if (totalCumulativeUsage.usage < lastUsage) {
+      usageOffset = totalCumulativeUsage.usage - lastUsage;
+    }
+    lastUsage = totalCumulativeUsage.usage;
+    totalCumulativeUsage.usage += usageOffset;
+  }
+  return Promise.resolve({
+    totalProcessorUsagePercent,
+    totalCumulativeUsage
+  });
 });
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_LAST_CRASH, () => {
   return Promise.resolve({
