@@ -256,9 +256,8 @@ function bindConnectionInstance(instance) {
     getStats: (callback) => instance.getStats(callback),
     getFilteredStats: (filter, callback) => instance.getFilteredStats(filter, callback),
     startReplay: () => instance.startReplay(),
-    startSamplesPlayback: (options, channels, callback) => instance.startSamplesPlayback(options, channels, callback),
-    stopSamplesPlayback: () => instance.stopSamplesPlayback(),
     setClipRecordUser: (userId, dataType, shouldRecord) => instance.setClipRecordUser(userId, dataType, shouldRecord),
+    setCallExperience: (bucket) => instance.setCallExperience(bucket),
     setRtcLogMarker: (marker) => instance.setRtcLogMarker(marker),
     startSamplesLocalPlayback: (samplesId, options, channels, callback) =>
       instance.startSamplesLocalPlayback(samplesId, options, channels, callback),
