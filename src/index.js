@@ -65,7 +65,7 @@ writeFileSync(join(baseOutDir, 'README.md'), `# discord-desktop-datamining
 
 | module | version |
 | ------ | :-----: |
-${Object.keys(versions).filter(x => x !== 'host').map(x => `| ${x} | ${versions[x]} |`).join('\n')}
+${Object.keys(versions).filter(x => x !== 'host').sort().map(x => `| ${x} | ${versions[x]} |`).join('\n')}
 
 ## branches
 
