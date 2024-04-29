@@ -5,15 +5,6 @@ if (process.platform === 'linux') {
     process.env.PULSE_LATENCY_MSEC = 30;
   }
 }
-const electronMajor = parseInt(process.versions.electron.split('.')[0]);
-if (electronMajor === 22) {
-  const path = require('path');
-  const fs = require('fs');
-  const tzdata_path = path.join(process.resourcesPath, 'tzdata');
-  if (fs.existsSync(tzdata_path)) {
-    process.env.ICU_TIMEZONE_FILES_DIR = tzdata_path;
-  }
-}
 const {
   app,
   Menu
@@ -81,8 +72,8 @@ async function setGPUFlags() {
   for (const gpu of info.gpuDevice) {
     if (gpu.active) {
       if (gpu.vendorId === 0x1002) {
-        if (gpu.deviceId === 0x1681) {
-          app.commandLine.appendSwitch('disable_media_foundation_clear_playback', '1');
+        if (gpu.deviceId === 0x15d8 || gpu.deviceId === 0x15dd || gpu.deviceId === 0x1636 || gpu.deviceId === 0x1638 || gpu.deviceId === 0x164c || gpu.deviceId === 0x1681 || gpu.deviceId === 0x67ef || gpu.deviceId === 0x67df || gpu.deviceId === 0x731f || gpu.deviceId === 0x7340 || gpu.deviceId === 0x73bf || gpu.deviceId === 0x73ef || gpu.deviceId === 0x73df || gpu.deviceId === 0x73ff || gpu.deviceId === 0x743f || gpu.deviceId === 0x744c || gpu.deviceId === 0x747e || gpu.deviceId === 0x7480) {
+          app.commandLine.appendSwitch('disable_d3d11_video_decoder', '1');
         }
       }
     }

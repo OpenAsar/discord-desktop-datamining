@@ -7,6 +7,7 @@ exports.flushCookies = flushCookies;
 exports.flushDNSCache = flushDNSCache;
 exports.flushStorageData = flushStorageData;
 exports.getCPUCoreCount = getCPUCoreCount;
+exports.getCumulativeCPUUsage = getCumulativeCPUUsage;
 exports.getCurrentCPUUsagePercent = getCurrentCPUUsagePercent;
 exports.getLastCrash = getLastCrash;
 exports.getMainArgvSync = getMainArgvSync;
@@ -25,9 +26,15 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 const CPU_USAGE_GATHER_INTERVAL = 1000;
 const mainArgv = _DiscordIPC.DiscordIPC.renderer.sendSync(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_MAIN_ARGV_SYNC);
 let totalProcessorUsagePercent = 0;
+let cumulativeCpuUsage;
 const cpuCoreCount = _os.default.cpus().length;
 setInterval(() => {
-  void _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_CPU_USAGE).then(usage => totalProcessorUsagePercent = usage);
+  void _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_CPU_USAGE).then(usage => {
+    ({
+      totalProcessorUsagePercent
+    } = usage);
+    if (usage.totalCumulativeUsage != null) cumulativeCpuUsage = usage.totalCumulativeUsage;
+  });
 }, CPU_USAGE_GATHER_INTERVAL);
 function flushDNSCache() {
   return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_FLUSH_DNS_CACHE);
@@ -73,6 +80,9 @@ function getProcessUptime() {
 }
 function getCurrentCPUUsagePercent() {
   return totalProcessorUsagePercent;
+}
+function getCumulativeCPUUsage() {
+  return cumulativeCpuUsage;
 }
 function getCPUCoreCount() {
   return cpuCoreCount;
