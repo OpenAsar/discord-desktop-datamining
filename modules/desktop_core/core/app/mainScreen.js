@@ -77,11 +77,14 @@ exports.WEBAPP_ENDPOINT = WEBAPP_ENDPOINT;
 function getSanitizedPath(path) {
   return new _url.default.URL(path, WEBAPP_ENDPOINT).pathname;
 }
-function getSanitizedProtocolPath(url_) {
+function getSanitizedProtocolUrl(fullUrl) {
   try {
-    const parsedURL = _url.default.parse(url_);
+    const parsedURL = _url.default.parse(fullUrl);
     if (parsedURL.protocol === 'discord:') {
-      return getSanitizedPath(parsedURL.path);
+      return {
+        path: getSanitizedPath(parsedURL.path),
+        query: parsedURL.query
+      };
     }
   } catch (_) {}
   return null;
@@ -876,6 +879,11 @@ function init() {
       setBackgroundColor(backgroundColor);
     }
   });
+  _ipcMain.default.on('OPEN_EXTERNAL_URL', (_event, externalUrl) => {
+    (0, _securityUtils.saferShellOpenExternal)(externalUrl).catch(() => {
+      console.error('Failed to open external URL', externalUrl);
+    });
+  });
   const updater = _updater.updater === null || _updater.updater === void 0 ? void 0 : _updater.updater.getUpdater();
   if (updater != null) {
     setupUpdaterEventsWithUpdater(updater);
@@ -885,12 +893,12 @@ function init() {
   launchMainAppWindow(false);
 }
 function handleOpenUrl(url) {
-  const path = getSanitizedProtocolPath(url);
-  if (path != null) {
+  const sanitizedUrl = getSanitizedProtocolUrl(url);
+  if (sanitizedUrl != null) {
     if (!mainWindowDidFinishLoad) {
-      mainWindowInitialPath = path;
+      mainWindowInitialPath = sanitizedUrl.path;
     }
-    webContentsSend('MAIN_WINDOW_PATH', path);
+    webContentsSend('MAIN_WINDOW_PATH', sanitizedUrl.path, sanitizedUrl.query);
   }
   if (mainWindow == null) {
     return;

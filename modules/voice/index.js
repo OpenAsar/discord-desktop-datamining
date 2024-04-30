@@ -124,7 +124,7 @@ if (debugLogging && console.discordVoiceHooked == null) {
         try {
           VoiceEngine.consoleLog(
             logFn,
-            JSON.stringify(Array.from(arguments).map((v) => (v != null ? v.toString() : v)))
+            JSON.stringify(Array.from(arguments).map((v) => (v != null ? v.toString() : v))),
           );
         } catch (e) {
           // Drop errors from toString()/stringify.
@@ -230,6 +230,7 @@ function bindConnectionInstance(instance) {
       instance.configureConnectionRetries(baseDelay, maxDelay, maxAttempts),
     setOnSpeakingCallback: (callback) => instance.setOnSpeakingCallback(callback),
     setOnNativeMuteToggleCallback: (callback) => instance.setOnNativeMuteToggleCallback?.(callback),
+    setOnNativeMuteChangedCallback: (callback) => instance.setOnNativeMuteChangedCallback?.(callback),
     setOnSpeakingWhileMutedCallback: (callback) => instance.setOnSpeakingWhileMutedCallback(callback),
     setPingInterval: (interval) => instance.setPingInterval(interval),
     setPingCallback: (callback) => instance.setPingCallback(callback),
@@ -255,9 +256,8 @@ function bindConnectionInstance(instance) {
     getStats: (callback) => instance.getStats(callback),
     getFilteredStats: (filter, callback) => instance.getFilteredStats(filter, callback),
     startReplay: () => instance.startReplay(),
-    startSamplesPlayback: (options, channels, callback) => instance.startSamplesPlayback(options, channels, callback),
-    stopSamplesPlayback: () => instance.stopSamplesPlayback(),
     setClipRecordUser: (userId, dataType, shouldRecord) => instance.setClipRecordUser(userId, dataType, shouldRecord),
+    setCallExperience: (bucket) => instance.setCallExperience(bucket),
     setRtcLogMarker: (marker) => instance.setRtcLogMarker(marker),
     startSamplesLocalPlayback: (samplesId, options, channels, callback) =>
       instance.startSamplesLocalPlayback(samplesId, options, channels, callback),

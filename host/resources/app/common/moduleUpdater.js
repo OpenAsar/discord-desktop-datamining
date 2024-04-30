@@ -16,6 +16,7 @@ exports.quitAndInstallUpdates = quitAndInstallUpdates;
 exports.setInBackground = setInBackground;
 exports.supportsEventObjects = void 0;
 var _fs = _interopRequireDefault(require("fs"));
+var _os = _interopRequireDefault(require("os"));
 var _path = _interopRequireDefault(require("path"));
 var _nodeGlobalPaths = require("./nodeGlobalPaths");
 var _events = require("events");
@@ -132,6 +133,10 @@ let localModuleVersionsFilePath;
 let updatable;
 let bootstrapManifestFilePath;
 let runningInBackground = false;
+let feedURL;
+let currentVersion;
+let releaseChannel;
+let pendingVersionDownloaded;
 function initPathsOnly(_buildInfo) {
   if (locallyInstalledModules || moduleInstallPath) {
     return;
@@ -144,17 +149,34 @@ function initPathsOnly(_buildInfo) {
     (0, _nodeGlobalPaths.addGlobalPath)(moduleInstallPath);
   }
 }
+function checkOSVersionSupported() {
+  if (process.platform === 'darwin') {
+    try {
+      const osVersion = _os.default.release();
+      const osMajorVersion = osVersion.split('.')[0];
+      const osMinimumSupportedVersion = 19;
+      console.log(`MacOS major version was ${osMajorVersion}, minimum supported version for future updates is ${osMinimumSupportedVersion}`);
+      if (osMajorVersion < osMinimumSupportedVersion) {
+        return false;
+      }
+    } catch (e) {
+      console.error(`Failed to retrieve the MacOS version for update skips: ${e.message}`);
+    }
+  }
+  return true;
+}
 function init(_endpoint, _settings, _buildInfo) {
   const endpoint = _endpoint;
   settings = _settings;
   const buildInfo = _buildInfo;
   updatable = buildInfo.version != '0.0.0' && !buildInfo.debug || settings.get(ALWAYS_ALLOW_UPDATES);
+  let hostUpdatable = buildInfo.version != '0.0.0' && !buildInfo.debug && checkOSVersionSupported() || settings.get(ALWAYS_ALLOW_UPDATES);
   initPathsOnly(buildInfo);
   logger = new LogStream(_path.default.join(paths.getUserData(), 'modules.log'));
   bootstrapping = false;
   hostUpdateAvailable = false;
   checkingForUpdates = false;
-  skipHostUpdate = settings.get(SKIP_HOST_UPDATE) || !updatable;
+  skipHostUpdate = settings.get(SKIP_HOST_UPDATE) || !hostUpdatable;
   skipModuleUpdate = settings.get(SKIP_MODULE_UPDATE) || locallyInstalledModules || !updatable;
   localModuleVersionsFilePath = _path.default.join(paths.getUserData(), 'local_module_versions.json');
   bootstrapManifestFilePath = _path.default.join(paths.getResources(), 'bootstrap', 'manifest.json');
@@ -201,7 +223,7 @@ function init(_endpoint, _settings, _buildInfo) {
   hostUpdater.on('update-progress', progress => hostOnUpdateProgress(progress));
   hostUpdater.on('update-not-available', () => hostOnUpdateNotAvailable());
   hostUpdater.on('update-manually', newVersion => hostOnUpdateManually(newVersion));
-  hostUpdater.on('update-downloaded', () => hostOnUpdateDownloaded());
+  hostUpdater.on('update-downloaded', (_ev, _releaseNotes, version) => hostOnUpdateDownloaded(version));
   hostUpdater.on('error', err => hostOnError(err));
   const setFeedURL = hostUpdater.setFeedURL.bind(hostUpdater);
   remoteBaseURL = `${endpoint}/modules/${buildInfo.releaseChannel}`;
@@ -235,18 +257,23 @@ function init(_endpoint, _settings, _buildInfo) {
   }
   switch (process.platform) {
     case 'darwin':
-      setFeedURL(`${endpoint}/updates/${buildInfo.releaseChannel}?platform=osx&version=${buildInfo.version}`);
+      feedURL = `${endpoint}/updates/${buildInfo.releaseChannel}?platform=osx&version=${buildInfo.version}`;
+      setFeedURL(feedURL);
       remoteQuery.platform = 'osx';
       break;
     case 'win32':
-      setFeedURL(`${endpoint}/updates/${buildInfo.releaseChannel}`);
+      feedURL = `${endpoint}/updates/${buildInfo.releaseChannel}`;
+      setFeedURL(feedURL);
       remoteQuery.platform = 'win';
       break;
     case 'linux':
-      setFeedURL(`${endpoint}/updates/${buildInfo.releaseChannel}?platform=linux&version=${buildInfo.version}`);
+      feedURL = `${endpoint}/updates/${buildInfo.releaseChannel}?platform=linux&version=${buildInfo.version}`;
+      setFeedURL(feedURL);
       remoteQuery.platform = 'linux';
       break;
   }
+  currentVersion = buildInfo.version;
+  releaseChannel = buildInfo.releaseChannel;
 }
 function cleanDownloadedModules(installedModules) {
   try {
@@ -322,9 +349,10 @@ function hostOnUpdateManually(newVersion) {
     manualRequired: true
   });
 }
-function hostOnUpdateDownloaded() {
-  logger.log(`Host update downloaded.`);
+function hostOnUpdateDownloaded(version) {
+  logger.log(`Host update downloaded (version ${version ?? 'unknown'})`);
   checkingForUpdates = false;
+  pendingVersionDownloaded = version;
   events.append({
     type: DOWNLOADED_MODULE,
     name: 'host',
@@ -367,6 +395,55 @@ function hostOnError(err) {
     });
   }
 }
+async function checkForHostUpdates() {
+  if (process.platform === 'darwin' && (releaseChannel === 'development' || releaseChannel === 'canary')) {
+    let shouldSkipUpdate = false;
+    try {
+      logger.log('Performing host update pre-check (macOS only)...');
+      const response = await request.get({
+        url: feedURL,
+        timeout: REQUEST_TIMEOUT
+      });
+      if (response.statusCode === 204) {
+        logger.log(`...no content; we're up to date.`);
+        shouldSkipUpdate = true;
+      } else {
+        const {
+          name: newVersion
+        } = JSON.parse(response.body);
+        logger.log(`...update available for ${newVersion}...`);
+        if (newVersion === currentVersion) {
+          logger.log(`...but we already have it; we're up to date.`);
+          shouldSkipUpdate = true;
+        } else if (newVersion === pendingVersionDownloaded) {
+          logger.log(`...but we've already downloaded it and are awaiting install.`);
+          shouldSkipUpdate = true;
+        }
+      }
+    } catch (err) {
+      logger.log(`...failed: ${String(err)}.`);
+      hostOnError(err);
+      return;
+    }
+    if (shouldSkipUpdate) {
+      if (pendingVersionDownloaded) {
+        events.append({
+          type: CHECKING_FOR_UPDATES
+        });
+        hostOnUpdateAvailable();
+        hostOnUpdateProgress(100);
+        hostOnUpdateDownloaded(pendingVersionDownloaded);
+      } else {
+        events.append({
+          type: CHECKING_FOR_UPDATES
+        });
+        hostOnUpdateNotAvailable();
+      }
+      return;
+    }
+  }
+  hostUpdater.checkForUpdates();
+}
 function checkForUpdates() {
   if (checkingForUpdates) return;
   checkingForUpdates = true;
@@ -378,7 +455,7 @@ function checkForUpdates() {
     hostOnUpdateNotAvailable();
   } else {
     logger.log('Checking for host updates.');
-    hostUpdater.checkForUpdates();
+    checkForHostUpdates();
   }
 }
 function setInBackground() {

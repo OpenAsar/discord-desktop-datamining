@@ -5,15 +5,6 @@ if (process.platform === 'linux') {
     process.env.PULSE_LATENCY_MSEC = 30;
   }
 }
-const electronMajor = parseInt(process.versions.electron.split('.')[0]);
-if (electronMajor === 22) {
-  const path = require('path');
-  const fs = require('fs');
-  const tzdata_path = path.join(process.resourcesPath, 'tzdata');
-  if (fs.existsSync(tzdata_path)) {
-    process.env.ICU_TIMEZONE_FILES_DIR = tzdata_path;
-  }
-}
 const {
   app,
   Menu
@@ -43,15 +34,51 @@ function setupHardwareAcceleration() {
 }
 setupHardwareAcceleration();
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
-let disabledFeatures = ['WinRetrieveSuggestionsOnlyOnDemand', 'HardwareMediaKeyHandling', 'MediaSessionService'];
+const disabledFeatures = ['WinRetrieveSuggestionsOnlyOnDemand', 'HardwareMediaKeyHandling', 'MediaSessionService'];
 if (process.platform === 'win32') {
-  if (buildInfo.releaseChannel === 'development' || buildInfo.releaseChannel === 'canary') {
-    disabledFeatures.push('CalculateNativeWinOcclusion');
-    app.commandLine.appendArgument('--disable-renderer-backgrounding');
-    app.commandLine.appendArgument('--disable-backgrounding-occluded-windows');
-  }
+  disabledFeatures.push('CalculateNativeWinOcclusion');
+  app.commandLine.appendArgument('--disable-renderer-backgrounding');
+  app.commandLine.appendArgument('--disable-backgrounding-occluded-windows');
 }
 app.commandLine.appendSwitch('disable-features', disabledFeatures.join(','));
+function setupSettingsFlags() {
+  const settings = appSettings.getSettings();
+  const validSwitches = {
+    disable_accelerated_h264_decode: 1,
+    disable_accelerated_h264_encode: 1,
+    disable_accelerated_hevc_decode: 1,
+    disable_d3d11: 1,
+    disable_d3d11_video_decoder: 1,
+    disable_decode_swap_chain: 1,
+    disable_dxgi_zero_copy_video: 1,
+    disable_dynamic_video_encode_framerate_update: 1,
+    disable_media_foundation_clear_playback: 1,
+    disable_media_foundation_frame_size_change: 1,
+    disable_metal: 1,
+    disable_nv12_dxgi_video: 1,
+    force_high_performance_gpu: 1,
+    force_low_power_gpu: 1
+  };
+  const switches = settings.get('chromiumSwitches', []);
+  for (const s in switches) {
+    if (validSwitches[s]) {
+      app.commandLine.appendSwitch(s, switches[s]);
+    }
+  }
+}
+setupSettingsFlags();
+async function setGPUFlags() {
+  const info = await app.getGPUInfo('complete');
+  for (const gpu of info.gpuDevice) {
+    if (gpu.active) {
+      if (gpu.vendorId === 0x1002) {
+        if (gpu.deviceId === 0x15d8 || gpu.deviceId === 0x15dd || gpu.deviceId === 0x1636 || gpu.deviceId === 0x1638 || gpu.deviceId === 0x164c || gpu.deviceId === 0x1681 || gpu.deviceId === 0x67ef || gpu.deviceId === 0x67df || gpu.deviceId === 0x731f || gpu.deviceId === 0x7340 || gpu.deviceId === 0x73bf || gpu.deviceId === 0x73ef || gpu.deviceId === 0x73df || gpu.deviceId === 0x73ff || gpu.deviceId === 0x743f || gpu.deviceId === 0x744c || gpu.deviceId === 0x747e || gpu.deviceId === 0x7480) {
+          app.commandLine.appendSwitch('disable_d3d11_video_decoder', '1');
+        }
+      }
+    }
+  }
+}
 function hasArgvFlag(flag) {
   return (process.argv || []).slice(1).includes(flag);
 }
@@ -163,5 +190,5 @@ if (pendingAppQuit) {
   app.quit();
 } else {
   discordProtocols.beforeReadyProtocolRegistration();
-  app.whenReady().then(() => startApp());
+  setGPUFlags().then(app.whenReady).then(() => startApp());
 }
