@@ -39,6 +39,7 @@ if (process.platform === 'win32') {
   disabledFeatures.push('CalculateNativeWinOcclusion');
   app.commandLine.appendArgument('--disable-renderer-backgrounding');
   app.commandLine.appendArgument('--disable-backgrounding-occluded-windows');
+  app.commandLine.appendArgument('--disable-background-timer-throttling');
 }
 app.commandLine.appendSwitch('disable-features', disabledFeatures.join(','));
 function setupSettingsFlags() {
