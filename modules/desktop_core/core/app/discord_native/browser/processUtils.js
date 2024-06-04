@@ -21,6 +21,7 @@ const processUtilsSettings = {
 exports.processUtilsSettings = processUtilsSettings;
 let usageOffset = 0;
 let lastUsage = 0;
+const cpuCoreCount = _os.default.cpus().length;
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_CPU_USAGE, () => {
   let totalProcessorUsagePercent = 0.0;
   let totalCumulativeUsage = undefined;
@@ -35,7 +36,7 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_CPU_U
           sampleTime
         };
       }
-      totalCumulativeUsage.usage += cpu.cumulativeCPUUsage;
+      totalCumulativeUsage.usage += cpu.cumulativeCPUUsage / cpuCoreCount;
     }
   }
   if (totalCumulativeUsage != null) {

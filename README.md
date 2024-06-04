@@ -2,7 +2,7 @@
 
 ## stable versions
 
-**host: 1.0.9046**
+**host: 1.0.9047**
 
 | module | version |
 | ------ | :-----: |
@@ -12,8 +12,8 @@
 | erlpack | 1 |
 | game_utils | 1 |
 | hook | 1 |
-| krisp | 2 |
-| media | 2 |
+| krisp | 1 |
+| media | 1 |
 | modules | 1 |
 | overlay2 | 1 |
 | rpc | 1 |
@@ -21,7 +21,7 @@
 | spellcheck | 1 |
 | utils | 1 |
 | vigilante | 1 |
-| voice | 3 |
+| voice | 1 |
 | zstd | 1 |
 
 ## branches
