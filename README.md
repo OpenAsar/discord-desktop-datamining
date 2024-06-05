@@ -12,7 +12,7 @@
 | erlpack | 4 |
 | game_utils | 4 |
 | hook | 4 |
-| krisp | 4 |
+| krisp | 5 |
 | media | 4 |
 | modules | 4 |
 | overlay2 | 4 |
@@ -21,7 +21,7 @@
 | spellcheck | 4 |
 | utils | 4 |
 | vigilante | 4 |
-| voice | 6 |
+| voice | 7 |
 | zstd | 4 |
 
 ## branches
