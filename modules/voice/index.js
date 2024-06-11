@@ -218,6 +218,7 @@ function bindConnectionInstance(instance) {
       instance.prepareMLSCommitTransition(transitionId, commit, callback),
     processMLSWelcome: (transitionId, welcome, callback) => instance.processMLSWelcome(transitionId, welcome, callback),
     setOnMLSFailureCallback: (callback) => instance.setOnMLSFailureCallback(callback),
+    setSecureFramesStateUpdateCallback: (callback) => instance.setSecureFramesStateUpdateCallback(callback),
 
     setLocalVolume: (userId, volume) => instance.setLocalVolume(userId, volume),
     setLocalMute: (userId, mute) => instance.setLocalMute(userId, mute),
