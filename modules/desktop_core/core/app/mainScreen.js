@@ -855,7 +855,10 @@ function init() {
     if (reason === 'crashed' || reason === 'oom') {
       const sentry = _crashReporterSetup.crashReporterSetup.getGlobalSentry();
       if (sentry != null) {
-        sentry.captureMessage(`'${details.type}' process exited with '${details.reason}' with exitcode '${details.exitCode}'`);
+        const skipSentryCapture = details.type === 'Utility' && details.exitCode === -1073741205;
+        if (!skipSentryCapture) {
+          sentry.captureMessage(`'${details.type}' process exited with '${details.reason}' with exitcode '${details.exitCode}'`);
+        }
       }
     }
   });
