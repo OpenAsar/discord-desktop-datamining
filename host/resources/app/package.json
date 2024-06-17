@@ -1,5 +1,6 @@
 {
   "name": "discord",
+  "license": "UNLICENSED",
   "description": "Discord Client for Desktop - Bootstrapper",
   "main": "app_bootstrap/index.js",
   "private": true,
@@ -12,7 +13,8 @@
     "yauzl": "^2.10.0"
   },
   "devDependencies": {
+    "@types/node": "*",
     "devtron": "1.4.0",
-    "electron": "22.3.12"
+    "electron": "28.2.10"
   }
 }

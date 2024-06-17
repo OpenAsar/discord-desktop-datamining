@@ -104,8 +104,8 @@ function createRenderer(pid, url) {
 
   // "paint" event will be skipped if direct frame delivery is enabled.
 
-  renderer.window.webContents.on('crashed', function (_e, killed) {
-    _overlay_module["default"].logMessage("Overlay for pid ".concat(renderer.pid, " crashed").concat(killed ? ' (killed)' : ''));
+  renderer.window.webContents.on('render-process-gone', function (_e, details) {
+    _overlay_module["default"].logMessage("Overlay for pid ".concat(renderer.pid, " crashed (").concat(details.reason, " | exit code: ").concat(details.exitCode, ")"));
     _overlay_module["default"].sendCommand(renderer.pid, {
       message: 'relay',
       _relay: 'renderer_crashed'
