@@ -50,7 +50,7 @@ function initializeSentrySdk(sentry, buildInfo) {
       void blackbox.addSentryReport(event, hint);
       return event;
     },
-    ignoreErrors: ['EADDRINUSE', 'ResizeObserver loop limit exceeded', 'ResizeObserver loop completed with undelivered notifications.', 'EACCES: permission denied', "'Utility' process exited with 'crashed' with exitcode '-1073741819'", 'BetterDiscord', 'VencordPatcher', 'mwittrien.github.io', 'Error: getaddrinfo ENOTFOUND raw.githubusercontent.com'],
+    ignoreErrors: ['EADDRINUSE', 'ResizeObserver loop limit exceeded', 'ResizeObserver loop completed with undelivered notifications.', 'EACCES: permission denied', 'BetterDiscord', 'VencordPatcher', 'mwittrien.github.io', 'Error: getaddrinfo ENOTFOUND raw.githubusercontent.com'],
     denyUrls: [/betterdiscord:\/\//]
   });
   gSentry = sentry;
