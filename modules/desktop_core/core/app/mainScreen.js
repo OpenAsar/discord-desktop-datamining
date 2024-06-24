@@ -18,6 +18,7 @@ var _securityUtils = require("../common/securityUtils");
 var appBadge = _interopRequireWildcard(require("./appBadge"));
 var appConfig = _interopRequireWildcard(require("./appConfig"));
 var _appSettings = require("./bootstrapModules/appSettings");
+var _bootstrapModules = require("./bootstrapModules/bootstrapModules");
 var _buildInfo = require("./bootstrapModules/buildInfo");
 var _crashReporterSetup = require("./bootstrapModules/crashReporterSetup");
 var _moduleUpdater = require("./bootstrapModules/moduleUpdater");
@@ -704,6 +705,34 @@ async function checkForUpdatesWithUpdater(updater) {
     webContentsSend(updaterState);
   }
 }
+const analyticsState = {
+  ready: false,
+  cached: []
+};
+function setupAnalyticsEvents() {
+  var _analytics$getAnalyti;
+  _bootstrapModules.analytics === null || _bootstrapModules.analytics === void 0 ? void 0 : (_analytics$getAnalyti = _bootstrapModules.analytics.getAnalytics()) === null || _analytics$getAnalyti === void 0 ? void 0 : _analytics$getAnalyti.on('event', event => {
+    if (analyticsState.ready) {
+      webContentsSend(_Constants.AnalyticsEvents.APP_PUSH_ANALYTICS, [event]);
+    } else {
+      analyticsState.cached.push(event);
+    }
+  });
+  _ipcMain.default.on(_Constants.AnalyticsEvents.APP_GET_ANALYTICS_EVENTS, () => {
+    const a = _bootstrapModules.analytics === null || _bootstrapModules.analytics === void 0 ? void 0 : _bootstrapModules.analytics.getAnalytics();
+    if (a == null) {
+      console.log(`[app] null analytics`);
+      return;
+    }
+    const events = a.getAndTruncateEvents();
+    if (!analyticsState.ready) {
+      analyticsState.ready = true;
+      events.push(...analyticsState.cached);
+      analyticsState.cached = [];
+    }
+    webContentsSend(_Constants.AnalyticsEvents.APP_PUSH_ANALYTICS, events);
+  });
+}
 function setupUpdaterEventsWithUpdater(updater) {
   _electron.app.on(_Constants.MenuEvents.CHECK_FOR_UPDATES, () => checkForUpdatesWithUpdater());
   _ipcMain.default.on(_Constants.UpdaterEvents.CHECK_FOR_UPDATES, () => {
@@ -887,6 +916,7 @@ function init() {
       console.error('Failed to open external URL', externalUrl);
     });
   });
+  setupAnalyticsEvents();
   const updater = _updater.updater === null || _updater.updater === void 0 ? void 0 : _updater.updater.getUpdater();
   if (updater != null) {
     setupUpdaterEventsWithUpdater(updater);
