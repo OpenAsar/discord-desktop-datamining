@@ -13,7 +13,6 @@ var _fs = _interopRequireDefault(require("fs"));
 var _path = _interopRequireDefault(require("path"));
 var _url = _interopRequireDefault(require("url"));
 var _Backoff = _interopRequireDefault(require("../common/Backoff"));
-var analytics = _interopRequireWildcard(require("../common/analytics"));
 var moduleUpdater = _interopRequireWildcard(require("../common/moduleUpdater"));
 var paths = _interopRequireWildcard(require("../common/paths"));
 var _securityUtils = require("../common/securityUtils");
@@ -148,9 +147,13 @@ async function updateUntilCurrent(widevineCDM) {
         });
         newUpdater.setRunningInBackground();
         newUpdater.collectGarbage();
-        console.log(`Checking CDM status...`);
-        const componentStatus = await widevineCDM;
-        console.log(`CDM completed with status: ${componentStatus}`);
+        try {
+          console.log(`Checking CDM status...`);
+          let componentStatus = await widevineCDM;
+          console.log(`CDM completed with status (new updater): ${JSON.stringify(componentStatus)}`);
+        } catch (e) {
+          console.log(`CDM failed: ${e.message}`);
+        }
         launchMainWindow();
         updateBackoff.succeed();
         updateSplashState(LAUNCHING);
@@ -180,7 +183,7 @@ function initOldUpdater(widevineCDM) {
   }) => {
     console.log(`splashScreen: ${UPDATE_CHECK_FINISHED} ${succeeded} ${updateCount} ${manualRequired}`);
     stopUpdateTimeout();
-    const splashCompletedWork = () => {
+    let splashCompletedWork = () => {
       if (!succeeded) {
         scheduleUpdateCheck();
         updateSplashState(UPDATE_FAILURE);
@@ -190,7 +193,11 @@ function initOldUpdater(widevineCDM) {
         updateSplashState(LAUNCHING);
       }
     };
-    widevineCDM.finally(() => {
+    widevineCDM.then(status => {
+      console.log(`CDM completed with status (old updater): ${JSON.stringify(status)}`);
+    }).catch(e => {
+      console.log(`CDM did not complete: ${e.message}`);
+    }).finally(() => {
       splashCompletedWork();
     });
   });
@@ -298,55 +305,29 @@ function initSplash(startMinimized = false) {
   splashState = {};
   launchedMainWindow = false;
   updateAttempt = 0;
+  function timeoutPromise(timeout, promise) {
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(new Error(`Promise timed out after ${timeout} ms`));
+      }, timeout);
+      promise.then(value => {
+        clearTimeout(timer);
+        resolve(value);
+      }).catch(error => {
+        clearTimeout(timer);
+        reject(error);
+      });
+    });
+  }
   let widevineCDM;
   if (_electron.components) {
     console.log('CDM component API found');
-    const now = performance.now();
-    const componentPromise = _electron.components.whenReady().then(result => {
-      const status = 'cdm-ready-success';
-      analytics.getAnalytics().pushEvent('cdm', 'cdm_ready_complete', {
-        status: status,
-        duration_ms: performance.now() - now,
-        result: JSON.stringify(result)
-      });
-      return Promise.resolve(status);
-    }).catch(err => {
-      const status = 'cdm-ready-error';
-      console.log(`CDM component API load failure: ${JSON.stringify(err)}`);
-      analytics.getAnalytics().pushEvent('cdm', 'cdm_ready_complete', {
-        status: status,
-        duration_ms: performance.now() - now,
-        result: JSON.stringify(err)
-      });
-      return Promise.reject(status);
-    });
-    const timeoutPromise = new Promise((_resolve, reject) => {
-      const ms = 200;
-      setTimeout(() => {
-        return reject(`cdm-ready-timeout-${ms}`);
-      }, ms);
-    });
-    widevineCDM = Promise.race([componentPromise, timeoutPromise]);
-    widevineCDM = widevineCDM.then(result => {
-      console.log(`CDM completed with status: ${result}`);
-      analytics.getAnalytics().pushEvent('cdm', 'cdm_load_status', {
-        status: result
-      });
-      return result;
-    }).catch(e => {
-      console.log(`CDM completed with err: ${e}`);
-      analytics.getAnalytics().pushEvent('cdm', 'cdm_load_status', {
-        status: e
-      });
-      return e;
+    widevineCDM = timeoutPromise(100, _electron.components.whenReady()).catch(() => {
+      console.log('CDM work timed out');
     });
   } else {
     console.log('CDM component API not found, skipping');
-    const result = 'api-not-found';
-    widevineCDM = Promise.resolve(result);
-    analytics.getAnalytics().pushEvent('cdm', 'cdm_load_status', {
-      status: result
-    });
+    widevineCDM = Promise.resolve('api-not-found');
   }
   newUpdater = (0, _updater.getUpdater)();
   if (newUpdater == null) {
