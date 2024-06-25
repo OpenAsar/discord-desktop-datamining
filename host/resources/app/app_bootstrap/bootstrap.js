@@ -21,6 +21,7 @@ const blackbox = require('../common/blackbox');
 blackbox.initialize(paths.getModuleDataPath(), buildInfo);
 const crashReporterSetup = require('../common/crashReporterSetup');
 crashReporterSetup.init(buildInfo, sentry);
+const analytics = require('../common/analytics');
 global.moduleDataPath = paths.getModuleDataPath();
 const appSettings = require('./appSettings');
 appSettings.init();
@@ -155,7 +156,8 @@ function startUpdate() {
         Constants,
         GPUSettings,
         updater,
-        crashReporterSetup
+        crashReporterSetup,
+        analytics
       });
       if (initialUrl != null) {
         coreModule.handleOpenUrl(initialUrl);
