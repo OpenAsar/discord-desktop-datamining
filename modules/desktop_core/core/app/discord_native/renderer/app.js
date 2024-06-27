@@ -52,6 +52,12 @@ function relaunch() {
 function getDefaultDoubleClickAction() {
   return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.APP_GET_DEFAULT_DOUBLE_CLICK_ACTION);
 }
+function pauseFrameEvictor() {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.APP_PAUSE_FRAME_EVICTOR);
+}
+function unpauseFrameEvictor() {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.APP_UNPAUSE_FRAME_EVICTOR);
+}
 function registerUserInteractionHandler(elementId, eventType, callback) {
   const element = document.getElementById(elementId);
   if (element == null) {
@@ -83,5 +89,7 @@ module.exports = {
   },
   relaunch,
   getDefaultDoubleClickAction,
+  pauseFrameEvictor,
+  unpauseFrameEvictor,
   registerUserInteractionHandler
 };

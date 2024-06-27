@@ -1,4 +1,5 @@
-import { logger } from './logger.js';
+import { DEBUG_BUILD } from './debug-build.js';
+import { consoleSandbox, logger } from './logger.js';
 
 /** Regular expression used to parse a Dsn. */
 const DSN_REGEX = /^(?:(\w+):)\/\/(?:(\w+)(?::(\w+)?)?@)([\w.-]+)(?::(\d+))?\/(.+)/;
@@ -35,8 +36,10 @@ function dsnFromString(str) {
 
   if (!match) {
     // This should be logged to the console
-    // eslint-disable-next-line no-console
-    console.error(`Invalid Sentry Dsn: ${str}`);
+    consoleSandbox(() => {
+      // eslint-disable-next-line no-console
+      console.error(`Invalid Sentry Dsn: ${str}`);
+    });
     return undefined;
   }
 
@@ -73,7 +76,7 @@ function dsnFromComponents(components) {
 }
 
 function validateDsn(dsn) {
-  if (!(typeof __SENTRY_DEBUG__ === 'undefined' || __SENTRY_DEBUG__)) {
+  if (!DEBUG_BUILD) {
     return true;
   }
 

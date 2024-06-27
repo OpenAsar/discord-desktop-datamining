@@ -123,3 +123,11 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.APP_RELAUNCH, async () 
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.APP_GET_DEFAULT_DOUBLE_CLICK_ACTION, async () => {
   return _electron.default.systemPreferences.getUserDefault('AppleActionOnDoubleClick', 'string');
 });
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.APP_PAUSE_FRAME_EVICTOR, async () => {
+  var _pauseFrameEvictionMa, _ref;
+  return (_pauseFrameEvictionMa = (_ref = _electron.default.app).pauseFrameEvictionManager) === null || _pauseFrameEvictionMa === void 0 ? void 0 : _pauseFrameEvictionMa.call(_ref);
+});
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.APP_UNPAUSE_FRAME_EVICTOR, async () => {
+  var _unpauseFrameEviction, _ref2;
+  return (_unpauseFrameEviction = (_ref2 = _electron.default.app).unpauseFrameEvictionManager) === null || _unpauseFrameEviction === void 0 ? void 0 : _unpauseFrameEviction.call(_ref2);
+});
