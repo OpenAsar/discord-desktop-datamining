@@ -571,6 +571,21 @@ function launchMainAppWindow(isVisible) {
   if (process.platform === 'win32') {
     setupNotificationScreen(mainWindow);
   }
+  mainWindow.webContents.session.webRequest.onBeforeRequest({
+    urls: ['https://*.discordsays.com/*']
+  }, (details, callback) => {
+    const pathMatch = details.url.match(/https:\/\/[0-9]+\.discordsays\.com(\/(?!\.proxy\/).+)/);
+    if (pathMatch != null) {
+      const applicationIdMatch = details.url.match(/https:\/\/([0-9]+)\.discordsays\.com/);
+      _bootstrapModules.analytics.getAnalytics().pushEvent('activities', 'activities_restricted_csp_violation', {
+        application_id: applicationIdMatch && applicationIdMatch.length >= 2 ? applicationIdMatch[1] : null,
+        path: pathMatch.length >= 2 ? pathMatch[1] : null
+      });
+    }
+    callback({
+      cancel: false
+    });
+  });
   setupSystemTray();
   setupAppBadge();
   setupAppConfig();

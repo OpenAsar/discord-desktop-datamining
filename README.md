@@ -7,7 +7,7 @@
 | module | version |
 | ------ | :-----: |
 | cloudsync | 1 |
-| desktop_core | 1 |
+| desktop_core | 2 |
 | dispatch | 1 |
 | erlpack | 1 |
 | game_utils | 1 |
@@ -21,7 +21,7 @@
 | spellcheck | 1 |
 | utils | 1 |
 | vigilante | 1 |
-| voice | 4 |
+| voice | 5 |
 | zstd | 1 |
 
 ## branches
