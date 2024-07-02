@@ -20,12 +20,7 @@ paths.init(buildInfo);
 const blackbox = require('../common/blackbox');
 blackbox.initialize(paths.getModuleDataPath(), buildInfo);
 const crashReporterSetup = require('../common/crashReporterSetup');
-const browser = require('@sentry/browser');
-const sentryConfig = {
-  sentry,
-  getTransport: dsnFunc => browser.makeMultiplexedTransport(browser.makeFetchTransport, dsnFunc)
-};
-crashReporterSetup.init(buildInfo, sentryConfig);
+crashReporterSetup.init(buildInfo, sentry);
 const analytics = require('../common/analytics');
 global.moduleDataPath = paths.getModuleDataPath();
 const appSettings = require('./appSettings');
