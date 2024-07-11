@@ -56,6 +56,10 @@ function updateSession(session, context = {}) {
 
   session.timestamp = context.timestamp || timestampInSeconds();
 
+  if (context.abnormal_mechanism) {
+    session.abnormal_mechanism = context.abnormal_mechanism;
+  }
+
   if (context.ignoreDuration) {
     session.ignoreDuration = context.ignoreDuration;
   }
@@ -142,6 +146,7 @@ function sessionToJSON(session) {
     errors: session.errors,
     did: typeof session.did === 'number' || typeof session.did === 'string' ? `${session.did}` : undefined,
     duration: session.duration,
+    abnormal_mechanism: session.abnormal_mechanism,
     attrs: {
       release: session.release,
       environment: session.environment,

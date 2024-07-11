@@ -67,6 +67,10 @@ function getReportDialogEndpoint(
       continue;
     }
 
+    if (key === 'onClose') {
+      continue;
+    }
+
     if (key === 'user') {
       const user = dialogOptions.user;
       if (!user) {
