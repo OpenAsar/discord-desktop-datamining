@@ -12,7 +12,7 @@
 | erlpack | 5 |
 | game_utils | 5 |
 | hook | 5 |
-| krisp | 5 |
+| krisp | 6 |
 | media | 5 |
 | modules | 5 |
 | overlay2 | 5 |
