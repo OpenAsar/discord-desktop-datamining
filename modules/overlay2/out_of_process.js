@@ -84,6 +84,9 @@ var OutOfProcessOverlayInterface = _objectSpread(_objectSpread({}, NativeOverlay
       focus(targetGamePID);
     };
     NativeOverlay.setFocusCallback(wrappedCallback);
+  },
+  setFocusLostCallback: function setFocusLostCallback(focus) {
+    NativeOverlay.setFocusLostCallback(focus);
   }
 });
 var _default = OutOfProcessOverlayInterface;
