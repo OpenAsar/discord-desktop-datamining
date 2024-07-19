@@ -20,12 +20,7 @@ paths.init(buildInfo);
 const blackbox = require('../common/blackbox');
 blackbox.initialize(paths.getModuleDataPath(), buildInfo);
 const crashReporterSetup = require('../common/crashReporterSetup');
-const browser = require('@sentry/browser');
-const sentryConfig = {
-  sentry,
-  getTransport: dsnFunc => browser.makeMultiplexedTransport(browser.makeFetchTransport, dsnFunc)
-};
-crashReporterSetup.init(buildInfo, sentryConfig);
+crashReporterSetup.init(buildInfo, sentry);
 const analytics = require('../common/analytics');
 global.moduleDataPath = paths.getModuleDataPath();
 const appSettings = require('./appSettings');
@@ -40,7 +35,7 @@ function setupHardwareAcceleration() {
 }
 setupHardwareAcceleration();
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
-const disabledFeatures = ['WinRetrieveSuggestionsOnlyOnDemand', 'HardwareMediaKeyHandling', 'MediaSessionService'];
+const disabledFeatures = ['WinRetrieveSuggestionsOnlyOnDemand', 'HardwareMediaKeyHandling', 'MediaSessionService', 'UseEcoQoSForBackgroundProcess', 'IntensiveWakeUpThrottling'];
 if (process.platform === 'win32') {
   app.commandLine.appendArgument('--disable-background-timer-throttling');
 }

@@ -12,7 +12,11 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.SPELLCHECK_GET_AVAILABL
   return Promise.resolve(electron.session.defaultSession.availableSpellCheckerLanguages);
 });
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.SPELLCHECK_SET_LOCALE, (_, locale) => {
-  electron.session.defaultSession.setSpellCheckerLanguages([locale]);
+  try {
+    electron.session.defaultSession.setSpellCheckerLanguages([locale]);
+  } catch (_) {
+    console.error(`Failed to set the spellcheck locale: ${locale}`);
+  }
   return Promise.resolve();
 });
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.SPELLCHECK_SET_LEARNED_WORDS, async (_, newLearnedWords) => {

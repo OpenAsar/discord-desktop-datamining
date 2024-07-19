@@ -23,10 +23,6 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.CRASH_REPORTER_UPDATE_M
     if (nativeBuildNumber != null) {
       sentry.setTag('nativeBuildNumber', nativeBuildNumber);
     }
-    const staff = additionalMetadata.staff;
-    if (staff != null) {
-      sentry.setTag('isStaff', staff.toString());
-    }
   }
   return Promise.resolve({
     metadata: finalMetadata
