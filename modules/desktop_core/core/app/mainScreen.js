@@ -117,12 +117,12 @@ function getMainWindowId() {
   return mainWindowId;
 }
 function webContentsSend(...args) {
-  if (mainWindow == null) {
-    console.error('mainScreen.webContentsSend: mainWindow is null.');
+  if (mainWindow == null || mainWindow.isDestroyed()) {
+    console.error('mainScreen.webContentsSend: mainWindow is null or destroyed');
     return;
   }
-  if (mainWindow.webContents == null) {
-    console.error('mainScreen.webContentsSend: mainWindow.webContents is null.');
+  if (mainWindow.webContents == null || mainWindow.webContents.isDestroyed()) {
+    console.error('mainScreen.webContentsSend: mainWindow.webContents is null or destroyed.');
     return;
   }
   const [event, ...options] = args;
