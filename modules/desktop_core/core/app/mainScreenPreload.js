@@ -52,12 +52,18 @@ if (window.opener === null) {
   };
   const crashReporterSetup = require('../common/crashReporterSetup');
   const sentry = require('@sentry/electron');
+  const browser = require('@sentry/browser');
   if (crashReporterSetup && !crashReporterSetup.isInitialized()) {
     const buildInfo = {
       releaseChannel: app.getReleaseChannel(),
       version: app.getVersion()
     };
-    crashReporterSetup.init(buildInfo, sentry);
+    crashReporterSetup.init(buildInfo, {
+      sentry,
+      getTransport: dsnFunc => {
+        return browser.makeMultiplexedTransport(browser.makeFetchTransport, dsnFunc);
+      }
+    });
   }
   contextBridge.exposeInMainWorld('DiscordNative', DiscordNative);
   process.once('loaded', () => {

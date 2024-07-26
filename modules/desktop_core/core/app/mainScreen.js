@@ -443,7 +443,7 @@ function launchMainAppWindow(isVisible) {
     }
     mainWindowDidFinishLoad = true;
     if (mainWindowInitialPath != null) {
-      webContentsSend('MAIN_WINDOW_PATH', mainWindowInitialPath);
+      webContentsSend('MAIN_WINDOW_PATH', mainWindowInitialPath.path, mainWindowInitialPath.query);
       mainWindowInitialPath = null;
     }
     webContentsSend(mainWindow != null && mainWindow.isFocused() ? 'MAIN_WINDOW_FOCUS' : 'MAIN_WINDOW_BLUR');
@@ -944,7 +944,10 @@ function handleOpenUrl(url) {
   const sanitizedUrl = getSanitizedProtocolUrl(url);
   if (sanitizedUrl != null) {
     if (!mainWindowDidFinishLoad) {
-      mainWindowInitialPath = sanitizedUrl.path;
+      mainWindowInitialPath = {
+        path: sanitizedUrl.path,
+        query: sanitizedUrl.query
+      };
     }
     webContentsSend('MAIN_WINDOW_PATH', sanitizedUrl.path, sanitizedUrl.query);
   }
