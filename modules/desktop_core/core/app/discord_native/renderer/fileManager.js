@@ -91,8 +91,9 @@ async function readLogFiles(maxSize) {
   const modulePath = await getModulePath();
   const voicePath = _path.default.join(modulePath, 'discord_voice');
   const hookPath = _path.default.join(modulePath, 'discord_hook');
+  const overlayPath = _path.default.join(modulePath, 'discord_overlay2');
   const utilsPath = _path.default.join(modulePath, 'discord_utils');
-  const filesToUpload = [_path.default.join(voicePath, 'discord-webrtc'), _path.default.join(voicePath, 'discord-last-webrtc'), _path.default.join(voicePath, 'audio_state.json'), _path.default.join(hookPath, 'hook.log'), _path.default.join(utilsPath, 'live_minidump.dmp')];
+  const filesToUpload = [_path.default.join(voicePath, 'discord-webrtc'), _path.default.join(voicePath, 'discord-last-webrtc'), _path.default.join(voicePath, 'audio_state.json'), _path.default.join(hookPath, 'hook.log'), _path.default.join(overlayPath, 'global_overlay.log'), _path.default.join(utilsPath, 'live_minidump.dmp')];
   blackbox.initializeRenderer(modulePath);
   const minidump = await blackbox.minidumpFiles.getNewestFile();
   if (minidump != null) {
