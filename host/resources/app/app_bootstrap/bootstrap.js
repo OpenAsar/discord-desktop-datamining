@@ -45,7 +45,7 @@ setupHardwareAcceleration();
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 const disabledFeatures = ['WinRetrieveSuggestionsOnlyOnDemand', 'HardwareMediaKeyHandling', 'MediaSessionService', 'UseEcoQoSForBackgroundProcess', 'IntensiveWakeUpThrottling', 'AllowAggressiveThrottlingWithWebSocket'];
 if (process.platform === 'win32') {
-  app.commandLine.appendArgument('--disable-background-timer-throttling');
+  app.commandLine.appendSwitch('disable-background-timer-throttling');
 }
 app.commandLine.appendSwitch('disable-features', disabledFeatures.join(','));
 function setupSettingsFlags() {
