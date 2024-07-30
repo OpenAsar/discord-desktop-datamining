@@ -20,7 +20,15 @@ paths.init(buildInfo);
 const blackbox = require('../common/blackbox');
 blackbox.initialize(paths.getModuleDataPath(), buildInfo);
 const crashReporterSetup = require('../common/crashReporterSetup');
-crashReporterSetup.init(buildInfo, sentry);
+const browser = require('@sentry/browser');
+const {
+  makeElectronOfflineTransport
+} = require('@sentry/electron/main');
+const sentryConfig = {
+  sentry,
+  getTransport: dsnFunc => browser.makeMultiplexedTransport(makeElectronOfflineTransport, dsnFunc)
+};
+crashReporterSetup.init(buildInfo, sentryConfig);
 const analytics = require('../common/analytics');
 global.moduleDataPath = paths.getModuleDataPath();
 const appSettings = require('./appSettings');
@@ -35,9 +43,9 @@ function setupHardwareAcceleration() {
 }
 setupHardwareAcceleration();
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
-const disabledFeatures = ['WinRetrieveSuggestionsOnlyOnDemand', 'HardwareMediaKeyHandling', 'MediaSessionService', 'UseEcoQoSForBackgroundProcess', 'IntensiveWakeUpThrottling'];
+const disabledFeatures = ['WinRetrieveSuggestionsOnlyOnDemand', 'HardwareMediaKeyHandling', 'MediaSessionService', 'UseEcoQoSForBackgroundProcess', 'IntensiveWakeUpThrottling', 'AllowAggressiveThrottlingWithWebSocket'];
 if (process.platform === 'win32') {
-  app.commandLine.appendArgument('--disable-background-timer-throttling');
+  app.commandLine.appendSwitch('disable-background-timer-throttling');
 }
 app.commandLine.appendSwitch('disable-features', disabledFeatures.join(','));
 function setupSettingsFlags() {
