@@ -158,6 +158,9 @@ features.declareSupported('bandwidth_estimation_experiments');
 
 if (process.platform === 'darwin') {
   features.declareSupported('screen_capture_kit');
+  if (versionGreaterThanOrEqual(os.release(), '23.0.0')) {
+    features.declareSupported('native_screenshare_picker');
+  }
 }
 
 if (process.platform === 'win32' || process.platform === 'darwin') {
@@ -265,6 +268,7 @@ function bindConnectionInstance(instance) {
     stopSamplesLocalPlayback: (sourceId) => instance.stopSamplesLocalPlayback(sourceId),
     stopAllSamplesLocalPlayback: () => instance.stopAllSamplesLocalPlayback(),
     setOnVideoEncoderFallbackCallback: (codecName) => instance.setOnVideoEncoderFallbackCallback(codecName),
+    presentDesktopSourcePicker: (style) => instance.presentDesktopSourcePicker(style),
   };
 }
 
