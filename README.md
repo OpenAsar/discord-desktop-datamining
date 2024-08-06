@@ -21,7 +21,7 @@
 | spellcheck | 13 |
 | utils | 13 |
 | vigilante | 13 |
-| voice | 25 |
+| voice | 26 |
 | zstd | 13 |
 
 ## branches
