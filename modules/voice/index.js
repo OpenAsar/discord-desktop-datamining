@@ -152,12 +152,14 @@ features.declareSupported('electron_video');
 features.declareSupported('fixed_keyframe_interval');
 features.declareSupported('first_frame_callback');
 features.declareSupported('remote_user_multi_stream');
-features.declareSupported('speed_test');
 features.declareSupported('go_live_hardware');
 features.declareSupported('bandwidth_estimation_experiments');
 
 if (process.platform === 'darwin') {
   features.declareSupported('screen_capture_kit');
+  if (versionGreaterThanOrEqual(os.release(), '23.0.0')) {
+    features.declareSupported('native_screenshare_picker');
+  }
 }
 
 if (process.platform === 'win32' || process.platform === 'darwin') {
@@ -265,6 +267,7 @@ function bindConnectionInstance(instance) {
     stopSamplesLocalPlayback: (sourceId) => instance.stopSamplesLocalPlayback(sourceId),
     stopAllSamplesLocalPlayback: () => instance.stopAllSamplesLocalPlayback(),
     setOnVideoEncoderFallbackCallback: (codecName) => instance.setOnVideoEncoderFallbackCallback(codecName),
+    presentDesktopSourcePicker: (style) => instance.presentDesktopSourcePicker(style),
   };
 }
 
@@ -290,28 +293,6 @@ VoiceEngine.createReplayConnection = function (audioEngineId, callback, replayLo
   }
 
   return bindConnectionInstance(new VoiceEngine.VoiceReplayConnection(replayLog, audioEngineId, callback));
-};
-
-function bindSpeedTestConnectionInstance(instance) {
-  return {
-    destroy: () => instance.destroy(),
-
-    setTransportOptions: (options) => instance.setTransportOptions(options),
-    getEncryptionModes: (callback) => instance.getEncryptionModes(callback),
-    getNetworkOverhead: (callback) => instance.getNetworkOverhead(callback),
-    setPingInterval: (interval) => instance.setPingInterval(interval),
-    setPingCallback: (callback) => instance.setPingCallback(callback),
-    setPingTimeoutCallback: (callback) => instance.setPingTimeoutCallback(callback),
-    startSpeedTestSender: (options, callback) => instance.startSpeedTestSender(options, callback),
-    stopSpeedTestSender: () => instance.stopSpeedTestSender(),
-    startSpeedTestReceiver: (options, callback) => instance.startSpeedTestReceiver(options, callback),
-    stopSpeedTestReceiver: (callback) => instance.stopSpeedTestReceiver(callback),
-  };
-}
-
-VoiceEngine.createSpeedTestConnectionWithOptions = function (userId, connectionOptions, onConnectCallback) {
-  const instance = new VoiceEngine.SpeedTestConnection(userId, connectionOptions, onConnectCallback);
-  return bindSpeedTestConnectionInstance(instance);
 };
 
 VoiceEngine.setAudioSubsystem = function (subsystem) {
