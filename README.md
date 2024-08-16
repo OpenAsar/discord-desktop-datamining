@@ -2,7 +2,7 @@
 
 ## ptb versions
 
-**host: 1.0.1086**
+**host: 1.0.1087**
 
 | module | version |
 | ------ | :-----: |
@@ -21,7 +21,7 @@
 | spellcheck | 1 |
 | utils | 1 |
 | vigilante | 1 |
-| voice | 3 |
+| voice | 1 |
 | zstd | 1 |
 
 ## branches
