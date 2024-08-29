@@ -14,5 +14,8 @@ exports.arch = arch;
 if (_process.default.platform === 'win32' && _process.default.env['PROCESSOR_ARCHITEW6432'] != null) {
   exports.arch = arch = 'x64';
 }
+if (_process.default.env['PROCESSOR_ARCHITECTURE'] === 'ARM64' || _process.default.env['PROCESSOR_ARCHITEW6432'] === 'ARM64') {
+  exports.arch = arch = 'arm64';
+}
 const release = _os.default.release();
 exports.release = release;
