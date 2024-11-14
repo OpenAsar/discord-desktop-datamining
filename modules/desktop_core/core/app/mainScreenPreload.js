@@ -46,6 +46,7 @@ if (window.opener === null) {
     safeStorage: require('./discord_native/renderer/safeStorage'),
     globalOverlay: require('./discord_native/renderer/globalOverlay'),
     hardware: require('./discord_native/renderer/hardware'),
+    riotGames: require('./discord_native/renderer/riotGames'),
     remoteApp: app,
     remotePowerMonitor: powerMonitor,
     webAuthn: require('./discord_native/renderer/webauthn')

@@ -1,25 +1,16 @@
 /* eslint-disable no-console */
 const hook = require('./discord_hook.node');
-const fs = require('fs');
-const path = require('path');
 
-let dataDirectory;
-
-try {
-  dataDirectory = window.DiscordNative.fileManager.getModuleDataPathSync
-    ? path.join(window.DiscordNative.fileManager.getModuleDataPathSync(), 'discord_hook')
-    : null;
-} catch (e) {
-  console.error('Failed to get data directory.', e);
+const isLogDirAvailable = window?.DiscordNative?.fileManager?.getAndCreateLogDirectorySync;
+let initializationParams;
+if (isLogDirAvailable) {
+  const logDirectory = window.DiscordNative.fileManager.getAndCreateLogDirectorySync(window);
+  const logLevel = window.DiscordNative.fileManager.logLevelSync(window);
+  initializationParams = { logDirectory, logLevel };
+} else {
+  console.warn('Unable to find log directory');
 }
 
-if (dataDirectory != null) {
-  try {
-    fs.mkdirSync(dataDirectory, {recursive: true});
-  } catch (e) {
-    console.warn(`Couldn't create hook data directory "${dataDirectory}"`, e);
-  }
-}
+hook.initialize(initializationParams);
 
-hook.initialize({dataDirectory});
 module.exports = hook;

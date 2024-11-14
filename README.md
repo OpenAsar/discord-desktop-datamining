@@ -2,12 +2,13 @@
 
 ## stable versions
 
-**host: 1.0.9059**
+**host: 1.0.9170**
 
 | module | version |
 | ------ | :-----: |
 | cloudsync | 1 |
 | desktop_core | 1 |
+| desktop_overlay | 1 |
 | dispatch | 1 |
 | erlpack | 1 |
 | game_utils | 1 |

@@ -7,6 +7,7 @@ declare module 'module' {
 }
 
 declare global {
+  var logPath: string | undefined;
   var moduleDataPath: string | undefined;
   var modulePath: string | undefined;
   var DiscordNative: DiscordNativeType;
