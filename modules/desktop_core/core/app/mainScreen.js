@@ -530,7 +530,9 @@ function launchMainAppWindow(isVisible) {
         break;
     }
   });
-  mainWindow.webContents.on('console-message', _logger.logger.ipcMainRendererLogger);
+  if (_logger.logger != null) {
+    mainWindow.webContents.on('console-message', _logger.logger.ipcMainRendererLogger);
+  }
   if (process.platform === 'win32') {
     mainWindow.on('app-command', (_, cmd) => {
       switch (cmd) {
