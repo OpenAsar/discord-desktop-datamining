@@ -11,6 +11,7 @@ function init(bootstrapConstants) {
   const APP_ID = bootstrapConstants.APP_ID;
   const DISABLE_WINDOWS_64BIT_TRANSITION = bootstrapConstants.DISABLE_WINDOWS_64BIT_TRANSITION;
   const OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION = bootstrapConstants.OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION;
+  const LOG_LEVEL = bootstrapConstants.LOG_LEVEL;
   const MAIN_APP_DIRNAME = __dirname;
   const exported = {
     AnalyticsEvents: {
@@ -20,6 +21,7 @@ function init(bootstrapConstants) {
     APP_NAME,
     DISABLE_WINDOWS_64BIT_TRANSITION,
     OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION,
+    LOG_LEVEL,
     DEFAULT_MAIN_WINDOW_ID: 0,
     MAIN_APP_DIRNAME,
     APP_ID,

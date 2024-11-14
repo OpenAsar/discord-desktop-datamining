@@ -9,6 +9,12 @@ function getModulePath() {
   }
   return global.moduleDataPath ?? global.modulePath;
 }
+function getLogPath() {
+  if (process.env.DISCORD_USER_DATA_DIR != null) {
+    return process.env.DISCORD_USER_DATA_DIR;
+  }
+  return global.logPath;
+}
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.FILE_MANAGER_GET_MODULE_PATH, async () => {
   return getModulePath();
 });
@@ -23,4 +29,10 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.FILE_MANAGER_SHOW_ITEM_
 });
 _DiscordIPC.DiscordIPC.main.on(_DiscordIPC.IPCEvents.FILE_MANAGER_GET_MODULE_DATA_PATH_SYNC, event => {
   event.returnValue = getModulePath();
+});
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.FILE_MANAGER_GET_MODULE_LOG_PATH, async () => {
+  return getLogPath();
+});
+_DiscordIPC.DiscordIPC.main.on(_DiscordIPC.IPCEvents.FILE_MANAGER_GET_MODULE_LOG_PATH_SYNC, event => {
+  event.returnValue = getLogPath();
 });

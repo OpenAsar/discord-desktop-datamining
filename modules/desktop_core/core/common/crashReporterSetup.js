@@ -20,7 +20,7 @@ exports.metadata = metadata;
 const supportsTls13 = processUtils.supportsTls13();
 const SENTRY_PROJECT_ID = '146342';
 const SENTRY_PROJECT_HOST = 'o64374';
-const STABLE_SENTRY_DSN_KEY = '67a1d187a8602d62872a3d880e723741';
+const STABLE_SENTRY_DSN_KEY = '7a60c374cb0e99ac8a57388db6933711';
 const DEFAULT_SENTRY_DSN_KEY = '384ce4413de74fe0be270abe03b2b35a';
 const STAFF_SENTRY_DSN_KEY = 'de156ff7a3f544cca369e77e3f1f5743';
 const TEST_SENTRY_DSN_KEY = '1a27a96457b24ff286a000266c573919';
@@ -37,9 +37,23 @@ const CHANNEL_SENTRY_SAMPLE = {
   canary: 1,
   development: 1
 };
-function initializeSentrySdk(sentry, buildInfo) {
-  sentry.init({
+let defaultDsn = DEFAULT_SENTRY_DSN;
+function dsnFromUser({
+  getEvent
+}) {
+  var _event$tags;
+  const event = getEvent();
+  if ((event === null || event === void 0 ? void 0 : (_event$tags = event.tags) === null || _event$tags === void 0 ? void 0 : _event$tags.isStaff) === 'true') {
+    return [buildSentryDSN(STAFF_SENTRY_DSN_KEY)];
+  } else {
+    return [defaultDsn];
+  }
+}
+function initializeSentrySdk(config, buildInfo) {
+  defaultDsn = getSentryDSN(buildInfo.releaseChannel);
+  config.sentry.init({
     dsn: getSentryDSN(buildInfo.releaseChannel),
+    transport: config.getTransport(dsnFromUser),
     environment: buildInfo.releaseChannel,
     release: buildInfo.version,
     sampleRate: getSampleRate(buildInfo.releaseChannel),
@@ -53,7 +67,7 @@ function initializeSentrySdk(sentry, buildInfo) {
     ignoreErrors: ['EADDRINUSE', 'ResizeObserver loop limit exceeded', 'ResizeObserver loop completed with undelivered notifications.', 'EACCES: permission denied', 'BetterDiscord', 'VencordPatcher', 'mwittrien.github.io', 'Error: getaddrinfo ENOTFOUND raw.githubusercontent.com'],
     denyUrls: [/betterdiscord:\/\//]
   });
-  gSentry = sentry;
+  gSentry = config.sentry;
 }
 function init(buildInfo, sentry) {
   if (initialized) {

@@ -5,6 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.cleanOldVersions = cleanOldVersions;
 exports.getInstallPath = getInstallPath;
+exports.getLogPath = getLogPath;
 exports.getModuleDataPath = getModuleDataPath;
 exports.getResources = getResources;
 exports.getUserData = getUserData;
@@ -20,6 +21,7 @@ let userDataPath = null;
 let userDataVersionedPath = null;
 let resourcesPath = null;
 let moduleDataPath = null;
+let logPath = null;
 let installPath = null;
 function determineAppUserDataRoot() {
   const userDataPath = process.env.DISCORD_USER_DATA_DIR;
@@ -79,6 +81,8 @@ function init(buildInfo) {
   } else {
     moduleDataPath = _path.default.join(userDataVersionedPath, 'modules');
   }
+  logPath = _path.default.join(userDataPath, 'logs');
+  _mkdirp.default.sync(logPath);
   const exeDir = _path.default.dirname(app.getPath('exe'));
   if (/^app-[0-9]+\.[0-9]+\.[0-9]+/.test(_path.default.basename(exeDir))) {
     installPath = _path.default.join(exeDir, '..');
@@ -95,6 +99,9 @@ function getResources() {
 }
 function getModuleDataPath() {
   return moduleDataPath;
+}
+function getLogPath() {
+  return logPath;
 }
 function getInstallPath() {
   return installPath;

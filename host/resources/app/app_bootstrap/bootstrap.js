@@ -20,9 +20,18 @@ paths.init(buildInfo);
 const blackbox = require('../common/blackbox');
 blackbox.initialize(paths.getModuleDataPath(), buildInfo);
 const crashReporterSetup = require('../common/crashReporterSetup');
-crashReporterSetup.init(buildInfo, sentry);
+const browser = require('@sentry/browser');
+const {
+  makeElectronOfflineTransport
+} = require('@sentry/electron/main');
+const sentryConfig = {
+  sentry,
+  getTransport: dsnFunc => browser.makeMultiplexedTransport(makeElectronOfflineTransport, dsnFunc)
+};
+crashReporterSetup.init(buildInfo, sentryConfig);
 const analytics = require('../common/analytics');
 global.moduleDataPath = paths.getModuleDataPath();
+global.logPath = paths.getLogPath();
 const appSettings = require('./appSettings');
 appSettings.init();
 const Constants = require('./Constants');
@@ -35,9 +44,9 @@ function setupHardwareAcceleration() {
 }
 setupHardwareAcceleration();
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
-const disabledFeatures = ['WinRetrieveSuggestionsOnlyOnDemand', 'HardwareMediaKeyHandling', 'MediaSessionService', 'UseEcoQoSForBackgroundProcess', 'IntensiveWakeUpThrottling'];
+const disabledFeatures = ['WinRetrieveSuggestionsOnlyOnDemand', 'HardwareMediaKeyHandling', 'MediaSessionService', 'UseEcoQoSForBackgroundProcess', 'IntensiveWakeUpThrottling', 'AllowAggressiveThrottlingWithWebSocket'];
 if (process.platform === 'win32') {
-  app.commandLine.appendArgument('--disable-background-timer-throttling');
+  app.commandLine.appendSwitch('disable-background-timer-throttling');
 }
 app.commandLine.appendSwitch('disable-features', disabledFeatures.join(','));
 function setupSettingsFlags() {
@@ -66,10 +75,28 @@ function setupSettingsFlags() {
   }
 }
 setupSettingsFlags();
+function NVIDIA(dev) {
+  return [0x10de, dev];
+}
+const workarounds = [{
+  gpus: [NVIDIA(0x1340), NVIDIA(0x1341), NVIDIA(0x1344), NVIDIA(0x1346), NVIDIA(0x1347), NVIDIA(0x1348), NVIDIA(0x1349), NVIDIA(0x134b), NVIDIA(0x134d), NVIDIA(0x134e), NVIDIA(0x134f), NVIDIA(0x137a), NVIDIA(0x137b), NVIDIA(0x1380), NVIDIA(0x1381), NVIDIA(0x1382), NVIDIA(0x1390), NVIDIA(0x1391), NVIDIA(0x1392), NVIDIA(0x1393), NVIDIA(0x1398), NVIDIA(0x1399), NVIDIA(0x139a), NVIDIA(0x139b), NVIDIA(0x139c), NVIDIA(0x139d), NVIDIA(0x13b0), NVIDIA(0x13b1), NVIDIA(0x13b2), NVIDIA(0x13b3), NVIDIA(0x13b4), NVIDIA(0x13b6), NVIDIA(0x13b9), NVIDIA(0x13ba), NVIDIA(0x13bb), NVIDIA(0x13bc), NVIDIA(0x13c0), NVIDIA(0x13c2), NVIDIA(0x13d7), NVIDIA(0x13d8), NVIDIA(0x13d9), NVIDIA(0x13da), NVIDIA(0x13f0), NVIDIA(0x13f1), NVIDIA(0x13f2), NVIDIA(0x13f3), NVIDIA(0x13f8), NVIDIA(0x13f9), NVIDIA(0x13fa), NVIDIA(0x13fb), NVIDIA(0x1401), NVIDIA(0x1406), NVIDIA(0x1407), NVIDIA(0x1427), NVIDIA(0x1617), NVIDIA(0x1618), NVIDIA(0x1619), NVIDIA(0x161a), NVIDIA(0x1667), NVIDIA(0x174d), NVIDIA(0x174e), NVIDIA(0x179c), NVIDIA(0x17c2), NVIDIA(0x17c8), NVIDIA(0x17f0), NVIDIA(0x17f1), NVIDIA(0x17fd)],
+  switches: ['disable_accelerated_hevc_decode'],
+  predicate: () => process.platform === 'win32'
+}];
 async function setGPUFlags() {
-  const info = await app.getGPUInfo('complete');
+  const info = await app.getGPUInfo('basic');
   for (const gpu of info.gpuDevice) {
-    if (gpu.active) {}
+    for (const workaround of workarounds) {
+      if (workaround.predicate()) {
+        for (const g of workaround.gpus) {
+          if (g[0] === gpu.vendorId && g[1] === gpu.deviceId) {
+            for (const s of workaround.switches) {
+              app.commandLine.appendSwitch(s, '1');
+            }
+          }
+        }
+      }
+    }
   }
 }
 function hasArgvFlag(flag) {

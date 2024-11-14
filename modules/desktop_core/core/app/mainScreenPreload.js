@@ -46,18 +46,25 @@ if (window.opener === null) {
     safeStorage: require('./discord_native/renderer/safeStorage'),
     globalOverlay: require('./discord_native/renderer/globalOverlay'),
     hardware: require('./discord_native/renderer/hardware'),
+    riotGames: require('./discord_native/renderer/riotGames'),
     remoteApp: app,
     remotePowerMonitor: powerMonitor,
     webAuthn: require('./discord_native/renderer/webauthn')
   };
   const crashReporterSetup = require('../common/crashReporterSetup');
   const sentry = require('@sentry/electron');
+  const browser = require('@sentry/browser');
   if (crashReporterSetup && !crashReporterSetup.isInitialized()) {
     const buildInfo = {
       releaseChannel: app.getReleaseChannel(),
       version: app.getVersion()
     };
-    crashReporterSetup.init(buildInfo, sentry);
+    crashReporterSetup.init(buildInfo, {
+      sentry,
+      getTransport: dsnFunc => {
+        return browser.makeMultiplexedTransport(browser.makeFetchTransport, dsnFunc);
+      }
+    });
   }
   contextBridge.exposeInMainWorld('DiscordNative', DiscordNative);
   process.once('loaded', () => {

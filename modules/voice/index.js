@@ -24,7 +24,7 @@ try {
 }
 
 const useLegacyAudioDevice = appSettings ? appSettings.getSync('useLegacyAudioDevice') : false;
-const audioSubsystemSelected = appSettings ? appSettings.getSync('audioSubsystem') : 'standard';
+const audioSubsystemSelected = appSettings ? appSettings.getSync('audioSubsystem', 'standard') : 'standard';
 const audioSubsystem = useLegacyAudioDevice || audioSubsystemSelected;
 const debugLogging = appSettings ? appSettings.getSync('debugLogging', true) : true;
 
@@ -152,12 +152,15 @@ features.declareSupported('electron_video');
 features.declareSupported('fixed_keyframe_interval');
 features.declareSupported('first_frame_callback');
 features.declareSupported('remote_user_multi_stream');
-features.declareSupported('speed_test');
 features.declareSupported('go_live_hardware');
 features.declareSupported('bandwidth_estimation_experiments');
+features.declareSupported('mls_pairwise_fingerprints');
 
 if (process.platform === 'darwin') {
   features.declareSupported('screen_capture_kit');
+  if (versionGreaterThanOrEqual(os.release(), '23.0.0')) {
+    features.declareSupported('native_screenshare_picker');
+  }
 }
 
 if (process.platform === 'win32' || process.platform === 'darwin') {
@@ -188,6 +191,7 @@ if (process.platform === 'win32') {
   features.declareSupported('audio_debug_state');
   features.declareSupported('video_effects');
   features.declareSupported('voice_experimental_subsystem');
+  features.declareSupported('voice_automatic_subsystem');
   // NOTE(jvass): currently there's no experimental encoders! Add this back if you
   // add one and want to re-enable the UI for them.
   // features.declareSupported('experimental_encoders');
@@ -217,6 +221,8 @@ function bindConnectionInstance(instance) {
     prepareMLSCommitTransition: (transitionId, commit, callback) =>
       instance.prepareMLSCommitTransition(transitionId, commit, callback),
     processMLSWelcome: (transitionId, welcome, callback) => instance.processMLSWelcome(transitionId, welcome, callback),
+    getMLSPairwiseFingerprint: (version, userId, callback) =>
+      instance.getMLSPairwiseFingerprint(version, userId, callback),
     setOnMLSFailureCallback: (callback) => instance.setOnMLSFailureCallback(callback),
     setSecureFramesStateUpdateCallback: (callback) => instance.setSecureFramesStateUpdateCallback(callback),
 
@@ -265,6 +271,8 @@ function bindConnectionInstance(instance) {
     stopSamplesLocalPlayback: (sourceId) => instance.stopSamplesLocalPlayback(sourceId),
     stopAllSamplesLocalPlayback: () => instance.stopAllSamplesLocalPlayback(),
     setOnVideoEncoderFallbackCallback: (codecName) => instance.setOnVideoEncoderFallbackCallback(codecName),
+    setOnRtcpMessageCallback: (callback) => instance.setOnRtcpMessageCallback?.(callback),
+    presentDesktopSourcePicker: (style) => instance.presentDesktopSourcePicker(style),
   };
 }
 
@@ -290,28 +298,6 @@ VoiceEngine.createReplayConnection = function (audioEngineId, callback, replayLo
   }
 
   return bindConnectionInstance(new VoiceEngine.VoiceReplayConnection(replayLog, audioEngineId, callback));
-};
-
-function bindSpeedTestConnectionInstance(instance) {
-  return {
-    destroy: () => instance.destroy(),
-
-    setTransportOptions: (options) => instance.setTransportOptions(options),
-    getEncryptionModes: (callback) => instance.getEncryptionModes(callback),
-    getNetworkOverhead: (callback) => instance.getNetworkOverhead(callback),
-    setPingInterval: (interval) => instance.setPingInterval(interval),
-    setPingCallback: (callback) => instance.setPingCallback(callback),
-    setPingTimeoutCallback: (callback) => instance.setPingTimeoutCallback(callback),
-    startSpeedTestSender: (options, callback) => instance.startSpeedTestSender(options, callback),
-    stopSpeedTestSender: () => instance.stopSpeedTestSender(),
-    startSpeedTestReceiver: (options, callback) => instance.startSpeedTestReceiver(options, callback),
-    stopSpeedTestReceiver: (callback) => instance.stopSpeedTestReceiver(callback),
-  };
-}
-
-VoiceEngine.createSpeedTestConnectionWithOptions = function (userId, connectionOptions, onConnectCallback) {
-  const instance = new VoiceEngine.SpeedTestConnection(userId, connectionOptions, onConnectCallback);
-  return bindSpeedTestConnectionInstance(instance);
 };
 
 VoiceEngine.setAudioSubsystem = function (subsystem) {

@@ -5,6 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.getCrashFiles = getCrashFiles;
 exports.getPath = getPath;
+exports.getUpdaterLogs = getUpdaterLogs;
 var _electron = _interopRequireDefault(require("electron"));
 var _fs = _interopRequireDefault(require("fs"));
 var _originalFs = _interopRequireDefault(require("original-fs"));
@@ -13,7 +14,7 @@ var _util = _interopRequireDefault(require("util"));
 var _processUtils = require("../../../common/processUtils");
 var _constants = require("../common/constants");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-const allowedAppPaths = new Set(['home', 'appData', 'desktop', 'documents', 'downloads', 'crashDumps']);
+const allowedAppPaths = new Set(['home', 'appData', 'desktop', 'documents', 'downloads', 'crashDumps', 'exe']);
 const readdir = _util.default.promisify(_fs.default.readdir);
 async function getPath(path) {
   if (!allowedAppPaths.has(path)) {
@@ -50,4 +51,16 @@ async function getCrashFiles() {
   const crashBaseFolder = await getPath('crashDumps');
   const crashFolder = _processUtils.IS_WIN ? _path.default.join(crashBaseFolder, 'reports') : _path.default.join(crashBaseFolder, 'completed');
   return orderedFiles(crashFolder);
+}
+async function getUpdaterLogs() {
+  if (_processUtils.IS_WIN) {
+    const exeFile = await getPath('exe');
+    const exeBaseFolder = _path.default.resolve(exeFile, '..');
+    const updaterLogFolder = _path.default.resolve(exeBaseFolder, '..');
+    const files = await orderedFiles(updaterLogFolder);
+    const logFiles = files.filter(f => f.endsWith('updater_rCURRENT.log'));
+    return logFiles;
+  } else {
+    return [];
+  }
 }

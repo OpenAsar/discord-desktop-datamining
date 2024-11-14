@@ -1,5 +1,9 @@
 "use strict";
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
 const electron = require('electron');
 const {
   SETTINGS_GET,
@@ -19,8 +23,11 @@ async function set(name, value) {
 function getSync(name, defaultValue) {
   return electron.ipcRenderer.sendSync(SETTINGS_GET_SYNC, name, defaultValue);
 }
-module.exports = {
+const settings = {
   get,
   set,
   getSync
 };
+var _default = settings;
+exports.default = _default;
+module.exports = settings;
