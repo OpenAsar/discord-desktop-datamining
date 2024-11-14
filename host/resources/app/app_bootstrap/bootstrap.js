@@ -10,6 +10,7 @@ const {
   Menu
 } = require('electron');
 const sentry = require('@sentry/electron');
+const logger = require('./logger');
 const buildInfo = require('./buildInfo');
 app.setVersion(buildInfo.version);
 global.releaseChannel = buildInfo.releaseChannel;
@@ -184,7 +185,8 @@ function startUpdate() {
         GPUSettings,
         updater,
         crashReporterSetup,
-        analytics
+        analytics,
+        logger
       });
       if (initialUrl != null) {
         coreModule.handleOpenUrl(initialUrl);

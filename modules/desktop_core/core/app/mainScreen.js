@@ -10,7 +10,6 @@ exports.init = init;
 exports.setMainWindowVisible = setMainWindowVisible;
 exports.webContentsSend = webContentsSend;
 var _electron = _interopRequireWildcard(require("electron"));
-var _main = _interopRequireDefault(require("electron-log/main"));
 var _fs = _interopRequireDefault(require("fs"));
 var _path = _interopRequireDefault(require("path"));
 var _url = _interopRequireDefault(require("url"));
@@ -20,8 +19,8 @@ var appBadge = _interopRequireWildcard(require("./appBadge"));
 var appConfig = _interopRequireWildcard(require("./appConfig"));
 var _appSettings = require("./bootstrapModules/appSettings");
 var _bootstrapModules = require("./bootstrapModules/bootstrapModules");
-var _buildInfo = require("./bootstrapModules/buildInfo");
 var _crashReporterSetup = require("./bootstrapModules/crashReporterSetup");
+var _logger = require("./bootstrapModules/logger");
 var _moduleUpdater = require("./bootstrapModules/moduleUpdater");
 var _paths = require("./bootstrapModules/paths");
 var _splashScreen = require("./bootstrapModules/splashScreen");
@@ -36,6 +35,10 @@ var _Constants = require("./Constants");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+const {
+  buildInfo
+} = require('./bootstrapModules/buildInfo');
+const BootstrapConstants = require('./Constants');
 const settings = _appSettings.appSettings.getSettings();
 const connectionBackoff = new _Backoff.default(1000, 20000);
 const DISCORD_NAMESPACE = 'DISCORD_';
@@ -51,13 +54,13 @@ function checkAlreadyMigrated() {
   return _fs.default.existsSync(_path.default.join(_paths.paths.getUserData(), 'domainMigrated'));
 }
 const getWebappEndpoint = () => {
-  if (envVariables.webappEndpoint) {
+  if (envVariables.webappEndpoint != null) {
     console.log(`Using DISCORD_WEBAPP_ENDPOINT override: ${envVariables.webappEndpoint}`);
     return envVariables.webappEndpoint;
   }
-  let endpoint = settings.get('WEBAPP_ENDPOINT');
-  if (!endpoint) {
-    if (_buildInfo.buildInfo.releaseChannel === 'stable') {
+  let endpoint = settings === null || settings === void 0 ? void 0 : settings.get('WEBAPP_ENDPOINT');
+  if (endpoint === false || endpoint == null) {
+    if (buildInfo.releaseChannel === 'stable') {
       const canMigrate = checkCanMigrate();
       const alreadyMigrated = checkAlreadyMigrated();
       if (canMigrate || alreadyMigrated) {
@@ -65,10 +68,10 @@ const getWebappEndpoint = () => {
       } else {
         endpoint = 'https://discordapp.com';
       }
-    } else if (_buildInfo.buildInfo.releaseChannel === 'development') {
+    } else if (buildInfo.releaseChannel === 'development') {
       endpoint = 'https://canary.discord.com';
     } else {
-      endpoint = `https://${_buildInfo.buildInfo.releaseChannel}.discord.com`;
+      endpoint = `https://${buildInfo.releaseChannel}.discord.com`;
     }
   }
   return endpoint;
@@ -83,24 +86,23 @@ function getSanitizedProtocolUrl(fullUrl) {
     const parsedURL = _url.default.parse(fullUrl);
     if (parsedURL.protocol === 'discord:') {
       return {
-        path: getSanitizedPath(parsedURL.path),
-        query: parsedURL.query
+        path: getSanitizedPath(parsedURL.path ?? ''),
+        query: parsedURL.query ?? ''
       };
     }
   } catch (_) {}
   return null;
 }
-const WEBAPP_PATH = settings.get('WEBAPP_PATH', `/app?_=${Date.now()}`);
+const WEBAPP_PATH = settings === null || settings === void 0 ? void 0 : settings.get('WEBAPP_PATH', `/app?_=${Date.now()}`);
 const URL_TO_LOAD = `${WEBAPP_ENDPOINT}${WEBAPP_PATH}`;
-const MIN_WIDTH = settings.get('MIN_WIDTH', 940);
-const MIN_HEIGHT = settings.get('MIN_HEIGHT', 500);
+const MIN_WIDTH = settings === null || settings === void 0 ? void 0 : settings.get('MIN_WIDTH', 940);
+const MIN_HEIGHT = settings === null || settings === void 0 ? void 0 : settings.get('MIN_HEIGHT', 500);
 const DEFAULT_WIDTH = 1280;
 const DEFAULT_HEIGHT = 720;
 const MIN_VISIBLE_ON_SCREEN = 32;
-const ENABLE_DEVTOOLS = _buildInfo.buildInfo.releaseChannel === 'stable' ? settings.get('DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING', false) : true;
-const LOG_LEVEL = settings.get('LOG_LEVEL', 'info');
+const ENABLE_DEVTOOLS = buildInfo.releaseChannel === 'stable' ? settings === null || settings === void 0 ? void 0 : settings.get('DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING', false) : true;
 let mainWindow = null;
-let mainWindowId = _Constants.DEFAULT_MAIN_WINDOW_ID;
+let mainWindowId = BootstrapConstants.DEFAULT_MAIN_WINDOW_ID;
 let mainWindowInitialPath = null;
 let mainWindowDidFinishLoad = false;
 let mainWindowIsVisible = false;
@@ -111,34 +113,9 @@ const retryUpdateOptions = {
   skip_host_delta: false,
   skip_module_delta: {},
   skip_all_module_delta: false,
-  skip_windows_arch_update: _Constants.DISABLE_WINDOWS_64BIT_TRANSITION,
-  optin_windows_transition_progression: _Constants.OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION
+  skip_windows_arch_update: BootstrapConstants.DISABLE_WINDOWS_64BIT_TRANSITION,
+  optin_windows_transition_progression: BootstrapConstants.OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION
 };
-function getAndCreateLogDirectory() {
-  let logDir = null;
-  try {
-    logDir = _paths.paths.getLogPath();
-  } catch (e) {
-    console.error('Failed to get log directory: ', e);
-  }
-  if (logDir != null) {
-    try {
-      _fs.default.mkdirSync(logDir, {
-        recursive: true
-      });
-    } catch (e) {
-      console.warn('Could not create log directory ', logDir, ':', e);
-    }
-  }
-  return logDir;
-}
-const logDir = getAndCreateLogDirectory();
-if (logDir != null) {
-  const rendererLogFile = _path.default.join(logDir, 'renderer_js.log');
-  _main.default.transports.file.resolvePathFn = () => rendererLogFile;
-  _main.default.transports.file.maxSize = 10 * 1024 * 1024;
-  _main.default.transports.file.level = LOG_LEVEL;
-}
 function getMainWindowId() {
   return mainWindowId;
 }
@@ -156,15 +133,15 @@ function webContentsSend(...args) {
 }
 function saveWindowConfig(browserWindow) {
   try {
-    if (!browserWindow || browserWindow.isDestroyed()) {
+    if (browserWindow == null || browserWindow.isDestroyed()) {
       return;
     }
-    settings.set('IS_MAXIMIZED', browserWindow.isMaximized());
-    settings.set('IS_MINIMIZED', browserWindow.isMinimized());
-    if (!settings.get('IS_MAXIMIZED') && !settings.get('IS_MINIMIZED')) {
-      settings.set('WINDOW_BOUNDS', browserWindow.getBounds());
+    settings === null || settings === void 0 ? void 0 : settings.set('IS_MAXIMIZED', browserWindow.isMaximized());
+    settings === null || settings === void 0 ? void 0 : settings.set('IS_MINIMIZED', browserWindow.isMinimized());
+    if (!(settings === null || settings === void 0 ? void 0 : settings.get('IS_MAXIMIZED')) && !(settings === null || settings === void 0 ? void 0 : settings.get('IS_MINIMIZED'))) {
+      settings === null || settings === void 0 ? void 0 : settings.set('WINDOW_BOUNDS', browserWindow.getBounds());
     }
-    settings.save();
+    settings === null || settings === void 0 ? void 0 : settings.save();
   } catch (e) {
     console.error(e);
   }
@@ -223,7 +200,7 @@ function getDisplayForBounds(displays, bounds) {
   });
 }
 function getSavedWindowBounds() {
-  if (!settings.get('WINDOW_BOUNDS')) {
+  if (!(settings === null || settings === void 0 ? void 0 : settings.get('WINDOW_BOUNDS'))) {
     return null;
   }
   const bounds = settings.get('WINDOW_BOUNDS');
@@ -270,7 +247,7 @@ function setupSystemTray() {
       onCheckForUpdates: () => {
         const updater = _updater.updater === null || _updater.updater === void 0 ? void 0 : _updater.updater.getUpdater();
         if (updater != null) {
-          checkForUpdatesWithUpdater(updater);
+          void checkForUpdatesWithUpdater(updater);
         } else {
           _moduleUpdater.moduleUpdater.checkForUpdates();
         }
@@ -318,12 +295,12 @@ const loadMainPage = () => {
 const DEFAULT_BACKGROUND_COLOR = '#2f3136';
 const BACKGROUND_COLOR_KEY = 'BACKGROUND_COLOR';
 function getBackgroundColor() {
-  return settings.get(BACKGROUND_COLOR_KEY, DEFAULT_BACKGROUND_COLOR);
+  return (settings === null || settings === void 0 ? void 0 : settings.get(BACKGROUND_COLOR_KEY, DEFAULT_BACKGROUND_COLOR)) ?? DEFAULT_BACKGROUND_COLOR;
 }
 function setBackgroundColor(color) {
-  settings.set(BACKGROUND_COLOR_KEY, color);
+  settings === null || settings === void 0 ? void 0 : settings.set(BACKGROUND_COLOR_KEY, color);
   mainWindow.setBackgroundColor(color);
-  settings.save();
+  settings === null || settings === void 0 ? void 0 : settings.save();
 }
 function launchMainAppWindow(isVisible) {
   if (mainWindow) {
@@ -403,10 +380,10 @@ function launchMainAppWindow(isVisible) {
     return false;
   });
   mainWindow.setMenuBarVisibility(false);
-  if (settings.get('IS_MAXIMIZED')) {
+  if (settings === null || settings === void 0 ? void 0 : settings.get('IS_MAXIMIZED')) {
     mainWindow.maximize();
   }
-  if (settings.get('IS_MINIMIZED')) {
+  if (settings === null || settings === void 0 ? void 0 : settings.get('IS_MINIMIZED')) {
     mainWindow.minimize();
   }
   mainWindow.webContents.setWindowOpenHandler(({
@@ -417,7 +394,7 @@ function launchMainAppWindow(isVisible) {
     if (frameName.startsWith(DISCORD_NAMESPACE) && (0, _securityUtils.checkUrlOriginMatches)(url, WEBAPP_ENDPOINT) && getSanitizedPath(url) === '/popout') {
       return popoutWindows.openOrFocusWindow(url, frameName, features);
     } else if ((0, _securityUtils.shouldOpenExternalUrl)(url)) {
-      (0, _securityUtils.saferShellOpenExternal)(url);
+      void (0, _securityUtils.saferShellOpenExternal)(url);
     }
     return {
       action: 'deny'
@@ -443,11 +420,10 @@ function launchMainAppWindow(isVisible) {
     frameName
   }) => {
     popoutWindows.setupPopout(childWindow, frameName, options, WEBAPP_ENDPOINT);
-    if (!options.outOfProcessOverlay) {
-      adjustWindowBounds(childWindow);
-    }
+    adjustWindowBounds(childWindow);
   });
   mainWindow.webContents.on('did-finish-load', () => {
+    var _mainWindow;
     console.log(`mainScreen.on(did-finish-load) ${lastPageLoadFailed} ${mainWindowDidFinishLoad}`);
     if (insideAuthFlow && mainWindow.webContents && (0, _securityUtils.checkUrlOriginMatches)(mainWindow.webContents.getURL(), WEBAPP_ENDPOINT)) {
       insideAuthFlow = false;
@@ -457,14 +433,14 @@ function launchMainAppWindow(isVisible) {
       webContentsSend('MAIN_WINDOW_PATH', mainWindowInitialPath.path, mainWindowInitialPath.query);
       mainWindowInitialPath = null;
     }
-    webContentsSend(mainWindow != null && mainWindow.isFocused() ? 'MAIN_WINDOW_FOCUS' : 'MAIN_WINDOW_BLUR');
+    webContentsSend(((_mainWindow = mainWindow) === null || _mainWindow === void 0 ? void 0 : _mainWindow.isFocused()) ? 'MAIN_WINDOW_FOCUS' : 'MAIN_WINDOW_BLUR');
     if (!lastPageLoadFailed) {
       connectionBackoff.succeed();
       _splashScreen.splashScreen.pageReady();
     }
   });
   mainWindow.webContents.on('render-process-gone', (e, details) => {
-    const reason = (details === null || details === void 0 ? void 0 : details.reason) || 'Unknown';
+    const reason = (details === null || details === void 0 ? void 0 : details.reason) ?? 'Unknown';
     _processUtils.processUtilsSettings.rendererCrashReason = reason;
     _processUtils.processUtilsSettings.rendererCrashExitCode = (details === null || details === void 0 ? void 0 : details.exitCode) ?? null;
     _processUtils.processUtilsSettings.lastRunsStoredInformation = _processUtils.processUtilsSettings.currentStoredInformation;
@@ -481,7 +457,7 @@ function launchMainAppWindow(isVisible) {
     }
     lastCrashed = crashTime;
     console.error(`[WebContents] crashed (reason: ${reason}, exitCode: ${details === null || details === void 0 ? void 0 : details.exitCode})... reloading`);
-    if (envVariables.disableRestart) {
+    if (envVariables.disableRestart != null) {
       _electron.app.quit();
       return;
     }
@@ -529,6 +505,7 @@ function launchMainAppWindow(isVisible) {
     setTimeout(() => appBadge.refreshAppBadge(), 500);
   });
   mainWindow.webContents.on('did-navigate-in-page', (_, eventUrl) => {
+    var _parsedUrl;
     if (mainWindow == null) {
       return;
     }
@@ -538,7 +515,7 @@ function launchMainAppWindow(isVisible) {
     } catch (_) {
       return;
     }
-    if (parsedUrl && parsedUrl.pathname === '/login') {
+    if (((_parsedUrl = parsedUrl) === null || _parsedUrl === void 0 ? void 0 : _parsedUrl.pathname) === '/login') {
       mainWindow.webContents.clearHistory();
     }
     setMainWindowTitle(mainWindow.webContents.getTitle());
@@ -553,27 +530,9 @@ function launchMainAppWindow(isVisible) {
         break;
     }
   });
-  mainWindow.webContents.on('console-message', (_event, level, message) => {
-    let logMsg = message.replace('\nfont-weight: bold;\ncolor: purple;\n ', '');
-    if (logMsg.startsWith('%c')) {
-      logMsg = logMsg.slice(2);
-    }
-    const logFn = (() => {
-      switch (level) {
-        case 0:
-          return _main.default.verbose;
-        case 1:
-          return _main.default.info;
-        case 2:
-          return _main.default.warn;
-        case 3:
-          return _main.default.error;
-        default:
-          return _main.default.info;
-      }
-    })();
-    logFn(logMsg);
-  });
+  if (_logger.logger != null) {
+    mainWindow.webContents.on('console-message', _logger.logger.ipcMainRendererLogger);
+  }
   if (process.platform === 'win32') {
     mainWindow.on('app-command', (_, cmd) => {
       switch (cmd) {
@@ -596,8 +555,8 @@ function launchMainAppWindow(isVisible) {
           _electron.default.Menu.sendActionToFirstResponder('hide:');
         }
         e.preventDefault();
-        return false;
       }
+      return false;
     });
   }
   setupSystemTray();
@@ -615,12 +574,12 @@ function launchMainAppWindow(isVisible) {
       }
       webContentsSend('MAIN_WINDOW_BLUR');
       saveWindowConfig(mainWindow);
-      if (!settings.get('MINIMIZE_TO_TRAY', true)) {
+      if (!(settings === null || settings === void 0 ? void 0 : settings.get('MINIMIZE_TO_TRAY', true))) {
         _electron.app.quit();
         return;
       }
       webContentsSend('MAIN_WINDOW_HIDDEN');
-      setWindowVisible(false);
+      setWindowVisible(false, false);
       e.preventDefault();
     });
   }
@@ -630,13 +589,13 @@ let updaterState = _Constants.UpdaterEvents.UPDATE_NOT_AVAILABLE;
 function includeOptionalModule(path, cb) {
   try {
     const module = require(path);
-    if (cb) {
+    if (cb != null) {
       cb(module);
     }
     console.log(`Module ${path} was included.`);
     return module;
   } catch (e) {
-    if (e && e.code === 'MODULE_NOT_FOUND') {
+    if ((e === null || e === void 0 ? void 0 : e.code) === 'MODULE_NOT_FOUND') {
       console.log(`Optional module ${path} was not included.`);
     } else {
       console.error(`Failed to initialize ${path}`, e);
@@ -763,7 +722,7 @@ function setupAnalyticsEvents() {
   });
 }
 function setupUpdaterEventsWithUpdater(updater) {
-  _electron.app.on(_Constants.MenuEvents.CHECK_FOR_UPDATES, () => checkForUpdatesWithUpdater());
+  _electron.app.on(_Constants.MenuEvents.CHECK_FOR_UPDATES, () => checkForUpdatesWithUpdater(updater));
   _ipcMain.default.on(_Constants.UpdaterEvents.CHECK_FOR_UPDATES, () => {
     return checkForUpdatesWithUpdater(updater);
   });
@@ -866,7 +825,7 @@ function setupLegacyUpdaterEvents() {
   });
   _ipcMain.default.on(_Constants.UpdaterEvents.MODULE_QUERY, (_event, name) => {
     console.log(`mainScreen.UpdaterEvents: ${_Constants.UpdaterEvents.MODULE_QUERY} ${name}`);
-    webContentsSend(_Constants.UpdaterEvents.MODULE_INSTALLED, name, _moduleUpdater.moduleUpdater.isInstalled(name));
+    webContentsSend(_Constants.UpdaterEvents.MODULE_INSTALLED, name, _moduleUpdater.moduleUpdater.isInstalled(name, undefined));
   });
   _ipcMain.default.on(_Constants.UpdaterEvents.UPDATER_HISTORY_QUERY_AND_TRUNCATE, () => {
     console.log(`mainScreen.UpdaterEvents: ${_Constants.UpdaterEvents.UPDATER_HISTORY_QUERY_AND_TRUNCATE}`);
@@ -887,7 +846,7 @@ function init() {
   _electron.screen.on('display-removed', handleDisplayChange);
   _electron.screen.on('display-metrics-changed', handleDisplayChange);
   _electron.app.on('window-all-closed', () => {
-    if (envVariables.test) {
+    if (envVariables.test != null) {
       _electron.app.quit();
     }
   });
@@ -895,12 +854,12 @@ function init() {
     saveWindowConfig(mainWindow);
     mainWindow = null;
   });
-  _electron.app.on('gpu-process-crashed', (e, killed) => {
+  _electron.app.on('gpu-process-crashed', (_, killed) => {
     if (killed) {
       _electron.app.quit();
     }
   });
-  _electron.app.on('child-process-gone', (_event, details) => {
+  _electron.app.on('child-process-gone', (_, details) => {
     if (details.exitCode === 0) {
       return;
     }
@@ -922,10 +881,11 @@ function init() {
   _electron.app.on(_Constants.MenuEvents.OPEN_HELP, () => webContentsSend('HELP_OPEN'));
   _electron.app.on(_Constants.MenuEvents.OPEN_SETTINGS, () => webContentsSend('USER_SETTINGS_OPEN'));
   _electron.app.on('second-instance', (_event, args) => {
-    if (args != null && args.indexOf('--squirrel-uninstall') > -1) {
+    var _process$argv;
+    if ((args === null || args === void 0 ? void 0 : args.indexOf('--squirrel-uninstall')) > -1) {
       return;
     }
-    if (process.argv != null && process.argv.slice(1).includes('--multi-instance')) {
+    if ((_process$argv = process.argv) === null || _process$argv === void 0 ? void 0 : _process$argv.slice(1).includes('--multi-instance')) {
       return;
     }
     if (mainWindow == null) {
