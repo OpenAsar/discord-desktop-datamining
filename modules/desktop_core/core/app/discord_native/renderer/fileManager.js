@@ -22,6 +22,9 @@ Object.defineProperty(exports, "extname", {
     return _path.extname;
   }
 });
+exports.getAndCreateLogDirectorySync = getAndCreateLogDirectorySync;
+exports.getLogPath = getLogPath;
+exports.getLogPathSync = getLogPathSync;
 exports.getModuleDataPathSync = getModuleDataPathSync;
 exports.getModulePath = getModulePath;
 Object.defineProperty(exports, "join", {
@@ -30,6 +33,7 @@ Object.defineProperty(exports, "join", {
     return _path.join;
   }
 });
+exports.logLevelSync = logLevelSync;
 exports.openFiles = openFiles;
 exports.readLogFiles = readLogFiles;
 exports.saveWithDialog = saveWithDialog;
@@ -38,6 +42,7 @@ exports.showOpenDialog = showOpenDialog;
 exports.uploadDiscordHookCrashes = uploadDiscordHookCrashes;
 var _fs = _interopRequireDefault(require("fs"));
 var _path = _interopRequireWildcard(require("path"));
+var _util = _interopRequireDefault(require("util"));
 var blackbox = _interopRequireWildcard(require("../../../common/blackbox"));
 var _utils = require("../../../common/utils");
 var _DiscordIPC = require("../common/DiscordIPC");
@@ -47,9 +52,11 @@ var _crashReporter = require("./crashReporter");
 var _endpoints = _interopRequireDefault(require("./endpoints"));
 var _files = require("./files");
 var _minidump = require("./minidump");
+var _settings = _interopRequireDefault(require("./settings"));
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+const readdir = _util.default.promisify(_fs.default.readdir);
 const uploadHookCrashSequence = (0, _utils.createLock)();
 const combineWebRtcLogsSequence = (0, _utils.createLock)();
 async function saveWithDialog(fileContents, fileName) {
@@ -85,14 +92,40 @@ async function showOpenDialog({
   });
   return results.filePaths;
 }
+function getAndCreateLogDirectorySync() {
+  let logDir = null;
+  try {
+    logDir = getLogPathSync();
+  } catch (e) {
+    console.error('Failed to get log directory: ', e);
+  }
+  if (logDir != null) {
+    try {
+      _fs.default.mkdirSync(logDir, {
+        recursive: true
+      });
+    } catch (e) {
+      console.warn('Could not create module log directory ', logDir, ':', e);
+    }
+  }
+  return logDir;
+}
+function logLevelSync() {
+  return _settings.default.getSync('LOG_LEVEL', 'info');
+}
 async function readLogFiles(maxSize) {
   await combineWebRtcLogs('discord-webrtc_0', 'discord-webrtc_1', 'discord-webrtc');
   await combineWebRtcLogs('discord-last-webrtc_0', 'discord-last-webrtc_1', 'discord-last-webrtc');
   const modulePath = await getModulePath();
   const voicePath = _path.default.join(modulePath, 'discord_voice');
-  const hookPath = _path.default.join(modulePath, 'discord_hook');
   const utilsPath = _path.default.join(modulePath, 'discord_utils');
-  const filesToUpload = [_path.default.join(voicePath, 'discord-webrtc'), _path.default.join(voicePath, 'discord-last-webrtc'), _path.default.join(voicePath, 'audio_state.json'), _path.default.join(hookPath, 'hook.log'), _path.default.join(utilsPath, 'live_minidump.dmp')];
+  const filesToUpload = [_path.default.join(voicePath, 'audio_state.json'), _path.default.join(utilsPath, 'live_minidump.dmp')];
+  const logPath = await getLogPath();
+  const filenames = await readdir(logPath);
+  const validLogFiles = filenames.filter(filename => filename.endsWith('.log')).map(filename => _path.default.join(logPath, filename));
+  filesToUpload.push(...validLogFiles);
+  const voiceLogFiles = ['discord-webrtc', 'discord-last-webrtc'].map(filename => _path.default.join(logPath, filename)).filter(filename => _fs.default.existsSync(filename));
+  filesToUpload.push(...voiceLogFiles);
   blackbox.initializeRenderer(modulePath);
   const minidump = await blackbox.minidumpFiles.getNewestFile();
   if (minidump != null) {
@@ -102,6 +135,10 @@ async function readLogFiles(maxSize) {
   if (blackboxLog != null) {
     filesToUpload.push(blackboxLog);
   }
+  const updaterLogs = await (0, _paths.getUpdaterLogs)();
+  if (updaterLogs.length > 0) {
+    filesToUpload.push(updaterLogs[0]);
+  }
   const crashFiles = await (0, _paths.getCrashFiles)();
   if (crashFiles.length > 0) {
     filesToUpload.push(crashFiles[0]);
@@ -109,11 +146,10 @@ async function readLogFiles(maxSize) {
   return (0, _fileutils.readFulfilledFiles)(filesToUpload, maxSize, false, filename => (0, _files.isMinidumpFile)(filename));
 }
 async function combineWebRtcLogs(path1, path2, destinationPath) {
-  const modulePath = await getModulePath();
-  const voicePath = _path.default.join(modulePath, 'discord_voice');
-  const webRtcFile1 = _path.default.join(voicePath, path1);
-  const webRtcFile2 = _path.default.join(voicePath, path2);
-  const combinedFilePath = _path.default.join(voicePath, destinationPath);
+  const logPath = await getLogPath();
+  const webRtcFile1 = _path.default.join(logPath, path1);
+  const webRtcFile2 = _path.default.join(logPath, path2);
+  const combinedFilePath = _path.default.join(logPath, destinationPath);
   await combineWebRtcLogsSequence(async () => {
     try {
       const [file1Data, file2Data] = await Promise.all([_fs.default.promises.readFile(webRtcFile1).catch(() => null), _fs.default.promises.readFile(webRtcFile2).catch(() => null)]);
@@ -210,4 +246,10 @@ function getModulePath() {
 }
 function getModuleDataPathSync() {
   return _DiscordIPC.DiscordIPC.renderer.sendSync(_DiscordIPC.IPCEvents.FILE_MANAGER_GET_MODULE_DATA_PATH_SYNC);
+}
+function getLogPath() {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.FILE_MANAGER_GET_MODULE_LOG_PATH);
+}
+function getLogPathSync() {
+  return _DiscordIPC.DiscordIPC.renderer.sendSync(_DiscordIPC.IPCEvents.FILE_MANAGER_GET_MODULE_LOG_PATH_SYNC);
 }

@@ -32,6 +32,19 @@ function versionNewer(verA, verB) {
     }
   }
 }
+function versionEqual(verA, verB) {
+  if (verA.length !== verB.length) {
+    return false;
+  }
+  for (let i = 0; i < verA.length; ++i) {
+    const a = verA[i];
+    const b = verB[i];
+    if (a !== b) {
+      return false;
+    }
+  }
+  return true;
+}
 class AutoUpdaterWin32 extends _events.EventEmitter {
   constructor() {
     super();
@@ -122,8 +135,14 @@ class AutoUpdaterLinux extends _events.EventEmitter {
       if (versionNewer(latestVersion, currVersion)) {
         console.log('[Updates] You are out of date!');
         this.emit('update-manually', latestVerStr);
+      } else if (versionNewer(currVersion, latestVersion)) {
+        console.log('[Updates] You are living in the future! Come back time traveller!');
+        this.emit('update-manually', latestVerStr);
+      } else if (versionEqual(latestVersion, currVersion)) {
+        console.log('[Updates] You are up to date.');
+        this.emit('update-not-available');
       } else {
-        console.log('[Updates] You are living in the future!');
+        console.log('[Updates] You are in a very strange place.');
         this.emit('update-not-available');
       }
     } catch (err) {

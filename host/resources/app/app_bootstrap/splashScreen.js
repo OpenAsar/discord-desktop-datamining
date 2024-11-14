@@ -12,6 +12,7 @@ var _events = require("events");
 var _fs = _interopRequireDefault(require("fs"));
 var _path = _interopRequireDefault(require("path"));
 var _url = _interopRequireDefault(require("url"));
+var logger = _interopRequireWildcard(require("./logger"));
 var _Backoff = _interopRequireDefault(require("../common/Backoff"));
 var analytics = _interopRequireWildcard(require("../common/analytics"));
 var moduleUpdater = _interopRequireWildcard(require("../common/moduleUpdater"));
@@ -49,6 +50,7 @@ const APP_SHOULD_SHOW = 'APP_SHOULD_SHOW';
 exports.APP_SHOULD_SHOW = APP_SHOULD_SHOW;
 const events = new _events.EventEmitter();
 exports.events = events;
+logger.initializeLogging(paths);
 function webContentsSend(win, event, ...args) {
   console.log(`splashScreen.webContentsSend: ${event}`, event, args);
   if (win == null) {
@@ -358,14 +360,14 @@ function initSplash(startMinimized = false) {
 }
 function destroySplash() {
   stopUpdateTimeout();
-  if (splashWindow == null) {
-    console.error('splashScreen.destroySplash: splashWindow is null.');
+  if (splashWindow == null || splashWindow.isDestroyed()) {
+    console.error('splashScreen.destroySplash: splashWindow is null or destroyed.');
     return;
   }
   splashWindow.setSkipTaskbar(true);
   setTimeout(() => {
-    if (splashWindow == null) {
-      console.error('splashScreen.destroySplash: splashWindow is null (setTimeout).');
+    if (splashWindow == null || splashWindow.isDestroyed()) {
+      console.error('splashScreen.destroySplash: splashWindow is null or destroyed (setTimeout).');
       return;
     }
     splashWindow.hide();
@@ -440,6 +442,7 @@ function launchSplashWindow(startMinimized, widevineCDM) {
     }
   };
   splashWindow = new _electron.BrowserWindow(windowConfig);
+  splashWindow.webContents.on('console-message', logger.ipcMainRendererLogger);
   splashWindow.webContents.on('will-navigate', e => e.preventDefault());
   splashWindow.webContents.on('new-window', (e, windowURL) => {
     e.preventDefault();
@@ -467,7 +470,7 @@ function launchSplashWindow(startMinimized, widevineCDM) {
       webContentsSend(splashWindow, 'SPLASH_SCREEN_QUOTE', cachedQuote);
     }
     if (splashWindow && !startMinimized) {
-      splashWindow.show();
+      splashWindow.showInactive();
     }
     if (newUpdater != null) {
       updateUntilCurrent(widevineCDM);

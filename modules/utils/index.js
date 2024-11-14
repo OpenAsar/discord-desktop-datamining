@@ -24,25 +24,36 @@ module.exports.inputCaptureRegisterElement = inputCaptureRegisterElement;
 module.exports.inputEventRegister = wrapInputEventRegister(module.exports.inputEventRegister);
 module.exports.inputEventUnregister = wrapInputEventUnregister(module.exports.inputEventUnregister);
 
-const isElectronRenderer =
-  typeof window !== 'undefined' && window != null && window.DiscordNative && window.DiscordNative.isRenderer;
-
+const isElectronRenderer = window?.DiscordNative?.isRenderer;
 let dataDirectory;
-try {
-  dataDirectory =
-    isElectronRenderer && window.DiscordNative.fileManager.getModuleDataPathSync
-      ? path.join(window.DiscordNative.fileManager.getModuleDataPathSync(), 'discord_utils')
-      : null;
-} catch (e) {
-  console.error('Failed to get data directory: ', e);
+if (isElectronRenderer) {
+  try {
+    dataDirectory =
+      window.DiscordNative.fileManager.getModuleDataPathSync
+        ? path.join(window.DiscordNative.fileManager.getModuleDataPathSync(), 'discord_utils')
+        : null;
+  } catch (e) {
+    console.error('Failed to get data directory: ', e);
+  }
+  if (dataDirectory != null) {
+    try {
+      fs.mkdirSync(dataDirectory, {recursive: true});
+    } catch (e) {
+      console.warn("Could not create utils data directory ", dataDirectory, ':', e);
+    }
+  }
 }
 
-if (dataDirectory != null) {
-  try {
-    fs.mkdirSync(dataDirectory, {recursive: true});
-  } catch (e) {
-    console.warn("Couldn't create utils data directory ", dataDirectory, ':', e);
-  }
+// Init logging
+const isFileManagerAvailable = window?.DiscordNative?.fileManager;
+const isLogDirAvailable = isFileManagerAvailable?.getAndCreateLogDirectorySync;
+if (isLogDirAvailable) {
+  const logDirectory = window.DiscordNative.fileManager.getAndCreateLogDirectorySync();
+  const logLevel = window.DiscordNative.fileManager.logLevelSync();
+  module.exports.init({logDirectory: logDirectory, logLevel: logLevel});
+} else {
+  console.warn('Unable to find log directory');
+  module.exports.init();
 }
 
 function parseNvidiaSmiOutput(result) {
@@ -78,8 +89,8 @@ module.exports.getGPUDriverVersions = async () => {
 
 module.exports.submitLiveCrashReport = async (channel, sentryMetadata) => {
   console.log('submitLiveCrashReport: submitting...');
-  const path = module.exports._generateLiveMinidump(dataDirectory);
 
+  const path = module.exports._generateLiveMinidump(dataDirectory);
   if (!path) {
     console.log('submitLiveCrashReport: minidump not created.');
     return null;
