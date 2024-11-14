@@ -24,7 +24,7 @@ try {
 }
 
 const useLegacyAudioDevice = appSettings ? appSettings.getSync('useLegacyAudioDevice') : false;
-const audioSubsystemSelected = appSettings ? appSettings.getSync('audioSubsystem') : 'standard';
+const audioSubsystemSelected = appSettings ? appSettings.getSync('audioSubsystem', 'standard') : 'standard';
 const audioSubsystem = useLegacyAudioDevice || audioSubsystemSelected;
 const debugLogging = appSettings ? appSettings.getSync('debugLogging', true) : true;
 
@@ -154,6 +154,7 @@ features.declareSupported('first_frame_callback');
 features.declareSupported('remote_user_multi_stream');
 features.declareSupported('go_live_hardware');
 features.declareSupported('bandwidth_estimation_experiments');
+features.declareSupported('mls_pairwise_fingerprints');
 
 if (process.platform === 'darwin') {
   features.declareSupported('screen_capture_kit');
@@ -190,6 +191,8 @@ if (process.platform === 'win32') {
   features.declareSupported('audio_debug_state');
   features.declareSupported('video_effects');
   features.declareSupported('voice_experimental_subsystem');
+  features.declareSupported('voice_automatic_subsystem');
+  features.declareSupported('voice_subsystem_deferred_switch');
   // NOTE(jvass): currently there's no experimental encoders! Add this back if you
   // add one and want to re-enable the UI for them.
   // features.declareSupported('experimental_encoders');
@@ -219,6 +222,8 @@ function bindConnectionInstance(instance) {
     prepareMLSCommitTransition: (transitionId, commit, callback) =>
       instance.prepareMLSCommitTransition(transitionId, commit, callback),
     processMLSWelcome: (transitionId, welcome, callback) => instance.processMLSWelcome(transitionId, welcome, callback),
+    getMLSPairwiseFingerprint: (version, userId, callback) =>
+      instance.getMLSPairwiseFingerprint(version, userId, callback),
     setOnMLSFailureCallback: (callback) => instance.setOnMLSFailureCallback(callback),
     setSecureFramesStateUpdateCallback: (callback) => instance.setSecureFramesStateUpdateCallback(callback),
 
@@ -267,6 +272,7 @@ function bindConnectionInstance(instance) {
     stopSamplesLocalPlayback: (sourceId) => instance.stopSamplesLocalPlayback(sourceId),
     stopAllSamplesLocalPlayback: () => instance.stopAllSamplesLocalPlayback(),
     setOnVideoEncoderFallbackCallback: (codecName) => instance.setOnVideoEncoderFallbackCallback(codecName),
+    setOnRtcpMessageCallback: (callback) => instance.setOnRtcpMessageCallback?.(callback),
     presentDesktopSourcePicker: (style) => instance.presentDesktopSourcePicker(style),
   };
 }
@@ -295,16 +301,9 @@ VoiceEngine.createReplayConnection = function (audioEngineId, callback, replayLo
   return bindConnectionInstance(new VoiceEngine.VoiceReplayConnection(replayLog, audioEngineId, callback));
 };
 
-VoiceEngine.setAudioSubsystem = function (subsystem) {
+const setAudioSubsystemInternal = function (subsystem, forceRestart) {
   if (appSettings == null) {
     console.warn('Unable to access app settings.');
-    return;
-  }
-
-  // TODO: With experiment controlling ADM selection, this may be incorrect since
-  // audioSubsystem is read from settings (or default if does not exists)
-  // and not the actual ADM used.
-  if (subsystem === audioSubsystem) {
     return;
   }
 
@@ -312,8 +311,26 @@ VoiceEngine.setAudioSubsystem = function (subsystem) {
   appSettings.set('useLegacyAudioDevice', false);
 
   if (isElectronRenderer) {
-    window.DiscordNative.app.relaunch();
+    if (forceRestart) {
+      // DANGER: any unconditional call to setAudioSubsytem will bootloop if we don't
+      // debounce noop changes.
+      if (subsystem === audioSubsystem) {
+        return;
+      }
+      window.DiscordNative.app.relaunch();
+    } else {
+      console.log(`deffering audio subsystem switch to ${subsystem} until next restart`);
+    }
   }
+};
+
+
+VoiceEngine.setAudioSubsystem = function (subsystem) {
+  setAudioSubsystemInternal(subsystem, true);
+};
+
+VoiceEngine.queueAudioSubsystem = function (subsystem) {
+  setAudioSubsystemInternal(subsystem, false);
 };
 
 VoiceEngine.setDebugLogging = function (enable) {

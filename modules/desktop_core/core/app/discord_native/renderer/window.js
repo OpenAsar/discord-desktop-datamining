@@ -18,6 +18,7 @@ exports.setAlwaysOnTop = setAlwaysOnTop;
 exports.setBackgroundThrottling = setBackgroundThrottling;
 exports.setContentProtection = setContentProtection;
 exports.setDevtoolsCallbacks = setDevtoolsCallbacks;
+exports.setMinimumSize = setMinimumSize;
 exports.setProgressBar = setProgressBar;
 exports.setZoomFactor = setZoomFactor;
 exports.supportsContentProtection = supportsContentProtection;
@@ -67,6 +68,9 @@ function fullscreen(key) {
 }
 function close(key) {
   return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.WINDOW_CLOSE, key);
+}
+function setMinimumSize(width, height) {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.WINDOW_SET_MINIMUM_SIZE, width, height);
 }
 function setZoomFactor(factor) {
   _electron.default.webFrame.setZoomFactor(factor / 100);

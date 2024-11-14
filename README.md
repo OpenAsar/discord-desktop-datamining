@@ -2,12 +2,13 @@
 
 ## ptb versions
 
-**host: 1.0.1090**
+**host: 1.0.1115**
 
 | module | version |
 | ------ | :-----: |
 | cloudsync | 1 |
 | desktop_core | 1 |
+| desktop_overlay | 1 |
 | dispatch | 1 |
 | erlpack | 1 |
 | game_utils | 1 |

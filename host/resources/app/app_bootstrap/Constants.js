@@ -21,6 +21,7 @@ const UPDATE_ENDPOINT = (settings === null || settings === void 0 ? void 0 : set
 const NEW_UPDATE_ENDPOINT = (settings === null || settings === void 0 ? void 0 : settings.get('NEW_UPDATE_ENDPOINT')) || 'https://updates.discord.com/';
 const DISABLE_WINDOWS_64BIT_TRANSITION = settings === null || settings === void 0 ? void 0 : settings.get('DISABLE_WINDOWS_64BIT_TRANSITION', false);
 const OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION = settings === null || settings === void 0 ? void 0 : settings.get('OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION', false);
+const LOG_LEVEL = (settings === null || settings === void 0 ? void 0 : settings.get('LOG_LEVEL')) || 'info';
 const bootstrapConstants = {
   APP_COMPANY,
   APP_DESCRIPTION,
@@ -32,6 +33,7 @@ const bootstrapConstants = {
   NEW_UPDATE_ENDPOINT,
   DISABLE_WINDOWS_64BIT_TRANSITION,
   OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION,
+  LOG_LEVEL,
   UPDATE_ENDPOINT
 };
 module.exports = bootstrapConstants;

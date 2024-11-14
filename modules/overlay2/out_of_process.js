@@ -77,7 +77,7 @@ var OutOfProcessOverlayInterface = _objectSpread(_objectSpread({}, NativeOverlay
       targetGamePID = pid;
       if (previousTargetGamePID === 0) {
         NativeOverlay.show();
-      } else if (targetGamePID !== 0) {
+      } else if (targetGamePID !== 0 && targetGamePID !== previousTargetGamePID) {
         NativeOverlay.hide();
         reloadHostWindowCallback(targetGamePID);
       }

@@ -358,14 +358,14 @@ function initSplash(startMinimized = false) {
 }
 function destroySplash() {
   stopUpdateTimeout();
-  if (splashWindow == null) {
-    console.error('splashScreen.destroySplash: splashWindow is null.');
+  if (splashWindow == null || splashWindow.isDestroyed()) {
+    console.error('splashScreen.destroySplash: splashWindow is null or destroyed.');
     return;
   }
   splashWindow.setSkipTaskbar(true);
   setTimeout(() => {
-    if (splashWindow == null) {
-      console.error('splashScreen.destroySplash: splashWindow is null (setTimeout).');
+    if (splashWindow == null || splashWindow.isDestroyed()) {
+      console.error('splashScreen.destroySplash: splashWindow is null or destroyed (setTimeout).');
       return;
     }
     splashWindow.hide();
@@ -467,7 +467,7 @@ function launchSplashWindow(startMinimized, widevineCDM) {
       webContentsSend(splashWindow, 'SPLASH_SCREEN_QUOTE', cachedQuote);
     }
     if (splashWindow && !startMinimized) {
-      splashWindow.show();
+      splashWindow.showInactive();
     }
     if (newUpdater != null) {
       updateUntilCurrent(widevineCDM);

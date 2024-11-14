@@ -10,6 +10,7 @@ exports.init = init;
 exports.setMainWindowVisible = setMainWindowVisible;
 exports.webContentsSend = webContentsSend;
 var _electron = _interopRequireWildcard(require("electron"));
+var _main = _interopRequireDefault(require("electron-log/main"));
 var _fs = _interopRequireDefault(require("fs"));
 var _path = _interopRequireDefault(require("path"));
 var _url = _interopRequireDefault(require("url"));
@@ -28,7 +29,6 @@ var _updater = require("./bootstrapModules/updater");
 var _processUtils = require("./discord_native/browser/processUtils");
 var _ipcMain = _interopRequireDefault(require("./ipcMain"));
 var mouse = _interopRequireWildcard(require("./mouse"));
-var notificationScreen = _interopRequireWildcard(require("./notificationScreen"));
 var popoutWindows = _interopRequireWildcard(require("./popoutWindows"));
 var systemTray = _interopRequireWildcard(require("./systemTray"));
 var thumbarButtons = _interopRequireWildcard(require("./thumbarButtons"));
@@ -98,6 +98,7 @@ const DEFAULT_WIDTH = 1280;
 const DEFAULT_HEIGHT = 720;
 const MIN_VISIBLE_ON_SCREEN = 32;
 const ENABLE_DEVTOOLS = _buildInfo.buildInfo.releaseChannel === 'stable' ? settings.get('DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING', false) : true;
+const LOG_LEVEL = settings.get('LOG_LEVEL', 'info');
 let mainWindow = null;
 let mainWindowId = _Constants.DEFAULT_MAIN_WINDOW_ID;
 let mainWindowInitialPath = null;
@@ -113,6 +114,31 @@ const retryUpdateOptions = {
   skip_windows_arch_update: _Constants.DISABLE_WINDOWS_64BIT_TRANSITION,
   optin_windows_transition_progression: _Constants.OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION
 };
+function getAndCreateLogDirectory() {
+  let logDir = null;
+  try {
+    logDir = _paths.paths.getLogPath();
+  } catch (e) {
+    console.error('Failed to get log directory: ', e);
+  }
+  if (logDir != null) {
+    try {
+      _fs.default.mkdirSync(logDir, {
+        recursive: true
+      });
+    } catch (e) {
+      console.warn('Could not create log directory ', logDir, ':', e);
+    }
+  }
+  return logDir;
+}
+const logDir = getAndCreateLogDirectory();
+if (logDir != null) {
+  const rendererLogFile = _path.default.join(logDir, 'renderer_js.log');
+  _main.default.transports.file.resolvePathFn = () => rendererLogFile;
+  _main.default.transports.file.maxSize = 10 * 1024 * 1024;
+  _main.default.transports.file.level = LOG_LEVEL;
+}
 function getMainWindowId() {
   return mainWindowId;
 }
@@ -238,21 +264,6 @@ function adjustWindowBounds(window) {
     window.setBounds(bounds);
   }
 }
-function setupNotificationScreen(mainWindow) {
-  if (!notificationScreen.hasInit) {
-    notificationScreen.init({
-      mainWindow,
-      title: 'Discord Notifications',
-      maxVisible: 5,
-      screenPosition: 'bottom'
-    });
-    notificationScreen.events.on(notificationScreen.NOTIFICATION_CLICK, () => {
-      setWindowVisible(true, true);
-    });
-  } else {
-    notificationScreen.setMainWindow(mainWindow);
-  }
-}
 function setupSystemTray() {
   if (!systemTray.hasInit) {
     systemTray.init({
@@ -330,12 +341,10 @@ function launchMainAppWindow(isVisible) {
     resizable: true,
     show: isVisible,
     webPreferences: {
-      blinkFeatures: 'EnumerateDevices,AudioOutputDevices',
+      enableBlinkFeatures: 'EnumerateDevices,AudioOutputDevices',
       nodeIntegration: false,
       sandbox: false,
       preload: _path.default.join(__dirname, 'mainScreenPreload.js'),
-      nativeWindowOpen: true,
-      enableRemoteModule: false,
       spellcheck: true,
       contextIsolation: true,
       additionalArguments: ['--enable-node-leakage-in-renderers'],
@@ -434,7 +443,9 @@ function launchMainAppWindow(isVisible) {
     frameName
   }) => {
     popoutWindows.setupPopout(childWindow, frameName, options, WEBAPP_ENDPOINT);
-    adjustWindowBounds(childWindow);
+    if (!options.outOfProcessOverlay) {
+      adjustWindowBounds(childWindow);
+    }
   });
   mainWindow.webContents.on('did-finish-load', () => {
     console.log(`mainScreen.on(did-finish-load) ${lastPageLoadFailed} ${mainWindowDidFinishLoad}`);
@@ -542,6 +553,27 @@ function launchMainAppWindow(isVisible) {
         break;
     }
   });
+  mainWindow.webContents.on('console-message', (_event, level, message) => {
+    let logMsg = message.replace('\nfont-weight: bold;\ncolor: purple;\n ', '');
+    if (logMsg.startsWith('%c')) {
+      logMsg = logMsg.slice(2);
+    }
+    const logFn = (() => {
+      switch (level) {
+        case 0:
+          return _main.default.verbose;
+        case 1:
+          return _main.default.info;
+        case 2:
+          return _main.default.warn;
+        case 3:
+          return _main.default.error;
+        default:
+          return _main.default.info;
+      }
+    })();
+    logFn(logMsg);
+  });
   if (process.platform === 'win32') {
     mainWindow.on('app-command', (_, cmd) => {
       switch (cmd) {
@@ -568,24 +600,6 @@ function launchMainAppWindow(isVisible) {
       }
     });
   }
-  if (process.platform === 'win32') {
-    setupNotificationScreen(mainWindow);
-  }
-  mainWindow.webContents.session.webRequest.onBeforeRequest({
-    urls: ['https://*.discordsays.com/*']
-  }, (details, callback) => {
-    const pathMatch = details.url.match(/https:\/\/[0-9]+\.discordsays\.com(\/(?!\.proxy\/).+)/);
-    if (pathMatch != null) {
-      const applicationIdMatch = details.url.match(/https:\/\/([0-9]+)\.discordsays\.com/);
-      _bootstrapModules.analytics.getAnalytics().pushEvent('activities', 'activities_restricted_csp_violation', {
-        application_id: applicationIdMatch && applicationIdMatch.length >= 2 ? applicationIdMatch[1] : null,
-        path: pathMatch.length >= 2 ? pathMatch[1] : null
-      });
-    }
-    callback({
-      cancel: false
-    });
-  });
   setupSystemTray();
   setupAppBadge();
   setupAppConfig();
@@ -880,7 +894,6 @@ function init() {
   _electron.app.on('before-quit', () => {
     saveWindowConfig(mainWindow);
     mainWindow = null;
-    notificationScreen.close();
   });
   _electron.app.on('gpu-process-crashed', (e, killed) => {
     if (killed) {
