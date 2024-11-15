@@ -6,7 +6,7 @@ let initializationParams;
 if (isLogDirAvailable) {
   const logDirectory = window.DiscordNative.fileManager.getAndCreateLogDirectorySync(window);
   const logLevel = window.DiscordNative.fileManager.logLevelSync(window);
-  initializationParams = { logDirectory, logLevel };
+  initializationParams = {logDirectory, logLevel};
 } else {
   console.warn('Unable to find log directory');
 }

@@ -12,15 +12,38 @@ const isElectronRenderer =
 const appSettings = isElectronRenderer ? window.DiscordNative.settings : global.appSettings;
 const features = isElectronRenderer ? window.DiscordNative.features : global.features;
 const mainArgv = isElectronRenderer ? window.DiscordNative.processUtils.getMainArgvSync() : [];
-let dataDirectory;
 
-try {
-  dataDirectory =
-    isElectronRenderer && window.DiscordNative.fileManager.getModuleDataPathSync
-      ? path.join(window.DiscordNative.fileManager.getModuleDataPathSync(), 'discord_voice')
-      : null;
-} catch (e) {
-  console.error('Failed to get data directory: ', e);
+let dataDirectory;
+if (isElectronRenderer) {
+  try {
+    dataDirectory =
+      isElectronRenderer && window.DiscordNative.fileManager.getModuleDataPathSync
+        ? path.join(window.DiscordNative.fileManager.getModuleDataPathSync(), 'discord_voice')
+        : null;
+  } catch (e) {
+    console.error('Failed to get data directory: ', e);
+  }
+  if (dataDirectory != null) {
+    try {
+      fs.mkdirSync(dataDirectory, {recursive: true});
+    } catch (e) {
+      console.warn("Couldn't create voice data directory ", dataDirectory, ':', e);
+    }
+  }
+}
+
+// Init logging
+const isFileManagerAvailable = window?.DiscordNative?.fileManager;
+const isLogDirAvailable = isFileManagerAvailable?.getAndCreateLogDirectorySync;
+let logDirectory;
+if (isLogDirAvailable) {
+  logDirectory = window.DiscordNative.fileManager.getAndCreateLogDirectorySync();
+  // TODO If/when we move away from utilizing webRTC logging in voice:
+  //   This module uses a different approach to the log-level, particularly an integer value rather than a string.
+  //   We should eventually try to align on the string approach (and querying it from our common settings) used by other modules.
+  // logLevel = window.DiscordNative.fileManager.logLevelSync();
+} else {
+  console.warn('Unable to find log directory');
 }
 
 const useLegacyAudioDevice = appSettings ? appSettings.getSync('useLegacyAudioDevice') : false;
@@ -103,37 +126,6 @@ const useFileForFakeVideoCapture = argv['use-file-for-fake-video-capture'];
 const useFakeAudioCapture = argv['use-fake-audio-capture'];
 const useFileForFakeAudioCapture = argv['use-file-for-fake-audio-capture'];
 
-if (dataDirectory != null) {
-  try {
-    fs.mkdirSync(dataDirectory, {recursive: true});
-  } catch (e) {
-    console.warn("Couldn't create voice data directory ", dataDirectory, ':', e);
-  }
-}
-
-if (debugLogging && console.discordVoiceHooked == null) {
-  console.discordVoiceHooked = true;
-
-  for (const logFn of ['trace', 'debug', 'info', 'warn', 'error', 'log']) {
-    const originalLogFn = console[logFn];
-
-    if (originalLogFn != null) {
-      console[logFn] = function () {
-        originalLogFn.apply(this, arguments);
-
-        try {
-          VoiceEngine.consoleLog(
-            logFn,
-            JSON.stringify(Array.from(arguments).map((v) => (v != null ? v.toString() : v))),
-          );
-        } catch (e) {
-          // Drop errors from toString()/stringify.
-        }
-      };
-    }
-  }
-}
-
 features.declareSupported('voice_panning');
 features.declareSupported('voice_multiple_connections');
 features.declareSupported('media_devices');
@@ -192,6 +184,7 @@ if (process.platform === 'win32') {
   features.declareSupported('video_effects');
   features.declareSupported('voice_experimental_subsystem');
   features.declareSupported('voice_automatic_subsystem');
+  features.declareSupported('voice_subsystem_deferred_switch');
   // NOTE(jvass): currently there's no experimental encoders! Add this back if you
   // add one and want to re-enable the UI for them.
   // features.declareSupported('experimental_encoders');
@@ -300,16 +293,9 @@ VoiceEngine.createReplayConnection = function (audioEngineId, callback, replayLo
   return bindConnectionInstance(new VoiceEngine.VoiceReplayConnection(replayLog, audioEngineId, callback));
 };
 
-VoiceEngine.setAudioSubsystem = function (subsystem) {
+const setAudioSubsystemInternal = function (subsystem, forceRestart) {
   if (appSettings == null) {
-    console.warn('Unable to access app settings.');
-    return;
-  }
-
-  // TODO: With experiment controlling ADM selection, this may be incorrect since
-  // audioSubsystem is read from settings (or default if does not exists)
-  // and not the actual ADM used.
-  if (subsystem === audioSubsystem) {
+    log('warn', 'Unable to access app settings.');
     return;
   }
 
@@ -317,13 +303,30 @@ VoiceEngine.setAudioSubsystem = function (subsystem) {
   appSettings.set('useLegacyAudioDevice', false);
 
   if (isElectronRenderer) {
-    window.DiscordNative.app.relaunch();
+    if (forceRestart) {
+      // DANGER: any unconditional call to setAudioSubsytem will bootloop if we don't
+      // debounce noop changes.
+      if (subsystem === audioSubsystem) {
+        return;
+      }
+      window.DiscordNative.app.relaunch();
+    } else {
+      console.log(`deffering audio subsystem switch to ${subsystem} until next restart`);
+    }
   }
+};
+
+VoiceEngine.setAudioSubsystem = function (subsystem) {
+  setAudioSubsystemInternal(subsystem, true);
+};
+
+VoiceEngine.queueAudioSubsystem = function (subsystem) {
+  setAudioSubsystemInternal(subsystem, false);
 };
 
 VoiceEngine.setDebugLogging = function (enable) {
   if (appSettings == null) {
-    console.warn('Unable to access app settings.');
+    log('warn', 'Unable to access app settings.');
     return;
   }
 
@@ -363,7 +366,7 @@ const ensureCanvasContext = function (sinkId) {
 
   const context = canvas.getContext('2d');
   if (context == null) {
-    console.log(`Failed to initialize context for sinkId ${sinkId}`);
+    log('info', `Failed to initialize context for sinkId ${sinkId}`);
     return null;
   }
 
@@ -409,7 +412,7 @@ function addVideoOutputSinkInternal(sinkId, streamId, frameCallback) {
   sinks.set(sinkId, frameCallback);
 
   if (needsToSubscribeToFrames) {
-    console.log(`Subscribing to frames for streamId ${streamId}`);
+    log('info', `Subscribing to frames for streamId ${streamId}`);
     const onFrame = (imageData) => {
       const sinks = videoStreams[streamId];
       if (sinks != null) {
@@ -453,7 +456,7 @@ VoiceEngine.removeVideoOutputSink = function (sinkId, streamId) {
     sinks.delete(sinkId);
     if (sinks.size === 0) {
       delete videoStreams[streamId];
-      console.log(`Unsubscribing from frames for streamId ${streamId}`);
+      log('info', `Unsubscribing from frames for streamId ${streamId}`);
       clearVideoOutputSink(streamId);
       notifyActiveSinksChange(streamId);
     }
@@ -465,13 +468,13 @@ VoiceEngine.removeVideoOutputSink = function (sinkId, streamId) {
 const addDirectVideoOutputSink_ = VoiceEngine.addDirectVideoOutputSink;
 const removeDirectVideoOutputSink_ = VoiceEngine.removeDirectVideoOutputSink;
 VoiceEngine.addDirectVideoOutputSink = function (streamId) {
-  console.log(`Subscribing to direct frames for streamId ${streamId}`);
+  log('info', `Subscribing to direct frames for streamId ${streamId}`);
   addDirectVideoOutputSink_(streamId);
   directVideoStreams[streamId] = true;
   notifyActiveSinksChange(streamId);
 };
 VoiceEngine.removeDirectVideoOutputSink = function (streamId) {
-  console.log(`Unsubscribing from direct frames for streamId ${streamId}`);
+  log('info', `Unsubscribing from direct frames for streamId ${streamId}`);
   removeDirectVideoOutputSink_(streamId);
   delete directVideoStreams[streamId];
   notifyActiveSinksChange(streamId);
@@ -498,12 +501,27 @@ VoiceEngine.getNextVideoOutputFrame = function (streamId) {
   });
 };
 
+function log(level, message) {
+  const consoleLogFn = (() => {
+    if (!['trace', 'debug', 'info', 'warn', 'error', 'log'].includes(level)) {
+      return console.info;
+    }
+    return console[level];
+  })();
+  consoleLogFn(message);
+
+  // Note: this currently races with the VoiceEngine initialization,
+  // not all logs may get logged here early in the process
+  VoiceEngine.consoleLog(level, message);
+}
+
 console.log(`Initializing voice engine with audio subsystem: ${audioSubsystem}`);
 VoiceEngine.platform = process.platform;
 VoiceEngine.initialize({
   audioSubsystem,
   logLevel,
   dataDirectory,
+  logDirectory,
   useFakeVideoCapture,
   useFileForFakeVideoCapture,
   useFakeAudioCapture,

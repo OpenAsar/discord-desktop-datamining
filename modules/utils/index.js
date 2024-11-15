@@ -2,14 +2,8 @@ const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const fs = require('fs');
 const path = require('path');
-const {
-  inputCaptureSetWatcher,
-  inputCaptureRegisterElement,
-} = require('./input_capture');
-const {
-  wrapInputEventRegister,
-  wrapInputEventUnregister,
-} = require('./input_event');
+const {inputCaptureSetWatcher, inputCaptureRegisterElement} = require('./input_capture');
+const {wrapInputEventRegister, wrapInputEventUnregister} = require('./input_event');
 const {getDoNotDisturb, getSessionState} = require('macos-notification-state');
 const {getNotificationState} = require('windows-notification-state');
 const {getIsQuietHours} = require('windows-quiet-hours');
@@ -28,10 +22,9 @@ const isElectronRenderer = window?.DiscordNative?.isRenderer;
 let dataDirectory;
 if (isElectronRenderer) {
   try {
-    dataDirectory =
-      window.DiscordNative.fileManager.getModuleDataPathSync
-        ? path.join(window.DiscordNative.fileManager.getModuleDataPathSync(), 'discord_utils')
-        : null;
+    dataDirectory = window.DiscordNative.fileManager.getModuleDataPathSync
+      ? path.join(window.DiscordNative.fileManager.getModuleDataPathSync(), 'discord_utils')
+      : null;
   } catch (e) {
     console.error('Failed to get data directory: ', e);
   }
@@ -39,7 +32,7 @@ if (isElectronRenderer) {
     try {
       fs.mkdirSync(dataDirectory, {recursive: true});
     } catch (e) {
-      console.warn("Could not create utils data directory ", dataDirectory, ':', e);
+      console.warn('Could not create utils data directory ', dataDirectory, ':', e);
     }
   }
 }
@@ -48,12 +41,12 @@ if (isElectronRenderer) {
 const isFileManagerAvailable = window?.DiscordNative?.fileManager;
 const isLogDirAvailable = isFileManagerAvailable?.getAndCreateLogDirectorySync;
 if (isLogDirAvailable) {
-  const logDirectory = window.DiscordNative.fileManager.getAndCreateLogDirectorySync(window);
-  const logLevel = window.DiscordNative.fileManager.logLevelSync(window);
+  const logDirectory = window.DiscordNative.fileManager.getAndCreateLogDirectorySync();
+  const logLevel = window.DiscordNative.fileManager.logLevelSync();
   module.exports.init({logDirectory: logDirectory, logLevel: logLevel});
 } else {
   console.warn('Unable to find log directory');
-  module.exports.init({});
+  module.exports.init();
 }
 
 function parseNvidiaSmiOutput(result) {
@@ -113,7 +106,7 @@ module.exports.submitLiveCrashReport = async (channel, sentryMetadata) => {
 
     console.log('submitLiveCrashReport: completed.', response);
   } catch (e) {
-    console.error("submitLiveCrashReport: error", e);
+    console.error('submitLiveCrashReport: error', e);
   }
 };
 
@@ -128,7 +121,7 @@ module.exports.shouldDisplayNotifications = () => {
   if (process.platform === 'win32') {
     dnd = getIsQuietHours();
     const state = getNotificationState();
-    shouldDisplay = (state === 'QUNS_ACCEPTS_NOTIFICATIONS' || state === 'QUNS_APP');
+    shouldDisplay = state === 'QUNS_ACCEPTS_NOTIFICATIONS' || state === 'QUNS_APP';
   }
 
   return !dnd && shouldDisplay;

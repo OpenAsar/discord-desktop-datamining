@@ -144,6 +144,8 @@ function openOrFocusWindow(windowURL, key, features) {
     windowOptions.webPreferences.preload = _path.default.join(__dirname, 'mainScreenPreload.js');
     windowOptions.frame = false;
     windowOptions.transparent = true;
+    windowOptions.webPreferences.backgroundThrottling = false;
+    windowOptions.paintWhenInitiallyHidden = true;
   }
   return {
     action: 'allow',
