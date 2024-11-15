@@ -10,7 +10,7 @@ function dispatchConstructor(jsonConfigString, updateCallback, errorCallback, an
       updateCallback(state);
     },
     errorCallback,
-    analyticsCallback
+    analyticsCallback,
   );
   return {
     command: instance.command.bind(instance),

@@ -316,7 +316,6 @@ const setAudioSubsystemInternal = function (subsystem, forceRestart) {
   }
 };
 
-
 VoiceEngine.setAudioSubsystem = function (subsystem) {
   setAudioSubsystemInternal(subsystem, true);
 };
