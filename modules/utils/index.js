@@ -48,12 +48,12 @@ if (isElectronRenderer) {
 const isFileManagerAvailable = window?.DiscordNative?.fileManager;
 const isLogDirAvailable = isFileManagerAvailable?.getAndCreateLogDirectorySync;
 if (isLogDirAvailable) {
-  const logDirectory = window.DiscordNative.fileManager.getAndCreateLogDirectorySync(window);
-  const logLevel = window.DiscordNative.fileManager.logLevelSync(window);
+  const logDirectory = window.DiscordNative.fileManager.getAndCreateLogDirectorySync();
+  const logLevel = window.DiscordNative.fileManager.logLevelSync();
   module.exports.init({logDirectory: logDirectory, logLevel: logLevel});
 } else {
   console.warn('Unable to find log directory');
-  module.exports.init({});
+  module.exports.init();
 }
 
 function parseNvidiaSmiOutput(result) {

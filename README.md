@@ -2,7 +2,7 @@
 
 ## stable versions
 
-**host: 1.0.9170**
+**host: 1.0.9171**
 
 | module | version |
 | ------ | :-----: |

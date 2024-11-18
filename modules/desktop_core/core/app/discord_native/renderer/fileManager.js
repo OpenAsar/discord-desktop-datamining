@@ -119,11 +119,13 @@ async function readLogFiles(maxSize) {
   const modulePath = await getModulePath();
   const voicePath = _path.default.join(modulePath, 'discord_voice');
   const utilsPath = _path.default.join(modulePath, 'discord_utils');
-  const filesToUpload = [_path.default.join(voicePath, 'discord-webrtc'), _path.default.join(voicePath, 'discord-last-webrtc'), _path.default.join(voicePath, 'audio_state.json'), _path.default.join(utilsPath, 'live_minidump.dmp')];
+  const filesToUpload = [_path.default.join(voicePath, 'audio_state.json'), _path.default.join(utilsPath, 'live_minidump.dmp')];
   const logPath = await getLogPath();
   const filenames = await readdir(logPath);
   const validLogFiles = filenames.filter(filename => filename.endsWith('.log')).map(filename => _path.default.join(logPath, filename));
   filesToUpload.push(...validLogFiles);
+  const voiceLogFiles = ['discord-webrtc', 'discord-last-webrtc'].map(filename => _path.default.join(logPath, filename)).filter(filename => _fs.default.existsSync(filename));
+  filesToUpload.push(...voiceLogFiles);
   blackbox.initializeRenderer(modulePath);
   const minidump = await blackbox.minidumpFiles.getNewestFile();
   if (minidump != null) {
@@ -144,11 +146,10 @@ async function readLogFiles(maxSize) {
   return (0, _fileutils.readFulfilledFiles)(filesToUpload, maxSize, false, filename => (0, _files.isMinidumpFile)(filename));
 }
 async function combineWebRtcLogs(path1, path2, destinationPath) {
-  const modulePath = await getModulePath();
-  const voicePath = _path.default.join(modulePath, 'discord_voice');
-  const webRtcFile1 = _path.default.join(voicePath, path1);
-  const webRtcFile2 = _path.default.join(voicePath, path2);
-  const combinedFilePath = _path.default.join(voicePath, destinationPath);
+  const logPath = await getLogPath();
+  const webRtcFile1 = _path.default.join(logPath, path1);
+  const webRtcFile2 = _path.default.join(logPath, path2);
+  const combinedFilePath = _path.default.join(logPath, destinationPath);
   await combineWebRtcLogsSequence(async () => {
     try {
       const [file1Data, file2Data] = await Promise.all([_fs.default.promises.readFile(webRtcFile1).catch(() => null), _fs.default.promises.readFile(webRtcFile2).catch(() => null)]);
