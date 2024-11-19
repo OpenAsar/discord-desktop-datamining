@@ -12,7 +12,6 @@ var _events = require("events");
 var _fs = _interopRequireDefault(require("fs"));
 var _path = _interopRequireDefault(require("path"));
 var _url = _interopRequireDefault(require("url"));
-var logger = _interopRequireWildcard(require("./logger"));
 var _Backoff = _interopRequireDefault(require("../common/Backoff"));
 var analytics = _interopRequireWildcard(require("../common/analytics"));
 var moduleUpdater = _interopRequireWildcard(require("../common/moduleUpdater"));
@@ -20,6 +19,7 @@ var paths = _interopRequireWildcard(require("../common/paths"));
 var _securityUtils = require("../common/securityUtils");
 var _updater = require("../common/updater");
 var _ipcMain = _interopRequireDefault(require("./ipcMain"));
+var logger = _interopRequireWildcard(require("./logger"));
 var _Constants = require("./Constants");
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }

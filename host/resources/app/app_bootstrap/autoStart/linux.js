@@ -7,9 +7,9 @@ exports.install = install;
 exports.isInstalled = isInstalled;
 exports.uninstall = uninstall;
 exports.update = update;
+var _electron = require("electron");
 var _fs = _interopRequireDefault(require("fs"));
 var _path = _interopRequireDefault(require("path"));
-var _electron = require("electron");
 var _buildInfo = _interopRequireDefault(require("../buildInfo"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 const appName = _path.default.basename(process.execPath, '.exe');
