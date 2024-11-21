@@ -6,20 +6,15 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = void 0;
 var _electron = require("electron");
 var _securityUtils = require("../../common/securityUtils");
-var Constants = _interopRequireWildcard(require("../Constants"));
-function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-const {
-  MenuEvents
-} = Constants;
+var _Constants = require("../Constants");
 const SEPARATOR = {
   type: 'separator'
 };
 function getWindow() {
   let window = _electron.BrowserWindow.getFocusedWindow();
-  if (!window) {
+  if (window == null) {
     const windowList = _electron.BrowserWindow.getAllWindows();
-    if (windowList && windowList[0]) {
+    if (windowList != null && windowList.length > 0) {
       window = windowList[0];
       window.show();
       window.focus();
@@ -31,31 +26,31 @@ var _default = enableDevtools => [{
   label: 'Discord',
   submenu: [{
     label: 'About Discord',
-    selector: 'orderFrontStandardAboutPanel:'
+    role: 'about'
   }, {
     label: 'Check for Updates...',
-    click: () => _electron.app.emit(MenuEvents.CHECK_FOR_UPDATES)
+    click: () => _electron.app.emit(_Constants.MenuEvents.CHECK_FOR_UPDATES)
   }, {
     label: 'Acknowledgements',
     click: () => (0, _securityUtils.saferShellOpenExternal)('https://discord.com/acknowledgements')
   }, SEPARATOR, {
     label: 'Preferences',
-    click: () => _electron.app.emit(MenuEvents.OPEN_SETTINGS),
+    click: () => _electron.app.emit(_Constants.MenuEvents.OPEN_SETTINGS),
     accelerator: 'Command+,'
   }, SEPARATOR, {
     label: 'Services',
     submenu: []
   }, SEPARATOR, {
     label: 'Hide Discord',
-    selector: 'hide:',
+    role: 'hide',
     accelerator: 'Command+H'
   }, {
     label: 'Hide Others',
-    selector: 'hideOtherApplications:',
+    role: 'hideOthers',
     accelerator: 'Command+Alt+H'
   }, {
     label: 'Show All',
-    selector: 'unhideAllApplications:'
+    role: 'unhide'
   }, SEPARATOR, {
     label: 'Quit',
     click: () => _electron.app.quit(),
@@ -88,7 +83,7 @@ var _default = enableDevtools => [{
     label: 'Reload',
     click: () => {
       const window = getWindow();
-      if (window) {
+      if (window != null) {
         window.webContents.reloadIgnoringCache();
       }
     },
@@ -97,7 +92,7 @@ var _default = enableDevtools => [{
     label: 'Toggle Full Screen',
     click: () => {
       const window = getWindow();
-      if (window) {
+      if (window != null) {
         window.setFullScreen(!window.isFullScreen());
       }
     },
@@ -108,8 +103,8 @@ var _default = enableDevtools => [{
       label: 'Toggle Developer Tools',
       click: () => {
         const window = getWindow();
-        if (window) {
-          window.toggleDevTools();
+        if (window != null) {
+          window.webContents.toggleDevTools();
         }
       },
       accelerator: 'Alt+Command+I'
@@ -119,30 +114,24 @@ var _default = enableDevtools => [{
   label: 'Window',
   submenu: [{
     label: 'Minimize',
-    selector: 'performMiniaturize:',
+    role: 'minimize',
     accelerator: 'Command+M'
-  }, {
-    label: 'Zoom',
-    selector: 'performZoom:'
   }, {
     label: 'Close',
     accelerator: 'Command+W',
     click: (_, window) => {
-      if (window == null || window.windowKey == null) {
-        _electron.Menu.sendActionToFirstResponder('hide:');
+      if (window == null) {
+        _electron.Menu.sendActionToFirstResponder('hide');
       } else {
         window.close();
       }
     }
-  }, SEPARATOR, {
-    label: 'Bring All to Front',
-    selector: 'arrangeInFront:'
   }]
 }, {
   label: 'Help',
   submenu: [{
     label: 'Discord Help',
-    click: () => _electron.app.emit(MenuEvents.OPEN_HELP)
+    click: () => _electron.app.emit(_Constants.MenuEvents.OPEN_HELP)
   }]
 }];
 exports.default = _default;
