@@ -139,6 +139,10 @@ async function readLogFiles(maxSize) {
   if (updaterLogs.length > 0) {
     filesToUpload.push(updaterLogs[0]);
   }
+  const squirrelLogs = await (0, _paths.getSquirrelLogs)();
+  if (squirrelLogs.length > 0) {
+    filesToUpload.push(...squirrelLogs);
+  }
   const crashFiles = await (0, _paths.getCrashFiles)();
   if (crashFiles.length > 0) {
     filesToUpload.push(crashFiles[0]);

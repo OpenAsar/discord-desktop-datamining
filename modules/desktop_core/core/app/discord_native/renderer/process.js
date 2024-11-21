@@ -3,6 +3,7 @@
 const process = require('process');
 const env = process.env;
 module.exports = {
+  pid: process.pid,
   platform: process.platform,
   arch: process.arch,
   env: {

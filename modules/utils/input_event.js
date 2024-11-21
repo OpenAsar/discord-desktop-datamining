@@ -27,6 +27,8 @@ var isRestrictedSingleCharacterKeybind = function isRestrictedSingleCharacterKey
   if (deviceType !== 0) {
     return false;
   }
+
+  // eslint-disable-next-line no-unused-vars
   var scanCode = button[1];
   if (buttons.length === 1 && buttons[0].length === 2) {
     var _deviceType = buttons[0][0];

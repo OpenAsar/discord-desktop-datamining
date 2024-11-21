@@ -4,8 +4,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
-var _overlay_module = _interopRequireDefault(require("./overlay_module"));
 var _out_of_process = _interopRequireDefault(require("./out_of_process"));
+var _overlay_module = _interopRequireDefault(require("./overlay_module"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 // eslint-disable-next-line import/no-unresolved, import/extensions
 
