@@ -132,6 +132,10 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_GET_NATIVE_HANDL
   }
   return Promise.resolve(null);
 });
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_GET_MEDIA_SOURCE_ID, (_, key) => {
+  const win = injectedGetWindow(key);
+  return Promise.resolve((win === null || win === void 0 ? void 0 : win.getMediaSourceId()) ?? null);
+});
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_SET_MINIMUM_SIZE, (_, width, height) => {
   const win = injectedGetWindow();
   if (win != null) {

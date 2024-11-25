@@ -7,6 +7,8 @@ var _FeatureFlags = _interopRequireDefault(require("./FeatureFlags"));
 var _host = require("./host");
 var _overlay_module = _interopRequireDefault(require("./overlay_module"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+// eslint-disable-next-line import/no-unresolved
+
 _process["default"].on('uncaughtException', function (e) {
   var _e$stack;
   _overlay_module["default"].logMessage("Overlay host process exception: ".concat(e.message));

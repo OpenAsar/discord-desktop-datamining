@@ -170,9 +170,9 @@ function init(_endpoint, _settings, _buildInfo) {
   settings = _settings;
   const buildInfo = _buildInfo;
   updatable = buildInfo.version != '0.0.0' && !buildInfo.debug || settings.get(ALWAYS_ALLOW_UPDATES);
-  let hostUpdatable = buildInfo.version != '0.0.0' && !buildInfo.debug && checkOSVersionSupported() || settings.get(ALWAYS_ALLOW_UPDATES);
+  const hostUpdatable = buildInfo.version != '0.0.0' && !buildInfo.debug && checkOSVersionSupported() || settings.get(ALWAYS_ALLOW_UPDATES);
   initPathsOnly(buildInfo);
-  logger = new LogStream(_path.default.join(paths.getUserData(), 'modules.log'));
+  logger = new LogStream(_path.default.join(paths.getUserData(), 'logs', 'legacyModulesUpdater.log'));
   bootstrapping = false;
   hostUpdateAvailable = false;
   checkingForUpdates = false;

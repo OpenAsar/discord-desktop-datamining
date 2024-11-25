@@ -147,17 +147,14 @@ features.declareSupported('remote_user_multi_stream');
 features.declareSupported('go_live_hardware');
 features.declareSupported('bandwidth_estimation_experiments');
 features.declareSupported('mls_pairwise_fingerprints');
+features.declareSupported('soundshare');
+features.declareSupported('screen_soundshare');
 
 if (process.platform === 'darwin') {
   features.declareSupported('screen_capture_kit');
   if (versionGreaterThanOrEqual(os.release(), '23.0.0')) {
     features.declareSupported('native_screenshare_picker');
   }
-}
-
-if (process.platform === 'win32' || process.platform === 'darwin') {
-  features.declareSupported('soundshare');
-  features.declareSupported('screen_soundshare');
 }
 
 if (
@@ -315,7 +312,6 @@ const setAudioSubsystemInternal = function (subsystem, forceRestart) {
     }
   }
 };
-
 
 VoiceEngine.setAudioSubsystem = function (subsystem) {
   setAudioSubsystemInternal(subsystem, true);

@@ -9,6 +9,7 @@ exports.close = close;
 exports.flashFrame = flashFrame;
 exports.focus = focus;
 exports.fullscreen = fullscreen;
+exports.getMediaSourceId = getMediaSourceId;
 exports.getNativeHandle = getNativeHandle;
 exports.isAlwaysOnTop = isAlwaysOnTop;
 exports.maximize = maximize;
@@ -94,6 +95,9 @@ function setContentProtection(enabled) {
 }
 function getNativeHandle(key) {
   return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.WINDOW_GET_NATIVE_HANDLE, key);
+}
+function getMediaSourceId(key) {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.WINDOW_GET_MEDIA_SOURCE_ID, key);
 }
 const USE_OSX_NATIVE_TRAFFIC_LIGHTS = true;
 exports.USE_OSX_NATIVE_TRAFFIC_LIGHTS = USE_OSX_NATIVE_TRAFFIC_LIGHTS;

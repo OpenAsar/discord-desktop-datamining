@@ -122,7 +122,7 @@ class CloudSync extends EventEmitter {
     const id = dispatch.getLastState != null ? `${options.applicationId}:${options.branchId}` : optionsOrOldId;
 
     return new Promise((resolve, reject) =>
-      this._cloudSync.command(JSON.stringify({type: 'SYNC', id, config}), makeCallback(resolve, reject))
+      this._cloudSync.command(JSON.stringify({type: 'SYNC', id, config}), makeCallback(resolve, reject)),
     );
   }
 }
