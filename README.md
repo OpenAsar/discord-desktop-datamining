@@ -11,7 +11,7 @@
 | desktop_overlay | 4 |
 | dispatch | 4 |
 | erlpack | 4 |
-| game_utils | 4 |
+| game_utils | 5 |
 | hook | 4 |
 | krisp | 4 |
 | media | 4 |
@@ -22,7 +22,7 @@
 | spellcheck | 4 |
 | utils | 6 |
 | vigilante | 4 |
-| voice | 9 |
+| voice | 10 |
 | zstd | 4 |
 
 ## branches
