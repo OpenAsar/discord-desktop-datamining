@@ -9,8 +9,9 @@ exports.spawnReg = spawnReg;
 var _child_process = _interopRequireDefault(require("child_process"));
 var _path = _interopRequireDefault(require("path"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-const regExe = process.env.SystemRoot ? _path.default.join(process.env.SystemRoot, 'System32', 'reg.exe') : 'reg.exe';
+const regExe = process.env.SystemRoot != null ? _path.default.join(process.env.SystemRoot ?? '', 'System32', 'reg.exe') : 'reg.exe';
 function spawn(command, args, callback) {
+  var _spawnedProcess$stdou;
   let stdout = '';
   let spawnedProcess;
   try {
@@ -23,7 +24,7 @@ function spawn(command, args, callback) {
     });
     return;
   }
-  spawnedProcess.stdout.on('data', data => {
+  (_spawnedProcess$stdou = spawnedProcess.stdout) === null || _spawnedProcess$stdou === void 0 ? void 0 : _spawnedProcess$stdou.on('data', data => {
     stdout += data;
   });
   let err = null;
@@ -34,14 +35,14 @@ function spawn(command, args, callback) {
   });
   spawnedProcess.on('close', (code, signal) => {
     if (err === null && code !== 0) {
-      err = new Error('Command failed: ' + (signal || code));
+      err = new Error('Command failed: ' + (signal ?? '') + ' ' + (code ?? ''));
     }
     if (err != null) {
-      err.code = err.code || code;
-      err.stdout = err.stdout || stdout;
+      err.name = err.name ?? `${code}`;
+      err.message = err.message ?? stdout;
     }
     if (callback != null) {
-      callback(err, stdout);
+      callback(err ?? new Error('Error is null'), stdout);
     }
   });
 }
@@ -50,10 +51,11 @@ function spawnReg(args, callback) {
 }
 function addToRegistry(queue, callback) {
   if (queue.length === 0) {
-    return callback && callback();
+    callback === null || callback === void 0 ? void 0 : callback();
   }
   const args = queue.shift();
+  if (args == null) return;
   args.unshift('add');
   args.push('/f');
-  return spawnReg(args, () => addToRegistry(queue, callback));
+  spawnReg(args, () => addToRegistry(queue, callback));
 }
