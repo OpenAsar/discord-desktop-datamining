@@ -141,9 +141,17 @@ function initPathsOnly(_buildInfo) {
   if (locallyInstalledModules || moduleInstallPath) {
     return;
   }
-  locallyInstalledModules = _buildInfo.localModulesRoot != null;
+  const {
+    localModulesRoot,
+    standaloneModules
+  } = _buildInfo;
+  locallyInstalledModules = localModulesRoot != null || standaloneModules === true;
   if (locallyInstalledModules) {
-    (0, _nodeGlobalPaths.addGlobalPath)(_buildInfo.localModulesRoot);
+    if (localModulesRoot != null) {
+      (0, _nodeGlobalPaths.addGlobalPath)(localModulesRoot);
+    } else if (standaloneModules) {
+      (0, _nodeGlobalPaths.addGlobalPath)(_path.default.join(paths.getResources(), 'standalone_modules'));
+    }
   } else {
     moduleInstallPath = _path.default.join(paths.getUserDataVersioned(), 'modules');
     (0, _nodeGlobalPaths.addGlobalPath)(moduleInstallPath);
