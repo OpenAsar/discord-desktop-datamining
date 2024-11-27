@@ -21,7 +21,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 const USE_PINNED_UPDATE_MANIFEST = 'USE_PINNED_UPDATE_MANIFEST';
 function update(startMinimized, doneCallback, showCallback) {
   const settings = (0, _appSettings.getSettings)();
-  if ((0, _updater.tryInitUpdater)(_buildInfo.default, _Constants.default.NEW_UPDATE_ENDPOINT)) {
+  const isStandaloneModules = _buildInfo.default.releaseChannel === 'development' && _buildInfo.default.standaloneModules;
+  if (!isStandaloneModules && (0, _updater.tryInitUpdater)(_buildInfo.default, _Constants.default.NEW_UPDATE_ENDPOINT)) {
     const updater = (0, _updater.getUpdater)();
     const usePinnedUpdateManifest = (settings === null || settings === void 0 ? void 0 : settings.get(USE_PINNED_UPDATE_MANIFEST)) ?? false;
     const autoStart = require('./autoStart');
