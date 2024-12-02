@@ -21,7 +21,8 @@ if (mode === 'app') {
   const {
     NEW_UPDATE_ENDPOINT
   } = require('./Constants');
-  if (!buildInfo.debug && buildInfo.newUpdater) {
+  const isStandaloneModules = buildInfo.releaseChannel === 'development' && buildInfo.standaloneModules;
+  if (!buildInfo.debug && !isStandaloneModules && buildInfo.newUpdater) {
     if (!updater.tryInitUpdater(buildInfo, NEW_UPDATE_ENDPOINT)) {
       throw new Error('Failed to initialize modules in overlay host.');
     }

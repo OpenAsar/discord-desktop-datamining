@@ -62,6 +62,9 @@ class AutoUpdaterWin32 extends _events.EventEmitter {
     }
   }
   downloadAndInstallUpdate(callback) {
+    if (this.updateUrl == null) {
+      throw new Error('Update URL is not set');
+    }
     void squirrelUpdate.spawnUpdateInstall(this.updateUrl, progress => {
       this.emit('update-progress', progress);
     }).catch(err => callback(err)).then(() => callback());
@@ -117,6 +120,9 @@ class AutoUpdaterLinux extends _events.EventEmitter {
     _electron.app.quit();
   }
   async checkForUpdates() {
+    if (this.updateUrl == null) {
+      throw new Error('Update URL is not set');
+    }
     const currVersion = versionParse(_electron.app.getVersion());
     this.emit('checking-for-update');
     try {
@@ -128,7 +134,8 @@ class AutoUpdaterLinux extends _events.EventEmitter {
       let latestVerStr = '';
       let latestVersion = [];
       try {
-        const latestMetadata = JSON.parse(response.body);
+        var _response$body;
+        const latestMetadata = JSON.parse(((_response$body = response.body) === null || _response$body === void 0 ? void 0 : _response$body.toString('utf-8')) ?? '');
         latestVerStr = latestMetadata.name;
         latestVersion = versionParse(latestVerStr);
       } catch (_) {}
