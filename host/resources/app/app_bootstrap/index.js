@@ -1,13 +1,14 @@
 "use strict";
 
-const buildInfo = require('./buildInfo');
-const paths = require('../common/paths');
-paths.init(buildInfo);
-const moduleUpdater = require('../common/moduleUpdater');
-const updater = require('../common/updater');
-const requireNative = require('./requireNative');
+var _moduleUpdater = require("../common/moduleUpdater");
+var _paths = require("../common/paths");
+var _updater = require("../common/updater");
+var _buildInfo = _interopRequireDefault(require("./buildInfo"));
+var _requireNative = _interopRequireDefault(require("./requireNative"));
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+(0, _paths.init)(_buildInfo.default);
 function getAppMode() {
-  if (process.argv && process.argv.includes('--overlay-host')) {
+  if (process.argv != null && process.argv.includes('--overlay-host')) {
     return 'overlay-host';
   }
   return 'app';
@@ -21,15 +22,17 @@ if (mode === 'app') {
   const {
     NEW_UPDATE_ENDPOINT
   } = require('./Constants');
-  if (!buildInfo.debug && buildInfo.newUpdater) {
-    if (!updater.tryInitUpdater(buildInfo, NEW_UPDATE_ENDPOINT)) {
+  const isStandaloneModules = _buildInfo.default.releaseChannel === 'development' && _buildInfo.default.standaloneModules;
+  if (!_buildInfo.default.debug && !isStandaloneModules && _buildInfo.default.newUpdater) {
+    var _getUpdater;
+    if (!(0, _updater.tryInitUpdater)(_buildInfo.default, NEW_UPDATE_ENDPOINT)) {
       throw new Error('Failed to initialize modules in overlay host.');
     }
-    updater.getUpdater().startCurrentVersionSync({
+    (_getUpdater = (0, _updater.getUpdater)()) === null || _getUpdater === void 0 ? void 0 : _getUpdater.startCurrentVersionSync({
       allowObsoleteHost: true
     });
   } else {
-    moduleUpdater.initPathsOnly(buildInfo);
+    (0, _moduleUpdater.initPathsOnly)(_buildInfo.default);
   }
-  requireNative('discord_overlay2/standalone_host.js');
+  (0, _requireNative.default)('discord_overlay2/standalone_host.js');
 }

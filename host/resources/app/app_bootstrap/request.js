@@ -8,6 +8,9 @@ var _electron = require("electron");
 var _querystring = _interopRequireDefault(require("querystring"));
 var _request = _interopRequireDefault(require("request"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+const {
+  Buffer
+} = require('node:buffer');
 const DEFAULT_REQUEST_TIMEOUT = 30000;
 function makeHTTPResponse({
   method,
@@ -26,12 +29,10 @@ function makeHTTPResponse({
   };
 }
 function makeHTTPStatusError(response) {
-  const err = new Error(`HTTP Error: Status Code ${response.statusCode}`);
-  err.response = response;
-  return err;
+  return Error(`HTTP Error: Status Code ${response.statusCode}`);
 }
 function handleHTTPResponse(resolve, reject, response, stream) {
-  const totalBytes = parseInt(response.headers['content-length'] || 1, 10);
+  const totalBytes = parseInt(response.headers['content-length'] || '1', 10);
   let receivedBytes = 0;
   const chunks = [];
   if (response.statusCode >= 300) {
@@ -135,7 +136,8 @@ async function electronRequest({
 async function requestWithMethod(method, options) {
   if (typeof options === 'string') {
     options = {
-      url: options
+      url: options,
+      method
     };
   }
   options = {

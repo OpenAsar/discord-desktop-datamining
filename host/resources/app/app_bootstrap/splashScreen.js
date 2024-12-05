@@ -12,7 +12,6 @@ var _events = require("events");
 var _fs = _interopRequireDefault(require("fs"));
 var _path = _interopRequireDefault(require("path"));
 var _url = _interopRequireDefault(require("url"));
-var logger = _interopRequireWildcard(require("./logger"));
 var _Backoff = _interopRequireDefault(require("../common/Backoff"));
 var analytics = _interopRequireWildcard(require("../common/analytics"));
 var moduleUpdater = _interopRequireWildcard(require("../common/moduleUpdater"));
@@ -20,10 +19,12 @@ var paths = _interopRequireWildcard(require("../common/paths"));
 var _securityUtils = require("../common/securityUtils");
 var _updater = require("../common/updater");
 var _ipcMain = _interopRequireDefault(require("./ipcMain"));
-var _Constants = require("./Constants");
+var logger = _interopRequireWildcard(require("./logger"));
+var _Constants = _interopRequireDefault(require("./Constants"));
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+const components = global.components || null;
 const UPDATE_TIMEOUT_WAIT = 10000;
 const RETRY_CAP_SECONDS = 60;
 const LOADING_WINDOW_WIDTH = 300;
@@ -64,7 +65,7 @@ function webContentsSend(win, event, ...args) {
   win.webContents.send(`DISCORD_${event}`, ...args);
 }
 let splashWindow;
-let modulesListeners;
+let modulesListeners = {};
 let updateTimeout = null;
 let updateAttempt;
 let splashState;
@@ -112,8 +113,8 @@ async function updateUntilCurrent(widevineCDM) {
     skip_host_delta: false,
     skip_module_delta: {},
     skip_all_module_delta: false,
-    skip_windows_arch_update: _Constants.DISABLE_WINDOWS_64BIT_TRANSITION,
-    optin_windows_transition_progression: _Constants.OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION
+    skip_windows_arch_update: _Constants.default.DISABLE_WINDOWS_64BIT_TRANSITION,
+    optin_windows_transition_progression: _Constants.default.OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION
   };
   while (true) {
     updateSplashState(CHECKING_FOR_UPDATES);
@@ -144,10 +145,11 @@ async function updateUntilCurrent(widevineCDM) {
         }
       });
       if (!installedAnything) {
-        await newUpdater.startCurrentVersion({
-          skip_windows_arch_update: _Constants.DISABLE_WINDOWS_64BIT_TRANSITION,
-          optin_windows_transition_progression: _Constants.OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION
-        });
+        const queryOptions = {
+          skip_windows_arch_update: _Constants.default.DISABLE_WINDOWS_64BIT_TRANSITION,
+          optin_windows_transition_progression: _Constants.default.OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION
+        };
+        await newUpdater.startCurrentVersion(queryOptions);
         newUpdater.setRunningInBackground();
         newUpdater.collectGarbage();
         console.log(`Checking CDM status...`);
@@ -161,7 +163,7 @@ async function updateUntilCurrent(widevineCDM) {
     } catch (e) {
       console.error('splashScreen: Update failed', e);
       await new Promise(resolve => {
-        const delayMs = updateBackoff.fail(resolve);
+        const delayMs = updateBackoff.fail(() => resolve(false));
         splashState.seconds = Math.round(delayMs / 1000);
         updateSplashState(UPDATE_FAILURE);
       });
@@ -192,7 +194,7 @@ function initOldUpdater(widevineCDM) {
         updateSplashState(LAUNCHING);
       }
     };
-    widevineCDM.finally(() => {
+    void widevineCDM.finally(() => {
       splashCompletedWork();
     });
   });
@@ -301,10 +303,10 @@ function initSplash(startMinimized = false) {
   launchedMainWindow = false;
   updateAttempt = 0;
   let widevineCDM;
-  if (_electron.components) {
+  if (components) {
     console.log('CDM component API found');
     const now = performance.now();
-    const componentPromise = _electron.components.whenReady().then(result => {
+    const componentPromise = components.whenReady().then(result => {
       const status = 'cdm-ready-success';
       analytics.getAnalytics().pushEvent('cdm', 'cdm_ready_complete', {
         status: status,
@@ -436,7 +438,6 @@ function launchSplashWindow(startMinimized, widevineCDM) {
     webPreferences: {
       nodeIntegration: false,
       sandbox: false,
-      enableRemoteModule: false,
       contextIsolation: true,
       preload: _path.default.join(__dirname, 'splashScreenPreload.js')
     }
@@ -444,10 +445,12 @@ function launchSplashWindow(startMinimized, widevineCDM) {
   splashWindow = new _electron.BrowserWindow(windowConfig);
   splashWindow.webContents.on('console-message', logger.ipcMainRendererLogger);
   splashWindow.webContents.on('will-navigate', e => e.preventDefault());
-  splashWindow.webContents.on('new-window', (e, windowURL) => {
-    e.preventDefault();
-    (0, _securityUtils.saferShellOpenExternal)(windowURL);
+  splashWindow.webContents.setWindowOpenHandler(details => {
+    void (0, _securityUtils.saferShellOpenExternal)(details.url);
     setTimeout(_electron.app.quit, 500);
+    return {
+      action: 'deny'
+    };
   });
   splashWindow.webContents.on('did-fail-load', (_e, errCode, errDesc, validatedURL, isMainFrame) => {
     console.error(`splashScreen: did-fail-load ${errCode} "${errDesc}" "${validatedURL}" ${isMainFrame}`);
@@ -469,11 +472,11 @@ function launchSplashWindow(startMinimized, widevineCDM) {
     if (cachedQuote) {
       webContentsSend(splashWindow, 'SPLASH_SCREEN_QUOTE', cachedQuote);
     }
-    if (splashWindow && !startMinimized) {
+    if (splashWindow != null && !startMinimized) {
       splashWindow.showInactive();
     }
     if (newUpdater != null) {
-      updateUntilCurrent(widevineCDM);
+      void updateUntilCurrent(widevineCDM);
     } else {
       moduleUpdater.installPendingUpdates();
     }
@@ -487,7 +490,7 @@ function launchSplashWindow(startMinimized, widevineCDM) {
     slashes: true,
     pathname: _path.default.join(__dirname, 'splash', 'index.html')
   });
-  splashWindow.loadURL(splashUrl);
+  void splashWindow.loadURL(splashUrl);
 }
 function launchMainWindow() {
   console.log(`splashScreen.launchMainWindow: ${launchedMainWindow}`);
@@ -524,7 +527,7 @@ function pageReady() {
 }
 function cacheLatestQuotes(quotes) {
   _fs.default.writeFile(quoteCachePath, JSON.stringify(quotes), e => {
-    if (e) {
+    if (e != null) {
       console.warn('splashScreen: Failed updating quote cache with error: ', e);
     }
   });
@@ -532,8 +535,10 @@ function cacheLatestQuotes(quotes) {
 function chooseCachedQuote() {
   let cachedQuote = null;
   try {
-    const cachedQuotes = JSON.parse(_fs.default.readFileSync(quoteCachePath));
+    const cachedQuotes = JSON.parse(_fs.default.readFileSync(quoteCachePath, {
+      encoding: 'utf8'
+    }));
     cachedQuote = cachedQuotes[Math.floor(Math.random() * cachedQuotes.length)];
-  } catch (_err) {}
+  } catch (_) {}
   return cachedQuote;
 }

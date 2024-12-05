@@ -7,9 +7,10 @@ declare module 'module' {
 }
 
 declare global {
+  var DiscordNative: DiscordNativeType;
   var logPath: string | undefined;
   var moduleDataPath: string | undefined;
   var modulePath: string | undefined;
-  var DiscordNative: DiscordNativeType;
   var popouts: Map<string, Window>;
+  var releaseChannel: string | undefined;
 }

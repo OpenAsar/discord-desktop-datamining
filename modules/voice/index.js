@@ -147,6 +147,8 @@ features.declareSupported('remote_user_multi_stream');
 features.declareSupported('go_live_hardware');
 features.declareSupported('bandwidth_estimation_experiments');
 features.declareSupported('mls_pairwise_fingerprints');
+features.declareSupported('soundshare');
+features.declareSupported('screen_soundshare');
 
 if (process.platform === 'darwin') {
   features.declareSupported('screen_capture_kit');
@@ -155,9 +157,12 @@ if (process.platform === 'darwin') {
   }
 }
 
-if (process.platform === 'win32' || process.platform === 'darwin') {
-  features.declareSupported('soundshare');
-  features.declareSupported('screen_soundshare');
+if (process.platform === 'linux') {
+  // from WebRTC DesktopCapturer::IsRunningUnderWayland()
+  const sessionType = process.env.XDG_SESSION_TYPE;
+  if (sessionType?.startsWith('wayland') && process.env.WAYLAND_DISPLAY != null) {
+    features.declareSupported('native_screenshare_picker');
+  }
 }
 
 if (
