@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.UpdaterEvents = exports.MenuEvents = exports.AnalyticsEvents = void 0;
+exports.UpdaterEvents = exports.MenuEvents = exports.AnalyticsEvents = exports.AllowedMediaOrigins = void 0;
 exports.init = init;
 const UpdaterEvents = {
   UPDATE_NOT_AVAILABLE: 'UPDATE_NOT_AVAILABLE',
@@ -33,6 +33,10 @@ const MenuEvents = {
   CHECK_FOR_UPDATES: 'menu:check-for-updates'
 };
 exports.MenuEvents = MenuEvents;
+const AllowedMediaOrigins = {
+  K_ID: 'https://d3ogqhtsivkon3.cloudfront.net'
+};
+exports.AllowedMediaOrigins = AllowedMediaOrigins;
 function init(bootstrapConstants) {
   const APP_NAME = bootstrapConstants.APP_NAME;
   const API_ENDPOINT = bootstrapConstants.API_ENDPOINT;
