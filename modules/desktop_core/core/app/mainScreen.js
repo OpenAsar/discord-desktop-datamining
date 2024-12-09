@@ -363,6 +363,9 @@ function launchMainAppWindow(isVisible) {
         }
         callback(result);
         return;
+      case 'media':
+        callback((0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, _Constants.AllowedMediaOrigins.K_ID));
+        return;
     }
     callback(false);
   });
@@ -376,6 +379,8 @@ function launchMainAppWindow(isVisible) {
         } else {
           return (0, _securityUtils.checkUrlOriginMatches)(details.embeddingOrigin, WEBAPP_ENDPOINT);
         }
+      case 'media':
+        return (0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, _Constants.AllowedMediaOrigins.K_ID);
     }
     return false;
   });
