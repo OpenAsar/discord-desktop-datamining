@@ -5,15 +5,20 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _electron = require("electron");
-var _Constants = require("../Constants");
+var Constants = _interopRequireWildcard(require("../Constants"));
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+const {
+  MenuEvents
+} = Constants;
 const SEPARATOR = {
   type: 'separator'
 };
-const buildMenu = enableDevtools => [{
+var _default = enableDevtools => [{
   label: '&File',
   submenu: [{
     label: '&Options',
-    click: () => _electron.app.emit(_Constants.MenuEvents.OPEN_SETTINGS),
+    click: () => _electron.app.emit(MenuEvents.OPEN_SETTINGS),
     accelerator: 'Ctrl+,'
   }, SEPARATOR, {
     label: '&Exit',
@@ -24,28 +29,17 @@ const buildMenu = enableDevtools => [{
   label: '&View',
   submenu: [{
     label: '&Reload',
-    click: () => {
-      var _BrowserWindow$getFoc;
-      return (_BrowserWindow$getFoc = _electron.BrowserWindow.getFocusedWindow()) === null || _BrowserWindow$getFoc === void 0 ? void 0 : _BrowserWindow$getFoc.webContents.reloadIgnoringCache();
-    },
+    click: () => _electron.BrowserWindow.getFocusedWindow().webContents.reloadIgnoringCache(),
     accelerator: 'Control+R'
   }, {
     label: 'Toggle &Full Screen',
-    click: () => {
-      const window = _electron.BrowserWindow.getFocusedWindow();
-      if (window != null) {
-        window.setFullScreen(!window.isFullScreen());
-      }
-    },
+    click: () => _electron.BrowserWindow.getFocusedWindow().setFullScreen(!_electron.BrowserWindow.getFocusedWindow().isFullScreen()),
     accelerator: 'Control+Shift+F'
   }, ...(enableDevtools ? [SEPARATOR, {
     label: '&Developer',
     submenu: [{
       label: 'Toggle Developer &Tools',
-      click: () => {
-        var _BrowserWindow$getFoc2;
-        return (_BrowserWindow$getFoc2 = _electron.BrowserWindow.getFocusedWindow()) === null || _BrowserWindow$getFoc2 === void 0 ? void 0 : _BrowserWindow$getFoc2.webContents.toggleDevTools();
-      },
+      click: () => _electron.BrowserWindow.getFocusedWindow().toggleDevTools(),
       accelerator: 'Control+Shift+I'
     }]
   }] : [])]
@@ -53,12 +47,11 @@ const buildMenu = enableDevtools => [{
   label: '&Help',
   submenu: [{
     label: 'Check for Updates',
-    click: () => _electron.app.emit(_Constants.MenuEvents.CHECK_FOR_UPDATES)
+    click: () => _electron.app.emit(MenuEvents.CHECK_FOR_UPDATES)
   }, SEPARATOR, {
     label: 'Discord Help',
-    click: () => _electron.app.emit(_Constants.MenuEvents.OPEN_HELP)
+    click: () => _electron.app.emit(MenuEvents.OPEN_HELP)
   }]
 }];
-var _default = buildMenu;
 exports.default = _default;
 module.exports = exports.default;

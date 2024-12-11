@@ -32,7 +32,7 @@ const CHANNEL_SENTRY_DSN = {
   development: buildSentryDSN(TEST_SENTRY_DSN_KEY)
 };
 const CHANNEL_SENTRY_SAMPLE = {
-  stable: 0.01,
+  stable: 0.1,
   ptb: 1,
   canary: 1,
   development: 1

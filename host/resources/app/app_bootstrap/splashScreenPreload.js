@@ -1,30 +1,34 @@
 "use strict";
 
-var _electron = require("electron");
-var _securityUtils = require("../common/securityUtils");
-var _buildInfo = _interopRequireDefault(require("./buildInfo"));
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-_electron.contextBridge.exposeInMainWorld('DiscordSplash', {
+const {
+  contextBridge,
+  ipcRenderer
+} = require('electron');
+const {
+  saferShellOpenExternal
+} = require('../common/securityUtils');
+contextBridge.exposeInMainWorld('DiscordSplash', {
   getReleaseChannel: () => {
-    return _buildInfo.default.releaseChannel;
+    const buildInfo = require('./buildInfo');
+    return buildInfo.releaseChannel;
   },
   signalReady: () => {
     console.log(`DiscordSplash.signalReady`);
-    _electron.ipcRenderer.send('DISCORD_SPLASH_SCREEN_READY');
+    ipcRenderer.send('DISCORD_SPLASH_SCREEN_READY');
   },
   onStateUpdate: callback => {
-    _electron.ipcRenderer.on('DISCORD_SPLASH_UPDATE_STATE', (_, state) => {
+    ipcRenderer.on('DISCORD_SPLASH_UPDATE_STATE', (_, state) => {
       console.log(`DiscordSplash.onStateUpdate: ${JSON.stringify(state)}`);
       callback(state);
     });
   },
   onQuoteUpdate: callback => {
-    _electron.ipcRenderer.on('DISCORD_SPLASH_SCREEN_QUOTE', (_, quote) => {
+    ipcRenderer.on('DISCORD_SPLASH_SCREEN_QUOTE', (_, quote) => {
       callback(quote);
     });
   },
-  openUrl: _securityUtils.saferShellOpenExternal,
+  openUrl: saferShellOpenExternal,
   quitDiscord: () => {
-    _electron.ipcRenderer.send('DISCORD_SPLASH_SCREEN_QUIT');
+    ipcRenderer.send('DISCORD_SPLASH_SCREEN_QUIT');
   }
 });

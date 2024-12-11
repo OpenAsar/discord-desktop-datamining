@@ -12,6 +12,7 @@ exports.updateExistsSync = updateExistsSync;
 var _child_process = _interopRequireDefault(require("child_process"));
 var _fs = _interopRequireDefault(require("fs"));
 var _path = _interopRequireDefault(require("path"));
+var autoStart = _interopRequireWildcard(require("./autoStart"));
 var windowsUtils = _interopRequireWildcard(require("./windowsUtils"));
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
@@ -34,7 +35,7 @@ function spawnUpdateInstall(updateUrl, progressCallback) {
     function parseProgress() {
       const lines = stdout.split(/\r?\n/);
       if (lines.length === 1) return;
-      stdout = lines.pop() ?? '';
+      stdout = lines.pop();
       let currentProgress;
       for (const line of lines) {
         if (!/^\d\d?$/.test(line)) continue;
@@ -62,7 +63,7 @@ function createShortcuts(callback, updateOnly) {
   let icoForTarget = icoDest;
   try {
     const ico = _fs.default.readFileSync(icoSrc);
-    _fs.default.writeFileSync(icoDest, new Uint8Array(ico));
+    _fs.default.writeFileSync(icoDest, ico);
   } catch (e) {
     icoForTarget = icoSrc;
   }
@@ -101,7 +102,6 @@ function maybeInstallNewUpdaterSeedDb() {
   }
 }
 function handleStartupEvent(protocol, app, squirrelCommand) {
-  const autoStart = require('./autoStart');
   switch (squirrelCommand) {
     case '--squirrel-install':
       createShortcuts(() => {

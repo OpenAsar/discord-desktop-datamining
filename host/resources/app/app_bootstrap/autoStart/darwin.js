@@ -8,14 +8,14 @@ exports.isInstalled = isInstalled;
 exports.uninstall = uninstall;
 exports.update = update;
 function install(callback) {
-  callback();
+  return callback();
 }
 function update(callback) {
-  callback();
+  return callback();
 }
 function isInstalled(callback) {
-  callback(false);
+  return callback(false);
 }
 function uninstall(callback) {
-  callback();
+  return callback();
 }

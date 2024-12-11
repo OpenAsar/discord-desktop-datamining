@@ -18,21 +18,13 @@ const appName = _path.default.basename(process.execPath, '.exe');
 const fullExeName = _path.default.basename(process.execPath);
 const updatePath = _path.default.join(_path.default.dirname(process.execPath), '..', 'Update.exe');
 function install(callback) {
-  const startMinimized = settings === null || settings === void 0 ? void 0 : settings.get('START_MINIMIZED', false);
+  const startMinimized = settings.get('START_MINIMIZED', false);
   let execPath = `"${updatePath}" --processStart ${fullExeName}`;
   if (startMinimized) {
     execPath = `${execPath} --process-start-args --start-minimized`;
   }
   const queue = [['HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run', '/v', appName, '/d', execPath]];
   windowsUtils.addToRegistry(queue, callback);
-}
-function isInstalled(callback) {
-  const queryValue = ['HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run', '/v', appName];
-  queryValue.unshift('query');
-  windowsUtils.spawnReg(queryValue, (_error, stdout) => {
-    const doesOldKeyExist = stdout.indexOf(appName) >= 0;
-    callback(doesOldKeyExist);
-  });
 }
 function update(callback) {
   isInstalled(installed => {
@@ -41,6 +33,14 @@ function update(callback) {
     } else {
       callback();
     }
+  });
+}
+function isInstalled(callback) {
+  const queryValue = ['HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run', '/v', appName];
+  queryValue.unshift('query');
+  windowsUtils.spawnReg(queryValue, (error, stdout) => {
+    const doesOldKeyExist = stdout.indexOf(appName) >= 0;
+    callback(doesOldKeyExist);
   });
 }
 function uninstall(callback) {

@@ -1,33 +1,28 @@
 "use strict";
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.Updater = exports.TASK_STATE_WORKING = exports.TASK_STATE_WAITING = exports.TASK_STATE_FAILED = exports.TASK_STATE_COMPLETE = exports.INCONSISTENT_INSTALLER_STATE_ERROR = void 0;
-exports.getUpdater = getUpdater;
-exports.tryInitUpdater = tryInitUpdater;
-var _child_process = _interopRequireDefault(require("child_process"));
-var _electron = require("electron");
-var _events = require("events");
-var _fs = _interopRequireDefault(require("fs"));
-var _path = _interopRequireDefault(require("path"));
-var _process = require("process");
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+const childProcess = require('child_process');
+const {
+  app
+} = require('electron');
+const {
+  EventEmitter
+} = require('events');
+const NodeModule = require('module');
+const path = require('path');
+const {
+  hrtime
+} = require('process');
 const arch = require('arch');
+const fs = require('fs');
 let instance;
 const TASK_STATE_COMPLETE = 'Complete';
-exports.TASK_STATE_COMPLETE = TASK_STATE_COMPLETE;
 const TASK_STATE_FAILED = 'Failed';
-exports.TASK_STATE_FAILED = TASK_STATE_FAILED;
 const TASK_STATE_WAITING = 'Waiting';
-exports.TASK_STATE_WAITING = TASK_STATE_WAITING;
 const TASK_STATE_WORKING = 'Working';
-exports.TASK_STATE_WORKING = TASK_STATE_WORKING;
 const INCONSISTENT_INSTALLER_STATE_ERROR = 'InconsistentInstallerState';
-exports.INCONSISTENT_INSTALLER_STATE_ERROR = INCONSISTENT_INSTALLER_STATE_ERROR;
 const EVENT_CACHE_FILENAME = 'updater_events.json';
 const INVALID_UPDATER_ERROR = "Can't send request to updater because the native updater isn't loaded.";
-class Updater extends _events.EventEmitter {
+class Updater extends EventEmitter {
   constructor(options) {
     super();
     let nativeUpdaterModule = options.nativeUpdaterModule;
@@ -59,7 +54,7 @@ class Updater extends _events.EventEmitter {
   get valid() {
     return this.nativeUpdater != null;
   }
-  _sendRequest(detail, progressCallback) {
+  _sendRequest(detail, progressCallback = null) {
     if (!this.valid) {
       throw new Error(INVALID_UPDATER_ERROR);
     }
@@ -101,7 +96,7 @@ class Updater extends _events.EventEmitter {
             throw e;
           }
         } else {
-          if (details != null) {
+          if (details) {
             if (details.includes('code: 10013')) {
               e = new Error(`(${kind}) (network_error): An attempt was made to access a socket in a way forbidden by its access permissions`);
             } else if (details.includes('code: 10054')) {
@@ -176,16 +171,9 @@ class Updater extends _events.EventEmitter {
     }
   }
   _reportAnalytics(analytics) {
-    const transformedEvent = this._transformAnalyticEvent(analytics);
-    let transformedEventSpread = {};
-    if (typeof transformedEvent === 'object' && transformedEvent !== null) {
-      transformedEventSpread = {
-        ...transformedEvent
-      };
-    }
     this.updateEventHistory.push({
       type: 'analytics',
-      transformedEventSpread
+      ...this._transformAnalyticEvent(analytics)
     });
   }
   _transformAnalyticEvent(event) {
@@ -199,39 +187,38 @@ class Updater extends _events.EventEmitter {
     if (detail['Error'] != null) {
       throw new Error(detail['Error']);
     } else if (detail === 'Ok') {
-      return null;
+      return;
     } else if (detail['VersionInfo'] != null) {
       return detail['VersionInfo'];
     }
     console.warn('Unknown updater response', detail);
-    return null;
   }
   _getHostPath() {
     const [major, minor, revision] = this.committedHostVersion;
-    return _path.default.join(this.rootPath, `app-${`${major}.${minor}.${revision}`}`);
+    return path.join(this.rootPath, `app-${`${major}.${minor}.${revision}`}`);
   }
   _startCurrentVersionInner(options, versions) {
     if (this.committedHostVersion == null) {
       this.committedHostVersion = versions.current_host;
     }
     const hostPath = this._getHostPath();
-    const hostExePath = _path.default.join(hostPath, _path.default.basename(process.execPath));
-    if (_path.default.resolve(hostExePath) !== _path.default.resolve(process.execPath) && !(options === null || options === void 0 ? void 0 : options.allowObsoleteHost)) {
-      _electron.app.once('will-quit', () => {
-        _child_process.default.spawn(hostExePath, [], {
+    const hostExePath = path.join(hostPath, path.basename(process.execPath));
+    if (path.resolve(hostExePath) != path.resolve(process.execPath) && !(options === null || options === void 0 ? void 0 : options.allowObsoleteHost)) {
+      app.once('will-quit', () => {
+        childProcess.spawn(hostExePath, [], {
           detached: true,
           stdio: 'inherit'
         });
       });
-      console.log(`Will Restart from ${_path.default.resolve(process.execPath)} to ${_path.default.resolve(hostExePath)}`);
+      console.log(`Will Restart from ${path.resolve(process.execPath)} to ${path.resolve(hostExePath)}`);
       try {
         const paths = require('./paths');
         const userDataPath = paths.getUserData();
-        const eventCachePath = _path.default.join(userDataPath, EVENT_CACHE_FILENAME);
+        const eventCachePath = path.join(userDataPath, EVENT_CACHE_FILENAME);
         const updaterEvents = this.queryAndTruncateHistory();
         if (updaterEvents.length > 0) {
-          _fs.default.writeFile(eventCachePath, JSON.stringify(updaterEvents), e => {
-            if (e != null) {
+          fs.writeFile(eventCachePath, JSON.stringify(updaterEvents), e => {
+            if (e) {
               console.warn('splashScreen: Failed writing updaterEvents with error: ', e);
             }
           });
@@ -239,8 +226,8 @@ class Updater extends _events.EventEmitter {
       } catch (e) {
         console.error(`Error caching updater events: ${e}`);
       }
-      console.log(`Restarting from ${_path.default.resolve(process.execPath)} to ${_path.default.resolve(hostExePath)}`);
-      _electron.app.quit();
+      console.log(`Restarting from ${path.resolve(process.execPath)} to ${path.resolve(hostExePath)}`);
+      app.quit();
       this.emit('starting-new-host');
       return;
     }
@@ -252,10 +239,10 @@ class Updater extends _events.EventEmitter {
       globalPathExists
     } = require('./nodeGlobalPaths');
     const hostPath = this._getHostPath();
-    const modulesPath = _path.default.join(hostPath, 'modules');
+    const modulesPath = path.join(hostPath, 'modules');
     for (const module in versions.current_modules) {
       const moduleVersion = versions.current_modules[module];
-      const moduleSearchPath = _path.default.join(modulesPath, `${module}-${moduleVersion}`);
+      const moduleSearchPath = path.join(modulesPath, `${module}-${moduleVersion}`);
       if (!this.committedModules.has(module) && !globalPathExists(moduleSearchPath)) {
         this.committedModules.add(module);
         addGlobalPath(moduleSearchPath);
@@ -263,7 +250,7 @@ class Updater extends _events.EventEmitter {
     }
   }
   _recordDownloadProgress(name, progress) {
-    const now = String(_process.hrtime.bigint());
+    const now = String(hrtime.bigint());
     if (progress.state === TASK_STATE_WORKING && !this.currentlyDownloading[name]) {
       this.currentlyDownloading[name] = true;
       this.updateEventHistory.push({
@@ -283,7 +270,7 @@ class Updater extends _events.EventEmitter {
     }
   }
   _recordInstallProgress(name, progress, newVersion, isDelta) {
-    const now = String(_process.hrtime.bigint());
+    const now = String(hrtime.bigint());
     if (progress.state === TASK_STATE_WORKING && !this.currentlyInstalling[name]) {
       this.currentlyInstalling[name] = true;
       this.updateEventHistory.push({
@@ -420,7 +407,6 @@ class Updater extends _events.EventEmitter {
     return this.nativeUpdater.create_shortcut(options);
   }
 }
-exports.Updater = Updater;
 function getUpdaterPlatformName(platform) {
   switch (platform) {
     case 'darwin':
@@ -452,15 +438,15 @@ function tryInitUpdater(buildInfo, repositoryUrl) {
     current_os_arch: currentArch,
     user_data_path: userDataPath
   });
-  const eventCachePath = _path.default.join(userDataPath, EVENT_CACHE_FILENAME);
-  if (_fs.default.existsSync(eventCachePath)) {
+  const eventCachePath = path.join(userDataPath, EVENT_CACHE_FILENAME);
+  if (fs.existsSync(eventCachePath)) {
     try {
-      instance.updateEventHistory = JSON.parse(_fs.default.readFileSync(eventCachePath).toString('utf-8'));
+      instance.updateEventHistory = JSON.parse(fs.readFileSync(eventCachePath));
     } catch (e) {
       console.log('Failed to read updater events cache with error ', e);
     }
     try {
-      _fs.default.unlinkSync(eventCachePath);
+      fs.unlinkSync(eventCachePath);
     } catch (e) {
       console.log('Failed to remove updater events cache with error ', e);
     }
@@ -471,5 +457,14 @@ function getUpdater() {
   if (instance != null && instance.valid) {
     return instance;
   }
-  return null;
 }
+module.exports = {
+  Updater,
+  tryInitUpdater,
+  getUpdater,
+  TASK_STATE_COMPLETE,
+  TASK_STATE_FAILED,
+  TASK_STATE_WAITING,
+  TASK_STATE_WORKING,
+  INCONSISTENT_INSTALLER_STATE_ERROR
+};

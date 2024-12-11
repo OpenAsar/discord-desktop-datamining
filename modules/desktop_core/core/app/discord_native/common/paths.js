@@ -21,12 +21,12 @@ async function getPath(path) {
   if (!allowedAppPaths.has(path)) {
     throw new Error(`${path} is not an allowed app path`);
   }
-  return await _electron.default.ipcRenderer.invoke(_constants.IPCEvents.APP_GET_PATH, path);
+  return _electron.default.ipcRenderer.invoke(_constants.IPCEvents.APP_GET_PATH, path);
 }
 function getTimes(filenames) {
   return Promise.allSettled(filenames.map(filename => new Promise((resolve, reject) => {
     _originalFs.default.stat(filename, (err, stats) => {
-      if (err != null) {
+      if (err) {
         return reject(err);
       }
       if (!stats.isFile()) {

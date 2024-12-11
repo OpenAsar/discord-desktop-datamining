@@ -7,13 +7,9 @@ exports.default = void 0;
 function installDevTools() {
   console.log(`Installing Devtron`);
   const devtron = require('devtron');
-  if (devtron) {
-    devtron.uninstall();
-    devtron.install();
-    console.log(`Installed Devtron`);
-  } else {
-    console.log(`Devtron module is not available`);
-  }
+  devtron.uninstall();
+  devtron.install();
+  console.log(`Installed Devtron`);
 }
 var _default = installDevTools;
 exports.default = _default;
