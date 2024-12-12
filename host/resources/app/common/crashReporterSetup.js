@@ -24,6 +24,7 @@ const STABLE_SENTRY_DSN_KEY = '7a60c374cb0e99ac8a57388db6933711';
 const DEFAULT_SENTRY_DSN_KEY = '384ce4413de74fe0be270abe03b2b35a';
 const STAFF_SENTRY_DSN_KEY = 'de156ff7a3f544cca369e77e3f1f5743';
 const TEST_SENTRY_DSN_KEY = '1a27a96457b24ff286a000266c573919';
+const LINUX_SENTRY_DSN_KEY = 'd2558f321dfc7ab68366d8258fd256c7';
 const DEFAULT_SENTRY_DSN = buildSentryDSN(DEFAULT_SENTRY_DSN_KEY);
 const CHANNEL_SENTRY_DSN = {
   stable: buildSentryDSN(STABLE_SENTRY_DSN_KEY),
@@ -37,6 +38,7 @@ const CHANNEL_SENTRY_SAMPLE = {
   canary: 1,
   development: 1
 };
+const LINUX_SENTRY_SAMPLE = 1;
 let defaultDsn = DEFAULT_SENTRY_DSN;
 function dsnFromUser({
   getEvent
@@ -107,14 +109,22 @@ function buildSentryDSN(dsnKey) {
   return 'https://' + dsnKey + '@' + SENTRY_PROJECT_HOST + '.insecure.sentry.io/' + SENTRY_PROJECT_ID;
 }
 function getSentryDSN(releaseChannel) {
-  if (releaseChannel != null && CHANNEL_SENTRY_DSN[releaseChannel] != null) {
-    return CHANNEL_SENTRY_DSN[releaseChannel];
+  if (processUtils.IS_LINUX) {
+    return LINUX_SENTRY_DSN_KEY;
+  } else {
+    if (releaseChannel != null && CHANNEL_SENTRY_DSN[releaseChannel] != null) {
+      return CHANNEL_SENTRY_DSN[releaseChannel];
+    }
   }
   return DEFAULT_SENTRY_DSN;
 }
 function getSampleRate(releaseChannel) {
-  if (releaseChannel != null && CHANNEL_SENTRY_SAMPLE[releaseChannel] != null) {
-    return CHANNEL_SENTRY_SAMPLE[releaseChannel];
+  if (processUtils.IS_LINUX) {
+    return LINUX_SENTRY_SAMPLE;
+  } else {
+    if (releaseChannel != null && CHANNEL_SENTRY_SAMPLE[releaseChannel] != null) {
+      return CHANNEL_SENTRY_SAMPLE[releaseChannel];
+    }
   }
   return 0.01;
 }
