@@ -20,9 +20,9 @@
 | rpc | 2 |
 | sekrit | 2 |
 | spellcheck | 2 |
-| utils | 2 |
+| utils | 3 |
 | vigilante | 2 |
-| voice | 2 |
+| voice | 4 |
 | zstd | 2 |
 
 ## branches
