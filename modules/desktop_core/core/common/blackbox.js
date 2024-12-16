@@ -90,7 +90,9 @@ class Files {
       }
     }
     const now = new Date();
-    const filenameStamp = now.toISOString().replace(/[^\d\w]/g, '_');
+    const filenameStamp = now.toLocaleString('en-US', {
+      timeZoneName: 'short'
+    }).replace(/[^\d\w]/g, '_');
     const filename = `${filenameStamp}-${fileWriteCounter++}-${this.name}.${this.extension}`;
     return _path.default.join(blackboxDirectory, filename);
   }
@@ -136,7 +138,9 @@ async function addMessage(message) {
     try {
       const log = await openLog(false);
       if (log == null) return;
-      const now = new Date().toISOString();
+      const now = new Date().toLocaleString('en-US', {
+        timeZoneName: 'short'
+      });
       console.log(`blackbox: ${now} ${eventCounter} ${message}`);
       await log.write(`${now} ${eventCounter}: ${message}\n`);
       ++eventCounter;
