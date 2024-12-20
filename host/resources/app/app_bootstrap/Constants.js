@@ -1,5 +1,9 @@
 "use strict";
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
 var _appSettings = require("./appSettings");
 const {
   releaseChannel
@@ -36,4 +40,6 @@ const bootstrapConstants = {
   LOG_LEVEL,
   UPDATE_ENDPOINT
 };
-module.exports = bootstrapConstants;
+var _default = bootstrapConstants;
+exports.default = _default;
+module.exports = exports.default;

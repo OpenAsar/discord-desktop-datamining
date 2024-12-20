@@ -1,8 +1,11 @@
 "use strict";
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 if (process.platform === 'linux') {
   if (process.env.PULSE_LATENCY_MSEC === undefined) {
-    process.env.PULSE_LATENCY_MSEC = 30;
+    process.env.PULSE_LATENCY_MSEC = '30';
   }
 }
 const {
@@ -39,7 +42,7 @@ const Constants = require('./Constants');
 const GPUSettings = require('./GPUSettings');
 function setupHardwareAcceleration() {
   const settings = appSettings.getSettings();
-  if (!settings.get('enableHardwareAcceleration', true)) {
+  if (!(settings === null || settings === void 0 ? void 0 : settings.get('enableHardwareAcceleration', true))) {
     app.disableHardwareAcceleration();
   }
 }
@@ -68,10 +71,16 @@ function setupSettingsFlags() {
     force_high_performance_gpu: 1,
     force_low_power_gpu: 1
   };
-  const switches = settings.get('chromiumSwitches', []);
-  for (const s in switches) {
-    if (validSwitches[s]) {
-      app.commandLine.appendSwitch(s, switches[s]);
+  const rawSwitches = settings === null || settings === void 0 ? void 0 : settings.get('chromiumSwitches', []);
+  let switches = [];
+  if (Array.isArray(rawSwitches)) {
+    switches = rawSwitches;
+  } else if (typeof rawSwitches === 'object' && rawSwitches !== null) {
+    switches = Object.keys(rawSwitches);
+  }
+  for (const s of switches) {
+    if (validSwitches[s] !== 0) {
+      app.commandLine.appendSwitch(s, s);
     }
   }
 }
@@ -101,7 +110,7 @@ async function setGPUFlags() {
   }
 }
 function hasArgvFlag(flag) {
-  return (process.argv || []).slice(1).includes(flag);
+  return process.argv.slice(1).includes(flag);
 }
 console.log(`${Constants.APP_NAME} ${app.getVersion()}`);
 let pendingAppQuit = false;
@@ -116,12 +125,12 @@ if (process.platform === 'win32') {
   }
 }
 const appUpdater = require('./appUpdater');
-const moduleUpdater = require('../common/moduleUpdater');
-const updater = require('../common/updater');
-const splashScreen = require('./splashScreen');
 const autoStart = require('./autoStart');
-const requireNative = require('./requireNative');
 const discordProtocols = require('./protocols');
+const moduleUpdater = require('../common/moduleUpdater');
+const requireNative = require('./requireNative');
+const splashScreen = require('./splashScreen');
+const updater = require('../common/updater');
 let coreModule;
 const allowMultipleInstances = hasArgvFlag('--multi-instance');
 const isFirstInstance = allowMultipleInstances ? true : app.requestSingleInstanceLock();
@@ -175,25 +184,25 @@ function startUpdate() {
     try {
       coreModule = requireNative('discord_desktop_core');
       coreModule.startup({
-        paths,
-        splashScreen,
-        moduleUpdater,
-        autoStart,
-        buildInfo,
-        appSettings,
         Constants,
         GPUSettings,
-        updater,
-        crashReporterSetup,
         analytics,
-        logger
+        appSettings,
+        autoStart,
+        buildInfo,
+        crashReporterSetup,
+        logger,
+        moduleUpdater,
+        paths,
+        splashScreen,
+        updater
       });
       if (initialUrl != null) {
         coreModule.handleOpenUrl(initialUrl);
         initialUrl = null;
       }
     } catch (err) {
-      return errorHandler.fatal(err);
+      errorHandler.fatal(err);
     }
   }, () => {
     coreModule.setMainWindowVisible(!startMinimized);
@@ -213,5 +222,7 @@ if (pendingAppQuit) {
   app.quit();
 } else {
   discordProtocols.beforeReadyProtocolRegistration();
-  setGPUFlags().then(app.whenReady).then(() => startApp());
+  setGPUFlags().then(app.whenReady).then(() => startApp()).catch(error => {
+    console.error('Error bootstrapping: ', error);
+  });
 }
