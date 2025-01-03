@@ -2,7 +2,7 @@
 
 ## canary versions
 
-**host: 1.0.516**
+**host: 1.0.517**
 
 | module | version |
 | ------ | :-----: |
