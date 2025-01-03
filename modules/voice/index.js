@@ -157,14 +157,6 @@ if (process.platform === 'darwin') {
   }
 }
 
-if (process.platform === 'linux') {
-  // from WebRTC DesktopCapturer::IsRunningUnderWayland()
-  const sessionType = process.env.XDG_SESSION_TYPE;
-  if (sessionType?.startsWith('wayland') && process.env.WAYLAND_DISPLAY != null) {
-    features.declareSupported('native_screenshare_picker');
-  }
-}
-
 if (
   process.platform === 'win32' ||
   (process.platform === 'darwin' && versionGreaterThanOrEqual(os.release(), '16.0.0'))

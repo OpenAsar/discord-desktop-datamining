@@ -8,6 +8,8 @@ if (process.platform === 'linux') {
     process.env.PULSE_LATENCY_MSEC = '30';
   }
 }
+const analytics = require('../common/analytics');
+analytics.getDesktopTTI().trackMainAppTimeToInit();
 const {
   app,
   Menu
@@ -33,7 +35,6 @@ const sentryConfig = {
   getTransport: dsnFunc => browser.makeMultiplexedTransport(makeElectronOfflineTransport, dsnFunc)
 };
 crashReporterSetup.init(buildInfo, sentryConfig);
-const analytics = require('../common/analytics');
 global.moduleDataPath = paths.getModuleDataPath();
 global.logPath = paths.getLogPath();
 const appSettings = require('./appSettings');

@@ -2,7 +2,7 @@
 
 ## development versions
 
-**host: 1.0.896**
+**host: 1.0.897**
 
 | module | version |
 | ------ | :-----: |
@@ -23,7 +23,6 @@
 | utils | 1 |
 | vigilante | 1 |
 | voice | 1 |
-| voice_filters | 1 |
 | zstd | 1 |
 
 ## branches

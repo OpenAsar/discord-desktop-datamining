@@ -374,6 +374,7 @@ function destroySplash() {
     splashWindow.hide();
     splashWindow.close();
     splashWindow = null;
+    analytics.getDesktopTTI().trackSplashWindowDuration();
   }, 100);
 }
 function addModulesListener(event, listener) {
@@ -441,6 +442,7 @@ function launchSplashWindow(startMinimized, widevineCDM) {
       preload: _path.default.join(__dirname, 'splashScreenPreload.js')
     }
   };
+  analytics.getDesktopTTI().trackSplashWindowCreated();
   splashWindow = new _electron.BrowserWindow(windowConfig);
   splashWindow.webContents.on('console-message', logger.ipcMainRendererLogger);
   splashWindow.webContents.on('will-navigate', e => e.preventDefault());
