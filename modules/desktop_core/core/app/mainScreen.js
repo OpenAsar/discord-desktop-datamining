@@ -432,7 +432,7 @@ function launchMainAppWindow(isVisible) {
   mainWindow.webContents.on('did-finish-load', () => {
     var _mainWindow;
     if (!mainWindowDidFinishLoad) {
-      _bootstrapModules.analytics.getDesktopTTI().trackMainWindowDuration();
+      _bootstrapModules.analytics.getDesktopTTI().trackMainWindowLoadDuration();
     }
     console.log(`mainScreen.on(did-finish-load) ${lastPageLoadFailed} ${mainWindowDidFinishLoad}`);
     if (insideAuthFlow && mainWindow.webContents && (0, _securityUtils.checkUrlOriginMatches)(mainWindow.webContents.getURL(), WEBAPP_ENDPOINT)) {
@@ -735,6 +735,7 @@ function setupAnalyticsEvents() {
     if (a == null) {
       return;
     }
+    a.trackMainWindowJSAppLoadDuration();
     a.trackFullTTI();
   });
 }

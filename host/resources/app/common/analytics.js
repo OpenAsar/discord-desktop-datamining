@@ -49,12 +49,14 @@ var DesktopAnalyticsEventType = function (DesktopAnalyticsEventType) {
   DesktopAnalyticsEventType[DesktopAnalyticsEventType["MainAppInit"] = 0] = "MainAppInit";
   DesktopAnalyticsEventType[DesktopAnalyticsEventType["SplashCreated"] = 1] = "SplashCreated";
   DesktopAnalyticsEventType[DesktopAnalyticsEventType["SplashDuration"] = 2] = "SplashDuration";
-  DesktopAnalyticsEventType[DesktopAnalyticsEventType["SplashRestart"] = 3] = "SplashRestart";
-  DesktopAnalyticsEventType[DesktopAnalyticsEventType["MainWinCreated"] = 4] = "MainWinCreated";
-  DesktopAnalyticsEventType[DesktopAnalyticsEventType["MainWinLoadStart"] = 5] = "MainWinLoadStart";
-  DesktopAnalyticsEventType[DesktopAnalyticsEventType["MainWinLoadComplete"] = 6] = "MainWinLoadComplete";
-  DesktopAnalyticsEventType[DesktopAnalyticsEventType["FullTTIComplete"] = 7] = "FullTTIComplete";
-  DesktopAnalyticsEventType[DesktopAnalyticsEventType["FullTTICompleteWithRestart"] = 8] = "FullTTICompleteWithRestart";
+  DesktopAnalyticsEventType[DesktopAnalyticsEventType["SplashDurationWithUpdates"] = 3] = "SplashDurationWithUpdates";
+  DesktopAnalyticsEventType[DesktopAnalyticsEventType["SplashRestart"] = 4] = "SplashRestart";
+  DesktopAnalyticsEventType[DesktopAnalyticsEventType["MainWinCreated"] = 5] = "MainWinCreated";
+  DesktopAnalyticsEventType[DesktopAnalyticsEventType["MainWinLoadStart"] = 6] = "MainWinLoadStart";
+  DesktopAnalyticsEventType[DesktopAnalyticsEventType["MainWinLoadComplete"] = 7] = "MainWinLoadComplete";
+  DesktopAnalyticsEventType[DesktopAnalyticsEventType["MainWinJSAppLoadComplete"] = 8] = "MainWinJSAppLoadComplete";
+  DesktopAnalyticsEventType[DesktopAnalyticsEventType["FullTTIComplete"] = 9] = "FullTTIComplete";
+  DesktopAnalyticsEventType[DesktopAnalyticsEventType["FullTTICompleteWithRestart"] = 10] = "FullTTICompleteWithRestart";
   return DesktopAnalyticsEventType;
 }(DesktopAnalyticsEventType || {});
 function createDesktopAnalyticsEvent(type, durationMS) {
@@ -67,12 +69,16 @@ function createDesktopAnalyticsEvent(type, durationMS) {
           return 'splash_created';
         case DesktopAnalyticsEventType.SplashDuration:
           return 'splash_duration';
+        case DesktopAnalyticsEventType.SplashDurationWithUpdates:
+          return 'splash_duration_with_updates';
         case DesktopAnalyticsEventType.MainWinCreated:
           return 'mainwin_created';
         case DesktopAnalyticsEventType.MainWinLoadStart:
           return 'mainwin_loadstart';
         case DesktopAnalyticsEventType.MainWinLoadComplete:
           return 'mainwin_loadcomplete';
+        case DesktopAnalyticsEventType.MainWinJSAppLoadComplete:
+          return 'mainwin_loadjsappcomplete';
         case DesktopAnalyticsEventType.SplashRestart:
           return 'splash_restart';
         case DesktopAnalyticsEventType.FullTTIComplete:
@@ -88,9 +94,7 @@ function createDesktopAnalyticsEvent(type, durationMS) {
 const DESKTOP_ANALYTICS_CACHE_FILENAME = 'desktop_analytics_cache.json';
 class TTISessionData {
   mainWindowCreationTime = null;
-  mainWindowLoadTime = null;
   splashCreationTime = null;
-  splashRestartTime = null;
   splashRestartTimepoint = null;
 }
 function getCacheFilePath() {
@@ -148,10 +152,16 @@ class DesktopTTIAnalytics {
     const evt = createDesktopAnalyticsEvent(DesktopAnalyticsEventType.SplashCreated, null);
     this.pushDesktopEvent(evt);
   }
-  trackSplashWindowDuration() {
+  trackSplashWindowDuration(installedUpdates) {
     if (this.currentSessionData.splashCreationTime != null) {
+      let evtType;
+      if (installedUpdates) {
+        evtType = DesktopAnalyticsEventType.SplashDurationWithUpdates;
+      } else {
+        evtType = DesktopAnalyticsEventType.SplashDuration;
+      }
       const duration = getDurationMS() - this.currentSessionData.splashCreationTime;
-      const evt = createDesktopAnalyticsEvent(DesktopAnalyticsEventType.SplashDuration, duration);
+      const evt = createDesktopAnalyticsEvent(evtType, duration);
       this.pushDesktopEvent(evt);
     }
   }
@@ -161,22 +171,27 @@ class DesktopTTIAnalytics {
     this.pushDesktopEvent(evt);
   }
   trackMainWindowLoadStart() {
-    this.currentSessionData.mainWindowLoadTime = getDurationMS();
     if (this.currentSessionData.mainWindowCreationTime != null) {
       const duration = getDurationMS() - this.currentSessionData.mainWindowCreationTime;
       const evt = createDesktopAnalyticsEvent(DesktopAnalyticsEventType.MainWinLoadStart, duration);
       this.pushDesktopEvent(evt);
     }
   }
-  trackMainWindowDuration() {
-    if (this.currentSessionData.mainWindowLoadTime != null) {
-      const duration = getDurationMS() - this.currentSessionData.mainWindowLoadTime;
+  trackMainWindowLoadDuration() {
+    if (this.currentSessionData.mainWindowCreationTime != null) {
+      const duration = getDurationMS() - this.currentSessionData.mainWindowCreationTime;
       const evt = createDesktopAnalyticsEvent(DesktopAnalyticsEventType.MainWinLoadComplete, duration);
       this.pushDesktopEvent(evt);
     }
   }
+  trackMainWindowJSAppLoadDuration() {
+    if (this.currentSessionData.mainWindowCreationTime != null) {
+      const duration = getDurationMS() - this.currentSessionData.mainWindowCreationTime;
+      const evt = createDesktopAnalyticsEvent(DesktopAnalyticsEventType.MainWinJSAppLoadComplete, duration);
+      this.pushDesktopEvent(evt);
+    }
+  }
   trackSplashWindowRestart() {
-    this.currentSessionData.splashRestartTime = getDurationMS();
     this.currentSessionData.splashRestartTimepoint = Date.now();
     const evt = createDesktopAnalyticsEvent(DesktopAnalyticsEventType.SplashRestart, null);
     this.pushDesktopEvent(evt);

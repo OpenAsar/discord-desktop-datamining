@@ -73,6 +73,7 @@ let quoteCachePath;
 let restartRequired = false;
 let newUpdater;
 let lastSplashEventState = null;
+let splashInstalledUpdates = false;
 const updateBackoff = new _Backoff.default(1000, 30000);
 class TaskProgress {
   constructor() {
@@ -126,6 +127,7 @@ async function updateUntilCurrent(widevineCDM) {
         const downloadTask = task.HostDownload || task.ModuleDownload;
         const installTask = task.HostInstall || task.ModuleInstall;
         installedAnything = true;
+        splashInstalledUpdates = true;
         if (downloadTask != null) {
           downloads.recordProgress(progress, downloadTask);
         }
@@ -374,7 +376,7 @@ function destroySplash() {
     splashWindow.hide();
     splashWindow.close();
     splashWindow = null;
-    analytics.getDesktopTTI().trackSplashWindowDuration();
+    analytics.getDesktopTTI().trackSplashWindowDuration(splashInstalledUpdates);
   }, 100);
 }
 function addModulesListener(event, listener) {
