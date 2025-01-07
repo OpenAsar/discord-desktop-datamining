@@ -110,7 +110,7 @@ function buildSentryDSN(dsnKey) {
 }
 function getSentryDSN(releaseChannel) {
   if (processUtils.IS_LINUX) {
-    return LINUX_SENTRY_DSN_KEY;
+    return buildSentryDSN(LINUX_SENTRY_DSN_KEY);
   } else {
     if (releaseChannel != null && CHANNEL_SENTRY_DSN[releaseChannel] != null) {
       return CHANNEL_SENTRY_DSN[releaseChannel];
