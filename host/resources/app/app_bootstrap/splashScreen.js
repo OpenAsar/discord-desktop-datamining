@@ -18,6 +18,7 @@ var moduleUpdater = _interopRequireWildcard(require("../common/moduleUpdater"));
 var paths = _interopRequireWildcard(require("../common/paths"));
 var _securityUtils = require("../common/securityUtils");
 var _updater = require("../common/updater");
+var _buildInfo = _interopRequireDefault(require("./buildInfo"));
 var _ipcMain = _interopRequireDefault(require("./ipcMain"));
 var logger = _interopRequireWildcard(require("./logger"));
 var _Constants = _interopRequireDefault(require("./Constants"));
@@ -73,6 +74,7 @@ let quoteCachePath;
 let restartRequired = false;
 let newUpdater;
 let lastSplashEventState = null;
+let splashInstalledUpdates = false;
 const updateBackoff = new _Backoff.default(1000, 30000);
 class TaskProgress {
   constructor() {
@@ -126,6 +128,7 @@ async function updateUntilCurrent(widevineCDM) {
         const downloadTask = task.HostDownload || task.ModuleDownload;
         const installTask = task.HostInstall || task.ModuleInstall;
         installedAnything = true;
+        splashInstalledUpdates = true;
         if (downloadTask != null) {
           downloads.recordProgress(progress, downloadTask);
         }
@@ -374,6 +377,7 @@ function destroySplash() {
     splashWindow.hide();
     splashWindow.close();
     splashWindow = null;
+    analytics.getDesktopTTI(_buildInfo.default.releaseChannel).trackSplashWindowDuration(splashInstalledUpdates);
   }, 100);
 }
 function addModulesListener(event, listener) {
@@ -441,6 +445,7 @@ function launchSplashWindow(startMinimized, widevineCDM) {
       preload: _path.default.join(__dirname, 'splashScreenPreload.js')
     }
   };
+  analytics.getDesktopTTI(_buildInfo.default.releaseChannel).trackSplashWindowCreated();
   splashWindow = new _electron.BrowserWindow(windowConfig);
   splashWindow.webContents.on('console-message', logger.ipcMainRendererLogger);
   splashWindow.webContents.on('will-navigate', e => e.preventDefault());
