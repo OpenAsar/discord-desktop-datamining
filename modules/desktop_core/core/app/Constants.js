@@ -24,8 +24,7 @@ const UpdaterEvents = {
 exports.UpdaterEvents = UpdaterEvents;
 const AnalyticsEvents = {
   APP_GET_ANALYTICS_EVENTS: 'APP_GET_ANALYTICS_EVENTS',
-  APP_PUSH_ANALYTICS: 'APP_PUSH_ANALYTICS',
-  APP_VIEWED: 'APP_VIEWED'
+  APP_PUSH_ANALYTICS: 'APP_PUSH_ANALYTICS'
 };
 exports.AnalyticsEvents = AnalyticsEvents;
 const MenuEvents = {

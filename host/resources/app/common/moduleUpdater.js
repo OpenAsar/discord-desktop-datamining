@@ -23,7 +23,6 @@ var _path = _interopRequireDefault(require("path"));
 var _process = require("process");
 var _yauzl = _interopRequireDefault(require("yauzl"));
 var _Backoff = _interopRequireDefault(require("./Backoff"));
-var analytics = _interopRequireWildcard(require("./analytics"));
 var _nodeGlobalPaths = require("./nodeGlobalPaths");
 var paths = _interopRequireWildcard(require("./paths"));
 var _processUtils = require("./processUtils");
@@ -823,8 +822,6 @@ function finishModuleUnzip(unzippedModule, succeeded) {
 function quitAndInstallUpdates() {
   logger.log(`Relaunching to install ${hostUpdateAvailable ? 'host' : 'module'} updates...`);
   if (hostUpdateAvailable) {
-    const desktopTTI = analytics.getDesktopTTI();
-    desktopTTI.trackSplashWindowRestart();
     hostUpdater.quitAndInstall();
   } else {
     relaunch();
