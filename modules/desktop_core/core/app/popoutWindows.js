@@ -30,8 +30,8 @@ const DEFAULT_POPOUT_OPTIONS = {
   show: true,
   titleBarStyle: process.platform === 'darwin' ? 'hidden' : undefined,
   trafficLightPosition: process.platform === 'darwin' ? {
-    x: 10,
-    y: 3
+    x: 12,
+    y: 4
   } : undefined,
   webPreferences: {
     nodeIntegration: false,
