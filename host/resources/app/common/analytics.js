@@ -110,6 +110,7 @@ class DesktopTTIAnalytics {
   previousSessionData = null;
   currentSessionData = new TTISessionData();
   trackedFullTTI = false;
+  trackedJSAppLoad = false;
   loadPreviousSessionData() {
     const cachePath = getCacheFilePath();
     if (cachePath === null) {
@@ -185,6 +186,10 @@ class DesktopTTIAnalytics {
     }
   }
   trackMainWindowJSAppLoadDuration() {
+    if (this.trackedJSAppLoad) {
+      return;
+    }
+    this.trackedJSAppLoad = true;
     if (this.currentSessionData.mainWindowCreationTime != null) {
       const duration = getDurationMS() - this.currentSessionData.mainWindowCreationTime;
       const evt = createDesktopAnalyticsEvent(DesktopAnalyticsEventType.MainWinJSAppLoadComplete, duration);
