@@ -186,6 +186,9 @@ function initOldUpdater(widevineCDM) {
   }) => {
     console.log(`splashScreen: ${UPDATE_CHECK_FINISHED} ${succeeded} ${updateCount} ${manualRequired}`);
     stopUpdateTimeout();
+    if (updateCount > 0) {
+      splashInstalledUpdates = true;
+    }
     const splashCompletedWork = () => {
       if (!succeeded) {
         scheduleUpdateCheck();
