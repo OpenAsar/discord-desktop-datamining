@@ -259,7 +259,9 @@ function getDesktopTTI(releaseChannel) {
   if (desktopTTIInstance === null) {
     let enablePushingEvents = true;
     if (releaseChannel != null) {
-      enablePushingEvents = releaseChannel === 'development' || releaseChannel === 'canary';
+      if (releaseChannel === 'stable') {
+        enablePushingEvents = Math.random() < 0.02;
+      }
     }
     desktopTTIInstance = new DesktopTTIAnalytics(enablePushingEvents);
   }
