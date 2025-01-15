@@ -289,6 +289,7 @@ function launchApplication(applicationId) {
   webContentsSend('LAUNCH_APPLICATION', applicationId);
 }
 const loadMainPage = () => {
+  _bootstrapModules.analytics.getDesktopTTI(buildInfo.releaseChannel).trackMainWindowLoadStart();
   lastPageLoadFailed = false;
   mainWindow.loadURL(URL_TO_LOAD);
 };
@@ -340,6 +341,7 @@ function launchMainAppWindow(isVisible) {
     };
   }
   applyWindowBoundsToConfig(mainWindowOptions);
+  _bootstrapModules.analytics.getDesktopTTI(buildInfo.releaseChannel).trackMainWindowCreated();
   mainWindow = new _electron.BrowserWindow(mainWindowOptions);
   mainWindowId = mainWindow.id;
   global.mainWindowId = mainWindowId;
@@ -429,6 +431,9 @@ function launchMainAppWindow(isVisible) {
   });
   mainWindow.webContents.on('did-finish-load', () => {
     var _mainWindow;
+    if (!mainWindowDidFinishLoad) {
+      _bootstrapModules.analytics.getDesktopTTI(buildInfo.releaseChannel).trackMainWindowLoadDuration();
+    }
     console.log(`mainScreen.on(did-finish-load) ${lastPageLoadFailed} ${mainWindowDidFinishLoad}`);
     if (insideAuthFlow && mainWindow.webContents && (0, _securityUtils.checkUrlOriginMatches)(mainWindow.webContents.getURL(), WEBAPP_ENDPOINT)) {
       insideAuthFlow = false;
@@ -724,6 +729,14 @@ function setupAnalyticsEvents() {
       analyticsState.cached = [];
     }
     webContentsSend(_Constants.AnalyticsEvents.APP_PUSH_ANALYTICS, events);
+  });
+  _ipcMain.default.on(_Constants.AnalyticsEvents.APP_VIEWED, () => {
+    const a = _bootstrapModules.analytics === null || _bootstrapModules.analytics === void 0 ? void 0 : _bootstrapModules.analytics.getDesktopTTI(buildInfo.releaseChannel);
+    if (a == null) {
+      return;
+    }
+    a.trackMainWindowJSAppLoadDuration();
+    a.trackFullTTI();
   });
 }
 function setupUpdaterEventsWithUpdater(updater) {
