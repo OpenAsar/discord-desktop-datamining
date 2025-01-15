@@ -196,7 +196,8 @@ function init(_endpoint, _settings, _buildInfo) {
   settings = _settings;
   const buildInfo = _buildInfo;
   updatable = buildInfo.version !== '0.0.0' && !buildInfo.debug || ((_settings2 = settings) === null || _settings2 === void 0 ? void 0 : _settings2.get(ALWAYS_ALLOW_UPDATES));
-  const hostUpdatable = buildInfo.version !== '0.0.0' && !buildInfo.debug && checkOSVersionSupported() || ((_settings3 = settings) === null || _settings3 === void 0 ? void 0 : _settings3.get(ALWAYS_ALLOW_UPDATES));
+  const versionTriple = buildInfo.version.split(/-|\+/, 1)[0];
+  const hostUpdatable = versionTriple !== '0.0.0' && !buildInfo.debug && checkOSVersionSupported() || ((_settings3 = settings) === null || _settings3 === void 0 ? void 0 : _settings3.get(ALWAYS_ALLOW_UPDATES));
   initPathsOnly(buildInfo);
   logger = new LogStream(_path.default.join(paths.getUserData() ?? '', 'logs', 'legacyModulesUpdater.log'));
   bootstrapping = false;

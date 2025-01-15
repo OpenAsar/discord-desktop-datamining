@@ -96,6 +96,7 @@ class TTISessionData {
   mainWindowCreationTime = null;
   splashCreationTime = null;
   splashRestartTimepoint = null;
+  processDuration = null;
 }
 function getCacheFilePath() {
   try {
@@ -203,6 +204,7 @@ class DesktopTTIAnalytics {
   }
   trackSplashWindowRestart() {
     this.currentSessionData.splashRestartTimepoint = Date.now();
+    this.currentSessionData.processDuration = getDurationMS();
     const evt = createDesktopAnalyticsEvent(DesktopAnalyticsEventType.SplashRestart, null);
     this.pushDesktopEvent(evt);
     const persistData = {
@@ -227,17 +229,21 @@ class DesktopTTIAnalytics {
     }
   }
   trackFullTTI() {
-    var _this$previousSession;
     if (this.trackedFullTTI) {
       return;
     }
     this.trackedFullTTI = true;
-    let fullDesktopDuration = null;
-    const prevTimepoint = (_this$previousSession = this.previousSessionData) === null || _this$previousSession === void 0 ? void 0 : _this$previousSession.splashRestartTimepoint;
-    if (prevTimepoint != null) {
-      fullDesktopDuration = Date.now() - prevTimepoint;
-      if (fullDesktopDuration < 0 || fullDesktopDuration > 120_000) {
-        fullDesktopDuration = null;
+    if (this.previousSessionData != null) {
+      var _this$previousSession, _this$previousSession2;
+      const prevTimepoint = (_this$previousSession = this.previousSessionData) === null || _this$previousSession === void 0 ? void 0 : _this$previousSession.splashRestartTimepoint;
+      const prevProcessDuration = (_this$previousSession2 = this.previousSessionData) === null || _this$previousSession2 === void 0 ? void 0 : _this$previousSession2.processDuration;
+      let fullDesktopDuration = null;
+      if (prevTimepoint != null && prevProcessDuration != null) {
+        const durationSinceSplashRestart = Date.now() - prevTimepoint;
+        fullDesktopDuration = durationSinceSplashRestart + prevProcessDuration;
+        if (durationSinceSplashRestart < 0 || durationSinceSplashRestart > 120_000) {
+          fullDesktopDuration = null;
+        }
       }
       const evt = createDesktopAnalyticsEvent(DesktopAnalyticsEventType.FullTTICompleteWithRestart, fullDesktopDuration);
       this.pushDesktopEvent(evt);
