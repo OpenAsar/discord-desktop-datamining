@@ -65,7 +65,6 @@ function startup(bootstrapModules) {
   const nativeModules = require('./discord_native/browser/nativeModules');
   nativeModules.injectModuleUpdater(moduleUpdater);
   nativeModules.injectUpdater(updater);
-  require('./discord_native/browser/notifications');
   require('./discord_native/browser/powerMonitor');
   require('./discord_native/browser/powerSaveBlocker');
   require('./discord_native/browser/processUtils');
