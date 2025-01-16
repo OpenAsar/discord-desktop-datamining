@@ -41,6 +41,7 @@ function getAnalytics() {
   return analyticsInstance;
 }
 const DESKTOP_TTI_TYPE = 'desktop_tti';
+const durationDiffThresholdMS = 30 * 60_000;
 function getDurationMS() {
   (0, _assert.default)(process.type === 'browser', 'Expected process to be main');
   return Math.ceil(process.uptime() * 1_000);
@@ -139,7 +140,7 @@ class DesktopTTIAnalytics {
       return;
     }
     const persistedData = parsedData;
-    if (Math.abs(Date.now() - persistedData.storeTimeMS) > 60 * 1000) {
+    if (Math.abs(Date.now() - persistedData.storeTimeMS) > durationDiffThresholdMS) {
       return;
     }
     this.previousSessionData = persistedData.sessionData;
@@ -241,7 +242,7 @@ class DesktopTTIAnalytics {
       if (prevTimepoint != null && prevProcessDuration != null) {
         const durationSinceSplashRestart = Date.now() - prevTimepoint;
         fullDesktopDuration = durationSinceSplashRestart + prevProcessDuration;
-        if (durationSinceSplashRestart < 0 || durationSinceSplashRestart > 120_000) {
+        if (durationSinceSplashRestart < 0 || durationSinceSplashRestart > durationDiffThresholdMS || fullDesktopDuration < 0 || fullDesktopDuration > durationDiffThresholdMS) {
           fullDesktopDuration = null;
         }
       }
