@@ -23,6 +23,7 @@ var _path = _interopRequireDefault(require("path"));
 var _process = require("process");
 var _yauzl = _interopRequireDefault(require("yauzl"));
 var _Backoff = _interopRequireDefault(require("./Backoff"));
+var analytics = _interopRequireWildcard(require("./analytics"));
 var _nodeGlobalPaths = require("./nodeGlobalPaths");
 var paths = _interopRequireWildcard(require("./paths"));
 var _processUtils = require("./processUtils");
@@ -195,7 +196,8 @@ function init(_endpoint, _settings, _buildInfo) {
   settings = _settings;
   const buildInfo = _buildInfo;
   updatable = buildInfo.version !== '0.0.0' && !buildInfo.debug || ((_settings2 = settings) === null || _settings2 === void 0 ? void 0 : _settings2.get(ALWAYS_ALLOW_UPDATES));
-  const hostUpdatable = buildInfo.version !== '0.0.0' && !buildInfo.debug && checkOSVersionSupported() || ((_settings3 = settings) === null || _settings3 === void 0 ? void 0 : _settings3.get(ALWAYS_ALLOW_UPDATES));
+  const versionTriple = buildInfo.version.split(/-|\+/, 1)[0];
+  const hostUpdatable = versionTriple !== '0.0.0' && !buildInfo.debug && checkOSVersionSupported() || ((_settings3 = settings) === null || _settings3 === void 0 ? void 0 : _settings3.get(ALWAYS_ALLOW_UPDATES));
   initPathsOnly(buildInfo);
   logger = new LogStream(_path.default.join(paths.getUserData() ?? '', 'logs', 'legacyModulesUpdater.log'));
   bootstrapping = false;
@@ -822,6 +824,8 @@ function finishModuleUnzip(unzippedModule, succeeded) {
 function quitAndInstallUpdates() {
   logger.log(`Relaunching to install ${hostUpdateAvailable ? 'host' : 'module'} updates...`);
   if (hostUpdateAvailable) {
+    const desktopTTI = analytics.getDesktopTTI();
+    desktopTTI.trackSplashWindowRestart();
     hostUpdater.quitAndInstall();
   } else {
     relaunch();

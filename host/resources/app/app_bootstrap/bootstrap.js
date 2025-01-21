@@ -8,13 +8,15 @@ if (process.platform === 'linux') {
     process.env.PULSE_LATENCY_MSEC = '30';
   }
 }
+const buildInfo = require('./buildInfo');
+const analytics = require('../common/analytics');
+analytics.getDesktopTTI(buildInfo.releaseChannel).trackMainAppTimeToInit();
 const {
   app,
   Menu
 } = require('electron');
 const sentry = require('@sentry/electron');
 const logger = require('./logger');
-const buildInfo = require('./buildInfo');
 app.setVersion(buildInfo.version);
 global.releaseChannel = buildInfo.releaseChannel;
 const errorHandler = require('./errorHandler');
@@ -33,7 +35,6 @@ const sentryConfig = {
   getTransport: dsnFunc => browser.makeMultiplexedTransport(makeElectronOfflineTransport, dsnFunc)
 };
 crashReporterSetup.init(buildInfo, sentryConfig);
-const analytics = require('../common/analytics');
 global.moduleDataPath = paths.getModuleDataPath();
 global.logPath = paths.getLogPath();
 const appSettings = require('./appSettings');
@@ -49,6 +50,15 @@ function setupHardwareAcceleration() {
 setupHardwareAcceleration();
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 const disabledFeatures = ['WinRetrieveSuggestionsOnlyOnDemand', 'HardwareMediaKeyHandling', 'MediaSessionService', 'UseEcoQoSForBackgroundProcess', 'IntensiveWakeUpThrottling', 'AllowAggressiveThrottlingWithWebSocket'];
+if (process.platform === 'darwin' && parseInt(require('os').release().split('.')[0]) < 24) {
+  disabledFeatures.push('ScreenCaptureKitMac');
+  disabledFeatures.push('ScreenCaptureKitMacWindow');
+  disabledFeatures.push('ScreenCaptureKitMacScreen');
+  disabledFeatures.push('ScreenCaptureKitPickerScreen');
+  disabledFeatures.push('ScreenCaptureKitStreamPickerSonoma');
+  disabledFeatures.push('WarmScreenCaptureSonoma');
+  disabledFeatures.push('UseSCContentSharingPicker');
+}
 if (process.platform === 'win32') {
   app.commandLine.appendSwitch('disable-background-timer-throttling');
 }
