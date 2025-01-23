@@ -71,6 +71,9 @@ var OutOfProcessOverlayInterface = _objectSpread(_objectSpread({}, NativeOverlay
       targetGamePID = 0;
     }
   },
+  setAlwaysVisible: function setAlwaysVisible(alwaysVisible) {
+    NativeOverlay.setAlwaysVisible(alwaysVisible);
+  },
   setFocusCallback: function setFocusCallback(focus) {
     var wrappedCallback = function wrappedCallback(pid) {
       var previousTargetGamePID = targetGamePID;

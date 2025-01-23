@@ -13,6 +13,7 @@ const analytics = require('../common/analytics');
 analytics.getDesktopTTI(buildInfo.releaseChannel).trackMainAppTimeToInit();
 const {
   app,
+  session,
   Menu
 } = require('electron');
 const sentry = require('@sentry/electron');
@@ -177,6 +178,17 @@ if (!allowMultipleInstances) {
     }
   });
 }
+app.on('ready', () => {
+  session.defaultSession.webRequest.onErrorOccurred(details => {
+    if (details.error.includes('net::ERR_QUIC_PROTOCOL_ERROR')) {
+      console.error(`WebRequest failed (${details.error}): '${details.method} ${details.url}'`);
+      const sentry = crashReporterSetup.getGlobalSentry();
+      if (sentry != null) {
+        sentry.captureMessage(`WebRequest failed: ${details.error}`, 'error');
+      }
+    }
+  });
+});
 app.on('will-finish-launching', () => {
   app.on('open-url', (event, url) => {
     event.preventDefault();
