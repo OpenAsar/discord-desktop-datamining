@@ -290,7 +290,7 @@ function launchApplication(applicationId) {
 }
 const loadMainPage = () => {
   var _analytics$getDesktop;
-  _bootstrapModules.analytics === null || _bootstrapModules.analytics === void 0 ? void 0 : (_analytics$getDesktop = _bootstrapModules.analytics.getDesktopTTI) === null || _analytics$getDesktop === void 0 ? void 0 : _analytics$getDesktop.call(_bootstrapModules.analytics, buildInfo.releaseChannel).trackMainWindowLoadStart();
+  _bootstrapModules.analytics === null || _bootstrapModules.analytics === void 0 ? void 0 : (_analytics$getDesktop = _bootstrapModules.analytics.getDesktopTTI) === null || _analytics$getDesktop === void 0 ? void 0 : _analytics$getDesktop.call(_bootstrapModules.analytics).trackMainWindowLoadStart();
   lastPageLoadFailed = false;
   mainWindow.loadURL(URL_TO_LOAD);
 };
@@ -343,7 +343,7 @@ function launchMainAppWindow(isVisible) {
     };
   }
   applyWindowBoundsToConfig(mainWindowOptions);
-  _bootstrapModules.analytics === null || _bootstrapModules.analytics === void 0 ? void 0 : (_analytics$getDesktop2 = _bootstrapModules.analytics.getDesktopTTI) === null || _analytics$getDesktop2 === void 0 ? void 0 : _analytics$getDesktop2.call(_bootstrapModules.analytics, buildInfo.releaseChannel).trackMainWindowCreated();
+  _bootstrapModules.analytics === null || _bootstrapModules.analytics === void 0 ? void 0 : (_analytics$getDesktop2 = _bootstrapModules.analytics.getDesktopTTI) === null || _analytics$getDesktop2 === void 0 ? void 0 : _analytics$getDesktop2.call(_bootstrapModules.analytics).trackMainWindowCreated();
   mainWindow = new _electron.BrowserWindow(mainWindowOptions);
   mainWindowId = mainWindow.id;
   global.mainWindowId = mainWindowId;
@@ -435,7 +435,7 @@ function launchMainAppWindow(isVisible) {
     var _mainWindow;
     if (!mainWindowDidFinishLoad) {
       var _analytics$getDesktop3;
-      _bootstrapModules.analytics === null || _bootstrapModules.analytics === void 0 ? void 0 : (_analytics$getDesktop3 = _bootstrapModules.analytics.getDesktopTTI) === null || _analytics$getDesktop3 === void 0 ? void 0 : _analytics$getDesktop3.call(_bootstrapModules.analytics, buildInfo.releaseChannel).trackMainWindowLoadDuration();
+      _bootstrapModules.analytics === null || _bootstrapModules.analytics === void 0 ? void 0 : (_analytics$getDesktop3 = _bootstrapModules.analytics.getDesktopTTI) === null || _analytics$getDesktop3 === void 0 ? void 0 : _analytics$getDesktop3.call(_bootstrapModules.analytics).trackMainWindowLoadDuration();
     }
     console.log(`mainScreen.on(did-finish-load) ${lastPageLoadFailed} ${mainWindowDidFinishLoad}`);
     if (insideAuthFlow && mainWindow.webContents && (0, _securityUtils.checkUrlOriginMatches)(mainWindow.webContents.getURL(), WEBAPP_ENDPOINT)) {
@@ -735,7 +735,7 @@ function setupAnalyticsEvents() {
   });
   _ipcMain.default.on(_Constants.AnalyticsEvents.APP_VIEWED, () => {
     var _analytics$getDesktop4;
-    const a = _bootstrapModules.analytics === null || _bootstrapModules.analytics === void 0 ? void 0 : (_analytics$getDesktop4 = _bootstrapModules.analytics.getDesktopTTI) === null || _analytics$getDesktop4 === void 0 ? void 0 : _analytics$getDesktop4.call(_bootstrapModules.analytics, buildInfo.releaseChannel);
+    const a = _bootstrapModules.analytics === null || _bootstrapModules.analytics === void 0 ? void 0 : (_analytics$getDesktop4 = _bootstrapModules.analytics.getDesktopTTI) === null || _analytics$getDesktop4 === void 0 ? void 0 : _analytics$getDesktop4.call(_bootstrapModules.analytics);
     if (a == null) {
       return;
     }

@@ -8,14 +8,14 @@ if (process.platform === 'linux') {
     process.env.PULSE_LATENCY_MSEC = '30';
   }
 }
-const buildInfo = require('./buildInfo');
 const analytics = require('../common/analytics');
-analytics.getDesktopTTI(buildInfo.releaseChannel).trackMainAppTimeToInit();
+analytics.getDesktopTTI().trackMainAppTimeToInit();
 const {
   app,
   session,
   Menu
 } = require('electron');
+const buildInfo = require('./buildInfo');
 const sentry = require('@sentry/electron');
 const logger = require('./logger');
 app.setVersion(buildInfo.version);
