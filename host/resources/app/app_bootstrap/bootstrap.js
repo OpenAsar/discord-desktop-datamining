@@ -8,13 +8,14 @@ if (process.platform === 'linux') {
     process.env.PULSE_LATENCY_MSEC = '30';
   }
 }
-const buildInfo = require('./buildInfo');
 const analytics = require('../common/analytics');
-analytics.getDesktopTTI(buildInfo.releaseChannel).trackMainAppTimeToInit();
+analytics.getDesktopTTI().trackMainAppTimeToInit();
 const {
   app,
+  session,
   Menu
 } = require('electron');
+const buildInfo = require('./buildInfo');
 const sentry = require('@sentry/electron');
 const logger = require('./logger');
 app.setVersion(buildInfo.version);
@@ -50,6 +51,15 @@ function setupHardwareAcceleration() {
 setupHardwareAcceleration();
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 const disabledFeatures = ['WinRetrieveSuggestionsOnlyOnDemand', 'HardwareMediaKeyHandling', 'MediaSessionService', 'UseEcoQoSForBackgroundProcess', 'IntensiveWakeUpThrottling', 'AllowAggressiveThrottlingWithWebSocket'];
+if (process.platform === 'darwin' && parseInt(require('os').release().split('.')[0]) < 24) {
+  disabledFeatures.push('ScreenCaptureKitMac');
+  disabledFeatures.push('ScreenCaptureKitMacWindow');
+  disabledFeatures.push('ScreenCaptureKitMacScreen');
+  disabledFeatures.push('ScreenCaptureKitPickerScreen');
+  disabledFeatures.push('ScreenCaptureKitStreamPickerSonoma');
+  disabledFeatures.push('WarmScreenCaptureSonoma');
+  disabledFeatures.push('UseSCContentSharingPicker');
+}
 if (process.platform === 'win32') {
   app.commandLine.appendSwitch('disable-background-timer-throttling');
 }
@@ -168,6 +178,17 @@ if (!allowMultipleInstances) {
     }
   });
 }
+app.on('ready', () => {
+  session.defaultSession.webRequest.onErrorOccurred(details => {
+    if (details.error.includes('net::ERR_QUIC_PROTOCOL_ERROR')) {
+      console.error(`WebRequest failed (${details.error}): '${details.method} ${details.url}'`);
+      const sentry = crashReporterSetup.getGlobalSentry();
+      if (sentry != null) {
+        sentry.captureMessage(`WebRequest failed: ${details.error}`, 'error');
+      }
+    }
+  });
+});
 app.on('will-finish-launching', () => {
   app.on('open-url', (event, url) => {
     event.preventDefault();
