@@ -100,3 +100,11 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_SET_MEMOR
   }
   return Promise.resolve();
 });
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_GPU_PROCESS_ID, () => {
+  for (const processMetric of _electron.default.app.getAppMetrics()) {
+    if (processMetric.type === 'GPU') {
+      return Promise.resolve(processMetric.pid);
+    }
+  }
+  return Promise.resolve(null);
+});

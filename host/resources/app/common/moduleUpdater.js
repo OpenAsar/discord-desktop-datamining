@@ -179,7 +179,7 @@ function checkOSVersionSupported() {
     try {
       const osVersion = _os.default.release();
       const osMajorVersion = Number(osVersion.split('.')[0]);
-      const osMinimumSupportedVersion = 19;
+      const osMinimumSupportedVersion = 20;
       console.log(`MacOS major version was ${osMajorVersion}, minimum supported version for future updates is ${osMinimumSupportedVersion}`);
       if (osMajorVersion < osMinimumSupportedVersion) {
         return false;

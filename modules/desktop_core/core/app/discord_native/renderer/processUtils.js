@@ -9,6 +9,7 @@ exports.flushStorageData = flushStorageData;
 exports.getCPUCoreCount = getCPUCoreCount;
 exports.getCumulativeCPUUsage = getCumulativeCPUUsage;
 exports.getCurrentCPUUsagePercent = getCurrentCPUUsagePercent;
+exports.getGpuProcessId = getGpuProcessId;
 exports.getLastCrash = getLastCrash;
 exports.getMainArgvSync = getMainArgvSync;
 exports.getProcessUptime = getProcessUptime;
@@ -103,4 +104,7 @@ function setMemoryInformation(memoryInformation) {
     memoryUsageKB: memoryInformation.memoryUsageKB,
     usedJSHeapSizeKB: memoryInformation.usedJSHeapSizeKB
   });
+}
+function getGpuProcessId() {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_GPU_PROCESS_ID);
 }
