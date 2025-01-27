@@ -670,8 +670,9 @@ function setMainWindowTitle(title) {
     mainWindow.setTitle(title);
   }
 }
-async function checkForUpdatesWithUpdater(updater) {
-  if (updaterState === _Constants.UpdaterEvents.UPDATE_NOT_AVAILABLE) {
+async function checkForUpdatesWithUpdater(updater, options) {
+  const allowMultipleUpdates = (options === null || options === void 0 ? void 0 : options.allowMultipleUpdates) ?? false;
+  if (updaterState === _Constants.UpdaterEvents.UPDATE_NOT_AVAILABLE || allowMultipleUpdates) {
     setUpdaterState(_Constants.UpdaterEvents.CHECKING_FOR_UPDATES);
     try {
       let installedAnything = false;
@@ -745,8 +746,8 @@ function setupAnalyticsEvents() {
 }
 function setupUpdaterEventsWithUpdater(updater) {
   _electron.app.on(_Constants.MenuEvents.CHECK_FOR_UPDATES, () => checkForUpdatesWithUpdater(updater));
-  _ipcMain.default.on(_Constants.UpdaterEvents.CHECK_FOR_UPDATES, () => {
-    return checkForUpdatesWithUpdater(updater);
+  _ipcMain.default.on(_Constants.UpdaterEvents.CHECK_FOR_UPDATES, (_evt, options) => {
+    return checkForUpdatesWithUpdater(updater, options);
   });
   _ipcMain.default.on(_Constants.UpdaterEvents.QUIT_AND_INSTALL, () => {
     saveWindowConfig(mainWindow);
