@@ -22,7 +22,7 @@
 | spellcheck | 1 |
 | utils | 3 |
 | vigilante | 1 |
-| voice | 3 |
+| voice | 4 |
 | zstd | 1 |
 
 ## branches
