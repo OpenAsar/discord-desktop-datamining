@@ -8,14 +8,14 @@ if (process.platform === 'linux') {
     process.env.PULSE_LATENCY_MSEC = '30';
   }
 }
-const buildInfo = require('./buildInfo');
 const analytics = require('../common/analytics');
-analytics.getDesktopTTI(buildInfo.releaseChannel).trackMainAppTimeToInit();
+analytics.getDesktopTTI().trackMainAppTimeToInit();
 const {
   app,
   session,
   Menu
 } = require('electron');
+const buildInfo = require('./buildInfo');
 const sentry = require('@sentry/electron');
 const logger = require('./logger');
 app.setVersion(buildInfo.version);
@@ -179,8 +179,10 @@ if (!allowMultipleInstances) {
   });
 }
 app.on('ready', () => {
+  let trackedNetErrQuicProtocol = false;
   session.defaultSession.webRequest.onErrorOccurred(details => {
-    if (details.error.includes('net::ERR_QUIC_PROTOCOL_ERROR')) {
+    if (!trackedNetErrQuicProtocol && details.error.includes('net::ERR_QUIC_PROTOCOL_ERROR')) {
+      trackedNetErrQuicProtocol = true;
       console.error(`WebRequest failed (${details.error}): '${details.method} ${details.url}'`);
       const sentry = crashReporterSetup.getGlobalSentry();
       if (sentry != null) {

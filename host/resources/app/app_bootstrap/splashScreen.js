@@ -18,7 +18,6 @@ var moduleUpdater = _interopRequireWildcard(require("../common/moduleUpdater"));
 var paths = _interopRequireWildcard(require("../common/paths"));
 var _securityUtils = require("../common/securityUtils");
 var _updater = require("../common/updater");
-var _buildInfo = _interopRequireDefault(require("./buildInfo"));
 var _ipcMain = _interopRequireDefault(require("./ipcMain"));
 var logger = _interopRequireWildcard(require("./logger"));
 var _Constants = _interopRequireDefault(require("./Constants"));
@@ -380,7 +379,7 @@ function destroySplash() {
     splashWindow.hide();
     splashWindow.close();
     splashWindow = null;
-    analytics.getDesktopTTI(_buildInfo.default.releaseChannel).trackSplashWindowDuration(splashInstalledUpdates);
+    analytics.getDesktopTTI().trackSplashWindowDuration(splashInstalledUpdates);
   }, 100);
 }
 function addModulesListener(event, listener) {
@@ -448,7 +447,7 @@ function launchSplashWindow(startMinimized, widevineCDM) {
       preload: _path.default.join(__dirname, 'splashScreenPreload.js')
     }
   };
-  analytics.getDesktopTTI(_buildInfo.default.releaseChannel).trackSplashWindowCreated();
+  analytics.getDesktopTTI().trackSplashWindowCreated();
   splashWindow = new _electron.BrowserWindow(windowConfig);
   splashWindow.webContents.on('console-message', logger.ipcMainRendererLogger);
   splashWindow.webContents.on('will-navigate', e => e.preventDefault());
