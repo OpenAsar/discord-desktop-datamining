@@ -10,6 +10,10 @@ let uncaughtExceptionHandler;
 function setUncaughtExceptionHandler(handler) {
   uncaughtExceptionHandler = handler;
 }
+let webAppLoaded = false;
+function setWebAppLoaded() {
+  webAppLoaded = true;
+}
 if (window.opener === null) {
   const {
     contextBridge,
@@ -21,6 +25,7 @@ if (window.opener === null) {
   const DiscordNative = {
     isRenderer: process.type === 'renderer',
     setUncaughtExceptionHandler,
+    setWebAppLoaded,
     nativeModules: require('./discord_native/renderer/nativeModules'),
     process: require('./discord_native/renderer/process'),
     os: require('./discord_native/renderer/os'),
@@ -65,6 +70,11 @@ if (window.opener === null) {
         return browser.makeMultiplexedTransport(browser.makeFetchTransport, dsnFunc);
       }
     });
+    setTimeout(() => {
+      if (!webAppLoaded) {
+        sentry.captureMessage('WebApp timed out loading (timeout=60s)');
+      }
+    }, 60000);
   }
   contextBridge.exposeInMainWorld('DiscordNative', DiscordNative);
   process.once('loaded', () => {
