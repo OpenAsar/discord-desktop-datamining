@@ -150,3 +150,10 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_SET_FOCUSABLE, (
   }
   return Promise.resolve();
 });
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_SHOW_INACTIVE, (_, key) => {
+  const win = injectedGetWindow(key);
+  if (win != null) {
+    win.showInactive();
+  }
+  return Promise.resolve();
+});

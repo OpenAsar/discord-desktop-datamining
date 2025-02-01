@@ -157,9 +157,6 @@ function setupPopout(popoutWindow, key, options, webappEndpoint) {
     popoutWindow.on('will-resize', event => {
       event.preventDefault();
     });
-    popoutWindow.webContents.once('did-finish-load', () => {
-      popoutWindow.showInactive();
-    });
   }
   popoutWindow.windowKey = key;
   popoutWindows[popoutWindow.windowKey] = popoutWindow;
