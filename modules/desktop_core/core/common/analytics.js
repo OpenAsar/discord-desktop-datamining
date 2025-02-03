@@ -256,15 +256,9 @@ class DesktopTTIAnalytics {
 }
 exports.DesktopTTIAnalytics = DesktopTTIAnalytics;
 let desktopTTIInstance = null;
-function getDesktopTTI(releaseChannel) {
+function getDesktopTTI() {
   if (desktopTTIInstance === null) {
-    let enablePushingEvents = true;
-    if (releaseChannel != null) {
-      if (releaseChannel === 'stable') {
-        enablePushingEvents = Math.random() < 0.02;
-      }
-    }
-    desktopTTIInstance = new DesktopTTIAnalytics(enablePushingEvents);
+    desktopTTIInstance = new DesktopTTIAnalytics(true);
   }
   return desktopTTIInstance;
 }
