@@ -47,6 +47,7 @@ const envVariables = {
   webappEndpoint: process.env.DISCORD_WEBAPP_ENDPOINT,
   test: undefined
 };
+let webAppLoaded = false;
 function checkCanMigrate() {
   return _fs.default.existsSync(_path.default.join(_paths.paths.getUserData(), 'userDataCache.json'));
 }
@@ -293,6 +294,14 @@ const loadMainPage = () => {
   _bootstrapModules.analytics === null || _bootstrapModules.analytics === void 0 ? void 0 : (_analytics$getDesktop = _bootstrapModules.analytics.getDesktopTTI) === null || _analytics$getDesktop === void 0 ? void 0 : _analytics$getDesktop.call(_bootstrapModules.analytics).trackMainWindowLoadStart();
   lastPageLoadFailed = false;
   mainWindow.loadURL(URL_TO_LOAD);
+  setTimeout(() => {
+    if (!webAppLoaded) {
+      const sentry = _crashReporterSetup.crashReporterSetup.getGlobalSentry();
+      if (sentry != null) {
+        sentry.captureMessage('WebApp timed out loading (timeout=60s)');
+      }
+    }
+  }, 60000);
 };
 const DEFAULT_BACKGROUND_COLOR = '#2f3136';
 const BACKGROUND_COLOR_KEY = 'BACKGROUND_COLOR';
@@ -742,6 +751,9 @@ function setupAnalyticsEvents() {
     }
     a.trackMainWindowJSAppLoadDuration();
     a.trackFullTTI();
+  });
+  _ipcMain.default.on(_Constants.AnalyticsEvents.APP_LOADED, () => {
+    webAppLoaded = true;
   });
 }
 function setupUpdaterEventsWithUpdater(updater) {
