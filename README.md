@@ -7,8 +7,8 @@
 | module | version |
 | ------ | :-----: |
 | cloudsync | 1 |
-| desktop_core | 1 |
-| desktop_overlay | 1 |
+| desktop_core | 2 |
+| desktop_overlay | 2 |
 | dispatch | 1 |
 | erlpack | 1 |
 | game_utils | 1 |
