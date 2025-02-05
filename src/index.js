@@ -7,6 +7,7 @@ global.LATEST_ONLY = true;
 const modules = [
   'host',
   'desktop_core',
+  'desktop_overlay',
   'krisp',
   'dispatch',
   'utils',
@@ -18,6 +19,7 @@ const modules = [
   'overlay2',
   'game_utils',
   'voice',
+  'voice_filters',
   'vigilante',
   'rpc',
   'erlpack',
