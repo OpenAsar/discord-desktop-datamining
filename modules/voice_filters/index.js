@@ -17,8 +17,18 @@ if (isElectronRenderer) {
   }
 }
 
+const isLogDirAvailable = window?.DiscordNative?.fileManager?.getAndCreateLogDirectorySync;
+let initializationParams;
+if (isLogDirAvailable) {
+  const logDirectory = window.DiscordNative.fileManager.getAndCreateLogDirectorySync(window);
+  const logLevel = window.DiscordNative.fileManager.logLevelSync(window);
+  initializationParams = {logDirectory, logLevel};
+} else {
+  console.warn('Unable to find log directory');
+}
+
 console.info('Initializing voice filters module');
-VoiceFiltersModule._initialize();
+VoiceFiltersModule._initialize(initializationParams);
 
 VoiceFiltersModule.setVoiceFilter = (voiceParams) =>
   new Promise((resolve, reject) =>
