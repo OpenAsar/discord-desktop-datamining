@@ -40,6 +40,7 @@ exports.readLogFiles = readLogFiles;
 exports.saveWithDialog = saveWithDialog;
 exports.showItemInFolder = showItemInFolder;
 exports.showOpenDialog = showOpenDialog;
+exports.stopDownloads = stopDownloads;
 exports.uploadDiscordHookCrashes = uploadDiscordHookCrashes;
 var _fs = _interopRequireDefault(require("fs"));
 var _nodeDownloaderHelper = require("node-downloader-helper");
@@ -93,6 +94,7 @@ async function showOpenDialog({
   });
   return results.filePaths;
 }
+const downloaders = [];
 async function maybeDownloadVoiceFilterFile(cdnURL, fileName, onProgress) {
   if (!cdnURL.startsWith('https://cdn.discordapp.com/assets/content')) {
     throw new Error('Invalid CDN URL');
@@ -126,6 +128,7 @@ async function maybeDownloadVoiceFilterFile(cdnURL, fileName, onProgress) {
     removeOnFail: false,
     progressThrottle: 200
   });
+  downloaders.push(new WeakRef(dl));
   return new Promise((resolve, reject) => {
     dl.on('end', ({
       incomplete
@@ -150,8 +153,18 @@ async function maybeDownloadVoiceFilterFile(cdnURL, fileName, onProgress) {
     });
     dl.on('timeout', () => reject(new Error('timeout')));
     dl.on('error', reject);
+    dl.on('stop', () => reject({
+      USER_CANCELED_DOWNLOAD: true
+    }));
     dl.start().catch(reject);
   });
+}
+function stopDownloads() {
+  while (downloaders.length > 0) {
+    var _downloaders$pop;
+    const dl = (_downloaders$pop = downloaders.pop()) === null || _downloaders$pop === void 0 ? void 0 : _downloaders$pop.deref();
+    void (dl === null || dl === void 0 ? void 0 : dl.stop());
+  }
 }
 function getAndCreateLogDirectorySync() {
   let logDir = null;
