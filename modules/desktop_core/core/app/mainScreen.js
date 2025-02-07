@@ -393,7 +393,7 @@ function launchMainAppWindow(isVisible) {
           return (0, _securityUtils.checkUrlOriginMatches)(details.embeddingOrigin, WEBAPP_ENDPOINT);
         }
       case 'media':
-        return (0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, _Constants.AllowedMediaOrigins.K_ID);
+        return (0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, _Constants.AllowedMediaOrigins.K_ID) || (0, _securityUtils.checkUrlOriginMatches)(requestingOrigin, WEBAPP_ENDPOINT);
     }
     return false;
   });
