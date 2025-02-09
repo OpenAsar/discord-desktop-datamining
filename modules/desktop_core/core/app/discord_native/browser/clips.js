@@ -87,7 +87,7 @@ async function loadClip(filename) {
   try {
     verifyHasMP4Extension(filename);
     const result = await (0, _fileutils.readFulfilledFiles)([filename], MAX_LENGTH, true);
-    const buffer = result[0].data;
+    const buffer = Buffer.from(result[0].data);
     verifyIsMP4(buffer);
     verifyValidClip(buffer);
     return result[0];
