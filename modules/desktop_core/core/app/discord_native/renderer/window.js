@@ -23,6 +23,7 @@ exports.setFocusable = setFocusable;
 exports.setMinimumSize = setMinimumSize;
 exports.setProgressBar = setProgressBar;
 exports.setZoomFactor = setZoomFactor;
+exports.showInactive = showInactive;
 exports.supportsContentProtection = supportsContentProtection;
 var _electron = _interopRequireDefault(require("electron"));
 var _processUtils = require("../../../common/processUtils");
@@ -58,6 +59,9 @@ function setAlwaysOnTop(key, enabled) {
 }
 function isAlwaysOnTop(key) {
   return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.WINDOW_IS_ALWAYS_ON_TOP, key);
+}
+function showInactive(key) {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.WINDOW_SHOW_INACTIVE, key);
 }
 function blur(key) {
   return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.WINDOW_BLUR, key);

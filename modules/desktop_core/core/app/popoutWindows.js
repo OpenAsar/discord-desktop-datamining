@@ -16,7 +16,7 @@ var _path = _interopRequireDefault(require("path"));
 var _securityUtils = require("../common/securityUtils");
 var _appFeatures = require("./appFeatures");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-const ALLOWED_FEATURES = ['width', 'height', 'left', 'top', 'resizable', 'movable', 'alwaysOnTop', 'frame', 'transparent', 'hasShadow', 'closable', 'skipTaskbar', 'backgroundColor', 'menubar', 'toolbar', 'location', 'directories', 'titleBarStyle', 'outOfProcessOverlay'];
+const ALLOWED_FEATURES = ['width', 'height', 'left', 'top', 'resizable', 'movable', 'alwaysOnTop', 'frame', 'transparent', 'hasShadow', 'closable', 'skipTaskbar', 'backgroundColor', 'menubar', 'toolbar', 'location', 'directories', 'titleBarStyle', 'outOfProcessOverlay', 'focusable'];
 const MIN_POPOUT_WIDTH = 320;
 const MIN_POPOUT_HEIGHT = 180;
 const DEFAULT_POPOUT_OPTIONS = {
@@ -156,9 +156,6 @@ function setupPopout(popoutWindow, key, options, webappEndpoint) {
   if (options.outOfProcessOverlay) {
     popoutWindow.on('will-resize', event => {
       event.preventDefault();
-    });
-    popoutWindow.webContents.once('did-finish-load', () => {
-      popoutWindow.showInactive();
     });
   }
   popoutWindow.windowKey = key;
