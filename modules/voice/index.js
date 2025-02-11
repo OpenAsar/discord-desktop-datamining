@@ -46,8 +46,11 @@ if (isLogDirAvailable) {
   console.warn('Unable to find log directory');
 }
 
+const defaultAudioSubsystem = process.platform === 'win32' ? 'experimental' : 'standard';
 const useLegacyAudioDevice = appSettings ? appSettings.getSync('useLegacyAudioDevice') : false;
-const audioSubsystemSelected = appSettings ? appSettings.getSync('audioSubsystem', 'standard') : 'standard';
+const audioSubsystemSelected = appSettings
+  ? appSettings.getSync('audioSubsystem', defaultAudioSubsystem)
+  : defaultAudioSubsystem;
 const audioSubsystem = useLegacyAudioDevice || audioSubsystemSelected;
 const debugLogging = appSettings ? appSettings.getSync('debugLogging', true) : true;
 
@@ -316,7 +319,7 @@ const setAudioSubsystemInternal = function (subsystem, forceRestart) {
       }
       window.DiscordNative.app.relaunch();
     } else {
-      console.log(`deffering audio subsystem switch to ${subsystem} until next restart`);
+      console.log(`Deferring audio subsystem switch to ${subsystem} until next restart.`);
     }
   }
 };
