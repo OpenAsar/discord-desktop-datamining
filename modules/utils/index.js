@@ -6,6 +6,7 @@ const {inputCaptureSetWatcher, inputCaptureRegisterElement} = require('./input_c
 const {wrapInputEventRegister, wrapInputEventUnregister} = require('./input_event');
 const {getDoNotDisturb, getSessionState} = require('macos-notification-state');
 const {getNotificationState} = require('windows-notification-state');
+const {getIsQuietHours} = require('windows-quiet-hours');
 
 module.exports = require('./discord_utils.node');
 module.exports.clearCandidateGamesCallback = module.exports.setCandidateGamesCallback;
@@ -118,6 +119,7 @@ module.exports.shouldDisplayNotifications = () => {
   }
 
   if (process.platform === 'win32') {
+    dnd = getIsQuietHours();
     const state = getNotificationState();
     shouldDisplay = state === 'QUNS_ACCEPTS_NOTIFICATIONS' || state === 'QUNS_APP';
   }

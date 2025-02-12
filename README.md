@@ -19,8 +19,8 @@
 | overlay2 | 1 |
 | rpc | 1 |
 | sekrit | 1 |
-| spellcheck | 2 |
-| utils | 2 |
+| spellcheck | 3 |
+| utils | 3 |
 | vigilante | 1 |
 | voice | 5 |
 | voice_filters | 1 |
