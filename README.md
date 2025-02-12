@@ -23,7 +23,7 @@
 | utils | 2 |
 | vigilante | 1 |
 | voice | 1 |
-| voice_filters | 1 |
+| voice_filters | 2 |
 | zstd | 1 |
 
 ## branches
