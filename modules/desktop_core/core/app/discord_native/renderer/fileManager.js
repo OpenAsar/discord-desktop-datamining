@@ -61,12 +61,13 @@ function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 const uploadHookCrashSequence = (0, _utils.createLock)();
 const combineWebRtcLogsSequence = (0, _utils.createLock)();
-async function saveWithDialog(fileContents, fileName) {
+async function saveWithDialog(fileContents, fileName, defaultDirectory) {
   if ((0, _files.containsInvalidFileChar)(fileName)) {
     throw new Error('fileName has invalid characters');
   }
+  const defaultPath = defaultDirectory != null && defaultDirectory !== '' ? defaultDirectory : await (0, _paths.getPath)('downloads');
   const options = {
-    defaultPath: _path.default.join(await (0, _paths.getPath)('downloads'), fileName)
+    defaultPath: _path.default.join(defaultPath, fileName)
   };
   const extension = _path.default.extname(fileName);
   if (extension != null && extension !== '' && extension !== '.') {
@@ -82,7 +83,9 @@ async function saveWithDialog(fileContents, fileName) {
   const results = await _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.FILE_MANAGER_SHOW_SAVE_DIALOG, options);
   if (results != null && results.filePath != null) {
     _fs.default.writeFileSync(results.filePath, fileContents);
+    return _path.default.dirname(results.filePath);
   }
+  return null;
 }
 async function showOpenDialog({
   filters,
