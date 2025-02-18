@@ -8,7 +8,8 @@ function mapDiscordDesktopCaptureSourcesToElectron(options) {
   const types = options.types.filter(type => requiredTypes.includes(type.toLocaleLowerCase())).map(type => type.toLocaleLowerCase());
   return {
     types,
-    thumbnailSize: options.thumbnailSize
+    thumbnailSize: options.thumbnailSize,
+    fetchWindowIcons: true
   };
 }
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.DESKTOP_CAPTURER_GET_SOURCES, (_, opts) => {

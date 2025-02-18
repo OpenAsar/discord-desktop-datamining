@@ -83,12 +83,12 @@ function readFiles(filepaths, dataMaxSize, shouldGzip) {
       if (stats.size > fileMaxSize) {
         throw resultError;
       }
-      const buffer = Buffer.alloc(stats.size);
+      const buffer = new Uint8Array(stats.size);
       const data = await promiseFs.read(handle, buffer, 0, stats.size, 0);
-      let finalData = data.buffer.slice(0, data.bytesRead);
+      let finalData = new Uint8Array(data.buffer.slice(0, data.bytesRead));
       if (willGzip) {
         try {
-          finalData = await promiseZlib.gzip(finalData);
+          finalData = new Uint8Array(await promiseZlib.gzip(finalData));
           finalFilename = finalFilename + '.gz';
           if (finalData.byteLength > dataMaxSize) {
             throw resultError;

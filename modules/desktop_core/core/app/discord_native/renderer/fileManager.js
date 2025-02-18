@@ -40,6 +40,7 @@ exports.readLogFiles = readLogFiles;
 exports.saveWithDialog = saveWithDialog;
 exports.showItemInFolder = showItemInFolder;
 exports.showOpenDialog = showOpenDialog;
+exports.stopVoiceFilterDownloads = stopVoiceFilterDownloads;
 exports.uploadDiscordHookCrashes = uploadDiscordHookCrashes;
 var _fs = _interopRequireDefault(require("fs"));
 var _nodeDownloaderHelper = require("node-downloader-helper");
@@ -60,12 +61,13 @@ function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 const uploadHookCrashSequence = (0, _utils.createLock)();
 const combineWebRtcLogsSequence = (0, _utils.createLock)();
-async function saveWithDialog(fileContents, fileName) {
+async function saveWithDialog(fileContents, fileName, defaultDirectory) {
   if ((0, _files.containsInvalidFileChar)(fileName)) {
     throw new Error('fileName has invalid characters');
   }
+  const defaultPath = defaultDirectory != null && defaultDirectory !== '' ? defaultDirectory : await (0, _paths.getPath)('downloads');
   const options = {
-    defaultPath: _path.default.join(await (0, _paths.getPath)('downloads'), fileName)
+    defaultPath: _path.default.join(defaultPath, fileName)
   };
   const extension = _path.default.extname(fileName);
   if (extension != null && extension !== '' && extension !== '.') {
@@ -81,7 +83,9 @@ async function saveWithDialog(fileContents, fileName) {
   const results = await _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.FILE_MANAGER_SHOW_SAVE_DIALOG, options);
   if (results != null && results.filePath != null) {
     _fs.default.writeFileSync(results.filePath, fileContents);
+    return _path.default.dirname(results.filePath);
   }
+  return null;
 }
 async function showOpenDialog({
   filters,
@@ -93,6 +97,7 @@ async function showOpenDialog({
   });
   return results.filePaths;
 }
+const voiceFilterDownloaders = [];
 async function maybeDownloadVoiceFilterFile(cdnURL, fileName, onProgress) {
   if (!cdnURL.startsWith('https://cdn.discordapp.com/assets/content')) {
     throw new Error('Invalid CDN URL');
@@ -126,6 +131,7 @@ async function maybeDownloadVoiceFilterFile(cdnURL, fileName, onProgress) {
     removeOnFail: false,
     progressThrottle: 200
   });
+  voiceFilterDownloaders.push(new WeakRef(dl));
   return new Promise((resolve, reject) => {
     dl.on('end', ({
       incomplete
@@ -150,8 +156,18 @@ async function maybeDownloadVoiceFilterFile(cdnURL, fileName, onProgress) {
     });
     dl.on('timeout', () => reject(new Error('timeout')));
     dl.on('error', reject);
+    dl.on('stop', () => reject({
+      USER_CANCELED_DOWNLOAD: true
+    }));
     dl.start().catch(reject);
   });
+}
+function stopVoiceFilterDownloads() {
+  while (voiceFilterDownloaders.length > 0) {
+    var _voiceFilterDownloade;
+    const dl = (_voiceFilterDownloade = voiceFilterDownloaders.pop()) === null || _voiceFilterDownloade === void 0 ? void 0 : _voiceFilterDownloade.deref();
+    void (dl === null || dl === void 0 ? void 0 : dl.stop());
+  }
 }
 function getAndCreateLogDirectorySync() {
   let logDir = null;
