@@ -36,7 +36,9 @@ VoiceFiltersModule.setVoiceFilter = (voiceParams) =>
   );
 
 VoiceFiltersModule.setupResources = () =>
-  new Promise((resolve) => VoiceFiltersModule._setupResources(dataDirectory, resolve));
+  new Promise((resolve, reject) =>
+    VoiceFiltersModule._setupResources(dataDirectory, resolve, (msg) => reject(new Error(msg))),
+  );
 
 VoiceFiltersModule.fetchCatalog = (token, superProperties) =>
   new Promise((resolve, reject) =>
