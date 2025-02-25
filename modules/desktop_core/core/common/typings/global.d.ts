@@ -11,6 +11,7 @@ declare global {
   var logPath: string | undefined;
   var moduleDataPath: string | undefined;
   var modulePath: string | undefined;
+  var assetCachePath: string | undefined;
   var popouts: Map<string, Window>;
   var releaseChannel: string | undefined;
 }

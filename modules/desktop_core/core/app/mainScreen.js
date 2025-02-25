@@ -47,6 +47,7 @@ const envVariables = {
   webappEndpoint: process.env.DISCORD_WEBAPP_ENDPOINT,
   test: undefined
 };
+let webAppLoaded = false;
 function checkCanMigrate() {
   return _fs.default.existsSync(_path.default.join(_paths.paths.getUserData(), 'userDataCache.json'));
 }
@@ -293,6 +294,14 @@ const loadMainPage = () => {
   _bootstrapModules.analytics === null || _bootstrapModules.analytics === void 0 ? void 0 : (_analytics$getDesktop = _bootstrapModules.analytics.getDesktopTTI) === null || _analytics$getDesktop === void 0 ? void 0 : _analytics$getDesktop.call(_bootstrapModules.analytics).trackMainWindowLoadStart();
   lastPageLoadFailed = false;
   mainWindow.loadURL(URL_TO_LOAD);
+  setTimeout(() => {
+    if (!webAppLoaded) {
+      const sentry = _crashReporterSetup.crashReporterSetup.getGlobalSentry();
+      if (sentry != null) {
+        sentry.captureMessage('WebApp timed out loading (timeout=60s)');
+      }
+    }
+  }, 60000);
 };
 const DEFAULT_BACKGROUND_COLOR = '#2f3136';
 const BACKGROUND_COLOR_KEY = 'BACKGROUND_COLOR';
@@ -384,7 +393,7 @@ function launchMainAppWindow(isVisible) {
           return (0, _securityUtils.checkUrlOriginMatches)(details.embeddingOrigin, WEBAPP_ENDPOINT);
         }
       case 'media':
-        return (0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, _Constants.AllowedMediaOrigins.K_ID);
+        return (0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, _Constants.AllowedMediaOrigins.K_ID) || (0, _securityUtils.checkUrlOriginMatches)(requestingOrigin, WEBAPP_ENDPOINT);
     }
     return false;
   });
@@ -670,8 +679,9 @@ function setMainWindowTitle(title) {
     mainWindow.setTitle(title);
   }
 }
-async function checkForUpdatesWithUpdater(updater) {
-  if (updaterState === _Constants.UpdaterEvents.UPDATE_NOT_AVAILABLE) {
+async function checkForUpdatesWithUpdater(updater, options) {
+  const allowMultipleUpdates = (options === null || options === void 0 ? void 0 : options.allowMultipleUpdates) ?? false;
+  if (updaterState === _Constants.UpdaterEvents.UPDATE_NOT_AVAILABLE || allowMultipleUpdates) {
     setUpdaterState(_Constants.UpdaterEvents.CHECKING_FOR_UPDATES);
     try {
       let installedAnything = false;
@@ -742,11 +752,14 @@ function setupAnalyticsEvents() {
     a.trackMainWindowJSAppLoadDuration();
     a.trackFullTTI();
   });
+  _ipcMain.default.on(_Constants.AnalyticsEvents.APP_LOADED, () => {
+    webAppLoaded = true;
+  });
 }
 function setupUpdaterEventsWithUpdater(updater) {
   _electron.app.on(_Constants.MenuEvents.CHECK_FOR_UPDATES, () => checkForUpdatesWithUpdater(updater));
-  _ipcMain.default.on(_Constants.UpdaterEvents.CHECK_FOR_UPDATES, () => {
-    return checkForUpdatesWithUpdater(updater);
+  _ipcMain.default.on(_Constants.UpdaterEvents.CHECK_FOR_UPDATES, (_evt, options) => {
+    return checkForUpdatesWithUpdater(updater, options);
   });
   _ipcMain.default.on(_Constants.UpdaterEvents.QUIT_AND_INSTALL, () => {
     saveWindowConfig(mainWindow);

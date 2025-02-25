@@ -38,6 +38,7 @@ const sentryConfig = {
 crashReporterSetup.init(buildInfo, sentryConfig);
 global.moduleDataPath = paths.getModuleDataPath();
 global.logPath = paths.getLogPath();
+global.assetCachePath = paths.getAssetCachePath();
 const appSettings = require('./appSettings');
 appSettings.init();
 const Constants = require('./Constants');
@@ -179,8 +180,10 @@ if (!allowMultipleInstances) {
   });
 }
 app.on('ready', () => {
+  let trackedNetErrQuicProtocol = false;
   session.defaultSession.webRequest.onErrorOccurred(details => {
-    if (details.error.includes('net::ERR_QUIC_PROTOCOL_ERROR')) {
+    if (!trackedNetErrQuicProtocol && details.error.includes('net::ERR_QUIC_PROTOCOL_ERROR')) {
+      trackedNetErrQuicProtocol = true;
       console.error(`WebRequest failed (${details.error}): '${details.method} ${details.url}'`);
       const sentry = crashReporterSetup.getGlobalSentry();
       if (sentry != null) {

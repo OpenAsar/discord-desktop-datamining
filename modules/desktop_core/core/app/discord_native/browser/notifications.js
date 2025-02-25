@@ -23,7 +23,7 @@ function sendToAllWindows(channel, ...args) {
     }
   });
 }
-if (_utils.isOSX && majorVersion >= 18 && moduleDataPath != null) {
+if (_utils.isOSX && majorVersion >= 21 && moduleDataPath != null) {
   try {
     const modulePath = _path.default.join(moduleDataPath, 'discord_notifications');
     const lib = require(modulePath);

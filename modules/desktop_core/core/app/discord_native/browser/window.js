@@ -143,3 +143,17 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_SET_MINIMUM_SIZE
   }
   return Promise.resolve();
 });
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_SET_FOCUSABLE, (_, key, enabled) => {
+  const win = injectedGetWindow(key);
+  if (win != null) {
+    win.setFocusable(enabled);
+  }
+  return Promise.resolve();
+});
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_SHOW_INACTIVE, (_, key) => {
+  const win = injectedGetWindow(key);
+  if (win != null) {
+    win.showInactive();
+  }
+  return Promise.resolve();
+});
