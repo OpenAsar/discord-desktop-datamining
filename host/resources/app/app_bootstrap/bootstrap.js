@@ -38,7 +38,6 @@ const sentryConfig = {
 crashReporterSetup.init(buildInfo, sentryConfig);
 global.moduleDataPath = paths.getModuleDataPath();
 global.logPath = paths.getLogPath();
-global.assetCachePath = paths.getAssetCachePath();
 const appSettings = require('./appSettings');
 appSettings.init();
 const Constants = require('./Constants');

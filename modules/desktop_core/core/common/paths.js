@@ -4,7 +4,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.cleanOldVersions = cleanOldVersions;
-exports.getAssetCachePath = getAssetCachePath;
 exports.getInstallPath = getInstallPath;
 exports.getLogPath = getLogPath;
 exports.getModuleDataPath = getModuleDataPath;
@@ -22,7 +21,6 @@ let userDataPath = null;
 let userDataVersionedPath = null;
 let resourcesPath = null;
 let moduleDataPath = null;
-let assetCachePath = null;
 let logPath = null;
 let installPath = null;
 function determineAppUserDataRoot() {
@@ -83,7 +81,6 @@ function init(buildInfo) {
   } else {
     moduleDataPath = _path.default.join(userDataVersionedPath, 'modules');
   }
-  assetCachePath = _path.default.join(userDataPath, 'discord_asset_cache');
   logPath = _path.default.join(userDataPath, 'logs');
   _mkdirp.default.sync(logPath);
   const exeDir = _path.default.dirname(app.getPath('exe'));
@@ -102,9 +99,6 @@ function getResources() {
 }
 function getModuleDataPath() {
   return moduleDataPath;
-}
-function getAssetCachePath() {
-  return assetCachePath;
 }
 function getLogPath() {
   return logPath;

@@ -23,14 +23,10 @@ Object.defineProperty(exports, "extname", {
   }
 });
 exports.getAndCreateLogDirectorySync = getAndCreateLogDirectorySync;
-exports.getAssetCachePath = getAssetCachePath;
-exports.getAssetCachePathSync = getAssetCachePathSync;
 exports.getLogPath = getLogPath;
 exports.getLogPathSync = getLogPathSync;
 exports.getModuleDataPathSync = getModuleDataPathSync;
 exports.getModulePath = getModulePath;
-exports.getVoiceFilterDataDir = getVoiceFilterDataDir;
-exports.getVoiceFilterDataDirSync = getVoiceFilterDataDirSync;
 Object.defineProperty(exports, "join", {
   enumerable: true,
   get: function () {
@@ -109,7 +105,9 @@ async function maybeDownloadVoiceFilterFile(cdnURL, fileName, onProgress) {
   if ((0, _files.containsInvalidFileChar)(fileName)) {
     throw new Error('fileName has invalid characters');
   }
-  const voiceFiltersDataPath = await getVoiceFilterDataDir();
+  const modulePath = await getModulePath();
+  const voiceFiltersPath = _path.default.join(modulePath, 'discord_voice_filters');
+  const voiceFiltersDataPath = _path.default.join(voiceFiltersPath, 'data');
   await (0, _promises.mkdir)(voiceFiltersDataPath, {
     recursive: true
   });
@@ -324,13 +322,6 @@ async function openFiles(dialogOptions, maxSize) {
   const filenames = await showOpenDialog(dialogOptions);
   return (0, _fileutils.readFulfilledFiles)(filenames, maxSize, true);
 }
-async function getVoiceFilterDataDir() {
-  const assetCachePath = await getAssetCachePath();
-  return _path.default.join(assetCachePath, 'voice_filters');
-}
-function getVoiceFilterDataDirSync() {
-  return _path.default.join(getAssetCachePathSync(), 'voice_filters');
-}
 function getModulePath() {
   return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.FILE_MANAGER_GET_MODULE_PATH);
 }
@@ -342,10 +333,4 @@ function getLogPath() {
 }
 function getLogPathSync() {
   return _DiscordIPC.DiscordIPC.renderer.sendSync(_DiscordIPC.IPCEvents.FILE_MANAGER_GET_MODULE_LOG_PATH_SYNC);
-}
-function getAssetCachePath() {
-  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.FILE_MANAGER_GET_ASSET_CACHE_PATH);
-}
-function getAssetCachePathSync() {
-  return _DiscordIPC.DiscordIPC.renderer.sendSync(_DiscordIPC.IPCEvents.FILE_MANAGER_GET_ASSET_CACHE_PATH_SYNC);
 }
