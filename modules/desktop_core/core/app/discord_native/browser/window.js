@@ -12,6 +12,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 let injectedGetWindow = () => null;
 let injectedGetAllWindows = () => [];
 let contentProtectionEnabled = false;
+const windowContentProtectionOverride = new Set();
 function injectGetWindow(getWindow, getAllWindows) {
   injectedGetWindow = getWindow;
   injectedGetAllWindows = getAllWindows;
@@ -118,11 +119,27 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_SET_CONTENT_PROT
   const windows = injectedGetAllWindows();
   for (const window of windows) {
     if (window != null) {
-      window.setContentProtection(enabled);
-      console.log(`window: WINDOW_SET_CONTENT_PROTCTION ${window.id} = ${enabled}`);
+      if (!windowContentProtectionOverride.has(window.id)) {
+        window.setContentProtection(enabled);
+        console.log(`window: WINDOW_SET_CONTENT_PROTCTION ${window.id} = ${enabled}`);
+      }
     }
   }
   contentProtectionEnabled = enabled;
+  return Promise.resolve();
+});
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_SET_WINDOW_CONTENT_PROTECTION, (_, key, enabled) => {
+  const window = injectedGetWindow(key);
+  if (window != null) {
+    if (enabled) {
+      windowContentProtectionOverride.add(window.id);
+    } else {
+      windowContentProtectionOverride.delete(window.id);
+    }
+    const combinedEnabled = enabled || contentProtectionEnabled;
+    window.setContentProtection(combinedEnabled);
+    console.log(`window: WINDOW_SET_WINDOW_CONTENT_PROTECTION ${key} ${window.id} = ${combinedEnabled}`);
+  }
   return Promise.resolve();
 });
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_GET_NATIVE_HANDLE, (_, key) => {
