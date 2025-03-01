@@ -146,6 +146,11 @@ const updater = require('../common/updater');
 let coreModule;
 const allowMultipleInstances = hasArgvFlag('--multi-instance');
 const isFirstInstance = allowMultipleInstances ? true : app.requestSingleInstanceLock();
+const exitImmediately = hasArgvFlag('--exit-immediately');
+if (exitImmediately) {
+  console.log('--exit-immediately flag found.  Exiting immediately.');
+  app.exit(0);
+}
 function extractUrlFromArgs(args) {
   const urlArgIndex = args.indexOf('--url');
   if (urlArgIndex < 0) {
