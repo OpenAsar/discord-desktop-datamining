@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
 
 const VoiceFiltersModule = require('./discord_voice_filters.node');
-const path = require('path');
 
 const isElectronRenderer = window?.DiscordNative?.isRenderer != null;
 
@@ -9,8 +8,8 @@ let dataDirectory;
 if (isElectronRenderer) {
   try {
     dataDirectory =
-      isElectronRenderer && window.DiscordNative.fileManager.getModuleDataPathSync
-        ? path.join(window.DiscordNative.fileManager.getModuleDataPathSync(), 'discord_voice_filters', 'data')
+      isElectronRenderer && window.DiscordNative.fileManager.getVoiceFilterDataDirSync
+        ? window.DiscordNative.fileManager.getVoiceFilterDataDirSync()
         : null;
   } catch (e) {
     console.error('Failed to get voice filters data directory: ', e);
