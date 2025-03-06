@@ -1,5 +1,8 @@
 const util = require('util');
-const exec = util.promisify(require('child_process').exec);
+const childProcess = require('child_process');
+const execFile = util.promisify(childProcess.execFile);
+const readline = require('node:readline');
+const EventEmitter = require('node:events');
 const fs = require('fs');
 const path = require('path');
 const {inputCaptureSetWatcher, inputCaptureRegisterElement} = require('./input_capture');
@@ -7,6 +10,8 @@ const {wrapInputEventRegister, wrapInputEventUnregister} = require('./input_even
 const {getDoNotDisturb, getSessionState} = require('macos-notification-state');
 const {getNotificationState} = require('windows-notification-state');
 const {getIsQuietHours} = require('windows-quiet-hours');
+
+/* eslint-disable no-console */
 
 module.exports = require('./discord_utils.node');
 module.exports.clearCandidateGamesCallback = module.exports.setCandidateGamesCallback;
@@ -72,12 +77,111 @@ module.exports.getGPUDriverVersions = async () => {
   const nvidiaSmiPath = `"${process.env['SystemRoot']}/System32/nvidia-smi.exe"`;
 
   try {
-    result.nvidia = parseNvidiaSmiOutput(await exec(nvidiaSmiPath));
+    result.nvidia = parseNvidiaSmiOutput(await execFile(nvidiaSmiPath, {windowsHide: true}));
   } catch (e) {
     result.nvidia = {error: e.toString()};
   }
 
   return result;
+};
+
+function warpCliPaths() {
+  if (process.platform === 'darwin') {
+    return ['/usr/local/bin/warp-cli'];
+  } else if (process.platform === 'win32') {
+    const programFiles = process.env['ProgramFiles'];
+    if (programFiles == null) {
+      return [];
+    } else {
+      return [programFiles + '\\Cloudflare\\Cloudflare WARP\\warp-cli.exe'];
+    }
+  } else {
+    return ['/usr/bin/warp-cli', '/usr/local/bin/warp-cli'];
+  }
+}
+
+let warpCliPath = undefined;
+
+function findWarpCli() {
+  if (warpCliPath == null) {
+    for (const p of warpCliPaths()) {
+      try {
+        fs.accessSync(p, fs.constants.R_OK | fs.constants.X_OK);
+        warpCliPath = p;
+        break;
+      } catch {}
+    }
+  }
+
+  if (warpCliPath == null) {
+    throw new Error('Failed to locate warp-cli');
+  }
+
+  return warpCliPath;
+}
+
+module.exports.runWarpCommand = async (command) => {
+  const warpCliPath = findWarpCli();
+
+  const allowedCommands = {
+    connect: [],
+    disconnect: [],
+    status: [],
+  };
+
+  if (!Object.hasOwn(allowedCommands, command)) {
+    throw new Error('Illegal command');
+  }
+
+  const args = ['-j', '--accept-tos', command];
+
+  const subprocess = await execFile(warpCliPath, args, {windowsHide: true});
+  if (subprocess?.stdout == null) {
+    throw new Error('Got no stdout');
+  }
+  return JSON.parse(subprocess.stdout);
+};
+
+let warpListenerSubprocess;
+const warpEventEmitter = new EventEmitter();
+let warpEmitterStartTime = performance.now();
+
+function startWarpListener() {
+  if (warpListenerSubprocess != null) {
+    return;
+  }
+
+  const now = performance.now();
+  if (warpEmitterStartTime != null && warpEmitterStartTime > now - 10 * 1000) {
+    // Don't just relaunch in a loop
+    return;
+  }
+  warpEmitterStartTime = now;
+
+  const warpCliPath = findWarpCli();
+
+  warpListenerSubprocess = childProcess.spawn(warpCliPath, ['-j', '-l', '--accept-tos', 'status'], {
+    windowsHide: true,
+    stdio: ['ignore', 'pipe', 'ignore'],
+  });
+  warpListenerSubprocess.on('exit', () => {
+    warpListenerSubprocess = null;
+    startWarpListener();
+  });
+  const rl = readline.createInterface({
+    input: warpListenerSubprocess.stdout,
+    crlfDelay: Infinity,
+  });
+  rl.on('line', (line) => {
+    try {
+      warpEventEmitter.emit('update', JSON.parse(line));
+    } catch {}
+  });
+}
+
+module.exports.onWarpEvent = (func) => {
+  startWarpListener();
+  warpEventEmitter.on('update', func);
 };
 
 module.exports.submitLiveCrashReport = async (channel, sentryMetadata) => {
