@@ -437,7 +437,9 @@ function launchMainAppWindow(isVisible) {
     options,
     frameName
   }) => {
-    popoutWindows.setupPopout(childWindow, frameName, options, WEBAPP_ENDPOINT);
+    const extendedWindow = childWindow;
+    extendedWindow.windowKey = frameName;
+    popoutWindows.setupPopout(extendedWindow, frameName, options, WEBAPP_ENDPOINT);
     adjustWindowBounds(childWindow);
   });
   mainWindow.webContents.on('did-finish-load', () => {
