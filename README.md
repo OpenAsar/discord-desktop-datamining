@@ -22,7 +22,7 @@
 | spellcheck | 2 |
 | utils | 6 |
 | vigilante | 1 |
-| voice | 3 |
+| voice | 4 |
 | voice_filters | 1 |
 | zstd | 1 |
 
