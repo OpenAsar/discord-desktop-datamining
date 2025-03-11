@@ -22,6 +22,7 @@ exports.setDevtoolsCallbacks = setDevtoolsCallbacks;
 exports.setFocusable = setFocusable;
 exports.setMinimumSize = setMinimumSize;
 exports.setProgressBar = setProgressBar;
+exports.setWindowContentProtection = setWindowContentProtection;
 exports.setZoomFactor = setZoomFactor;
 exports.showInactive = showInactive;
 exports.supportsContentProtection = supportsContentProtection;
@@ -97,6 +98,13 @@ function setContentProtection(enabled) {
     return Promise.resolve();
   }
   return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.WINDOW_SET_CONTENT_PROTCTION, enabled);
+}
+function setWindowContentProtection(key, enabled) {
+  if (!supportsContentProtection()) {
+    console.log('setWindowContentProtection: Unsupported platform.');
+    return Promise.resolve();
+  }
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.WINDOW_SET_WINDOW_CONTENT_PROTECTION, key, enabled);
 }
 function getNativeHandle(key) {
   return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.WINDOW_GET_NATIVE_HANDLE, key);

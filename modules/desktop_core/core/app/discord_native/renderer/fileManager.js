@@ -115,7 +115,9 @@ async function maybeDownloadVoiceFilterFile(cdnURL, fileName, onProgress) {
   });
   const finishedFilePath = _path.default.join(voiceFiltersDataPath, fileName);
   if (_fs.default.existsSync(finishedFilePath)) {
-    return Promise.resolve();
+    return {
+      fetchedFromNetwork: false
+    };
   }
   const partialFileName = `${fileName}.partial`;
   const partialFilePath = _path.default.join(voiceFiltersDataPath, partialFileName);
@@ -141,11 +143,15 @@ async function maybeDownloadVoiceFilterFile(cdnURL, fileName, onProgress) {
       if (incomplete) {
         reject(new Error('incomplete'));
       } else {
-        (0, _promises.rename)(partialFilePath, finishedFilePath).then(resolve).catch(reject);
+        (0, _promises.rename)(partialFilePath, finishedFilePath).then(() => resolve({
+          fetchedFromNetwork: true
+        })).catch(reject);
       }
     });
     dl.on('skip', () => {
-      (0, _promises.rename)(partialFilePath, finishedFilePath).then(resolve).catch(reject);
+      (0, _promises.rename)(partialFilePath, finishedFilePath).then(() => resolve({
+        fetchedFromNetwork: false
+      })).catch(reject);
     });
     dl.on('progress.throttled', ({
       downloaded: downloadedBytes,
