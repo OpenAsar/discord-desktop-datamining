@@ -20,9 +20,9 @@
 | rpc | 1 |
 | sekrit | 1 |
 | spellcheck | 2 |
-| utils | 8 |
+| utils | 9 |
 | vigilante | 1 |
-| voice | 7 |
+| voice | 9 |
 | voice_filters | 2 |
 | zstd | 1 |
 
