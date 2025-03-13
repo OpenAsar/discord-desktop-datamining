@@ -93,16 +93,14 @@ function filterWindowFeatures(hasKey, getKey) {
 }
 function parseWindowFeatures(features) {
   const keyValuesParsed = features.split(',');
-  const parsedFeatures = keyValuesParsed.reduce((acc, curr) => {
-    const [key, value] = curr.split('=');
-    return {
-      ...acc,
-      [key]: parseFeatureValue(value)
-    };
-  }, {});
+  const parsedFeatures = {};
+  for (const feature of keyValuesParsed) {
+    const [key, value] = feature.split('=');
+    parsedFeatures[key] = parseFeatureValue(value);
+  }
   return filterWindowFeatures(key => parsedFeatures.hasOwnProperty(key), key => parsedFeatures[key]);
 }
-function openOrFocusWindow(windowURL, key, features) {
+function openOrFocusWindow(_windowURL, key, features) {
   const windowOptions = {
     ...DEFAULT_POPOUT_OPTIONS,
     ...parseWindowFeatures(features)
@@ -158,7 +156,6 @@ function setupPopout(popoutWindow, key, options, webappEndpoint) {
       event.preventDefault();
     });
   }
-  popoutWindow.windowKey = key;
   popoutWindows[popoutWindow.windowKey] = popoutWindow;
   popoutWindow.webContents.on('will-navigate', (evt, url) => {
     if (!(0, _securityUtils.checkUrlOriginMatches)(url, webappEndpoint)) {
@@ -168,7 +165,7 @@ function setupPopout(popoutWindow, key, options, webappEndpoint) {
   popoutWindow.webContents.setWindowOpenHandler(({
     url
   }) => {
-    (0, _securityUtils.saferShellOpenExternal)(url);
+    void (0, _securityUtils.saferShellOpenExternal)(url);
     return {
       action: 'deny'
     };
