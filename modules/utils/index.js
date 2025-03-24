@@ -9,7 +9,6 @@ const {inputCaptureSetWatcher, inputCaptureRegisterElement} = require('./input_c
 const {wrapInputEventRegister, wrapInputEventUnregister} = require('./input_event');
 const {getDoNotDisturb, getSessionState} = require('macos-notification-state');
 const {getNotificationState} = require('windows-notification-state');
-const {getIsQuietHours} = require('windows-quiet-hours');
 
 /* eslint-disable no-console */
 
@@ -120,20 +119,60 @@ function findWarpCli() {
   return warpCliPath;
 }
 
-module.exports.runWarpCommand = async (command) => {
+module.exports.runWarpCommand = async (...params) => {
   const warpCliPath = findWarpCli();
 
+  const nonOptionRegex = /^[^-]/;
   const allowedCommands = {
-    connect: [],
-    disconnect: [],
-    status: [],
+    connect: null,
+    disconnect: null,
+    status: null,
+    settings: {
+      list: null,
+      reset: null,
+    },
+    tunnel: {
+      host: {
+        list: null,
+        reset: null,
+        add: nonOptionRegex,
+        remove: nonOptionRegex,
+      },
+      ip: {
+        list: null,
+        reset: null,
+        add: nonOptionRegex,
+        remove: nonOptionRegex,
+        'add-range': nonOptionRegex,
+        'remove-range': nonOptionRegex,
+      },
+    },
+    registration: {
+      show: null,
+      license: nonOptionRegex,
+    },
   };
 
-  if (!Object.hasOwn(allowedCommands, command)) {
-    throw new Error('Illegal command');
+  if (params.length < 1) {
+    throw new Error('Missing command');
   }
 
-  const args = ['-j', '--accept-tos', command];
+  let allowedSubcommands = allowedCommands;
+  for (const param of params) {
+    if (RegExp.prototype.isPrototypeOf(allowedSubcommands)) {
+      if (!allowedSubcommands.test(param)) {
+        throw new Error('Illegal command');
+      }
+    } else {
+      if (allowedSubcommands == null || !Object.hasOwn(allowedSubcommands, param)) {
+        throw new Error('Illegal command');
+      }
+
+      allowedSubcommands = allowedSubcommands[param];
+    }
+  }
+
+  const args = ['-j', '--accept-tos'].concat(params);
 
   const subprocess = await execFile(warpCliPath, args, {windowsHide: true});
   if (subprocess?.stdout == null) {
@@ -223,7 +262,6 @@ module.exports.shouldDisplayNotifications = () => {
   }
 
   if (process.platform === 'win32') {
-    dnd = getIsQuietHours();
     const state = getNotificationState();
     shouldDisplay = state === 'QUNS_ACCEPTS_NOTIFICATIONS' || state === 'QUNS_APP';
   }
