@@ -28,10 +28,12 @@ var _updater = require("./bootstrapModules/updater");
 var _processUtils = require("./discord_native/browser/processUtils");
 var _ipcMain = _interopRequireDefault(require("./ipcMain"));
 var mouse = _interopRequireWildcard(require("./mouse"));
+var _networkDebugUtils = require("./networkDebugUtils");
 var popoutWindows = _interopRequireWildcard(require("./popoutWindows"));
 var systemTray = _interopRequireWildcard(require("./systemTray"));
 var thumbarButtons = _interopRequireWildcard(require("./thumbarButtons"));
 var _Constants = require("./Constants");
+var _envVariables$network;
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
@@ -45,7 +47,8 @@ const DISCORD_NAMESPACE = 'DISCORD_';
 const envVariables = {
   disableRestart: process.env.DISCORD_DISABLE_RESTART,
   webappEndpoint: process.env.DISCORD_WEBAPP_ENDPOINT,
-  test: undefined
+  test: undefined,
+  networkDebugLog: process.env.DISCORD_NETWORK_DEBUG_LOG
 };
 let webAppLoaded = false;
 function checkCanMigrate() {
@@ -102,6 +105,7 @@ const DEFAULT_WIDTH = 1280;
 const DEFAULT_HEIGHT = 720;
 const MIN_VISIBLE_ON_SCREEN = 32;
 const ENABLE_DEVTOOLS = buildInfo.releaseChannel === 'stable' ? settings === null || settings === void 0 ? void 0 : settings.get('DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING', false) : true;
+const ENABLE_NET_DEBUG = ((_envVariables$network = envVariables.networkDebugLog) === null || _envVariables$network === void 0 ? void 0 : _envVariables$network.toLowerCase()) === 'true';
 let mainWindow = null;
 let mainWindowId = BootstrapConstants.DEFAULT_MAIN_WINDOW_ID;
 let mainWindowInitialPath = null;
@@ -453,6 +457,12 @@ function launchMainAppWindow(isVisible) {
       insideAuthFlow = false;
     }
     mainWindowDidFinishLoad = true;
+    if (ENABLE_NET_DEBUG) {
+      const netLogger = _logger.logger.networkDebugLogger();
+      if (netLogger != null) {
+        (0, _networkDebugUtils.setupNetworkLogging)(mainWindow, netLogger);
+      }
+    }
     if (mainWindowInitialPath != null) {
       webContentsSend('MAIN_WINDOW_PATH', mainWindowInitialPath.path, mainWindowInitialPath.query);
       mainWindowInitialPath = null;
