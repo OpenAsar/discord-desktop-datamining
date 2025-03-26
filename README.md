@@ -7,7 +7,7 @@
 | module | version |
 | ------ | :-----: |
 | cloudsync | 1 |
-| desktop_core | 2 |
+| desktop_core | 3 |
 | desktop_overlay | 1 |
 | dispatch | 1 |
 | erlpack | 1 |
@@ -20,7 +20,7 @@
 | rpc | 1 |
 | sekrit | 1 |
 | spellcheck | 1 |
-| utils | 7 |
+| utils | 8 |
 | vigilante | 1 |
 | voice | 5 |
 | voice_filters | 3 |
