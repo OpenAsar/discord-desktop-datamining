@@ -104,15 +104,31 @@ async function showOpenDialog({
 const voiceFilterDownloaders = [];
 async function maybeDownloadVoiceFilterFile(cdnURL, fileName, onProgress) {
   if (!cdnURL.startsWith('https://cdn.discordapp.com/assets/content')) {
-    throw new Error('Invalid CDN URL');
+    throw new Error('Voice Filters invalid CDN URL');
   }
   if ((0, _files.containsInvalidFileChar)(fileName)) {
-    throw new Error('fileName has invalid characters');
+    throw new Error('Voice Filters fileName has invalid characters');
   }
-  const voiceFiltersDataPath = await getVoiceFilterDataDir();
-  await (0, _promises.mkdir)(voiceFiltersDataPath, {
-    recursive: true
-  });
+  if (!Boolean(fileName)) {
+    throw new Error('Voice Filters fileName is not set');
+  }
+  let voiceFiltersDataPath;
+  try {
+    voiceFiltersDataPath = await getVoiceFilterDataDir();
+  } catch (cause) {
+    throw new Error('Voice Filters unable to get path of data dir', {
+      cause
+    });
+  }
+  try {
+    await (0, _promises.mkdir)(voiceFiltersDataPath, {
+      recursive: true
+    });
+  } catch (cause) {
+    throw new Error('Voice Filters unable create data dir', {
+      cause
+    });
+  }
   const finishedFilePath = _path.default.join(voiceFiltersDataPath, fileName);
   if (_fs.default.existsSync(finishedFilePath)) {
     return {
@@ -141,7 +157,7 @@ async function maybeDownloadVoiceFilterFile(cdnURL, fileName, onProgress) {
       incomplete
     }) => {
       if (incomplete) {
-        reject(new Error('incomplete'));
+        reject(new Error('Voice Filters download incomplete'));
       } else {
         (0, _promises.rename)(partialFilePath, finishedFilePath).then(() => resolve({
           fetchedFromNetwork: true
@@ -162,7 +178,7 @@ async function maybeDownloadVoiceFilterFile(cdnURL, fileName, onProgress) {
         totalBytes
       });
     });
-    dl.on('timeout', () => reject(new Error('timeout')));
+    dl.on('timeout', () => reject(new Error('Voice Filters timeout')));
     dl.on('error', reject);
     dl.on('stop', () => reject({
       USER_CANCELED_DOWNLOAD: true
