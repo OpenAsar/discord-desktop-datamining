@@ -41,6 +41,7 @@ const AllowedMediaOrigins = {
 exports.AllowedMediaOrigins = AllowedMediaOrigins;
 function init(bootstrapConstants) {
   const APP_NAME = bootstrapConstants.APP_NAME;
+  const APP_NAME_FOR_HUMANS = bootstrapConstants.APP_NAME_FOR_HUMANS;
   const API_ENDPOINT = bootstrapConstants.API_ENDPOINT;
   const NEW_UPDATE_ENDPOINT = bootstrapConstants.NEW_UPDATE_ENDPOINT;
   const UPDATE_ENDPOINT = bootstrapConstants.UPDATE_ENDPOINT;
@@ -51,6 +52,7 @@ function init(bootstrapConstants) {
   const MAIN_APP_DIRNAME = __dirname;
   const exported = {
     APP_NAME,
+    APP_NAME_FOR_HUMANS,
     DISABLE_WINDOWS_64BIT_TRANSITION,
     OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION,
     LOG_LEVEL,

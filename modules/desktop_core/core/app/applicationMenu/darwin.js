@@ -19,6 +19,7 @@ const developerMenuSection = [SEPARATOR, {
 var _default = enableDevtools => [{
   role: 'appMenu',
   submenu: [{
+    label: `About ${_Constants.APP_NAME_FOR_HUMANS}`,
     role: 'about'
   }, {
     label: 'Check for Updates...',
@@ -33,12 +34,14 @@ var _default = enableDevtools => [{
   }, SEPARATOR, {
     role: 'services'
   }, SEPARATOR, {
+    label: `Hide ${_Constants.APP_NAME_FOR_HUMANS}`,
     role: 'hide'
   }, {
     role: 'hideOthers'
   }, {
     role: 'unhide'
   }, SEPARATOR, {
+    label: `Quit ${_Constants.APP_NAME_FOR_HUMANS}`,
     role: 'quit'
   }]
 }, {
