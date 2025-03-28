@@ -2,7 +2,7 @@
 
 ## canary versions
 
-**host: 1.0.582**
+**host: 1.0.583**
 
 | module | version |
 | ------ | :-----: |
@@ -20,10 +20,10 @@
 | rpc | 1 |
 | sekrit | 1 |
 | spellcheck | 1 |
-| utils | 5 |
+| utils | 1 |
 | vigilante | 1 |
-| voice | 3 |
-| voice_filters | 4 |
+| voice | 1 |
+| voice_filters | 1 |
 | zstd | 1 |
 
 ## branches
