@@ -372,6 +372,7 @@ function launchMainAppWindow(isVisible) {
         callback((0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, WEBAPP_ENDPOINT));
         return;
       case 'fullscreen':
+      case 'clipboard-sanitized-write':
         let result = false;
         if (details.isMainFrame) {
           result = (0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, WEBAPP_ENDPOINT);
@@ -391,6 +392,7 @@ function launchMainAppWindow(isVisible) {
       case 'notifications':
       case 'fullscreen':
       case 'pointerLock':
+      case 'clipboard-sanitized-write':
         if (details.isMainFrame || details.embeddingOrigin == null) {
           return (0, _securityUtils.checkUrlOriginMatches)(requestingOrigin, WEBAPP_ENDPOINT);
         } else {
