@@ -313,8 +313,9 @@ function getBackgroundColor() {
   return (settings === null || settings === void 0 ? void 0 : settings.get(BACKGROUND_COLOR_KEY, DEFAULT_BACKGROUND_COLOR)) ?? DEFAULT_BACKGROUND_COLOR;
 }
 function setBackgroundColor(color) {
+  var _mainWindow;
   settings === null || settings === void 0 ? void 0 : settings.set(BACKGROUND_COLOR_KEY, color);
-  mainWindow.setBackgroundColor(color);
+  (_mainWindow = mainWindow) === null || _mainWindow === void 0 ? void 0 : _mainWindow.setBackgroundColor(color);
   settings === null || settings === void 0 ? void 0 : settings.save();
 }
 function launchMainAppWindow(isVisible) {
@@ -449,7 +450,7 @@ function launchMainAppWindow(isVisible) {
     adjustWindowBounds(childWindow);
   });
   mainWindow.webContents.on('did-finish-load', () => {
-    var _mainWindow;
+    var _mainWindow2;
     if (!mainWindowDidFinishLoad) {
       var _analytics$getDesktop3;
       _bootstrapModules.analytics === null || _bootstrapModules.analytics === void 0 ? void 0 : (_analytics$getDesktop3 = _bootstrapModules.analytics.getDesktopTTI) === null || _analytics$getDesktop3 === void 0 ? void 0 : _analytics$getDesktop3.call(_bootstrapModules.analytics).trackMainWindowLoadDuration();
@@ -469,7 +470,7 @@ function launchMainAppWindow(isVisible) {
       webContentsSend('MAIN_WINDOW_PATH', mainWindowInitialPath.path, mainWindowInitialPath.query);
       mainWindowInitialPath = null;
     }
-    webContentsSend(((_mainWindow = mainWindow) === null || _mainWindow === void 0 ? void 0 : _mainWindow.isFocused()) ? 'MAIN_WINDOW_FOCUS' : 'MAIN_WINDOW_BLUR');
+    webContentsSend(((_mainWindow2 = mainWindow) === null || _mainWindow2 === void 0 ? void 0 : _mainWindow2.isFocused()) ? 'MAIN_WINDOW_FOCUS' : 'MAIN_WINDOW_BLUR');
     if (!lastPageLoadFailed) {
       connectionBackoff.succeed();
       _splashScreen.splashScreen.pageReady();
