@@ -9,7 +9,7 @@ var _fs = _interopRequireDefault(require("fs"));
 var _os = _interopRequireDefault(require("os"));
 var _path = _interopRequireDefault(require("path"));
 var _paths = require("./bootstrapModules/paths");
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 function exposeModuleResource(asarPath, fileName) {
   const appPath = _path.default.resolve(__dirname, '..');
   const fullPathToAsarFile = _path.default.join(appPath, asarPath, fileName);
@@ -22,11 +22,7 @@ function exposeModuleResource(asarPath, fileName) {
   _fs.default.writeFileSync(nativeFilePath, data);
   return nativeFilePath;
 }
-const platform = _os.default.platform();
-exports.platform = platform;
-const isWindows = /^win/.test(platform);
-exports.isWindows = isWindows;
-const isOSX = platform === 'darwin';
-exports.isOSX = isOSX;
-const isLinux = platform === 'linux';
-exports.isLinux = isLinux;
+const platform = exports.platform = _os.default.platform();
+const isWindows = exports.isWindows = /^win/.test(platform);
+const isOSX = exports.isOSX = platform === 'darwin';
+const isLinux = exports.isLinux = platform === 'linux';

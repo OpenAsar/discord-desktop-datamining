@@ -4,9 +4,14 @@
   "description": "Discord Client for Desktop - Bootstrapper",
   "main": "app_bootstrap/index.js",
   "private": true,
+  "scripts": {
+    "eslint": "eslint . --ext .ts,.tsx --color --quiet",
+    "prettier": "prettier --write .",
+    "tsc": "tsc --pretty"
+  },
   "dependencies": {
-    "@sentry/electron": "4.24.0",
     "@sentry/browser": "7.112.0",
+    "@sentry/electron": "4.24.0",
     "arch": "2.2.0",
     "electron-log": "5.2.0",
     "mkdirp": "^1.0.2",
