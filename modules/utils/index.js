@@ -7,7 +7,6 @@ const fs = require('fs');
 const path = require('path');
 const {inputCaptureSetWatcher, inputCaptureRegisterElement} = require('./input_capture');
 const {wrapInputEventRegister, wrapInputEventUnregister} = require('./input_event');
-const {getDoNotDisturb, getSessionState} = require('macos-notification-state');
 const {getNotificationState} = require('windows-notification-state');
 
 /* eslint-disable no-console */
@@ -272,13 +271,8 @@ module.exports.submitLiveCrashReport = async (channel, sentryMetadata) => {
 };
 
 module.exports.shouldDisplayNotifications = () => {
-  let dnd = false;
+  const dnd = false;
   let shouldDisplay = true;
-  if (process.platform === 'darwin') {
-    dnd = getDoNotDisturb();
-    shouldDisplay = getSessionState() === 'SESSION_ON_CONSOLE_KEY';
-  }
-
   if (process.platform === 'win32') {
     const state = getNotificationState();
     shouldDisplay = state === 'QUNS_ACCEPTS_NOTIFICATIONS' || state === 'QUNS_APP';
