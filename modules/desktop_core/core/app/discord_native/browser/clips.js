@@ -13,7 +13,7 @@ var _constants = require("../../../common/constants");
 var _utils = require("../../../common/utils");
 var _DiscordIPC = require("../common/DiscordIPC");
 var _fileutils = require("../common/fileutils");
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 const MAX_LENGTH = _buffer.default.constants.MAX_LENGTH;
 const INVALID_FILE_ERROR = 'Invalid file';
 const BOX_HEADER_SIZE_BYTES = 8;

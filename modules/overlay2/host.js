@@ -10,7 +10,7 @@ var _electron = require("electron");
 var _Backoff = _interopRequireDefault(require("./Backoff"));
 var _overlay_module = _interopRequireDefault(require("./overlay_module"));
 var _securityUtils = require("./securityUtils");
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { "default": e }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/ban-types */
 

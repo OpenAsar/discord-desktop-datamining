@@ -2,7 +2,7 @@
 
 var _assert = _interopRequireDefault(require("assert"));
 var _electron = _interopRequireDefault(require("electron"));
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 const {
   CLIPBOARD_COPY,
   CLIPBOARD_CUT,

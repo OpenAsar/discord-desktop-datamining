@@ -6,7 +6,7 @@ var _process = _interopRequireDefault(require("process"));
 var _FeatureFlags = _interopRequireDefault(require("./FeatureFlags"));
 var _host = require("./host");
 var _overlay_module = _interopRequireDefault(require("./overlay_module"));
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { "default": e }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 // eslint-disable-next-line import/no-unresolved
 
 _process["default"].on('uncaughtException', function (e) {

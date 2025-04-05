@@ -2,7 +2,7 @@
 
 var _electron = _interopRequireDefault(require("electron"));
 var _DiscordIPC = require("../common/DiscordIPC");
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 function maybeUseSmoketestPath() {
   if (process.env.DISCORD_USER_DATA_DIR != null) {
     return process.env.DISCORD_USER_DATA_DIR;

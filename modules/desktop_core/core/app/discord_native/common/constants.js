@@ -9,8 +9,9 @@ const discordPrefixRegex = /^DISCORD_/;
 function getDiscordIPCEvent(ev) {
   return discordPrefixRegex.test(ev) ? ev : `DISCORD_${ev}`;
 }
-const OVERLAY_WINDOW_KEY = exports.OVERLAY_WINDOW_KEY = 'DISCORD_OutOfProcessOverlay';
-let IPCEvents = exports.IPCEvents = function (IPCEvents) {
+const OVERLAY_WINDOW_KEY = 'DISCORD_OutOfProcessOverlay';
+exports.OVERLAY_WINDOW_KEY = OVERLAY_WINDOW_KEY;
+let IPCEvents = function (IPCEvents) {
   IPCEvents["ACCESSIBILITY_GET_ENABLED"] = "DISCORD_ACCESSIBILITY_GET_ENABLED";
   IPCEvents["APP_BADGE_SET"] = "DISCORD_APP_BADGE_SET";
   IPCEvents["APP_GET_RELEASE_CHANNEL_SYNC"] = "DISCORD_APP_GET_RELEASE_CHANNEL_SYNC";
@@ -142,3 +143,4 @@ let IPCEvents = exports.IPCEvents = function (IPCEvents) {
   IPCEvents["GET_MOUSE_COORDINATES"] = "DISCORD_GET_MOUSE_COORDINATES";
   return IPCEvents;
 }({});
+exports.IPCEvents = IPCEvents;

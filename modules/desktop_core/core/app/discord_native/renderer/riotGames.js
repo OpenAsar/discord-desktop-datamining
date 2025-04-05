@@ -3,7 +3,7 @@
 var _fs = _interopRequireDefault(require("fs"));
 var _https = _interopRequireDefault(require("https"));
 var _path = _interopRequireDefault(require("path"));
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 const LIVE_CLIENT_API_HOSTNAME = 'https://127.0.0.1:2999/liveclientdata/';
 let riotRootCA;
 function fetchLiveClientData(endpoint, riotId) {

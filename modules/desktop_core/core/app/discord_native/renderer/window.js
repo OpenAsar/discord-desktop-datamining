@@ -29,7 +29,7 @@ exports.supportsContentProtection = supportsContentProtection;
 var _electron = _interopRequireDefault(require("electron"));
 var _processUtils = require("../../../common/processUtils");
 var _DiscordIPC = require("../common/DiscordIPC");
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 let devtoolsOpenedCallback = () => {};
 let devtoolsClosedCallback = () => {};
 _DiscordIPC.DiscordIPC.renderer.on(_DiscordIPC.IPCEvents.WINDOW_DEVTOOLS_OPENED, () => {
@@ -115,4 +115,5 @@ function getMediaSourceId(key) {
 function setFocusable(key, enabled) {
   return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.WINDOW_SET_FOCUSABLE, key, enabled);
 }
-const USE_OSX_NATIVE_TRAFFIC_LIGHTS = exports.USE_OSX_NATIVE_TRAFFIC_LIGHTS = true;
+const USE_OSX_NATIVE_TRAFFIC_LIGHTS = true;
+exports.USE_OSX_NATIVE_TRAFFIC_LIGHTS = USE_OSX_NATIVE_TRAFFIC_LIGHTS;

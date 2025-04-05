@@ -10,7 +10,7 @@ exports.updateCrashReporter = updateCrashReporter;
 var _electron = _interopRequireDefault(require("electron"));
 var _crashReporterUtils = require("../../../common/crashReporterUtils");
 var _DiscordIPC = require("../common/DiscordIPC");
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 let metadata = {};
 void updateCrashReporter(metadata);
 async function updateCrashReporter(additionalMetadata) {

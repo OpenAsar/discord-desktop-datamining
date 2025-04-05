@@ -11,7 +11,7 @@ var _processUtils = require("../../../common/processUtils");
 var _mainScreen = require("../../mainScreen");
 var _DiscordIPC = require("../common/DiscordIPC");
 var _constants = require("../common/constants");
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 const OPEN_TIMEOUT = 5 * 60 * 1000;
 let overlayWindow = null;
 let overlayUrl = null;

@@ -17,7 +17,7 @@ var _mkdirp = _interopRequireDefault(require("mkdirp"));
 var _originalFs = _interopRequireDefault(require("original-fs"));
 var _path = _interopRequireDefault(require("path"));
 var _rimraf = _interopRequireDefault(require("rimraf"));
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 let userDataPath = null;
 let userDataVersionedPath = null;
 let resourcesPath = null;
