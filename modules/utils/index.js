@@ -152,6 +152,15 @@ module.exports.runWarpCommand = async (...params) => {
       new: null,
       license: nonOptionRegex,
     },
+    mode: {
+      warp: null,
+      doh: null,
+      'warp+doh': null,
+      dot: null,
+      'warp+dot': null,
+      // proxy: null,
+      tunnel_only: null,
+    },
   };
 
   if (params.length < 1) {
