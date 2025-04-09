@@ -7,7 +7,6 @@ const fs = require('fs');
 const path = require('path');
 const {inputCaptureSetWatcher, inputCaptureRegisterElement} = require('./input_capture');
 const {wrapInputEventRegister, wrapInputEventUnregister} = require('./input_event');
-const {getDoNotDisturb, getSessionState} = require('macos-notification-state');
 const {getNotificationState} = require('windows-notification-state');
 
 /* eslint-disable no-console */
@@ -121,6 +120,7 @@ function findWarpCli() {
 
 module.exports.runWarpCommand = async (...params) => {
   const warpCliPath = findWarpCli();
+  startWarpListener();
 
   const nonOptionRegex = /^[^-]/;
   const allowedCommands = {
@@ -149,7 +149,17 @@ module.exports.runWarpCommand = async (...params) => {
     },
     registration: {
       show: null,
+      new: null,
       license: nonOptionRegex,
+    },
+    mode: {
+      warp: null,
+      doh: null,
+      'warp+doh': null,
+      dot: null,
+      'warp+dot': null,
+      // proxy: null,
+      tunnel_only: null,
     },
   };
 
@@ -174,11 +184,22 @@ module.exports.runWarpCommand = async (...params) => {
 
   const args = ['-j', '--accept-tos'].concat(params);
 
-  const subprocess = await execFile(warpCliPath, args, {windowsHide: true});
-  if (subprocess?.stdout == null) {
-    throw new Error('Got no stdout');
+  let stdout;
+  try {
+    stdout = (
+      await execFile(warpCliPath, args, {
+        windowsHide: true,
+        stdio: ['ignore', 'pipe', 'pipe'],
+        encoding: 'utf8',
+      })
+    ).stdout;
+  } catch (e) {
+    stdout = e.stdout || e.stderr;
+    if (stdout == null) {
+      throw e;
+    }
   }
-  return JSON.parse(subprocess.stdout);
+  return JSON.parse(stdout);
 };
 
 let warpListenerSubprocess;
@@ -186,6 +207,13 @@ const warpEventEmitter = new EventEmitter();
 let warpEmitterStartTime = performance.now();
 
 function startWarpListener() {
+  let warpCliPath;
+  try {
+    warpCliPath = findWarpCli();
+  } catch {
+    return;
+  }
+
   if (warpListenerSubprocess != null) {
     return;
   }
@@ -196,8 +224,6 @@ function startWarpListener() {
     return;
   }
   warpEmitterStartTime = now;
-
-  const warpCliPath = findWarpCli();
 
   warpListenerSubprocess = childProcess.spawn(warpCliPath, ['-j', '-l', '--accept-tos', 'status'], {
     windowsHide: true,
@@ -219,8 +245,8 @@ function startWarpListener() {
 }
 
 module.exports.onWarpEvent = (func) => {
-  startWarpListener();
   warpEventEmitter.on('update', func);
+  startWarpListener();
 };
 
 module.exports.submitLiveCrashReport = async (channel, sentryMetadata) => {
@@ -254,13 +280,8 @@ module.exports.submitLiveCrashReport = async (channel, sentryMetadata) => {
 };
 
 module.exports.shouldDisplayNotifications = () => {
-  let dnd = false;
+  const dnd = false;
   let shouldDisplay = true;
-  if (process.platform === 'darwin') {
-    dnd = getDoNotDisturb();
-    shouldDisplay = getSessionState() === 'SESSION_ON_CONSOLE_KEY';
-  }
-
   if (process.platform === 'win32') {
     const state = getNotificationState();
     shouldDisplay = state === 'QUNS_ACCEPTS_NOTIFICATIONS' || state === 'QUNS_APP';

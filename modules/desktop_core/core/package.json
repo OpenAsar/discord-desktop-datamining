@@ -4,17 +4,22 @@
   "description": "Discord Client for Desktop - Core App",
   "main": "app/index.js",
   "private": true,
+  "scripts": {
+    "eslint": "eslint . --ext .ts,.tsx --color --quiet",
+    "prettier": "prettier --write .",
+    "tsc": "tsc --pretty"
+  },
   "dependencies": {
     "@discordapp/desktop-electron-test-rpc-protocol": "file:../../../discord_common/js/packages/desktop-electron-test-rpc-protocol",
     "@discordapp/desktop-smoketest-common": "file:../../../discord_common/js/packages/desktop-smoketest-common",
     "@discordapp/discord-native-types": "file:../../../discord_common/js/packages/discord-native-types",
     "@discordapp/native-crash-codes": "file:../../../discord_common/js/packages/native-crash-codes",
-    "@sentry/electron": "4.24.0",
     "@sentry/browser": "7.112.0",
+    "@sentry/electron": "4.24.0",
     "arch": "2.2.0",
     "lodash": "4.17.21",
-    "node-downloader-helper": "^2.1.9",
     "mkdirp": "^1.0.2",
+    "node-downloader-helper": "^2.1.9",
     "request": "2.88.0",
     "rimraf": "^2.6.3",
     "yauzl": "^2.10.0"

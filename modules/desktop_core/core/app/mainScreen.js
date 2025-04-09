@@ -28,10 +28,12 @@ var _updater = require("./bootstrapModules/updater");
 var _processUtils = require("./discord_native/browser/processUtils");
 var _ipcMain = _interopRequireDefault(require("./ipcMain"));
 var mouse = _interopRequireWildcard(require("./mouse"));
+var _networkDebugUtils = require("./networkDebugUtils");
 var popoutWindows = _interopRequireWildcard(require("./popoutWindows"));
 var systemTray = _interopRequireWildcard(require("./systemTray"));
 var thumbarButtons = _interopRequireWildcard(require("./thumbarButtons"));
 var _Constants = require("./Constants");
+var _envVariables$network;
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
@@ -45,7 +47,8 @@ const DISCORD_NAMESPACE = 'DISCORD_';
 const envVariables = {
   disableRestart: process.env.DISCORD_DISABLE_RESTART,
   webappEndpoint: process.env.DISCORD_WEBAPP_ENDPOINT,
-  test: undefined
+  test: undefined,
+  networkDebugLog: process.env.DISCORD_NETWORK_DEBUG_LOG
 };
 let webAppLoaded = false;
 function checkCanMigrate() {
@@ -102,6 +105,7 @@ const DEFAULT_WIDTH = 1280;
 const DEFAULT_HEIGHT = 720;
 const MIN_VISIBLE_ON_SCREEN = 32;
 const ENABLE_DEVTOOLS = buildInfo.releaseChannel === 'stable' ? settings === null || settings === void 0 ? void 0 : settings.get('DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING', false) : true;
+const ENABLE_NET_DEBUG = ((_envVariables$network = envVariables.networkDebugLog) === null || _envVariables$network === void 0 ? void 0 : _envVariables$network.toLowerCase()) === 'true';
 let mainWindow = null;
 let mainWindowId = BootstrapConstants.DEFAULT_MAIN_WINDOW_ID;
 let mainWindowInitialPath = null;
@@ -309,8 +313,9 @@ function getBackgroundColor() {
   return (settings === null || settings === void 0 ? void 0 : settings.get(BACKGROUND_COLOR_KEY, DEFAULT_BACKGROUND_COLOR)) ?? DEFAULT_BACKGROUND_COLOR;
 }
 function setBackgroundColor(color) {
+  var _mainWindow;
   settings === null || settings === void 0 ? void 0 : settings.set(BACKGROUND_COLOR_KEY, color);
-  mainWindow.setBackgroundColor(color);
+  (_mainWindow = mainWindow) === null || _mainWindow === void 0 ? void 0 : _mainWindow.setBackgroundColor(color);
   settings === null || settings === void 0 ? void 0 : settings.save();
 }
 function launchMainAppWindow(isVisible) {
@@ -368,6 +373,7 @@ function launchMainAppWindow(isVisible) {
         callback((0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, WEBAPP_ENDPOINT));
         return;
       case 'fullscreen':
+      case 'clipboard-sanitized-write':
         let result = false;
         if (details.isMainFrame) {
           result = (0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, WEBAPP_ENDPOINT);
@@ -387,6 +393,7 @@ function launchMainAppWindow(isVisible) {
       case 'notifications':
       case 'fullscreen':
       case 'pointerLock':
+      case 'clipboard-sanitized-write':
         if (details.isMainFrame || details.embeddingOrigin == null) {
           return (0, _securityUtils.checkUrlOriginMatches)(requestingOrigin, WEBAPP_ENDPOINT);
         } else {
@@ -443,7 +450,7 @@ function launchMainAppWindow(isVisible) {
     adjustWindowBounds(childWindow);
   });
   mainWindow.webContents.on('did-finish-load', () => {
-    var _mainWindow;
+    var _mainWindow2;
     if (!mainWindowDidFinishLoad) {
       var _analytics$getDesktop3;
       _bootstrapModules.analytics === null || _bootstrapModules.analytics === void 0 ? void 0 : (_analytics$getDesktop3 = _bootstrapModules.analytics.getDesktopTTI) === null || _analytics$getDesktop3 === void 0 ? void 0 : _analytics$getDesktop3.call(_bootstrapModules.analytics).trackMainWindowLoadDuration();
@@ -453,11 +460,17 @@ function launchMainAppWindow(isVisible) {
       insideAuthFlow = false;
     }
     mainWindowDidFinishLoad = true;
+    if (ENABLE_NET_DEBUG) {
+      const netLogger = _logger.logger.networkDebugLogger();
+      if (netLogger != null) {
+        (0, _networkDebugUtils.setupNetworkLogging)(mainWindow, netLogger);
+      }
+    }
     if (mainWindowInitialPath != null) {
       webContentsSend('MAIN_WINDOW_PATH', mainWindowInitialPath.path, mainWindowInitialPath.query);
       mainWindowInitialPath = null;
     }
-    webContentsSend(((_mainWindow = mainWindow) === null || _mainWindow === void 0 ? void 0 : _mainWindow.isFocused()) ? 'MAIN_WINDOW_FOCUS' : 'MAIN_WINDOW_BLUR');
+    webContentsSend(((_mainWindow2 = mainWindow) === null || _mainWindow2 === void 0 ? void 0 : _mainWindow2.isFocused()) ? 'MAIN_WINDOW_FOCUS' : 'MAIN_WINDOW_BLUR');
     if (!lastPageLoadFailed) {
       connectionBackoff.succeed();
       _splashScreen.splashScreen.pageReady();
