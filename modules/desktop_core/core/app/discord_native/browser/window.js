@@ -8,7 +8,7 @@ exports.newWindowEvent = newWindowEvent;
 var _electron = _interopRequireDefault(require("electron"));
 var _process = _interopRequireDefault(require("process"));
 var _DiscordIPC = require("../common/DiscordIPC");
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 let injectedGetWindow = () => null;
 let injectedGetAllWindows = () => [];
 let contentProtectionEnabled = false;

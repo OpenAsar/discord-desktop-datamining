@@ -13,7 +13,7 @@ var _fs = _interopRequireDefault(require("fs"));
 var _path = _interopRequireDefault(require("path"));
 var _util = _interopRequireDefault(require("util"));
 var _utils = require("../common/utils");
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 const MAX_FILE_COUNT = 10;
 const MAX_LOG_SIZE = 200 * 1024;
 let fileWriteCounter = 0;
@@ -100,8 +100,10 @@ class Files {
     return (await this.getFiles())[0] ?? null;
   }
 }
-const minidumpFiles = exports.minidumpFiles = new Files('minidump', 'dmp');
-const logFiles = exports.logFiles = new Files('events', 'log');
+const minidumpFiles = new Files('minidump', 'dmp');
+exports.minidumpFiles = minidumpFiles;
+const logFiles = new Files('events', 'log');
+exports.logFiles = logFiles;
 async function writeMinidump(minidump) {
   try {
     const filepath = await minidumpFiles.getNewFilename();

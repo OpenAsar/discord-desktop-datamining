@@ -3,7 +3,7 @@
 var _electron = require("electron");
 var _securityUtils = require("../common/securityUtils");
 var _buildInfo = _interopRequireDefault(require("./buildInfo"));
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 _electron.contextBridge.exposeInMainWorld('DiscordSplash', {
   getReleaseChannel: () => {
     return _buildInfo.default.releaseChannel;

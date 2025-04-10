@@ -5,7 +5,7 @@ var _path = _interopRequireDefault(require("path"));
 var _appFeatures = require("../../appFeatures");
 var _utils = require("../../utils");
 var _DiscordIPC = require("../common/DiscordIPC");
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 const features = (0, _appFeatures.getFeatures)();
 let majorVersion;
 try {

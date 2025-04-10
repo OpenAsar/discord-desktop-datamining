@@ -13,7 +13,7 @@ var _appSettings = require("./bootstrapModules/appSettings");
 var _ipcMain = _interopRequireDefault(require("./ipcMain"));
 var _utils = require("./utils");
 var _Constants = require("./Constants");
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 const settings = _appSettings.appSettings.getSettings();
 const TrayIconNames = {
   DEFAULT: 'tray',
@@ -33,7 +33,8 @@ const MenuItems = {
   QUIT: 'QUIT',
   ACKNOWLEDGEMENTS: 'ACKNOWLEDGEMENTS'
 };
-let hasInit = exports.hasInit = false;
+let hasInit = false;
+exports.hasInit = hasInit;
 let currentIcon;
 let options;
 let menuItems;

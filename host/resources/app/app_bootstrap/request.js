@@ -7,7 +7,7 @@ exports.default = void 0;
 var _electron = require("electron");
 var _querystring = _interopRequireDefault(require("querystring"));
 var _request = _interopRequireDefault(require("request"));
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 const {
   Buffer
 } = require('node:buffer');
@@ -152,7 +152,8 @@ async function requestWithMethod(method, options) {
   }
   return nodeRequest(options);
 }
-var _default = exports.default = {
+var _default = {
   get: requestWithMethod.bind(null, 'GET')
 };
+exports.default = _default;
 module.exports = exports.default;

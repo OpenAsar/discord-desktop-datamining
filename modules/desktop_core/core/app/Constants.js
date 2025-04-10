@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.UpdaterEvents = exports.MenuEvents = exports.AnalyticsEvents = exports.AllowedMediaOrigins = void 0;
 exports.init = init;
-const UpdaterEvents = exports.UpdaterEvents = {
+const UpdaterEvents = {
   UPDATE_NOT_AVAILABLE: 'UPDATE_NOT_AVAILABLE',
   CHECKING_FOR_UPDATES: 'CHECKING_FOR_UPDATES',
   UPDATE_ERROR: 'UPDATE_ERROR',
@@ -21,20 +21,24 @@ const UpdaterEvents = exports.UpdaterEvents = {
   UPDATER_HISTORY_QUERY_AND_TRUNCATE: 'UPDATER_HISTORY_QUERY_AND_TRUNCATE',
   UPDATER_HISTORY_RESPONSE: 'UPDATER_HISTORY_RESPONSE'
 };
-const AnalyticsEvents = exports.AnalyticsEvents = {
+exports.UpdaterEvents = UpdaterEvents;
+const AnalyticsEvents = {
   APP_GET_ANALYTICS_EVENTS: 'APP_GET_ANALYTICS_EVENTS',
   APP_PUSH_ANALYTICS: 'APP_PUSH_ANALYTICS',
   APP_VIEWED: 'APP_VIEWED',
   APP_LOADED: 'APP_LOADED'
 };
-const MenuEvents = exports.MenuEvents = {
+exports.AnalyticsEvents = AnalyticsEvents;
+const MenuEvents = {
   OPEN_HELP: 'menu:open-help',
   OPEN_SETTINGS: 'menu:open-settings',
   CHECK_FOR_UPDATES: 'menu:check-for-updates'
 };
-const AllowedMediaOrigins = exports.AllowedMediaOrigins = {
+exports.MenuEvents = MenuEvents;
+const AllowedMediaOrigins = {
   K_ID: 'https://d3ogqhtsivkon3.cloudfront.net'
 };
+exports.AllowedMediaOrigins = AllowedMediaOrigins;
 function init(bootstrapConstants) {
   const APP_NAME = bootstrapConstants.APP_NAME;
   const APP_NAME_FOR_HUMANS = bootstrapConstants.APP_NAME_FOR_HUMANS;

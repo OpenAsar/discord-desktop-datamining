@@ -40,5 +40,6 @@ const bootstrapConstants = {
   LOG_LEVEL,
   UPDATE_ENDPOINT
 };
-var _default = exports.default = bootstrapConstants;
+var _default = bootstrapConstants;
+exports.default = _default;
 module.exports = exports.default;

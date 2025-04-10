@@ -14,7 +14,7 @@ var _path = _interopRequireDefault(require("path"));
 var _util = _interopRequireDefault(require("util"));
 var _processUtils = require("../../../common/processUtils");
 var _constants = require("../common/constants");
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 const allowedAppPaths = new Set(['home', 'appData', 'desktop', 'documents', 'downloads', 'crashDumps', 'exe']);
 const readdir = _util.default.promisify(_fs.default.readdir);
 async function getPath(path) {

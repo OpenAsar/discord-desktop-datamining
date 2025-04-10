@@ -6,7 +6,7 @@ var _path = _interopRequireDefault(require("path"));
 var _appFeatures = require("../../appFeatures");
 var _paths = require("../../bootstrapModules/paths");
 var _constants = require("../common/constants");
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 const {
   USER_DATA_CACHE_SAVE,
   USER_DATA_CACHE_GET,

@@ -7,7 +7,7 @@ exports.addGlobalPath = addGlobalPath;
 exports.getGlobalPaths = getGlobalPaths;
 exports.globalPathExists = globalPathExists;
 var _module = _interopRequireDefault(require("module"));
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 const resolveLookupPaths = _module.default._resolveLookupPaths;
 _module.default._resolveLookupPaths = (request, parent) => {
   var _parent$paths;

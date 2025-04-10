@@ -5,4 +5,5 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.crashReporterSetup = void 0;
 var _bootstrapModules = require("./bootstrapModules");
-const crashReporterSetup = exports.crashReporterSetup = _bootstrapModules.crashReporterSetup ?? require('../../common/crashReporterSetup');
+const crashReporterSetup = _bootstrapModules.crashReporterSetup ?? require('../../common/crashReporterSetup');
+exports.crashReporterSetup = crashReporterSetup;

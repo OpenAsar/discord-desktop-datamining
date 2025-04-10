@@ -23,7 +23,7 @@ var _os = _interopRequireDefault(require("os"));
 var _process = _interopRequireDefault(require("process"));
 var _DiscordIPC = require("../common/DiscordIPC");
 var _minidumpReader = require("./minidumpReader");
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 const CPU_USAGE_GATHER_INTERVAL = 1000;
 const mainArgv = _DiscordIPC.DiscordIPC.renderer.sendSync(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_MAIN_ARGV_SYNC);
 let totalProcessorUsagePercent = 0;

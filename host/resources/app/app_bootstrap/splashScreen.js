@@ -21,9 +21,9 @@ var _updater = require("../common/updater");
 var _ipcMain = _interopRequireDefault(require("./ipcMain"));
 var logger = _interopRequireWildcard(require("./logger"));
 var _Constants = _interopRequireDefault(require("./Constants"));
-function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
-function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 const UPDATE_TIMEOUT_WAIT = 10000;
 const RETRY_CAP_SECONDS = 60;
 const LOADING_WINDOW_WIDTH = 300;
@@ -44,9 +44,12 @@ const INSTALLED_MODULE = 'installed-module';
 const INSTALLING_MODULE_PROGRESS = 'installing-module-progress';
 const INSTALLING_MODULES_FINISHED = 'installing-modules-finished';
 const UPDATE_MANUALLY = 'update-manually';
-const APP_SHOULD_LAUNCH = exports.APP_SHOULD_LAUNCH = 'APP_SHOULD_LAUNCH';
-const APP_SHOULD_SHOW = exports.APP_SHOULD_SHOW = 'APP_SHOULD_SHOW';
-const events = exports.events = new _events.EventEmitter();
+const APP_SHOULD_LAUNCH = 'APP_SHOULD_LAUNCH';
+exports.APP_SHOULD_LAUNCH = APP_SHOULD_LAUNCH;
+const APP_SHOULD_SHOW = 'APP_SHOULD_SHOW';
+exports.APP_SHOULD_SHOW = APP_SHOULD_SHOW;
+const events = new _events.EventEmitter();
+exports.events = events;
 logger.initializeLogging(paths);
 function webContentsSend(win, event, ...args) {
   console.log(`splashScreen.webContentsSend: ${event}`, event, args);
