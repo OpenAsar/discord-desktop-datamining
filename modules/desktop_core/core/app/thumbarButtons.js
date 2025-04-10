@@ -9,7 +9,7 @@ var _constants = require("./discord_native/common/constants");
 var _ipcMain = _interopRequireDefault(require("./ipcMain"));
 var _mainScreen = require("./mainScreen");
 var _utils = require("./utils");
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 let hasInit = false;
 const ThumbarButtonName = {
   VIDEO: 'VIDEO',

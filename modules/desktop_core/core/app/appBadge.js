@@ -10,9 +10,8 @@ var _electron = require("electron");
 var _ipcMain = _interopRequireDefault(require("./ipcMain"));
 var _mainScreen = require("./mainScreen");
 var _utils = require("./utils");
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-let hasInit = false;
-exports.hasInit = hasInit;
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+let hasInit = exports.hasInit = false;
 let lastIndex = null;
 let lastCount = null;
 const appIcons = [];
