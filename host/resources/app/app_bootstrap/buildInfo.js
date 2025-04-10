@@ -5,8 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _path = _interopRequireDefault(require("path"));
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 const buildInfo = require(_path.default.join(process.resourcesPath, 'build_info.json'));
-var _default = buildInfo;
-exports.default = _default;
+var _default = exports.default = buildInfo;
 module.exports = exports.default;

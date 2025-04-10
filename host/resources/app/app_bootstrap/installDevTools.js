@@ -15,6 +15,5 @@ function installDevTools() {
     console.log(`Devtron module is not available`);
   }
 }
-var _default = installDevTools;
-exports.default = _default;
+var _default = exports.default = installDevTools;
 module.exports = exports.default;
