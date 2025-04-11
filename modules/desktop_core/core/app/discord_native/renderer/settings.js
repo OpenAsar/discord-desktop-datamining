@@ -28,6 +28,5 @@ const settings = {
   set,
   getSync
 };
-var _default = settings;
-exports.default = _default;
+var _default = exports.default = settings;
 module.exports = settings;

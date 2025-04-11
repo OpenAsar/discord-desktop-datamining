@@ -15,7 +15,7 @@ var _electron = require("electron");
 var _path = _interopRequireDefault(require("path"));
 var _securityUtils = require("../common/securityUtils");
 var _appFeatures = require("./appFeatures");
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 const ALLOWED_FEATURES = ['width', 'height', 'left', 'top', 'resizable', 'movable', 'alwaysOnTop', 'frame', 'transparent', 'hasShadow', 'closable', 'skipTaskbar', 'backgroundColor', 'menubar', 'toolbar', 'location', 'directories', 'titleBarStyle', 'outOfProcessOverlay', 'focusable'];
 const MIN_POPOUT_WIDTH = 320;
 const MIN_POPOUT_HEIGHT = 180;
@@ -41,8 +41,7 @@ const DEFAULT_POPOUT_OPTIONS = {
   }
 };
 const features = (0, _appFeatures.getFeatures)();
-let hasInit = false;
-exports.hasInit = hasInit;
+let hasInit = exports.hasInit = false;
 let popoutWindows = {};
 let newWindowEvent = () => {};
 function init() {

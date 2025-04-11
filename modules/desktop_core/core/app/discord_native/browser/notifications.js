@@ -6,9 +6,15 @@ var _path = _interopRequireDefault(require("path"));
 var _appFeatures = require("../../appFeatures");
 var _utils = require("../../utils");
 var _DiscordIPC = require("../common/DiscordIPC");
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
+function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
+let majorVersion;
+try {
+  majorVersion = parseInt(_os.default.release().split('.')[0], 10);
+} catch (_e) {
+  majorVersion = 0;
+}
 function sendToAllWindows(channel, ...args) {
   electron.BrowserWindow.getAllWindows().forEach(win => {
     const contents = win.webContents;
@@ -17,66 +23,37 @@ function sendToAllWindows(channel, ...args) {
     }
   });
 }
-if (_utils.isOSX) {
-  let majorVersion;
+if (_utils.isOSX && majorVersion >= 21 && moduleDataPath != null) {
   try {
-    majorVersion = parseInt(_os.default.release().split('.')[0], 10);
-  } catch (_e) {
-    majorVersion = 0;
+    const modulePath = _path.default.join(moduleDataPath, 'discord_notifications');
+    const lib = require(modulePath);
+    lib.setDataPath(modulePath);
+    lib.setCallbacks((action, identifier, userText) => {
+      sendToAllWindows(_DiscordIPC.IPCEvents.NOTIFICATIONS_RECEIVED_RESPONSE, action, identifier, userText);
+    }, () => {
+      return ['badge', 'banner', 'list', 'sound'];
+    }, identifier => {
+      sendToAllWindows('USER_SETTINGS_OPEN', 'Notifications', identifier);
+    });
+    _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.NOTIFICATIONS_GET_AUTHORIZATION, async () => {
+      return await lib.getAuthorization();
+    });
+    _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.NOTIFICATIONS_GET_SETTINGS, async () => {
+      return await lib.getSettings();
+    });
+    _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.NOTIFICATIONS_SEND_NOTIFICATION, async (_event, options) => {
+      return await lib.sendNotification(options);
+    });
+    _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.NOTIFICATIONS_REMOVE_NOTIFICATIONS, (_event, identifiers) => {
+      lib.removeNotifications(identifiers);
+      return Promise.resolve();
+    });
+    _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.NOTIFICATIONS_REMOVE_ALL_NOTIFICATIONS, () => {
+      lib.removeAllNotifications();
+      return Promise.resolve();
+    });
+    (0, _appFeatures.getFeatures)().declareSupported('notifications');
+  } catch (e) {
+    console.warn('discord_notifications setup failed with error: ', e);
   }
-  if (majorVersion >= 21 && moduleDataPath != null) {
-    try {
-      const modulePath = _path.default.join(moduleDataPath, 'discord_notifications');
-      const lib = require(modulePath);
-      lib.setDataPath(modulePath);
-      lib.setCallbacks((action, identifier, userText) => {
-        sendToAllWindows(_DiscordIPC.IPCEvents.NOTIFICATIONS_RECEIVED_RESPONSE, action, identifier, userText);
-      }, () => {
-        return ['badge', 'banner', 'list', 'sound'];
-      }, identifier => {
-        sendToAllWindows('USER_SETTINGS_OPEN', 'Notifications', identifier);
-      });
-      _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.NOTIFICATIONS_GET_AUTHORIZATION, async () => {
-        return await lib.getAuthorization();
-      });
-      _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.NOTIFICATIONS_GET_SETTINGS, async () => {
-        return await lib.getSettings();
-      });
-      _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.NOTIFICATIONS_SEND_NOTIFICATION, async (_event, options) => {
-        return await lib.sendNotification(options);
-      });
-      _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.NOTIFICATIONS_REMOVE_NOTIFICATIONS, (_event, identifiers) => {
-        lib.removeNotifications(identifiers);
-        return Promise.resolve();
-      });
-      _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.NOTIFICATIONS_REMOVE_ALL_NOTIFICATIONS, () => {
-        lib.removeAllNotifications();
-        return Promise.resolve();
-      });
-      (0, _appFeatures.getFeatures)().declareSupported('notifications');
-    } catch (e) {
-      console.warn('discord_notifications setup failed with error: ', e);
-    }
-  }
-} else if (_utils.isWindows && electron.Notification.isSupported() && moduleDataPath != null) {
-  const lib = require('discord_notifications');
-  lib.setCallbacks((action, identifier, userText) => {
-    sendToAllWindows(_DiscordIPC.IPCEvents.NOTIFICATIONS_RECEIVED_RESPONSE, action, identifier, userText);
-  });
-  _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.NOTIFICATIONS_GET_AUTHORIZATION, async () => {
-    return await lib.getAuthorization();
-  });
-  _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.NOTIFICATIONS_GET_SETTINGS, async () => {
-    return await lib.getSettings();
-  });
-  _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.NOTIFICATIONS_SEND_NOTIFICATION, async (_event, options) => {
-    return await lib.showNotification(options);
-  });
-  _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.NOTIFICATIONS_REMOVE_NOTIFICATIONS, async (_event, identifiers) => {
-    return await lib.removeNotifications(identifiers);
-  });
-  _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.NOTIFICATIONS_REMOVE_ALL_NOTIFICATIONS, async () => {
-    return await lib.removeAllNotifications();
-  });
-  (0, _appFeatures.getFeatures)().declareSupported('notifications');
 }

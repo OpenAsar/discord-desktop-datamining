@@ -127,11 +127,7 @@ function hasArgvFlag(flag) {
 console.log(`${Constants.APP_NAME} ${app.getVersion()}`);
 let pendingAppQuit = false;
 if (process.platform === 'win32') {
-  if (hasArgvFlag('--localdev')) {
-    app.setAppUserModelId(process.execPath);
-  } else {
-    app.setAppUserModelId(Constants.APP_ID);
-  }
+  app.setAppUserModelId(Constants.APP_ID);
   const {
     handleStartupEvent
   } = require('./squirrelUpdate');

@@ -7,7 +7,7 @@ exports.readMinidump = readMinidump;
 var _promises = _interopRequireDefault(require("fs/promises"));
 var _util = _interopRequireDefault(require("util"));
 var _nativeCrashCodes = require("@discordapp/native-crash-codes");
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 class FileReader {
   utf16Decoder = new _util.default.TextDecoder('utf-16');
   constructor(path, bufferSize = 2048) {

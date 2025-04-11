@@ -8,7 +8,7 @@ exports.spawn = spawn;
 exports.spawnReg = spawnReg;
 var _child_process = _interopRequireDefault(require("child_process"));
 var _path = _interopRequireDefault(require("path"));
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 const regExe = process.env.SystemRoot != null ? _path.default.join(process.env.SystemRoot ?? '', 'System32', 'reg.exe') : 'reg.exe';
 function spawn(command, args, callback) {
   var _spawnedProcess$stdou;

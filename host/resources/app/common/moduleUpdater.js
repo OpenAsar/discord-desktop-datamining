@@ -27,34 +27,22 @@ var analytics = _interopRequireWildcard(require("./analytics"));
 var _nodeGlobalPaths = require("./nodeGlobalPaths");
 var paths = _interopRequireWildcard(require("./paths"));
 var _processUtils = require("./processUtils");
-function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
+function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 const originalFs = require('original-fs');
-const CHECKING_FOR_UPDATES = 'checking-for-updates';
-exports.CHECKING_FOR_UPDATES = CHECKING_FOR_UPDATES;
-const INSTALLED_MODULE = 'installed-module';
-exports.INSTALLED_MODULE = INSTALLED_MODULE;
-const UPDATE_CHECK_FINISHED = 'update-check-finished';
-exports.UPDATE_CHECK_FINISHED = UPDATE_CHECK_FINISHED;
-const DOWNLOADING_MODULE = 'downloading-module';
-exports.DOWNLOADING_MODULE = DOWNLOADING_MODULE;
-const DOWNLOADING_MODULE_PROGRESS = 'downloading-module-progress';
-exports.DOWNLOADING_MODULE_PROGRESS = DOWNLOADING_MODULE_PROGRESS;
-const DOWNLOADING_MODULES_FINISHED = 'downloading-modules-finished';
-exports.DOWNLOADING_MODULES_FINISHED = DOWNLOADING_MODULES_FINISHED;
-const UPDATE_MANUALLY = 'update-manually';
-exports.UPDATE_MANUALLY = UPDATE_MANUALLY;
-const DOWNLOADED_MODULE = 'downloaded-module';
-exports.DOWNLOADED_MODULE = DOWNLOADED_MODULE;
-const INSTALLING_MODULES_FINISHED = 'installing-modules-finished';
-exports.INSTALLING_MODULES_FINISHED = INSTALLING_MODULES_FINISHED;
-const INSTALLING_MODULE = 'installing-module';
-exports.INSTALLING_MODULE = INSTALLING_MODULE;
-const INSTALLING_MODULE_PROGRESS = 'installing-module-progress';
-exports.INSTALLING_MODULE_PROGRESS = INSTALLING_MODULE_PROGRESS;
-const NO_PENDING_UPDATES = 'no-pending-updates';
-exports.NO_PENDING_UPDATES = NO_PENDING_UPDATES;
+const CHECKING_FOR_UPDATES = exports.CHECKING_FOR_UPDATES = 'checking-for-updates';
+const INSTALLED_MODULE = exports.INSTALLED_MODULE = 'installed-module';
+const UPDATE_CHECK_FINISHED = exports.UPDATE_CHECK_FINISHED = 'update-check-finished';
+const DOWNLOADING_MODULE = exports.DOWNLOADING_MODULE = 'downloading-module';
+const DOWNLOADING_MODULE_PROGRESS = exports.DOWNLOADING_MODULE_PROGRESS = 'downloading-module-progress';
+const DOWNLOADING_MODULES_FINISHED = exports.DOWNLOADING_MODULES_FINISHED = 'downloading-modules-finished';
+const UPDATE_MANUALLY = exports.UPDATE_MANUALLY = 'update-manually';
+const DOWNLOADED_MODULE = exports.DOWNLOADED_MODULE = 'downloaded-module';
+const INSTALLING_MODULES_FINISHED = exports.INSTALLING_MODULES_FINISHED = 'installing-modules-finished';
+const INSTALLING_MODULE = exports.INSTALLING_MODULE = 'installing-module';
+const INSTALLING_MODULE_PROGRESS = exports.INSTALLING_MODULE_PROGRESS = 'installing-module-progress';
+const NO_PENDING_UPDATES = exports.NO_PENDING_UPDATES = 'no-pending-updates';
 const ALWAYS_ALLOW_UPDATES = 'ALWAYS_ALLOW_UPDATES';
 const SKIP_HOST_UPDATE = 'SKIP_HOST_UPDATE';
 const SKIP_MODULE_UPDATE = 'SKIP_MODULE_UPDATE';
@@ -120,10 +108,8 @@ const {
 } = require('electron');
 const REQUEST_TIMEOUT = 15000;
 const backoff = new _Backoff.default(1000, 20000);
-const events = new Events();
-exports.events = events;
-const supportsEventObjects = true;
-exports.supportsEventObjects = supportsEventObjects;
+const events = exports.events = new Events();
+const supportsEventObjects = exports.supportsEventObjects = true;
 let logger;
 let locallyInstalledModules;
 let moduleInstallPath;
