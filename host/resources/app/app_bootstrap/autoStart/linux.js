@@ -11,7 +11,7 @@ var _electron = require("electron");
 var _fs = _interopRequireDefault(require("fs"));
 var _path = _interopRequireDefault(require("path"));
 var _buildInfo = _interopRequireDefault(require("../buildInfo"));
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 const appName = _path.default.basename(process.execPath, '.exe');
 const exePath = _electron.app.getPath('exe');
 const exeDir = _path.default.dirname(exePath);

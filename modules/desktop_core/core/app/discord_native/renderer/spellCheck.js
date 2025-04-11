@@ -10,7 +10,7 @@ exports.setLearnedWords = setLearnedWords;
 exports.setLocale = setLocale;
 var _events = _interopRequireDefault(require("events"));
 var _DiscordIPC = require("../common/DiscordIPC");
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 const events = new _events.default();
 _DiscordIPC.DiscordIPC.renderer.on(_DiscordIPC.IPCEvents.SPELLCHECK_RESULT, (_, misspelledWord, dictionarySuggestions) => {
   events.emit('spellcheck-result', misspelledWord, dictionarySuggestions);

@@ -12,7 +12,7 @@ Object.defineProperty(exports, "IPCEvents", {
 });
 var _electron = _interopRequireDefault(require("electron"));
 var _constants = require("./constants");
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 class DiscordMainIPC {
   static on(channel, listener) {
     _electron.default.ipcMain.on(channel, (...args) => {
@@ -38,8 +38,7 @@ class DiscordRendererIPC {
     });
   }
 }
-const DiscordIPC = {
+const DiscordIPC = exports.DiscordIPC = {
   main: DiscordMainIPC,
   renderer: DiscordRendererIPC
 };
-exports.DiscordIPC = DiscordIPC;

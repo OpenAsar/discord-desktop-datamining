@@ -34,6 +34,5 @@ if (Overlay.broadcastCommand == null && Overlay.broadcastCommandJson != null) {
     Overlay.broadcastCommandJson(JSON.stringify(command));
   };
 }
-var _default = Overlay;
-exports["default"] = _default;
+var _default = exports["default"] = Overlay;
 module.exports = exports.default;

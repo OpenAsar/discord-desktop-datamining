@@ -5,6 +5,5 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 const autoStart = require('./' + process.platform);
-var _default = autoStart;
-exports.default = _default;
+var _default = exports.default = autoStart;
 module.exports = exports.default;

@@ -7,7 +7,7 @@ exports.getRequestCA = getRequestCA;
 exports.init = init;
 var _fs = _interopRequireDefault(require("fs"));
 var _path = _interopRequireDefault(require("path"));
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 let requestCA;
 function init() {
   let rootCertificateAuthorities;
