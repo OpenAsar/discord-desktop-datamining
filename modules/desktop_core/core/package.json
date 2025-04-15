@@ -31,7 +31,13 @@
     "@types/mkdirp": "1.0.2",
     "@types/node": "17.0.8",
     "@types/rimraf": "3.0.2",
+    "canvas": "^3.0.0",
     "electron": "28.2.10",
     "jest": "^27.1.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "canvas": "^3.0.0"
+    }
   }
 }
