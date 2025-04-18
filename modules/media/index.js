@@ -2,7 +2,7 @@
 
 var _discord_media = _interopRequireDefault(require("./discord_media.node"));
 var _ref, _ref$DiscordNative; // eslint-disable-next-line import/no-unresolved, import/extensions
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { "default": e }; }
 // Init logging
 var isFileManagerAvailable = (_ref = window) === null || _ref === void 0 ? void 0 : (_ref$DiscordNative = _ref.DiscordNative) === null || _ref$DiscordNative === void 0 ? void 0 : _ref$DiscordNative.fileManager;
 var isLogDirAvailable = isFileManagerAvailable === null || isFileManagerAvailable === void 0 ? void 0 : isFileManagerAvailable.getAndCreateLogDirectorySync;

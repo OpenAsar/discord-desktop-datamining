@@ -4,7 +4,7 @@ var _electron = _interopRequireDefault(require("electron"));
 var _DiscordIPC = require("../common/DiscordIPC");
 var _paths = require("../common/paths");
 var _crashReporter = require("./crashReporter");
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 const releaseChannel = _DiscordIPC.DiscordIPC.renderer.sendSync(_DiscordIPC.IPCEvents.APP_GET_RELEASE_CHANNEL_SYNC);
 const hostVersion = _DiscordIPC.DiscordIPC.renderer.sendSync(_DiscordIPC.IPCEvents.APP_GET_HOST_VERSION_SYNC);
 const buildNumber = _DiscordIPC.DiscordIPC.renderer.sendSync(_DiscordIPC.IPCEvents.APP_GET_BUILD_NUMBER);

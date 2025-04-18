@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _electron = require("electron");
-var _default = [{
+var _default = exports.default = [{
   label: '&File',
   submenu: [{
     label: '&Exit',
@@ -13,5 +13,4 @@ var _default = [{
     accelerator: 'Control+Q'
   }]
 }];
-exports.default = _default;
 module.exports = exports.default;

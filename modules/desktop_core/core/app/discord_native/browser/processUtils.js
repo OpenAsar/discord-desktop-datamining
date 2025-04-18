@@ -8,8 +8,8 @@ var _electron = _interopRequireDefault(require("electron"));
 var _os = _interopRequireDefault(require("os"));
 var _process = _interopRequireDefault(require("process"));
 var _DiscordIPC = require("../common/DiscordIPC");
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-const processUtilsSettings = {
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+const processUtilsSettings = exports.processUtilsSettings = {
   rendererCrashReason: null,
   rendererCrashExitCode: null,
   lastRunsStoredInformation: {},
@@ -17,7 +17,6 @@ const processUtilsSettings = {
   lastMemoryInformation: null,
   highestMemoryInformation: null
 };
-exports.processUtilsSettings = processUtilsSettings;
 let usageOffset = 0;
 let lastUsage = 0;
 const cpuCoreCount = _os.default.cpus().length;

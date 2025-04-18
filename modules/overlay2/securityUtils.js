@@ -8,7 +8,7 @@ exports.saferShellOpenExternal = saferShellOpenExternal;
 exports.shouldOpenExternalUrl = shouldOpenExternalUrl;
 var _electron = require("electron");
 var _url = _interopRequireDefault(require("url"));
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { "default": e }; }
 /* eslint-disable-next-line import/no-unresolved */
 
 var BLOCKED_URL_PROTOCOLS = ['file:', 'javascript:', 'vbscript:', 'data:', 'about:', 'chrome:', 'ms-cxh:', 'ms-cxh-full:', 'ms-word:'];
