@@ -8,11 +8,10 @@ exports.init = init;
 var _appSettings = require("./bootstrapModules/appSettings");
 var _autoStart = require("./bootstrapModules/autoStart");
 var _ipcMain = _interopRequireDefault(require("./ipcMain"));
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 const settings = _appSettings.appSettings.getSettings();
 const NOOP = () => {};
-let hasInit = false;
-exports.hasInit = hasInit;
+let hasInit = exports.hasInit = false;
 function init() {
   if (hasInit) {
     return;

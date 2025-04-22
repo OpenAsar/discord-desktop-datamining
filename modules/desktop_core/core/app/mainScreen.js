@@ -34,9 +34,9 @@ var systemTray = _interopRequireWildcard(require("./systemTray"));
 var thumbarButtons = _interopRequireWildcard(require("./thumbarButtons"));
 var _Constants = require("./Constants");
 var _envVariables$network;
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
+function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
 const {
   buildInfo
 } = require('./bootstrapModules/buildInfo');
@@ -80,8 +80,7 @@ const getWebappEndpoint = () => {
   }
   return endpoint;
 };
-const WEBAPP_ENDPOINT = getWebappEndpoint();
-exports.WEBAPP_ENDPOINT = WEBAPP_ENDPOINT;
+const WEBAPP_ENDPOINT = exports.WEBAPP_ENDPOINT = getWebappEndpoint();
 function getSanitizedPath(path) {
   return new _url.default.URL(path, WEBAPP_ENDPOINT).pathname;
 }
@@ -313,8 +312,9 @@ function getBackgroundColor() {
   return (settings === null || settings === void 0 ? void 0 : settings.get(BACKGROUND_COLOR_KEY, DEFAULT_BACKGROUND_COLOR)) ?? DEFAULT_BACKGROUND_COLOR;
 }
 function setBackgroundColor(color) {
+  var _mainWindow;
   settings === null || settings === void 0 ? void 0 : settings.set(BACKGROUND_COLOR_KEY, color);
-  mainWindow.setBackgroundColor(color);
+  (_mainWindow = mainWindow) === null || _mainWindow === void 0 ? void 0 : _mainWindow.setBackgroundColor(color);
   settings === null || settings === void 0 ? void 0 : settings.save();
 }
 function launchMainAppWindow(isVisible) {
@@ -449,7 +449,7 @@ function launchMainAppWindow(isVisible) {
     adjustWindowBounds(childWindow);
   });
   mainWindow.webContents.on('did-finish-load', () => {
-    var _mainWindow;
+    var _mainWindow2;
     if (!mainWindowDidFinishLoad) {
       var _analytics$getDesktop3;
       _bootstrapModules.analytics === null || _bootstrapModules.analytics === void 0 ? void 0 : (_analytics$getDesktop3 = _bootstrapModules.analytics.getDesktopTTI) === null || _analytics$getDesktop3 === void 0 ? void 0 : _analytics$getDesktop3.call(_bootstrapModules.analytics).trackMainWindowLoadDuration();
@@ -469,7 +469,7 @@ function launchMainAppWindow(isVisible) {
       webContentsSend('MAIN_WINDOW_PATH', mainWindowInitialPath.path, mainWindowInitialPath.query);
       mainWindowInitialPath = null;
     }
-    webContentsSend(((_mainWindow = mainWindow) === null || _mainWindow === void 0 ? void 0 : _mainWindow.isFocused()) ? 'MAIN_WINDOW_FOCUS' : 'MAIN_WINDOW_BLUR');
+    webContentsSend(((_mainWindow2 = mainWindow) === null || _mainWindow2 === void 0 ? void 0 : _mainWindow2.isFocused()) ? 'MAIN_WINDOW_FOCUS' : 'MAIN_WINDOW_BLUR');
     if (!lastPageLoadFailed) {
       connectionBackoff.succeed();
       _splashScreen.splashScreen.pageReady();

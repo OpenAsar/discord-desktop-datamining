@@ -59,6 +59,5 @@ const buildMenu = enableDevtools => [{
     click: () => _electron.app.emit(_Constants.MenuEvents.OPEN_HELP)
   }]
 }];
-var _default = buildMenu;
-exports.default = _default;
+var _default = exports.default = buildMenu;
 module.exports = exports.default;

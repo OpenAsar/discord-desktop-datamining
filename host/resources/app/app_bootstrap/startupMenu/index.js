@@ -6,6 +6,5 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = void 0;
 var _electron = require("electron");
 const menu = require('./' + process.platform);
-var _default = _electron.Menu.buildFromTemplate(menu);
-exports.default = _default;
+var _default = exports.default = _electron.Menu.buildFromTemplate(menu);
 module.exports = exports.default;

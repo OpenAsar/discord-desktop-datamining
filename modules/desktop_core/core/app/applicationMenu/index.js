@@ -9,6 +9,5 @@ const createMenu = require('./' + process.platform);
 const buildMenu = enableDevtools => {
   return _electron.Menu.buildFromTemplate(createMenu(enableDevtools));
 };
-var _default = buildMenu;
-exports.default = _default;
+var _default = exports.default = buildMenu;
 module.exports = exports.default;
