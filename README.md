@@ -21,7 +21,7 @@
 | rpc | 1 |
 | sekrit | 1 |
 | spellcheck | 1 |
-| utils | 13 |
+| utils | 14 |
 | vigilante | 1 |
 | voice | 1 |
 | voice_filters | 8 |
