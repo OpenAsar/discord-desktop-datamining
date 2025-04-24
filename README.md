@@ -2,7 +2,7 @@
 
 ## ptb versions
 
-**host: 1.0.1138**
+**host: 1.0.1139**
 
 | module | version |
 | ------ | :-----: |
@@ -16,6 +16,7 @@
 | krisp | 1 |
 | media | 1 |
 | modules | 1 |
+| notifications | 1 |
 | overlay2 | 1 |
 | rpc | 1 |
 | sekrit | 1 |

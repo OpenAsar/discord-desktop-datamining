@@ -77,7 +77,7 @@ function parseArguments(args) {
     'use-fake-video-capture': 'Use fake video capture device.',
     'use-file-for-fake-video-capture': 'Use local file for fake video capture.',
     'use-fake-audio-capture': 'Use fake audio capture device.',
-    'use-file-for-fake-audio-capture': 'Use local file for fake audio capture.',
+    'use-files-for-fake-audio-capture': 'Use local files for fake audio capture.',
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -113,8 +113,8 @@ function parseArguments(args) {
       case '--use-fake-audio-capture':
         parsed['use-fake-audio-capture'] = true;
         break;
-      case '--use-file-for-fake-audio-capture':
-        parsed['use-file-for-fake-audio-capture'] = getValue();
+      case '--use-files-for-fake-audio-capture':
+        parsed['use-files-for-fake-audio-capture'] = getValue();
         break;
     }
   }
@@ -127,7 +127,7 @@ const logLevel = argv['log-level'] === -1 ? (debugLogging ? 2 : -1) : argv['log-
 const useFakeVideoCapture = argv['use-fake-video-capture'];
 const useFileForFakeVideoCapture = argv['use-file-for-fake-video-capture'];
 const useFakeAudioCapture = argv['use-fake-audio-capture'];
-const useFileForFakeAudioCapture = argv['use-file-for-fake-audio-capture'];
+const useFilesForFakeAudioCapture = argv['use-files-for-fake-audio-capture'];
 
 features.declareSupported('voice_panning');
 features.declareSupported('voice_multiple_connections');
@@ -533,7 +533,7 @@ VoiceEngine.initialize({
   useFakeVideoCapture,
   useFileForFakeVideoCapture,
   useFakeAudioCapture,
-  useFileForFakeAudioCapture,
+  useFilesForFakeAudioCapture,
 });
 
 module.exports = VoiceEngine;
