@@ -50,4 +50,10 @@ VoiceFiltersModule.setVoiceFilterLaggingCallback = (cb) => {
   );
 };
 
+VoiceFiltersModule.setVoiceFilterReadyCallback = (cb) => {
+  new Promise((resolve, reject) =>
+    VoiceFiltersModule._setVoiceFilterReadyCallback(cb, resolve, (msg) => reject(new Error(msg))),
+  );
+};
+
 module.exports = VoiceFiltersModule;
