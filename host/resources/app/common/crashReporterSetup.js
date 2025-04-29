@@ -16,7 +16,6 @@ function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e
 let gSentry = null;
 let initialized = false;
 const metadata = exports.metadata = {};
-const supportsTls13 = processUtils.supportsTls13();
 const SENTRY_PROJECT_ID = '146342';
 const SENTRY_PROJECT_HOST = 'o64374';
 const STABLE_SENTRY_DSN_KEY = '7a60c374cb0e99ac8a57388db6933711';
@@ -102,10 +101,7 @@ function init(buildInfo, sentry) {
   initialized = true;
 }
 function buildSentryDSN(dsnKey) {
-  if (supportsTls13) {
-    return 'https://' + dsnKey + '@' + SENTRY_PROJECT_HOST + '.ingest.sentry.io/' + SENTRY_PROJECT_ID;
-  }
-  return 'https://' + dsnKey + '@' + SENTRY_PROJECT_HOST + '.insecure.sentry.io/' + SENTRY_PROJECT_ID;
+  return 'https://' + dsnKey + '@' + SENTRY_PROJECT_HOST + '.ingest.sentry.io/' + SENTRY_PROJECT_ID;
 }
 function getSentryDSN(releaseChannel) {
   if (processUtils.IS_LINUX) {
