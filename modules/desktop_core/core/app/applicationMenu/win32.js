@@ -10,27 +10,27 @@ const SEPARATOR = {
   type: 'separator'
 };
 const buildMenu = enableDevtools => [{
-  label: '&File',
+  label: 'File',
   submenu: [{
-    label: '&Options',
+    label: 'Options',
     click: () => _electron.app.emit(_Constants.MenuEvents.OPEN_SETTINGS),
     accelerator: 'Ctrl+,'
   }, SEPARATOR, {
-    label: '&Exit',
+    label: 'Exit',
     click: () => _electron.app.quit(),
     accelerator: 'Alt+F4'
   }]
 }, {
-  label: '&View',
+  label: 'View',
   submenu: [{
-    label: '&Reload',
+    label: 'Reload',
     click: () => {
       var _BrowserWindow$getFoc;
       return (_BrowserWindow$getFoc = _electron.BrowserWindow.getFocusedWindow()) === null || _BrowserWindow$getFoc === void 0 ? void 0 : _BrowserWindow$getFoc.webContents.reloadIgnoringCache();
     },
     accelerator: 'Control+R'
   }, {
-    label: 'Toggle &Full Screen',
+    label: 'Toggle Full Screen',
     click: () => {
       const window = _electron.BrowserWindow.getFocusedWindow();
       if (window != null) {
@@ -39,9 +39,9 @@ const buildMenu = enableDevtools => [{
     },
     accelerator: 'Control+Shift+F'
   }, ...(enableDevtools ? [SEPARATOR, {
-    label: '&Developer',
+    label: 'Developer',
     submenu: [{
-      label: 'Toggle Developer &Tools',
+      label: 'Toggle Developer Tools',
       click: () => {
         var _BrowserWindow$getFoc2;
         return (_BrowserWindow$getFoc2 = _electron.BrowserWindow.getFocusedWindow()) === null || _BrowserWindow$getFoc2 === void 0 ? void 0 : _BrowserWindow$getFoc2.webContents.toggleDevTools();
@@ -50,7 +50,7 @@ const buildMenu = enableDevtools => [{
     }]
   }] : [])]
 }, {
-  label: '&Help',
+  label: 'Help',
   submenu: [{
     label: 'Check for Updates',
     click: () => _electron.app.emit(_Constants.MenuEvents.CHECK_FOR_UPDATES)
