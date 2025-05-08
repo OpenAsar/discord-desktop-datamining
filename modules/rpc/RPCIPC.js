@@ -59,8 +59,8 @@ function recastNetSocket(socket) {
   socket.on('close', function () {
     return emitter.emit('close');
   });
-  socket.on('readable', function () {
-    return emitter.emit('readable');
+  socket.on('data', function (data) {
+    return emitter.emit('data', data);
   });
   socket.on('pong', function () {
     return emitter.emit('pong');
@@ -77,9 +77,6 @@ function recastNetSocket(socket) {
     },
     getHandshakeComplete: function getHandshakeComplete() {
       return didHandshake;
-    },
-    pause: function pause() {
-      return socket.pause();
     },
     destroy: function destroy() {
       return socket.destroy();
