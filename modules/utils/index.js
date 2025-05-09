@@ -267,7 +267,8 @@ module.exports.submitLiveCrashReport = async (channel, sentryMetadata) => {
     formData.append('channel', channel);
     formData.append('sentry', JSON.stringify(sentryMetadata));
 
-    const sentryEndPoint = 'https://sentry.io/api/146342/minidump/?sentry_key=f11e8c3e62cb46b5a006c339b2086ba3';
+    const sentryEndPoint =
+      'https://o64374.ingest.sentry.io/api/146342/minidump/?sentry_key=f11e8c3e62cb46b5a006c339b2086ba3';
     const response = await fetch(sentryEndPoint, {
       method: 'POST',
       body: formData,

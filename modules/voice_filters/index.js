@@ -44,4 +44,16 @@ VoiceFiltersModule.fetchCatalog = (token, superProperties) =>
     VoiceFiltersModule._fetchCatalog(token, superProperties, resolve, (msg) => reject(new Error(msg))),
   );
 
+VoiceFiltersModule.setVoiceFilterLaggingCallback = (cb) => {
+  new Promise((resolve, reject) =>
+    VoiceFiltersModule._setVoiceFilterLaggingCallback(cb, resolve, (msg) => reject(new Error(msg))),
+  );
+};
+
+VoiceFiltersModule.setVoiceFilterReadyCallback = (cb) => {
+  new Promise((resolve, reject) =>
+    VoiceFiltersModule._setVoiceFilterReadyCallback(cb, resolve, (msg) => reject(new Error(msg))),
+  );
+};
+
 module.exports = VoiceFiltersModule;
