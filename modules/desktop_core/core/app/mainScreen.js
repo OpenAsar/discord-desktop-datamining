@@ -322,6 +322,11 @@ function launchMainAppWindow(isVisible) {
   if (mainWindow) {
     mainWindow.destroy();
   }
+  const additionalArguments = ['--enable-node-leakage-in-renderers'];
+  if (WEBAPP_ENDPOINT.startsWith('http://') && !WEBAPP_ENDPOINT.startsWith('http://localhost')) {
+    console.log('Allowing insecure origin for development');
+    additionalArguments.push(`--unsafely-treat-insecure-origin-as-secure=${WEBAPP_ENDPOINT}`);
+  }
   const mainWindowOptions = {
     title: 'Discord',
     backgroundColor: getBackgroundColor(),
@@ -340,7 +345,7 @@ function launchMainAppWindow(isVisible) {
       preload: _path.default.join(__dirname, 'mainScreenPreload.js'),
       spellcheck: true,
       contextIsolation: true,
-      additionalArguments: ['--enable-node-leakage-in-renderers'],
+      additionalArguments,
       devTools: ENABLE_DEVTOOLS
     }
   };

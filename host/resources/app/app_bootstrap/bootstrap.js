@@ -63,6 +63,7 @@ if (process.platform === 'darwin' && parseInt(require('os').release().split('.')
 }
 if (process.platform === 'win32') {
   app.commandLine.appendSwitch('disable-background-timer-throttling');
+  app.commandLine.appendSwitch('disable-renderer-backgrounding');
 }
 app.commandLine.appendSwitch('disable-features', disabledFeatures.join(','));
 function setupSettingsFlags() {
