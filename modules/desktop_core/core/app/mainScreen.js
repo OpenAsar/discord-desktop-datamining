@@ -908,17 +908,15 @@ function init() {
     saveWindowConfig(mainWindow);
     mainWindow = null;
   });
-  _electron.app.on('gpu-process-crashed', (_, killed) => {
-    if (killed) {
-      _electron.app.quit();
-    }
-  });
-  _electron.app.on('child-process-gone', (_, details) => {
+  _electron.app.on('child-process-gone', (_event, details) => {
     if (details.exitCode === 0) {
       return;
     }
     const serviceDescription = `${details.type} (${details.name})`;
     console.error(`child-process-gone! child: ${serviceDescription} exitCode: ${details.exitCode}`);
+    if (details.type === 'GPU' || details.type === 'Utility') {
+      webContentsSend('CRASH_REPORTER_NEW_CRASH', details);
+    }
     const {
       reason
     } = details;
