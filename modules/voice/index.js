@@ -193,10 +193,10 @@ if (process.platform === 'win32') {
   features.declareSupported('voice_experimental_subsystem');
   features.declareSupported('voice_automatic_subsystem');
   features.declareSupported('voice_subsystem_deferred_switch');
+  features.declareSupported('voice_bypass_system_audio_input_processing');
   // NOTE(jvass): currently there's no experimental encoders! Add this back if you
   // add one and want to re-enable the UI for them.
   // features.declareSupported('experimental_encoders');
-  features.declareSupported('capture_timeout_experiments');
   features.declareSupported('clips');
 }
 
