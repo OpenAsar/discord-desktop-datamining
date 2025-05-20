@@ -112,6 +112,7 @@ let mainWindowDidFinishLoad = false;
 let mainWindowIsVisible = false;
 let insideAuthFlow = false;
 let lastCrashed = 0;
+let lastCrashedNonRenderer = 0;
 let lastPageLoadFailed = false;
 const retryUpdateOptions = {
   skip_host_delta: false,
@@ -915,7 +916,13 @@ function init() {
     const serviceDescription = `${details.type} (${details.name})`;
     console.error(`child-process-gone! child: ${serviceDescription} exitCode: ${details.exitCode}`);
     if (details.type === 'GPU' || details.type === 'Utility') {
-      webContentsSend('CRASH_REPORTER_NEW_CRASH', details);
+      const crashTime = performance.now();
+      if (crashTime - lastCrashedNonRenderer > 30_000) {
+        webContentsSend('CRASH_REPORTER_NEW_CRASH', details);
+      } else {
+        console.error(`Detected frequent crash for non-renderer process`);
+      }
+      lastCrashedNonRenderer = crashTime;
     }
     const {
       reason
