@@ -25,6 +25,7 @@ var _moduleUpdater = require("./bootstrapModules/moduleUpdater");
 var _paths = require("./bootstrapModules/paths");
 var _splashScreen = require("./bootstrapModules/splashScreen");
 var _updater = require("./bootstrapModules/updater");
+var _buildOverrideUtils = require("./discord_native/browser/buildOverrideUtils");
 var _processUtils = require("./discord_native/browser/processUtils");
 var _ipcMain = _interopRequireDefault(require("./ipcMain"));
 var mouse = _interopRequireWildcard(require("./mouse"));
@@ -81,6 +82,7 @@ const getWebappEndpoint = () => {
   return endpoint;
 };
 const WEBAPP_ENDPOINT = exports.WEBAPP_ENDPOINT = getWebappEndpoint();
+(0, _buildOverrideUtils.registerBuildOverrideUtils)(WEBAPP_ENDPOINT);
 function getSanitizedPath(path) {
   return new _url.default.URL(path, WEBAPP_ENDPOINT).pathname;
 }
