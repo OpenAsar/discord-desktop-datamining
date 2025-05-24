@@ -6,9 +6,10 @@ Object.defineProperty(exports, "__esModule", {
 exports.setupClipsProtocol = setupClipsProtocol;
 var _buffer = _interopRequireDefault(require("buffer"));
 var _electron = require("electron");
-var _promises = _interopRequireDefault(require("fs/promises"));
+var _nodeFs = require("node:fs");
+var _promises = _interopRequireDefault(require("node:fs/promises"));
+var _nodeStream = require("node:stream");
 var _path = _interopRequireDefault(require("path"));
-var _url = require("url");
 var _constants = require("../../../common/constants");
 var _utils = require("../../../common/utils");
 var _DiscordIPC = require("../common/DiscordIPC");
@@ -23,6 +24,7 @@ const UUID_SIZE_BYTES = 16;
 const MP4_SIGNATURE = 'ftypisom';
 const MP4_SIGNATURE_SIZE_BYTES = 8;
 const MP4_SIGNATURE_OFFSET_BYTES = 4;
+const RANGE_HEADER_REGEX = /bytes=(\d+)?-(\d+)?/;
 class InvalidFileError extends Error {}
 function verifyIsMP4(buffer) {
   if (buffer.toString('ascii', MP4_SIGNATURE_OFFSET_BYTES, MP4_SIGNATURE_OFFSET_BYTES + MP4_SIGNATURE_SIZE_BYTES) !== MP4_SIGNATURE) {
@@ -47,24 +49,72 @@ function isDiscordUUIDBox(buffer, startIndex) {
   return getBoxHeaderName(buffer, startIndex) === UUID_BOX_NAME && getUUID(buffer, startIndex) === DISCORD_UUID;
 }
 function setupClipsProtocol() {
-  _electron.protocol.registerFileProtocol(_constants.DISCORD_CLIP_PROTOCOL, async function (request, callback) {
+  _electron.protocol.handle(_constants.DISCORD_CLIP_PROTOCOL, async function (request) {
     const parsedURL = new URL(request.url);
-    const filepath = (0, _url.fileURLToPath)(parsedURL.href.replace(parsedURL.protocol, 'file:'));
-    const filename = _path.default.basename(filepath);
-    const dirname = _path.default.dirname(filepath);
+    const pathname = _path.default.normalize(parsedURL.pathname.slice(1));
+    const filename = _path.default.basename(pathname);
+    const dirname = _path.default.dirname(pathname);
     try {
       const clipMetadata = await getClipMetadata(filename, dirname);
       if (clipMetadata == null) {
         throw new Error(INVALID_FILE_ERROR);
       }
-      callback({
-        path: filepath
-      });
     } catch (e) {
       console.error('Invalid clip requested via protocol:', e);
-      callback({
-        error: -6,
-        statusCode: 404
+      return new Response('Clip not found', {
+        status: 404
+      });
+    }
+    try {
+      const stats = await _promises.default.stat(pathname);
+      const rangeHeader = request.headers.get('Range');
+      if (rangeHeader == null) {
+        return new Response(_nodeStream.Readable.toWeb((0, _nodeFs.createReadStream)(pathname)), {
+          status: 200,
+          headers: {
+            'Content-Type': 'video/mp4',
+            'Accept-Ranges': 'bytes',
+            'Content-Length': `${stats.size}`
+          }
+        });
+      }
+      const matches = RANGE_HEADER_REGEX.exec(rangeHeader);
+      if (matches == null) {
+        return new Response(null, {
+          status: 416,
+          headers: {
+            'Content-Range': `bytes */${stats.size}`
+          }
+        });
+      }
+      const start = matches[1] != null ? parseInt(matches[1], 10) : 0;
+      const end = matches[2] != null ? parseInt(matches[2], 10) : stats.size - 1;
+      if (Number.isNaN(start) || start > stats.size || end > stats.size) {
+        return new Response(null, {
+          status: 416,
+          headers: {
+            'Content-Range': `bytes */${stats.size}`
+          }
+        });
+      }
+      const stream = (0, _nodeFs.createReadStream)(pathname, {
+        start,
+        end
+      });
+      const resp = new Response(_nodeStream.Readable.toWeb(stream), {
+        status: 206,
+        headers: {
+          'Content-Range': `bytes ${start}-${end}/${stats.size}`,
+          'Accept-Ranges': 'bytes',
+          'Content-Length': `${end - start + 1}`,
+          'Content-Type': `video/mp4`
+        }
+      });
+      return resp;
+    } catch (e) {
+      console.error('Something went wrong when serving the clip:', e);
+      return new Response('Clip serve failure', {
+        status: 500
       });
     }
   });
