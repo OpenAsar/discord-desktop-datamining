@@ -36,8 +36,8 @@ if (_utils.isOSX) {
       }, identifier => {
         sendToAllWindows('USER_SETTINGS_OPEN', 'Notifications', identifier);
       });
-      _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.NOTIFICATIONS_GET_AUTHORIZATION, async () => {
-        return await lib.getAuthorization();
+      _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.NOTIFICATIONS_GET_AUTHORIZATION, async (_event, provisional) => {
+        return await lib.getAuthorization(provisional);
       });
       _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.NOTIFICATIONS_GET_SETTINGS, async () => {
         return await lib.getSettings();
@@ -54,6 +54,7 @@ if (_utils.isOSX) {
         return Promise.resolve();
       });
       (0, _appFeatures.getFeatures)().declareSupported('notifications');
+      (0, _appFeatures.getFeatures)().declareSupported('notifications_provisional');
     } catch (e) {
       console.warn('discord_notifications setup failed with error: ', e);
     }

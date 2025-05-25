@@ -25,6 +25,7 @@ var _moduleUpdater = require("./bootstrapModules/moduleUpdater");
 var _paths = require("./bootstrapModules/paths");
 var _splashScreen = require("./bootstrapModules/splashScreen");
 var _updater = require("./bootstrapModules/updater");
+var _buildOverrideUtils = require("./discord_native/browser/buildOverrideUtils");
 var _processUtils = require("./discord_native/browser/processUtils");
 var _ipcMain = _interopRequireDefault(require("./ipcMain"));
 var mouse = _interopRequireWildcard(require("./mouse"));
@@ -81,6 +82,7 @@ const getWebappEndpoint = () => {
   return endpoint;
 };
 const WEBAPP_ENDPOINT = exports.WEBAPP_ENDPOINT = getWebappEndpoint();
+(0, _buildOverrideUtils.registerBuildOverrideUtils)(WEBAPP_ENDPOINT);
 function getSanitizedPath(path) {
   return new _url.default.URL(path, WEBAPP_ENDPOINT).pathname;
 }
@@ -112,6 +114,7 @@ let mainWindowDidFinishLoad = false;
 let mainWindowIsVisible = false;
 let insideAuthFlow = false;
 let lastCrashed = 0;
+let lastCrashedNonRenderer = 0;
 let lastPageLoadFailed = false;
 const retryUpdateOptions = {
   skip_host_delta: false,
@@ -322,6 +325,11 @@ function launchMainAppWindow(isVisible) {
   if (mainWindow) {
     mainWindow.destroy();
   }
+  const additionalArguments = ['--enable-node-leakage-in-renderers'];
+  if (WEBAPP_ENDPOINT.startsWith('http://') && !WEBAPP_ENDPOINT.startsWith('http://localhost')) {
+    console.log('Allowing insecure origin for development');
+    additionalArguments.push(`--unsafely-treat-insecure-origin-as-secure=${WEBAPP_ENDPOINT}`);
+  }
   const mainWindowOptions = {
     title: 'Discord',
     backgroundColor: getBackgroundColor(),
@@ -340,7 +348,7 @@ function launchMainAppWindow(isVisible) {
       preload: _path.default.join(__dirname, 'mainScreenPreload.js'),
       spellcheck: true,
       contextIsolation: true,
-      additionalArguments: ['--enable-node-leakage-in-renderers'],
+      additionalArguments,
       devTools: ENABLE_DEVTOOLS
     }
   };
@@ -903,17 +911,21 @@ function init() {
     saveWindowConfig(mainWindow);
     mainWindow = null;
   });
-  _electron.app.on('gpu-process-crashed', (_, killed) => {
-    if (killed) {
-      _electron.app.quit();
-    }
-  });
-  _electron.app.on('child-process-gone', (_, details) => {
+  _electron.app.on('child-process-gone', (_event, details) => {
     if (details.exitCode === 0) {
       return;
     }
     const serviceDescription = `${details.type} (${details.name})`;
     console.error(`child-process-gone! child: ${serviceDescription} exitCode: ${details.exitCode}`);
+    if (details.type === 'GPU' || details.type === 'Utility') {
+      const crashTime = performance.now();
+      if (crashTime - lastCrashedNonRenderer > 30_000) {
+        webContentsSend('CRASH_REPORTER_NEW_CRASH', details);
+      } else {
+        console.error(`Detected frequent crash for non-renderer process`);
+      }
+      lastCrashedNonRenderer = crashTime;
+    }
     const {
       reason
     } = details;

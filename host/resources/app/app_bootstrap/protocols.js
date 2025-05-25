@@ -10,9 +10,10 @@ function beforeReadyProtocolRegistration() {
   _electron.protocol.registerSchemesAsPrivileged([{
     scheme: _constants.DISCORD_CLIP_PROTOCOL,
     privileges: {
-      standard: false,
+      standard: true,
       secure: true,
-      supportFetchAPI: true
+      supportFetchAPI: true,
+      stream: true
     }
   }]);
 }
