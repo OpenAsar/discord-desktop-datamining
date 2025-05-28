@@ -9,6 +9,7 @@ Object.defineProperty(exports, "basename", {
     return _path.basename;
   }
 });
+exports.checkVoiceFilterFilesExist = checkVoiceFilterFilesExist;
 exports.combineWebRtcLogs = combineWebRtcLogs;
 Object.defineProperty(exports, "dirname", {
   enumerable: true,
@@ -192,6 +193,32 @@ function stopVoiceFilterDownloads() {
     const dl = (_voiceFilterDownloade = voiceFilterDownloaders.pop()) === null || _voiceFilterDownloade === void 0 ? void 0 : _voiceFilterDownloade.deref();
     void (dl === null || dl === void 0 ? void 0 : dl.stop());
   }
+}
+async function checkVoiceFilterFilesExist(files) {
+  let voiceFiltersDataPath;
+  try {
+    voiceFiltersDataPath = getVoiceFilterDataDirSync();
+  } catch (cause) {
+    throw new Error('Voice Filters unable to get path of data dir', {
+      cause
+    });
+  }
+  const results = await Promise.all(files.map(async file => {
+    const fullPath = _path.default.join(voiceFiltersDataPath, file.fileName);
+    try {
+      await _fs.default.promises.access(fullPath);
+      return {
+        ...file,
+        exists: true
+      };
+    } catch (error) {
+      return {
+        ...file,
+        exists: false
+      };
+    }
+  }));
+  return results;
 }
 function getAndCreateLogDirectorySync() {
   let logDir = null;
