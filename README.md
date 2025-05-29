@@ -2,12 +2,12 @@
 
 ## canary versions
 
-**host: 1.0.642**
+**host: 1.0.644**
 
 | module | version |
 | ------ | :-----: |
 | cloudsync | 1 |
-| desktop_core | 2 |
+| desktop_core | 1 |
 | desktop_overlay | 1 |
 | dispatch | 1 |
 | erlpack | 1 |
@@ -21,9 +21,9 @@
 | rpc | 1 |
 | sekrit | 1 |
 | spellcheck | 1 |
-| utils | 7 |
+| utils | 3 |
 | vigilante | 1 |
-| voice | 3 |
+| voice | 2 |
 | voice_filters | 2 |
 | zstd | 1 |
 

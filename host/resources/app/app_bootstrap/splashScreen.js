@@ -418,6 +418,9 @@ function updateSplashState(event) {
     console.log('splashScreen.updateSplashState: Windows webContents isDestroyed.');
     return;
   }
+  if (event === UPDATE_MANUALLY) {
+    splashWindow.setAlwaysOnTop(true);
+  }
   webContentsSend(splashWindow, 'SPLASH_UPDATE_STATE', {
     status: event,
     ...splashState
