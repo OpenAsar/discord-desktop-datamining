@@ -2,7 +2,7 @@
 
 ## ptb versions
 
-**host: 1.0.1144**
+**host: 1.0.1146**
 
 | module | version |
 | ------ | :-----: |
