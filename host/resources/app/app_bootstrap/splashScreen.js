@@ -18,6 +18,7 @@ var moduleUpdater = _interopRequireWildcard(require("../common/moduleUpdater"));
 var paths = _interopRequireWildcard(require("../common/paths"));
 var _securityUtils = require("../common/securityUtils");
 var _updater = require("../common/updater");
+var _buildOverrideUtils = require("./buildOverrideUtils");
 var _ipcMain = _interopRequireDefault(require("./ipcMain"));
 var logger = _interopRequireWildcard(require("./logger"));
 var _Constants = _interopRequireDefault(require("./Constants"));
@@ -72,6 +73,7 @@ let newUpdater;
 let lastSplashEventState = null;
 let splashInstalledUpdates = false;
 const updateBackoff = new _Backoff.default(1000, 30000);
+(0, _buildOverrideUtils.registerBuildOverrideUtils)();
 class TaskProgress {
   constructor() {
     this.inProgress = new Map();
@@ -415,6 +417,9 @@ function updateSplashState(event) {
   if (splashWindow.webContents.isDestroyed()) {
     console.log('splashScreen.updateSplashState: Windows webContents isDestroyed.');
     return;
+  }
+  if (event === UPDATE_MANUALLY) {
+    splashWindow.setAlwaysOnTop(true);
   }
   webContentsSend(splashWindow, 'SPLASH_UPDATE_STATE', {
     status: event,

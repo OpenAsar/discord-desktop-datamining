@@ -26,34 +26,19 @@ if (isLogDirAvailable) {
   console.warn('Unable to find log directory');
 }
 
+function promisify(func, ...prefixArgs) {
+  return (...args) =>
+    new Promise((resolve, reject) => func(...prefixArgs, ...args, resolve, (msg) => reject(new Error(msg))));
+}
+
+VoiceFiltersModule.setVoiceFilter = promisify(VoiceFiltersModule._setVoiceFilter);
+VoiceFiltersModule.setupResources = promisify(VoiceFiltersModule._setupResources, dataDirectory);
+VoiceFiltersModule.fetchCatalog = promisify(VoiceFiltersModule._fetchCatalog);
+VoiceFiltersModule.setCatalog = promisify(VoiceFiltersModule._setCatalog);
+VoiceFiltersModule.setVoiceFilterLaggingCallback = promisify(VoiceFiltersModule._setVoiceFilterLaggingCallback);
+VoiceFiltersModule.setVoiceFilterReadyCallback = promisify(VoiceFiltersModule._setVoiceFilterReadyCallback);
+
 console.info('Initializing voice filters module');
 VoiceFiltersModule._initialize(initializationParams);
-
-VoiceFiltersModule.setVoiceFilter = (voiceParams) =>
-  new Promise((resolve, reject) =>
-    VoiceFiltersModule._setVoiceFilter(voiceParams, resolve, (msg) => reject(new Error(msg))),
-  );
-
-VoiceFiltersModule.setupResources = () =>
-  new Promise((resolve, reject) =>
-    VoiceFiltersModule._setupResources(dataDirectory, resolve, (msg) => reject(new Error(msg))),
-  );
-
-VoiceFiltersModule.fetchCatalog = (token, superProperties) =>
-  new Promise((resolve, reject) =>
-    VoiceFiltersModule._fetchCatalog(token, superProperties, resolve, (msg) => reject(new Error(msg))),
-  );
-
-VoiceFiltersModule.setVoiceFilterLaggingCallback = (cb) => {
-  new Promise((resolve, reject) =>
-    VoiceFiltersModule._setVoiceFilterLaggingCallback(cb, resolve, (msg) => reject(new Error(msg))),
-  );
-};
-
-VoiceFiltersModule.setVoiceFilterReadyCallback = (cb) => {
-  new Promise((resolve, reject) =>
-    VoiceFiltersModule._setVoiceFilterReadyCallback(cb, resolve, (msg) => reject(new Error(msg))),
-  );
-};
 
 module.exports = VoiceFiltersModule;
