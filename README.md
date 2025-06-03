@@ -7,24 +7,24 @@
 | module | version |
 | ------ | :-----: |
 | cloudsync | 1 |
-| desktop_core | 1 |
+| desktop_core | 2 |
 | desktop_overlay | 1 |
 | dispatch | 1 |
 | erlpack | 1 |
 | game_utils | 1 |
 | hook | 1 |
-| krisp | 1 |
+| krisp | 2 |
 | media | 1 |
 | modules | 1 |
 | notifications | 1 |
-| overlay2 | 1 |
+| overlay2 | 2 |
 | rpc | 1 |
 | sekrit | 1 |
 | spellcheck | 1 |
-| utils | 6 |
+| utils | 8 |
 | vigilante | 1 |
-| voice | 3 |
-| voice_filters | 6 |
+| voice | 6 |
+| voice_filters | 8 |
 | zstd | 1 |
 
 ## branches
