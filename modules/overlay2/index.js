@@ -4,7 +4,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
-var _out_of_process = _interopRequireDefault(require("./out_of_process"));
 var _overlay_module = _interopRequireDefault(require("./overlay_module"));
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { "default": e }; }
 // eslint-disable-next-line import/no-unresolved, import/extensions
@@ -65,6 +64,5 @@ _overlay_module["default"].setImeExclusiveFullscreenCallback = function (callbac
 _overlay_module["default"].setPerfInfoCallback = function (callback) {
   perfInfoCallback = callback;
 };
-_overlay_module["default"].OutOfProcess = _out_of_process["default"];
 var _default = exports["default"] = _overlay_module["default"];
 module.exports = exports.default;

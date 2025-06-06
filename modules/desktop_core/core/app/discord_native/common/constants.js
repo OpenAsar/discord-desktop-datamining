@@ -3,13 +3,12 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.OVERLAY_WINDOW_KEY = exports.IPCEvents = void 0;
+exports.IPCEvents = void 0;
 exports.getDiscordIPCEvent = getDiscordIPCEvent;
 const discordPrefixRegex = /^DISCORD_/;
 function getDiscordIPCEvent(ev) {
   return discordPrefixRegex.test(ev) ? ev : `DISCORD_${ev}`;
 }
-const OVERLAY_WINDOW_KEY = exports.OVERLAY_WINDOW_KEY = 'DISCORD_OutOfProcessOverlay';
 let IPCEvents = exports.IPCEvents = function (IPCEvents) {
   IPCEvents["ACCESSIBILITY_GET_ENABLED"] = "DISCORD_ACCESSIBILITY_GET_ENABLED";
   IPCEvents["APP_ASYNC_INDEX_TSX_LOADED"] = "DISCORD_APP_ASYNC_INDEX_TSX_LOADED";
@@ -72,7 +71,6 @@ let IPCEvents = exports.IPCEvents = function (IPCEvents) {
   IPCEvents["NOTIFICATIONS_RECEIVED_RESPONSE"] = "DISCORD_NOTIFICATIONS_RECEIVED_RESPONSE";
   IPCEvents["REQUEST_OPEN_EXTERNAL_URL"] = "DISCORD_REQUEST_OPEN_EXTERNAL_URL";
   IPCEvents["OPEN_EXTERNAL_URL"] = "DISCORD_OPEN_EXTERNAL_URL";
-  IPCEvents["GLOBAL_OVERLAY_OPEN_WINDOW"] = "DISCORD_GLOBAL_OVERLAY_OPEN_WINDOW";
   IPCEvents["POWER_MONITOR_RESUME"] = "DISCORD_POWER_MONITOR_RESUME";
   IPCEvents["POWER_MONITOR_SUSPEND"] = "DISCORD_POWER_MONITOR_SUSPEND";
   IPCEvents["POWER_MONITOR_LOCK_SCREEN"] = "DISCORD_POWER_MONITOR_LOCK_SCREEN";
