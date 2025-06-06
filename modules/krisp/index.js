@@ -7,6 +7,7 @@ if (isLogDirAvailable) {
   const logLevel = window.DiscordNative.fileManager.logLevelSync(window);
   initializationParams = {logDirectory, logLevel};
 } else {
+  // eslint-disable-next-line no-console
   console.warn('Unable to find log directory');
 }
 
@@ -21,6 +22,12 @@ KrispModule.getNcModels = function () {
 KrispModule.getVadModels = function () {
   return new Promise((resolve) => {
     KrispModule._getVadModels((models) => resolve(models));
+  });
+};
+
+KrispModule.getNcModelFilename = function () {
+  return new Promise((resolve) => {
+    KrispModule._getNcModelFilename((model) => resolve(model));
   });
 };
 
