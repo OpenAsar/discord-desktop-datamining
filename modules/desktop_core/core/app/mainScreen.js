@@ -25,8 +25,8 @@ var _moduleUpdater = require("./bootstrapModules/moduleUpdater");
 var _paths = require("./bootstrapModules/paths");
 var _splashScreen = require("./bootstrapModules/splashScreen");
 var _updater = require("./bootstrapModules/updater");
-var _buildOverrideUtils = require("./discord_native/browser/buildOverrideUtils");
 var _processUtils = require("./discord_native/browser/processUtils");
+var _constants = require("./discord_native/common/constants");
 var _ipcMain = _interopRequireDefault(require("./ipcMain"));
 var mouse = _interopRequireWildcard(require("./mouse"));
 var _networkDebugUtils = require("./networkDebugUtils");
@@ -82,7 +82,6 @@ const getWebappEndpoint = () => {
   return endpoint;
 };
 const WEBAPP_ENDPOINT = exports.WEBAPP_ENDPOINT = getWebappEndpoint();
-(0, _buildOverrideUtils.registerBuildOverrideUtils)(WEBAPP_ENDPOINT);
 function getSanitizedPath(path) {
   return new _url.default.URL(path, WEBAPP_ENDPOINT).pathname;
 }
@@ -456,13 +455,13 @@ function launchMainAppWindow(isVisible) {
     popoutWindows.setupPopout(extendedWindow, frameName, options, WEBAPP_ENDPOINT);
     adjustWindowBounds(childWindow);
   });
-  mainWindow.webContents.on('did-finish-load', () => {
+  _ipcMain.default.on(_constants.IPCEvents.APP_ASYNC_INDEX_TSX_LOADED, () => {
     var _mainWindow2;
     if (!mainWindowDidFinishLoad) {
       var _analytics$getDesktop3;
       _bootstrapModules.analytics === null || _bootstrapModules.analytics === void 0 ? void 0 : (_analytics$getDesktop3 = _bootstrapModules.analytics.getDesktopTTI) === null || _analytics$getDesktop3 === void 0 ? void 0 : _analytics$getDesktop3.call(_bootstrapModules.analytics).trackMainWindowLoadDuration();
     }
-    console.log(`mainScreen.on(did-finish-load) ${lastPageLoadFailed} ${mainWindowDidFinishLoad}`);
+    console.log(`ipcMain.on(IPCEvents.APP_ASYNC_INDEX_TSX_LOADED) ${lastPageLoadFailed} ${mainWindowDidFinishLoad}`);
     if (insideAuthFlow && mainWindow.webContents && (0, _securityUtils.checkUrlOriginMatches)(mainWindow.webContents.getURL(), WEBAPP_ENDPOINT)) {
       insideAuthFlow = false;
     }

@@ -26,6 +26,11 @@ const NEW_UPDATE_ENDPOINT = (settings === null || settings === void 0 ? void 0 :
 const DISABLE_WINDOWS_64BIT_TRANSITION = settings === null || settings === void 0 ? void 0 : settings.get('DISABLE_WINDOWS_64BIT_TRANSITION', false);
 const OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION = settings === null || settings === void 0 ? void 0 : settings.get('OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION', false);
 const LOG_LEVEL = (settings === null || settings === void 0 ? void 0 : settings.get('LOG_LEVEL')) || 'info';
+var IPCEvents = function (IPCEvents) {
+  IPCEvents["GET_BUILD_OVERRIDE_STATUS"] = "DISCORD_GET_BUILD_OVERRIDE_STATUS";
+  IPCEvents["CLEAR_BUILD_OVERRIDE"] = "DISCORD_CLEAR_BUILD_OVERRIDE";
+  return IPCEvents;
+}(IPCEvents || {});
 const bootstrapConstants = {
   APP_COMPANY,
   APP_DESCRIPTION,
@@ -38,7 +43,8 @@ const bootstrapConstants = {
   DISABLE_WINDOWS_64BIT_TRANSITION,
   OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION,
   LOG_LEVEL,
-  UPDATE_ENDPOINT
+  UPDATE_ENDPOINT,
+  IPCEvents
 };
 var _default = exports.default = bootstrapConstants;
 module.exports = exports.default;

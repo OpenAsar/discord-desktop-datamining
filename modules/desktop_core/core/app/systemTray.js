@@ -167,7 +167,7 @@ function setTrayIcon(icon) {
     shouldSetContextMenu = true;
   }
   shouldSetContextMenu && setContextMenu();
-  atomTray != null && atomTray.setImage(_electron.nativeImage.createFromPath(currentIcon));
+  atomTray != null && atomTray.setImage(currentIcon);
 }
 function launchApplication(applicationId) {
   options.onLaunchApplication(applicationId);
