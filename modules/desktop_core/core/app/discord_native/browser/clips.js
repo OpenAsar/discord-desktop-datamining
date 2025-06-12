@@ -51,7 +51,7 @@ function isDiscordUUIDBox(buffer, startIndex) {
 function setupClipsProtocol() {
   _electron.protocol.handle(_constants.DISCORD_CLIP_PROTOCOL, async function (request) {
     const parsedURL = new URL(request.url);
-    const pathname = _path.default.normalize(parsedURL.pathname.slice(1));
+    const pathname = _path.default.normalize(decodeURIComponent(parsedURL.pathname.slice(1)));
     const filename = _path.default.basename(pathname);
     const dirname = _path.default.dirname(pathname);
     try {

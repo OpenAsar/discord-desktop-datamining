@@ -175,15 +175,13 @@ class Updater extends _events.EventEmitter {
   }
   _reportAnalytics(analytics) {
     const transformedEvent = this._transformAnalyticEvent(analytics);
-    let transformedEventSpread = {};
+    let validTransformedEvent = {};
     if (typeof transformedEvent === 'object' && transformedEvent !== null) {
-      transformedEventSpread = {
-        ...transformedEvent
-      };
+      validTransformedEvent = transformedEvent;
     }
     this.updateEventHistory.push({
       type: 'analytics',
-      transformedEventSpread
+      ...validTransformedEvent
     });
   }
   _transformAnalyticEvent(event) {

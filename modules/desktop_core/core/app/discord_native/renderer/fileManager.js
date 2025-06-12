@@ -10,6 +10,7 @@ Object.defineProperty(exports, "basename", {
   }
 });
 exports.checkVoiceFilterFilesExist = checkVoiceFilterFilesExist;
+exports.cleanupUnusedVoiceFilterFiles = cleanupUnusedVoiceFilterFiles;
 exports.combineWebRtcLogs = combineWebRtcLogs;
 Object.defineProperty(exports, "dirname", {
   enumerable: true,
@@ -131,11 +132,12 @@ async function maybeDownloadVoiceFilterFile(cdnURL, fileName, onProgress) {
     });
   }
   const finishedFilePath = _path.default.join(voiceFiltersDataPath, fileName);
-  if (_fs.default.existsSync(finishedFilePath)) {
+  try {
+    await _fs.default.promises.access(finishedFilePath);
     return {
       fetchedFromNetwork: false
     };
-  }
+  } catch {}
   const partialFileName = `${fileName}.partial`;
   const partialFilePath = _path.default.join(voiceFiltersDataPath, partialFileName);
   const dl = new _nodeDownloaderHelper.DownloaderHelper(cdnURL, voiceFiltersDataPath, {
@@ -219,6 +221,59 @@ async function checkVoiceFilterFilesExist(files) {
     }
   }));
   return results;
+}
+async function cleanupUnusedVoiceFilterFiles(neededFileNames) {
+  const deletedFiles = [];
+  const errors = [];
+  try {
+    const voiceFiltersDataPath = getVoiceFilterDataDirSync();
+    try {
+      await _fs.default.promises.access(voiceFiltersDataPath);
+    } catch {
+      return {
+        deletedFiles,
+        errors
+      };
+    }
+    const existingFiles = await _fs.default.promises.readdir(voiceFiltersDataPath);
+    const neededFileSet = new Set(neededFileNames);
+    const neededPartialFileSet = new Set(neededFileNames.map(fileName => `${fileName}.partial`));
+    for (const fileName of existingFiles) {
+      if (neededFileSet.has(fileName)) {
+        continue;
+      }
+      if (fileName.endsWith('.partial')) {
+        if (neededPartialFileSet.has(fileName)) {
+          continue;
+        }
+      } else {
+        if (fileName.startsWith('.') || !fileName.includes('.')) {
+          continue;
+        }
+      }
+      const fullPath = _path.default.join(voiceFiltersDataPath, fileName);
+      try {
+        await _fs.default.promises.unlink(fullPath);
+        deletedFiles.push(fileName);
+        console.log(`Voice Filters cleanup: Deleted unused file "${fileName}"`);
+      } catch (error) {
+        const errorMsg = `Failed to delete "${fileName}": ${error}`;
+        errors.push(errorMsg);
+        console.error(`Voice Filters cleanup: ${errorMsg}`);
+      }
+    }
+    if (deletedFiles.length > 0) {
+      console.log(`Voice Filters cleanup: Deleted ${deletedFiles.length} unused files`);
+    }
+  } catch (cause) {
+    const errorMsg = `Voice Filters cleanup failed: ${cause}`;
+    errors.push(errorMsg);
+    console.error(errorMsg);
+  }
+  return {
+    deletedFiles,
+    errors
+  };
 }
 function getAndCreateLogDirectorySync() {
   let logDir = null;
