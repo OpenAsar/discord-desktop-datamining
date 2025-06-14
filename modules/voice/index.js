@@ -169,7 +169,7 @@ if (process.platform === 'linux') {
 }
 
 if (
-  process.platform === 'win32'
+  (process.platform === 'win32' && process.arch !== 'arm64')
   || (process.platform === 'darwin' && versionGreaterThanOrEqual(os.release(), '16.0.0'))
 ) {
   features.declareSupported('mediapipe');
