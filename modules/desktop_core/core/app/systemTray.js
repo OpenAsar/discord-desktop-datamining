@@ -167,7 +167,13 @@ function setTrayIcon(icon) {
     shouldSetContextMenu = true;
   }
   shouldSetContextMenu && setContextMenu();
-  atomTray != null && atomTray.setImage(_electron.nativeImage.createFromPath(currentIcon));
+  if (atomTray != null && currentIcon != null) {
+    try {
+      atomTray.setImage(currentIcon);
+    } catch (e) {
+      console.error('systemTray: Failed to set tray icon:', e);
+    }
+  }
 }
 function launchApplication(applicationId) {
   options.onLaunchApplication(applicationId);
@@ -192,10 +198,18 @@ function setContextMenu() {
 }
 function show() {
   if (atomTray != null) return;
-  atomTray = new _electron.Tray(_electron.nativeImage.createFromPath(currentIcon));
-  atomTray.setToolTip(_Constants.APP_NAME);
-  setContextMenu();
-  atomTray.on('click', options.onTrayClicked);
+  if (currentIcon == null) {
+    console.error('systemTray: Cannot create tray icon: currentIcon is null');
+    return;
+  }
+  try {
+    atomTray = new _electron.Tray(currentIcon);
+    atomTray.setToolTip(_Constants.APP_NAME);
+    setContextMenu();
+    atomTray.on('click', options.onTrayClicked);
+  } catch (e) {
+    console.error('systemTray: Failed to create tray icon:', e);
+  }
 }
 function hide() {
   if (atomTray == null) {
