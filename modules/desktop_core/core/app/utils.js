@@ -39,7 +39,9 @@ function exposeModuleResource(asarPath, fileName) {
       if (/^win/.test(platform)) {
         const scaleFactor = _electron.screen.getPrimaryDisplay().scaleFactor;
         if (variantScale >= scaleFactor) {
-          return _electron.nativeImage.createFromBuffer(variantBuffer);
+          return _electron.nativeImage.createFromBuffer(variantBuffer, {
+            scaleFactor: variantScale
+          });
         }
       } else if (image != null) {
         image.addRepresentation({
