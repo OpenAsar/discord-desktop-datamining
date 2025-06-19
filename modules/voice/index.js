@@ -47,11 +47,10 @@ if (isLogDirAvailable) {
 }
 
 const defaultAudioSubsystem = process.platform === 'win32' ? 'experimental' : 'standard';
-const useLegacyAudioDevice = appSettings ? appSettings.getSync('useLegacyAudioDevice') : false;
-const audioSubsystemSelected = appSettings
+const audioSubsystem = appSettings
   ? appSettings.getSync('audioSubsystem', defaultAudioSubsystem)
   : defaultAudioSubsystem;
-const audioSubsystem = useLegacyAudioDevice || audioSubsystemSelected;
+const offloadAdmControls = appSettings ? appSettings.getSync('offloadAdmControls', false) : false;
 const debugLogging = appSettings ? appSettings.getSync('debugLogging', true) : true;
 
 function versionGreaterThanOrEqual(v1, v2) {
@@ -152,6 +151,7 @@ features.declareSupported('bandwidth_estimation_experiments');
 features.declareSupported('mls_pairwise_fingerprints');
 features.declareSupported('soundshare');
 features.declareSupported('screen_soundshare');
+features.declareSupported('offloadAdmControls');
 
 if (process.platform === 'darwin') {
   features.declareSupported('screen_capture_kit');
@@ -308,7 +308,6 @@ const setAudioSubsystemInternal = function (subsystem, forceRestart) {
   }
 
   appSettings.set('audioSubsystem', subsystem);
-  appSettings.set('useLegacyAudioDevice', false);
 
   if (isElectronRenderer) {
     if (forceRestart) {
@@ -330,6 +329,10 @@ VoiceEngine.setAudioSubsystem = function (subsystem) {
 
 VoiceEngine.queueAudioSubsystem = function (subsystem) {
   setAudioSubsystemInternal(subsystem, false);
+};
+
+VoiceEngine.setOffloadAdmControls = function (doOffload) {
+  appSettings.set('offloadAdmControls', doOffload);
 };
 
 VoiceEngine.setDebugLogging = function (enable) {
@@ -534,6 +537,7 @@ VoiceEngine.initialize({
   useFileForFakeVideoCapture,
   useFakeAudioCapture,
   useFilesForFakeAudioCapture,
+  offloadAdmControls,
 });
 
 module.exports = VoiceEngine;
