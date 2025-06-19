@@ -61,6 +61,7 @@ function startup(bootstrapModules) {
   require('./discord_native/browser/userDataCache');
   const gpuSettings = require('./discord_native/browser/gpuSettings');
   gpuSettings.injectGpuSettingsBackend(GPUSettings);
+  require('./discord_native/browser/intents');
   const nativeModules = require('./discord_native/browser/nativeModules');
   nativeModules.injectModuleUpdater(moduleUpdater);
   nativeModules.injectUpdater(updater);

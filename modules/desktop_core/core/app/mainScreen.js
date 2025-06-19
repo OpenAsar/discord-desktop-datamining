@@ -319,7 +319,7 @@ function setBackgroundColor(color) {
   (_mainWindow = mainWindow) === null || _mainWindow === void 0 ? void 0 : _mainWindow.setBackgroundColor(color);
   settings === null || settings === void 0 ? void 0 : settings.save();
 }
-function launchMainAppWindow(isVisible) {
+async function launchMainAppWindow(isVisible) {
   var _analytics$getDesktop2;
   if (mainWindow) {
     mainWindow.destroy();
@@ -368,6 +368,16 @@ function launchMainAppWindow(isVisible) {
   mainWindowId = mainWindow.id;
   global.mainWindowId = mainWindowId;
   includeOptionalModule('./ElectronTestRpc', module => module.initialize(mainWindow));
+  console.log(`Clearing GPU cache...`);
+  try {
+    await mainWindow.webContents.session.clearStorageData({
+      storages: ['shadercache']
+    });
+    console.log(`Clearing code cache...`);
+    await mainWindow.webContents.session.clearCodeCaches({});
+  } catch (error) {
+    console.error('Failed to clear caches:', error);
+  }
   restoreMainWindowBounds(mainWindow);
   mainWindow.webContents.session.setPermissionRequestHandler((webContents, permission, callback, details) => {
     switch (permission) {
@@ -504,7 +514,7 @@ function launchMainAppWindow(isVisible) {
       _electron.app.quit();
       return;
     }
-    launchMainAppWindow(true);
+    void launchMainAppWindow(true);
   });
   mainWindow.webContents.on('will-navigate', (evt, url) => {
     if (!insideAuthFlow && !(0, _securityUtils.checkUrlOriginMatches)(url, WEBAPP_ENDPOINT)) {
@@ -971,7 +981,7 @@ function init() {
   } else {
     setupLegacyUpdaterEvents();
   }
-  launchMainAppWindow(false);
+  void launchMainAppWindow(false);
 }
 function handleOpenUrl(url) {
   const sanitizedUrl = getSanitizedProtocolUrl(url);
