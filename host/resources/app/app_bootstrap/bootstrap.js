@@ -15,6 +15,7 @@ const {
   session,
   Menu
 } = require('electron');
+const url = require('url');
 const buildInfo = require('./buildInfo');
 const sentry = require('@sentry/electron');
 const logger = require('./logger');
@@ -209,6 +210,25 @@ app.on('will-finish-launching', () => {
       coreModule.handleOpenUrl(url);
     } else {
       initialUrl = url;
+    }
+  });
+  app.on('continue-activity', (event, type, userInfo, details) => {
+    if (type === 'com.apple.corespotlightitem') {
+      event.preventDefault();
+      const url = 'discord:' + userInfo.kCSSearchableItemActivityIdentifier;
+      if (coreModule) {
+        coreModule.handleOpenUrl(url);
+      } else {
+        initialUrl = url;
+      }
+    } else if (type === 'com.discord.view-channel') {
+      event.preventDefault();
+      const u = 'discord:' + url.parse(details.webpageURL).path;
+      if (coreModule) {
+        coreModule.handleOpenUrl(u);
+      } else {
+        initialUrl = u;
+      }
     }
   });
 });
