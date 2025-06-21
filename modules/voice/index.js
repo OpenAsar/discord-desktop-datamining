@@ -151,7 +151,7 @@ features.declareSupported('bandwidth_estimation_experiments');
 features.declareSupported('mls_pairwise_fingerprints');
 features.declareSupported('soundshare');
 features.declareSupported('screen_soundshare');
-features.declareSupported('offloadAdmControls');
+features.declareSupported('offload_adm_controls');
 
 if (process.platform === 'darwin') {
   features.declareSupported('screen_capture_kit');
