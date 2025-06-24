@@ -958,7 +958,7 @@ function init() {
     if ((_process$argv = process.argv) === null || _process$argv === void 0 ? void 0 : _process$argv.slice(1).includes('--multi-instance')) {
       return;
     }
-    if (mainWindow == null) {
+    if (mainWindow == null || mainWindow.isDestroyed()) {
       return;
     }
     setWindowVisible(true, false);
