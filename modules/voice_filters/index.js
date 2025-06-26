@@ -33,7 +33,6 @@ function promisify(func, ...prefixArgs) {
 
 VoiceFiltersModule.setVoiceFilter = promisify(VoiceFiltersModule._setVoiceFilter);
 VoiceFiltersModule.setupResources = promisify(VoiceFiltersModule._setupResources, dataDirectory);
-VoiceFiltersModule.fetchCatalog = promisify(VoiceFiltersModule._fetchCatalog);
 VoiceFiltersModule.setCatalog = promisify(VoiceFiltersModule._setCatalog);
 VoiceFiltersModule.setVoiceFilterLaggingCallback = promisify(VoiceFiltersModule._setVoiceFilterLaggingCallback);
 VoiceFiltersModule.setVoiceFilterReadyCallback = promisify(VoiceFiltersModule._setVoiceFilterReadyCallback);
