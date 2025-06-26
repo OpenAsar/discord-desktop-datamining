@@ -29,6 +29,14 @@ function exposeModuleResource(asarPath, fileName) {
   if (userDataPath != null && _fs.default.existsSync(_path.default.join(userDataPath, fileName))) {
     _fs.default.unlinkSync(_path.default.join(userDataPath, fileName));
   }
+  const scaleFactor = _electron.screen.getPrimaryDisplay().scaleFactor;
+  if (/^win/.test(platform)) {
+    if (scaleFactor <= 1 && buffer != null) {
+      return _electron.nativeImage.createFromBuffer(buffer, {
+        scaleFactor: 1
+      });
+    }
+  }
   const variants = ['@1.25x', '@1.33x', '@1.4x', '@1.5x', '@1.8x', '@2x', '@2.5x', '@3x', '@4x', '@5x'];
   for (const variant of variants) {
     const variantFileName = `${baseName}${variant}${_path.default.extname(fileName)}`;
@@ -37,8 +45,7 @@ function exposeModuleResource(asarPath, fileName) {
     if (_fs.default.existsSync(variantFullPath)) {
       const variantBuffer = _fs.default.readFileSync(variantFullPath);
       if (/^win/.test(platform)) {
-        const scaleFactor = _electron.screen.getPrimaryDisplay().scaleFactor;
-        if (variantScale >= scaleFactor) {
+        if (variantScale >= scaleFactor || variant === variants[variants.length - 1]) {
           return _electron.nativeImage.createFromBuffer(variantBuffer, {
             scaleFactor: variantScale
           });
