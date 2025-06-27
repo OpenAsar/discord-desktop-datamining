@@ -58,6 +58,9 @@ function exposeModuleResource(asarPath, fileName) {
       }
     }
   }
+  if (image != null && baseName.endsWith('Template')) {
+    image.setTemplateImage(true);
+  }
   return image;
 }
 const platform = exports.platform = _os.default.platform();
