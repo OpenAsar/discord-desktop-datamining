@@ -104,7 +104,7 @@ function startup(bootstrapModules) {
   setNewWindowEvent(window => windowNative.newWindowEvent(window));
 }
 function handleOpenUrl(url) {
-  if (mainScreen === null) {
+  if (mainScreen == null) {
     return;
   }
   mainScreen.handleOpenUrl(url);
