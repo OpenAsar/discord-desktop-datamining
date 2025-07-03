@@ -152,6 +152,7 @@ features.declareSupported('mls_pairwise_fingerprints');
 features.declareSupported('soundshare');
 features.declareSupported('screen_soundshare');
 features.declareSupported('offload_adm_controls');
+features.declareSupported('audio_codec_red');
 
 if (process.platform === 'darwin') {
   features.declareSupported('screen_capture_kit');
