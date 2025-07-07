@@ -16,7 +16,7 @@
 | krisp | 1 |
 | media | 1 |
 | modules | 1 |
-| notifications | 1 |
+| notifications | 2 |
 | overlay2 | 1 |
 | rpc | 1 |
 | sekrit | 1 |
@@ -24,7 +24,7 @@
 | utils | 2 |
 | vigilante | 1 |
 | voice | 3 |
-| voice_filters | 2 |
+| voice_filters | 3 |
 | zstd | 1 |
 
 ## branches
