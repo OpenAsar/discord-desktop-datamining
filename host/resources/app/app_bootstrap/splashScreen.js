@@ -108,12 +108,15 @@ class TaskProgress {
   }
 }
 async function updateUntilCurrent(widevineCDM) {
+  const skipNonRequiredUpdates = !_Constants.default.DISABLE_SKIP_OPTIONAL_UPDATES;
+  console.log(`skipNonRequiredUpdates: ${skipNonRequiredUpdates}`);
   const retryOptions = {
     skip_host_delta: false,
     skip_module_delta: {},
     skip_all_module_delta: false,
     skip_windows_arch_update: _Constants.default.DISABLE_WINDOWS_64BIT_TRANSITION,
-    optin_windows_transition_progression: _Constants.default.OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION
+    optin_windows_transition_progression: _Constants.default.OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION,
+    skip_nonrequired_updates: skipNonRequiredUpdates
   };
   while (true) {
     updateSplashState(CHECKING_FOR_UPDATES);
