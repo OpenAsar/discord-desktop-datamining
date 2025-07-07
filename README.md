@@ -2,7 +2,7 @@
 
 ## development versions
 
-**host: 1.0.926**
+**host: 1.0.927**
 
 | module | version |
 | ------ | :-----: |
@@ -21,7 +21,7 @@
 | rpc | 1 |
 | sekrit | 1 |
 | spellcheck | 1 |
-| utils | 2 |
+| utils | 1 |
 | vigilante | 1 |
 | voice | 1 |
 | voice_filters | 1 |
