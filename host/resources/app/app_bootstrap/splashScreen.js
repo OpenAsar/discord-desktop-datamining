@@ -108,7 +108,8 @@ class TaskProgress {
   }
 }
 async function updateUntilCurrent(widevineCDM) {
-  const skipNonRequiredUpdates = !_Constants.default.DISABLE_SKIP_OPTIONAL_UPDATES;
+  let skipNonRequiredUpdates = !_Constants.default.DISABLE_SKIP_OPTIONAL_UPDATES;
+  skipNonRequiredUpdates = false;
   console.log(`skipNonRequiredUpdates: ${skipNonRequiredUpdates}`);
   const retryOptions = {
     skip_host_delta: false,
