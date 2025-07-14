@@ -32,10 +32,10 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
 var notifications = new Map();
 // TODO: This is a temporary fix for the icon cache. We should use a better cache system in the future.
 // Of concern - data uris are large
-var iconMap = new Map();
+var assetMap = new Map();
 var handlerOnNotificationAction = function handlerOnNotificationAction() {};
-function handleNotificationAction(action, identifier, userText) {
-  handlerOnNotificationAction(action, identifier, userText);
+function handleNotificationAction(action, identifier, args) {
+  handlerOnNotificationAction(action, identifier, args);
 }
 function setCallbacks(onNotificationAction) {
   handlerOnNotificationAction = onNotificationAction;
@@ -48,31 +48,31 @@ function getSettings() {
     authorizationStatus: 'authorized'
   });
 }
-function getIconUrl(_x) {
-  return _getIconUrl.apply(this, arguments);
+function getAssetUrl(_x) {
+  return _getAssetUrl.apply(this, arguments);
 }
-function _getIconUrl() {
-  _getIconUrl = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(icon) {
+function _getAssetUrl() {
+  _getAssetUrl = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(assetUrl) {
     var path, filePath;
     return _regeneratorRuntime().wrap(function _callee$(_context) {
       while (1) switch (_context.prev = _context.next) {
         case 0:
-          if (icon) {
+          if (assetUrl) {
             _context.next = 2;
             break;
           }
           return _context.abrupt("return", Promise.resolve(undefined));
         case 2:
-          if (!iconMap.has(icon)) {
+          if (!assetMap.has(assetUrl)) {
             _context.next = 4;
             break;
           }
-          return _context.abrupt("return", Promise.resolve(iconMap.get(icon)));
+          return _context.abrupt("return", Promise.resolve(assetMap.get(assetUrl)));
         case 4:
           path = _os["default"].tmpdir() + '/' + (0, _uuid.v4)() + '.png';
           _context.next = 7;
           return new Promise(function (resolve, _reject) {
-            fetch(icon).then(function (response) {
+            fetch(assetUrl).then(function (response) {
               if (response.body == null) {
                 resolve(undefined);
                 return;
@@ -98,7 +98,7 @@ function _getIconUrl() {
         case 7:
           filePath = _context.sent;
           if (filePath != null) {
-            iconMap.set(icon, filePath);
+            assetMap.set(assetUrl, filePath);
           }
           return _context.abrupt("return", Promise.resolve(filePath));
         case 10:
@@ -107,7 +107,7 @@ function _getIconUrl() {
       }
     }, _callee);
   }));
-  return _getIconUrl.apply(this, arguments);
+  return _getAssetUrl.apply(this, arguments);
 }
 var ToastBuilder = /*#__PURE__*/function () {
   function ToastBuilder(content) {
@@ -115,6 +115,7 @@ var ToastBuilder = /*#__PURE__*/function () {
     this.title = content.title;
     this.body = content.body;
     this.icon = content.icon;
+    this.actions = content.actions;
     this._identifier = content.identifier;
     this.threadIdentifier = content.threadIdentifier;
     this.groupName = content.groupName;
@@ -140,25 +141,49 @@ var ToastBuilder = /*#__PURE__*/function () {
   }, {
     key: "build",
     value: function build() {
-      var toast = "<toast>";
-      toast += "<visual><binding template=\"ToastGeneric\">";
+      var xml = "<toast>";
+      xml += "<visual><binding template=\"ToastGeneric\">";
       if (this.title) {
-        toast += "<text>".concat(this.title, "</text>");
+        xml += "<text>".concat(this.title, "</text>");
       }
       if (this.body) {
-        toast += "<text>".concat(this.body, "</text>");
+        xml += "<text>".concat(this.body, "</text>");
       }
       if (this.icon) {
-        toast += "<image placement='appLogoOverride' src='".concat(this.icon, "' />");
+        xml += "<image placement='appLogoOverride' src='".concat(this.icon, "' />");
       }
-      toast += "</binding></visual>";
+      xml += "</binding></visual>";
       // We play the sound from the javascript layer
-      toast += "<audio silent='true' />";
+      xml += "<audio silent='true' />";
       if (this.supportsHeaders() && this.threadIdentifier && this.groupName) {
-        toast += "<header id='".concat(this.threadIdentifier, "' title='").concat(this.groupName, "' arguments='").concat(this.threadIdentifier, "' />");
+        xml += "<header id='".concat(this.threadIdentifier, "' title='").concat(this.groupName, "' arguments='").concat(this.threadIdentifier, "' />");
       }
-      toast += "</toast>";
-      return toast;
+      if (Array.isArray(this.actions)) {
+        xml += "<actions>";
+        var _iterator = _createForOfIteratorHelper(this.actions),
+          _step;
+        try {
+          for (_iterator.s(); !(_step = _iterator.n()).done;) {
+            var action = _step.value;
+            var actionXml = "<action content=\"".concat(action.content, "\" arguments=\"").concat(action.args, "\" ");
+            if (action.hintTooltip) {
+              actionXml += "hint-toolTip=\"".concat(action.hintTooltip, "\" ");
+            }
+            if (action.hintButtonStyle) {
+              actionXml += "hint-buttonStyle=\"".concat(action.hintButtonStyle, "\" ");
+            }
+            actionXml += "/>";
+            xml += actionXml;
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
+        }
+        xml += "</actions>";
+      }
+      xml += "</toast>";
+      return xml;
     }
   }]);
 }();
@@ -178,7 +203,7 @@ function _showNotification() {
           }
           _context2.t0 = toast;
           _context2.next = 5;
-          return getIconUrl(options.icon);
+          return getAssetUrl(options.icon);
         case 5:
           _context2.t1 = _context2.sent;
           _context2.t0.setIcon.call(_context2.t0, _context2.t1);
@@ -187,11 +212,13 @@ function _showNotification() {
           notification = new electron.Notification({
             toastXml: toast.build()
           });
-          notification.on('click', function () {
-            handleNotificationAction('clicked', uuid, '');
+          notification.on('click', function (_event) {
+            var action = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+            handleNotificationAction('clicked', uuid, action);
           });
-          notification.on('close', function () {
-            handleNotificationAction('dismiss', uuid, '');
+          notification.on('close', function (_event) {
+            var action = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+            handleNotificationAction('dismiss', uuid, action);
           });
           notifications.set(uuid, notification);
           notification.show();
@@ -205,11 +232,11 @@ function _showNotification() {
   return _showNotification.apply(this, arguments);
 }
 function removeNotifications(identifiers) {
-  var _iterator = _createForOfIteratorHelper(identifiers),
-    _step;
+  var _iterator2 = _createForOfIteratorHelper(identifiers),
+    _step2;
   try {
-    for (_iterator.s(); !(_step = _iterator.n()).done;) {
-      var identifier = _step.value;
+    for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+      var identifier = _step2.value;
       var notification = notifications.get(identifier);
       if (notification != null) {
         notification.close();
@@ -217,24 +244,24 @@ function removeNotifications(identifiers) {
       }
     }
   } catch (err) {
-    _iterator.e(err);
+    _iterator2.e(err);
   } finally {
-    _iterator.f();
+    _iterator2.f();
   }
   return Promise.resolve();
 }
 function removeAllNotifications() {
-  var _iterator2 = _createForOfIteratorHelper(notifications.values()),
-    _step2;
+  var _iterator3 = _createForOfIteratorHelper(notifications.values()),
+    _step3;
   try {
-    for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-      var notification = _step2.value;
+    for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+      var notification = _step3.value;
       notification.close();
     }
   } catch (err) {
-    _iterator2.e(err);
+    _iterator3.e(err);
   } finally {
-    _iterator2.f();
+    _iterator3.f();
   }
   notifications.clear();
   return Promise.resolve();
