@@ -14,6 +14,9 @@ var _ipcMain = _interopRequireDefault(require("./ipcMain"));
 var _utils = require("./utils");
 var _Constants = require("./Constants");
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+const {
+  buildInfo
+} = require('./bootstrapModules/buildInfo');
 const settings = _appSettings.appSettings.getSettings();
 const TrayIconNames = {
   DEFAULT: 'tray',
@@ -32,6 +35,10 @@ const MenuItems = {
   CHECK_UPDATE: 'CHECK_UPDATE',
   QUIT: 'QUIT',
   ACKNOWLEDGEMENTS: 'ACKNOWLEDGEMENTS'
+};
+const TrayGuidByChannel = {
+  canary: 'd9c5e1da-d4ab-424f-97cf-00c2ce9bec67',
+  development: '6603ea8b-b21d-46e9-8ea5-d87b9105613f'
 };
 let hasInit = exports.hasInit = false;
 let currentIcon;
@@ -202,8 +209,9 @@ function show() {
     console.error('systemTray: Cannot create tray icon: currentIcon is null');
     return;
   }
+  const guid = process.platform === 'win32' ? TrayGuidByChannel[buildInfo.releaseChannel] : undefined;
   try {
-    atomTray = new _electron.Tray(currentIcon);
+    atomTray = new _electron.Tray(currentIcon, guid);
     atomTray.setToolTip(_Constants.APP_NAME);
     setContextMenu();
     atomTray.on('click', options.onTrayClicked);
