@@ -109,7 +109,9 @@ class TaskProgress {
 }
 async function updateUntilCurrent(widevineCDM) {
   let allowOptionalUpdates = _Constants.default.ALLOW_OPTIONAL_UPDATES;
-  allowOptionalUpdates = false;
+  if (allowOptionalUpdates) {
+    allowOptionalUpdates = _Constants.default.OPTIN_OPTIONAL_UPDATES;
+  }
   console.log(`allowOptionalUpdates: ${allowOptionalUpdates}`);
   const retryOptions = {
     skip_host_delta: false,
