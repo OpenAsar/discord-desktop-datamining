@@ -37,6 +37,8 @@ const MenuItems = {
   ACKNOWLEDGEMENTS: 'ACKNOWLEDGEMENTS'
 };
 const TrayGuidByChannel = {
+  stable: '699e423d-73da-42ba-b94e-881ff8672467',
+  ptb: '8bdf397e-37fc-440a-ac55-ec80cc585152',
   canary: 'd9c5e1da-d4ab-424f-97cf-00c2ce9bec67',
   development: '6603ea8b-b21d-46e9-8ea5-d87b9105613f'
 };
