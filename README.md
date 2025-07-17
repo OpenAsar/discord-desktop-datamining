@@ -2,7 +2,7 @@
 
 ## canary versions
 
-**host: 1.0.677**
+**host: 1.0.678**
 
 | module | version |
 | ------ | :-----: |
@@ -12,7 +12,7 @@
 | dispatch | 1 |
 | erlpack | 1 |
 | game_utils | 1 |
-| hook | 1 |
+| hook | 2 |
 | krisp | 1 |
 | media | 1 |
 | modules | 1 |
