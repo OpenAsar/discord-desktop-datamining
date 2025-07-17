@@ -2,7 +2,7 @@
 
 ## canary versions
 
-**host: 1.0.678**
+**host: 1.0.679**
 
 | module | version |
 | ------ | :-----: |
@@ -12,7 +12,7 @@
 | dispatch | 1 |
 | erlpack | 1 |
 | game_utils | 1 |
-| hook | 2 |
+| hook | 1 |
 | krisp | 1 |
 | media | 1 |
 | modules | 1 |
@@ -23,8 +23,8 @@
 | spellcheck | 1 |
 | utils | 1 |
 | vigilante | 1 |
-| voice | 5 |
-| voice_filters | 3 |
+| voice | 1 |
+| voice_filters | 1 |
 | zstd | 1 |
 
 ## branches
