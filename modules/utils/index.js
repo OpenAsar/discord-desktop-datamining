@@ -52,6 +52,14 @@ if (isLogDirAvailable) {
   module.exports.init();
 }
 
+if (process.platform === 'win32') {
+  const releaseChannel = window?.DiscordNative?.app?.getReleaseChannel?.();
+  if (releaseChannel) {
+    console.log('service release channel:', releaseChannel);
+    module.exports.setServiceChannel?.(releaseChannel);
+  }
+}
+
 function parseNvidiaSmiOutput(result) {
   if (!result || !result.stdout) {
     return {error: 'nvidia-smi produced no output'};
