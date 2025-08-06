@@ -80,6 +80,8 @@ function init(buildInfo) {
     moduleDataPath = buildInfo.localModulesRoot;
   } else if (buildInfo.newUpdater) {
     moduleDataPath = _path.default.join(userDataPath, 'module_data');
+  } else if (buildInfo.standaloneModules) {
+    moduleDataPath = _path.default.join(resourcesPath, 'standalone_modules');
   } else {
     moduleDataPath = _path.default.join(userDataVersionedPath, 'modules');
   }
