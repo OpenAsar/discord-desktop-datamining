@@ -21,6 +21,7 @@ const sentry = require('@sentry/electron');
 const logger = require('./logger');
 app.setVersion(buildInfo.version);
 global.releaseChannel = buildInfo.releaseChannel;
+app.setName(app.getName() + '-' + buildInfo.releaseChannel);
 const errorHandler = require('./errorHandler');
 errorHandler.init();
 const paths = require('../common/paths');
