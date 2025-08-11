@@ -462,6 +462,7 @@ async function launchMainAppWindow(isVisible) {
     frameName
   }) => {
     const extendedWindow = childWindow;
+    extendedWindow.setMenuBarVisibility(false);
     extendedWindow.windowKey = frameName;
     popoutWindows.setupPopout(extendedWindow, frameName, options, WEBAPP_ENDPOINT);
     adjustWindowBounds(childWindow);
