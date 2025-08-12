@@ -29,8 +29,8 @@ if (_utils.isOSX) {
       const modulePath = _path.default.join(moduleDataPath, 'discord_notifications');
       const lib = require(modulePath);
       lib.setDataPath(modulePath);
-      lib.setCallbacks((action, identifier, userText) => {
-        sendToAllWindows(_DiscordIPC.IPCEvents.NOTIFICATIONS_RECEIVED_RESPONSE, action, identifier, userText);
+      lib.setCallbacks((action, identifier, userText, fallbackDeepLink) => {
+        sendToAllWindows(_DiscordIPC.IPCEvents.NOTIFICATIONS_RECEIVED_RESPONSE, action, identifier, userText, fallbackDeepLink);
       }, () => {
         return ['badge', 'banner', 'list', 'sound'];
       }, identifier => {
