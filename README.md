@@ -11,7 +11,7 @@
 | desktop_overlay | 1 |
 | dispatch | 1 |
 | erlpack | 1 |
-| game_utils | 1 |
+| game_utils | 2 |
 | hook | 1 |
 | krisp | 1 |
 | media | 1 |
@@ -23,7 +23,7 @@
 | spellcheck | 1 |
 | utils | 1 |
 | vigilante | 1 |
-| voice | 1 |
+| voice | 2 |
 | voice_filters | 1 |
 | zstd | 1 |
 
