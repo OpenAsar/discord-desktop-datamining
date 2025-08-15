@@ -368,6 +368,16 @@ async function launchMainAppWindow(isVisible) {
   mainWindow = new _electron.BrowserWindow(mainWindowOptions);
   mainWindowId = mainWindow.id;
   global.mainWindowId = mainWindowId;
+  if (process.platform === 'darwin') {
+    includeOptionalModule(global.moduleDataPath + '/discord_intents', module => {
+      try {
+        var _module$setupWindowRe;
+        (_module$setupWindowRe = module.setupWindowRestoration) === null || _module$setupWindowRe === void 0 ? void 0 : _module$setupWindowRe.call(module, mainWindow.getNativeWindowHandle(), 'main');
+      } catch (e) {
+        console.error('Failed to setup window restoration:', e);
+      }
+    });
+  }
   includeOptionalModule('./ElectronTestRpc', module => module.initialize(mainWindow));
   console.log(`Clearing GPU cache...`);
   try {
