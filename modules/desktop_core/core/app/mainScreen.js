@@ -516,7 +516,7 @@ async function launchMainAppWindow(isVisible) {
       _electron.app.quit();
       return;
     }
-    void launchMainAppWindow(true);
+    mainWindow.webContents.reload();
   });
   mainWindow.webContents.on('will-navigate', (evt, url) => {
     if (!insideAuthFlow && !(0, _securityUtils.checkUrlOriginMatches)(url, WEBAPP_ENDPOINT)) {
