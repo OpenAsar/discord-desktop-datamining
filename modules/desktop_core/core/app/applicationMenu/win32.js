@@ -37,7 +37,7 @@ const buildMenu = enableDevtools => [{
         window.setFullScreen(!window.isFullScreen());
       }
     },
-    accelerator: 'Control+Shift+F'
+    accelerator: 'F11'
   }, ...(enableDevtools ? [SEPARATOR, {
     label: 'Developer',
     submenu: [{
