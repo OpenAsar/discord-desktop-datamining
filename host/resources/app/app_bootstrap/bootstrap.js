@@ -21,6 +21,7 @@ const sentry = require('@sentry/electron');
 const logger = require('./logger');
 app.setVersion(buildInfo.version);
 global.releaseChannel = buildInfo.releaseChannel;
+app.setName(app.getName() + '-' + buildInfo.releaseChannel);
 const errorHandler = require('./errorHandler');
 errorHandler.init();
 const paths = require('../common/paths');
@@ -123,6 +124,15 @@ async function setGPUFlags() {
     }
   }
 }
+function setupEarlyNative() {
+  try {
+    if (process.platform === 'darwin') {
+      require(global.moduleDataPath + '/discord_intents');
+    }
+  } catch (e) {
+    console.error('Error in early native init: ', e);
+  }
+}
 function hasArgvFlag(flag) {
   return process.argv.slice(1).includes(flag);
 }
@@ -173,6 +183,13 @@ function extractUrlFromArgs(args) {
   return url;
 }
 let initialUrl = extractUrlFromArgs(process.argv);
+function openOrQueueUrl(url) {
+  if (coreModule) {
+    coreModule.handleOpenUrl(url);
+  } else {
+    initialUrl = url;
+  }
+}
 if (!allowMultipleInstances) {
   app.on('second-instance', (_event, args) => {
     if (args != null && args.indexOf('--squirrel-uninstall') > -1) {
@@ -180,17 +197,18 @@ if (!allowMultipleInstances) {
       return;
     }
     const url = extractUrlFromArgs(args);
-    if (coreModule) {
+    if (url != null) {
+      openOrQueueUrl(url);
+    } else if (coreModule) {
       coreModule.handleOpenUrl(url);
-    } else if (url != null) {
-      initialUrl = url;
     }
     if (!coreModule) {
       appUpdater.focusSplash();
     }
   });
 }
-app.on('ready', () => {
+app.on('ready', (_event, launchInfo) => {
+  var _launchInfo$userInfo;
   let trackedNetErrQuicProtocol = false;
   session.defaultSession.webRequest.onErrorOccurred(details => {
     if (!trackedNetErrQuicProtocol && details.error.includes('net::ERR_QUIC_PROTOCOL_ERROR')) {
@@ -202,33 +220,24 @@ app.on('ready', () => {
       }
     }
   });
+  if ((launchInfo === null || launchInfo === void 0 ? void 0 : (_launchInfo$userInfo = launchInfo.userInfo) === null || _launchInfo$userInfo === void 0 ? void 0 : _launchInfo$userInfo.fallbackDeepLink) != null) {
+    openOrQueueUrl(launchInfo.userInfo.fallbackDeepLink);
+  }
 });
 app.on('will-finish-launching', () => {
   app.on('open-url', (event, url) => {
     event.preventDefault();
-    if (coreModule) {
-      coreModule.handleOpenUrl(url);
-    } else {
-      initialUrl = url;
-    }
+    openOrQueueUrl(url);
   });
   app.on('continue-activity', (event, type, userInfo, details) => {
     if (type === 'com.apple.corespotlightitem') {
       event.preventDefault();
       const url = 'discord:' + userInfo.kCSSearchableItemActivityIdentifier;
-      if (coreModule) {
-        coreModule.handleOpenUrl(url);
-      } else {
-        initialUrl = url;
-      }
+      openOrQueueUrl(url);
     } else if (type === 'com.discord.view-channel') {
       event.preventDefault();
       const u = 'discord:' + url.parse(details.webpageURL).path;
-      if (coreModule) {
-        coreModule.handleOpenUrl(u);
-      } else {
-        initialUrl = u;
-      }
+      openOrQueueUrl(u);
     }
   });
 });
@@ -277,6 +286,7 @@ if (pendingAppQuit) {
   app.quit();
 } else {
   discordProtocols.beforeReadyProtocolRegistration();
+  setupEarlyNative();
   setGPUFlags().then(app.whenReady).then(() => startApp()).catch(error => {
     console.error('Error bootstrapping: ', error);
   });

@@ -368,6 +368,16 @@ async function launchMainAppWindow(isVisible) {
   mainWindow = new _electron.BrowserWindow(mainWindowOptions);
   mainWindowId = mainWindow.id;
   global.mainWindowId = mainWindowId;
+  if (process.platform === 'darwin') {
+    includeOptionalModule(global.moduleDataPath + '/discord_intents', module => {
+      try {
+        var _module$setupWindowRe;
+        (_module$setupWindowRe = module.setupWindowRestoration) === null || _module$setupWindowRe === void 0 ? void 0 : _module$setupWindowRe.call(module, mainWindow.getNativeWindowHandle(), 'main');
+      } catch (e) {
+        console.error('Failed to setup window restoration:', e);
+      }
+    });
+  }
   includeOptionalModule('./ElectronTestRpc', module => module.initialize(mainWindow));
   console.log(`Clearing GPU cache...`);
   try {
@@ -462,6 +472,7 @@ async function launchMainAppWindow(isVisible) {
     frameName
   }) => {
     const extendedWindow = childWindow;
+    extendedWindow.setMenuBarVisibility(false);
     extendedWindow.windowKey = frameName;
     popoutWindows.setupPopout(extendedWindow, frameName, options, WEBAPP_ENDPOINT);
     adjustWindowBounds(childWindow);
@@ -515,7 +526,7 @@ async function launchMainAppWindow(isVisible) {
       _electron.app.quit();
       return;
     }
-    void launchMainAppWindow(true);
+    mainWindow.webContents.reload();
   });
   mainWindow.webContents.on('will-navigate', (evt, url) => {
     if (!insideAuthFlow && !(0, _securityUtils.checkUrlOriginMatches)(url, WEBAPP_ENDPOINT)) {

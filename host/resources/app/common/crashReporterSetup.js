@@ -23,6 +23,7 @@ const DEFAULT_SENTRY_DSN_KEY = '384ce4413de74fe0be270abe03b2b35a';
 const STAFF_SENTRY_DSN_KEY = 'de156ff7a3f544cca369e77e3f1f5743';
 const TEST_SENTRY_DSN_KEY = '1a27a96457b24ff286a000266c573919';
 const LINUX_SENTRY_DSN_KEY = 'd2558f321dfc7ab68366d8258fd256c7';
+const MACOS_SENTRY_DSN_KEY = '098008bd74508d75b72f31244ddb1d04';
 const DEFAULT_SENTRY_DSN = buildSentryDSN(DEFAULT_SENTRY_DSN_KEY);
 const CHANNEL_SENTRY_DSN = {
   stable: buildSentryDSN(STABLE_SENTRY_DSN_KEY),
@@ -37,6 +38,7 @@ const CHANNEL_SENTRY_SAMPLE = {
   development: 1
 };
 const LINUX_SENTRY_SAMPLE = 1;
+const MACOS_SENTRY_SAMPLE = 1;
 let defaultDsn = DEFAULT_SENTRY_DSN;
 function dsnFromUser({
   getEvent
@@ -106,6 +108,8 @@ function buildSentryDSN(dsnKey) {
 function getSentryDSN(releaseChannel) {
   if (processUtils.IS_LINUX) {
     return buildSentryDSN(LINUX_SENTRY_DSN_KEY);
+  } else if (processUtils.IS_OSX) {
+    return buildSentryDSN(MACOS_SENTRY_DSN_KEY);
   } else {
     if (releaseChannel != null && CHANNEL_SENTRY_DSN[releaseChannel] != null) {
       return CHANNEL_SENTRY_DSN[releaseChannel];
@@ -116,6 +120,8 @@ function getSentryDSN(releaseChannel) {
 function getSampleRate(releaseChannel) {
   if (processUtils.IS_LINUX) {
     return LINUX_SENTRY_SAMPLE;
+  } else if (processUtils.IS_OSX) {
+    return MACOS_SENTRY_SAMPLE;
   } else {
     if (releaseChannel != null && CHANNEL_SENTRY_SAMPLE[releaseChannel] != null) {
       return CHANNEL_SENTRY_SAMPLE[releaseChannel];
