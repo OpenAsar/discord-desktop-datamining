@@ -42,7 +42,7 @@ function flushDNSCache() {
 }
 async function getLastCrash() {
   const lastCrash = await _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_LAST_CRASH);
-  const minidumpInformation = lastCrash.id != null ? await (0, _minidumpReader.getNewestMinidumpInformation)() : null;
+  const minidumpInformation = (lastCrash === null || lastCrash === void 0 ? void 0 : lastCrash.id) != null ? await (0, _minidumpReader.getNewestMinidumpInformation)() : null;
   return {
     date: lastCrash.date,
     id: lastCrash.id,

@@ -121,6 +121,7 @@ var ToastBuilder = /*#__PURE__*/function () {
     this.groupName = content.groupName;
     this._senderIdentifier = content.senderIdentifier;
     this._senderDisplayName = content.senderDisplayName;
+    this.fallbackDeepLink = content.fallbackDeepLink;
   }
   return _createClass(ToastBuilder, [{
     key: "setIcon",
@@ -141,7 +142,7 @@ var ToastBuilder = /*#__PURE__*/function () {
   }, {
     key: "build",
     value: function build() {
-      var xml = "<toast>";
+      var xml = this.fallbackDeepLink != null ? "<toast launch=\"".concat(this.fallbackDeepLink, "\" activationType=\"protocol\">") : "<toast>";
       xml += "<visual><binding template=\"ToastGeneric\">";
       if (this.title) {
         xml += "<text>".concat(this.title, "</text>");

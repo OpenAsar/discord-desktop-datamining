@@ -10,7 +10,6 @@ exports.update = update;
 var _electron = require("electron");
 var _fs = _interopRequireDefault(require("fs"));
 var _path = _interopRequireDefault(require("path"));
-var _buildInfo = _interopRequireDefault(require("../buildInfo"));
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 const appName = _path.default.basename(process.execPath, '.exe');
 const exePath = _electron.app.getPath('exe');
@@ -18,7 +17,7 @@ const exeDir = _path.default.dirname(exePath);
 const iconPath = _path.default.join(exeDir, 'discord.png');
 const autostartDir = _path.default.join(_electron.app.getPath('appData'), 'autostart');
 const electronAppName = _electron.app.name ?? _electron.app.getName();
-const autostartFileName = _path.default.join(autostartDir, electronAppName + '-' + _buildInfo.default.releaseChannel + '.desktop');
+const autostartFileName = _path.default.join(autostartDir, electronAppName + '.desktop');
 const desktopFile = `[Desktop Entry]
 Type=Application
 Exec=${exePath}
