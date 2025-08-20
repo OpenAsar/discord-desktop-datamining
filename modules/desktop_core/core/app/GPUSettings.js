@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.getEnableHardwareAcceleration = getEnableHardwareAcceleration;
 exports.setChromiumSwitches = setChromiumSwitches;
 exports.setEnableHardwareAcceleration = setEnableHardwareAcceleration;
+exports.setSetting = setSetting;
 var _electron = require("electron");
 var _appSettings = require("./bootstrapModules/appSettings");
 const settings = _appSettings.appSettings.getSettings();
@@ -29,5 +30,12 @@ function setChromiumSwitches(switches) {
     return;
   }
   settings.set('chromiumSwitches', switches);
+  settings.save();
+}
+function setSetting(key, value) {
+  if (settings == null) {
+    return;
+  }
+  settings.set(key, value);
   settings.save();
 }
