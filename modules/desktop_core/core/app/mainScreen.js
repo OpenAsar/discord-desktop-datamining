@@ -981,6 +981,15 @@ function init() {
       setBackgroundColor(backgroundColor);
     }
   });
+  _ipcMain.default.on(_constants.IPCEvents.WINDOW_SET_TRAFFIC_LIGHT_POSITION, (_event, position) => {
+    if (process.platform !== 'darwin') return;
+    if (mainWindow == null || mainWindow.isDestroyed()) return;
+    try {
+      mainWindow.setWindowButtonPosition(position);
+    } catch (e) {
+      console.error('Failed to set traffic light position', e);
+    }
+  });
   _ipcMain.default.on('OPEN_EXTERNAL_URL', (_event, externalUrl) => {
     (0, _securityUtils.saferShellOpenExternal)(externalUrl).catch(() => {
       console.error('Failed to open external URL', externalUrl);
