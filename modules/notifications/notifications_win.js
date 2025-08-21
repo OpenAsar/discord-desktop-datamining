@@ -109,6 +109,9 @@ function _getAssetUrl() {
   }));
   return _getAssetUrl.apply(this, arguments);
 }
+function escapeXml(text) {
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+}
 var ToastBuilder = /*#__PURE__*/function () {
   function ToastBuilder(content) {
     _classCallCheck(this, ToastBuilder);
@@ -142,22 +145,22 @@ var ToastBuilder = /*#__PURE__*/function () {
   }, {
     key: "build",
     value: function build() {
-      var xml = this.fallbackDeepLink != null ? "<toast launch=\"".concat(this.fallbackDeepLink, "\" activationType=\"protocol\">") : "<toast>";
+      var xml = this.fallbackDeepLink != null ? "<toast launch=\"".concat(escapeXml(this.fallbackDeepLink), "\" activationType=\"protocol\">") : "<toast>";
       xml += "<visual><binding template=\"ToastGeneric\">";
       if (this.title) {
-        xml += "<text>".concat(this.title, "</text>");
+        xml += "<text>".concat(escapeXml(this.title), "</text>");
       }
       if (this.body) {
-        xml += "<text>".concat(this.body, "</text>");
+        xml += "<text>".concat(escapeXml(this.body), "</text>");
       }
       if (this.icon) {
-        xml += "<image placement='appLogoOverride' src='".concat(this.icon, "' />");
+        xml += "<image placement='appLogoOverride' src='".concat(escapeXml(this.icon), "' />");
       }
       xml += "</binding></visual>";
       // We play the sound from the javascript layer
       xml += "<audio silent='true' />";
       if (this.supportsHeaders() && this.threadIdentifier && this.groupName) {
-        xml += "<header id='".concat(this.threadIdentifier, "' title='").concat(this.groupName, "' arguments='").concat(this.threadIdentifier, "' />");
+        xml += "<header id='".concat(escapeXml(this.threadIdentifier), "' title='").concat(escapeXml(this.groupName), "' arguments='").concat(escapeXml(this.threadIdentifier), "' />");
       }
       if (Array.isArray(this.actions)) {
         xml += "<actions>";
@@ -166,12 +169,12 @@ var ToastBuilder = /*#__PURE__*/function () {
         try {
           for (_iterator.s(); !(_step = _iterator.n()).done;) {
             var action = _step.value;
-            var actionXml = "<action content=\"".concat(action.content, "\" arguments=\"").concat(action.args, "\" ");
+            var actionXml = "<action content=\"".concat(escapeXml(action.content), "\" arguments=\"").concat(escapeXml(action.args), "\" ");
             if (action.hintTooltip) {
-              actionXml += "hint-toolTip=\"".concat(action.hintTooltip, "\" ");
+              actionXml += "hint-toolTip=\"".concat(escapeXml(action.hintTooltip), "\" ");
             }
             if (action.hintButtonStyle) {
-              actionXml += "hint-buttonStyle=\"".concat(action.hintButtonStyle, "\" ");
+              actionXml += "hint-buttonStyle=\"".concat(escapeXml(action.hintButtonStyle), "\" ");
             }
             actionXml += "/>";
             xml += actionXml;

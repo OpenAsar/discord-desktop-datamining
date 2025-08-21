@@ -16,12 +16,12 @@
 | krisp | 2 |
 | media | 1 |
 | modules | 1 |
-| notifications | 1 |
+| notifications | 2 |
 | overlay2 | 1 |
 | rpc | 1 |
 | sekrit | 1 |
 | spellcheck | 1 |
-| utils | 6 |
+| utils | 7 |
 | vigilante | 1 |
 | voice | 5 |
 | voice_filters | 2 |
