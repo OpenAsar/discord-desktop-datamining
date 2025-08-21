@@ -21,7 +21,9 @@ const sentry = require('@sentry/electron');
 const logger = require('./logger');
 app.setVersion(buildInfo.version);
 global.releaseChannel = buildInfo.releaseChannel;
-app.setName(app.getName() + '-' + buildInfo.releaseChannel);
+if (buildInfo.releaseChannel !== 'stable' && process.platform === 'linux') {
+  app.setName(app.getName() + '-' + buildInfo.releaseChannel);
+}
 const errorHandler = require('./errorHandler');
 errorHandler.init();
 const paths = require('../common/paths');
@@ -122,6 +124,15 @@ async function setGPUFlags() {
         }
       }
     }
+  }
+}
+function setupEarlyNative() {
+  try {
+    if (process.platform === 'darwin') {
+      require(global.moduleDataPath + '/discord_intents');
+    }
+  } catch (e) {
+    console.error('Error in early native init: ', e);
   }
 }
 function hasArgvFlag(flag) {
@@ -277,6 +288,7 @@ if (pendingAppQuit) {
   app.quit();
 } else {
   discordProtocols.beforeReadyProtocolRegistration();
+  setupEarlyNative();
   setGPUFlags().then(app.whenReady).then(() => startApp()).catch(error => {
     console.error('Error bootstrapping: ', error);
   });

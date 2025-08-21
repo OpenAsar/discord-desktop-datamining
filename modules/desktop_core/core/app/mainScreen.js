@@ -368,6 +368,16 @@ async function launchMainAppWindow(isVisible) {
   mainWindow = new _electron.BrowserWindow(mainWindowOptions);
   mainWindowId = mainWindow.id;
   global.mainWindowId = mainWindowId;
+  if (process.platform === 'darwin') {
+    includeOptionalModule(global.moduleDataPath + '/discord_intents', module => {
+      try {
+        var _module$setupWindowRe;
+        (_module$setupWindowRe = module.setupWindowRestoration) === null || _module$setupWindowRe === void 0 ? void 0 : _module$setupWindowRe.call(module, mainWindow.getNativeWindowHandle(), 'main');
+      } catch (e) {
+        console.error('Failed to setup window restoration:', e);
+      }
+    });
+  }
   includeOptionalModule('./ElectronTestRpc', module => module.initialize(mainWindow));
   console.log(`Clearing GPU cache...`);
   try {
@@ -516,7 +526,7 @@ async function launchMainAppWindow(isVisible) {
       _electron.app.quit();
       return;
     }
-    void launchMainAppWindow(true);
+    mainWindow.webContents.reload();
   });
   mainWindow.webContents.on('will-navigate', (evt, url) => {
     if (!insideAuthFlow && !(0, _securityUtils.checkUrlOriginMatches)(url, WEBAPP_ENDPOINT)) {
@@ -969,6 +979,15 @@ function init() {
   _ipcMain.default.on('SETTINGS_UPDATE_BACKGROUND_COLOR', (_event, backgroundColor) => {
     if (getBackgroundColor() !== backgroundColor) {
       setBackgroundColor(backgroundColor);
+    }
+  });
+  _ipcMain.default.on(_constants.IPCEvents.WINDOW_SET_TRAFFIC_LIGHT_POSITION, (_event, position) => {
+    if (process.platform !== 'darwin') return;
+    if (mainWindow == null || mainWindow.isDestroyed()) return;
+    try {
+      mainWindow.setWindowButtonPosition(position);
+    } catch (e) {
+      console.error('Failed to set traffic light position', e);
     }
   });
   _ipcMain.default.on('OPEN_EXTERNAL_URL', (_event, externalUrl) => {
