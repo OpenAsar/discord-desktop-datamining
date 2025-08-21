@@ -51,11 +51,9 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_CPU_U
 });
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_LAST_CRASH, () => {
   const lastCrashReport = _electron.default.crashReporter.getLastCrashReport();
-  if (lastCrashReport == null) {
-    return Promise.resolve(null);
-  }
   return Promise.resolve({
-    ...lastCrashReport,
+    date: (lastCrashReport === null || lastCrashReport === void 0 ? void 0 : lastCrashReport.date) ?? null,
+    id: (lastCrashReport === null || lastCrashReport === void 0 ? void 0 : lastCrashReport.id) ?? null,
     rendererCrashReason: processUtilsSettings.rendererCrashReason,
     rendererCrashExitCode: processUtilsSettings.rendererCrashExitCode,
     storedInformation: processUtilsSettings.lastRunsStoredInformation,
