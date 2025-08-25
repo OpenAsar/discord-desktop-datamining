@@ -126,15 +126,6 @@ async function setGPUFlags() {
     }
   }
 }
-function setupEarlyNative() {
-  try {
-    if (process.platform === 'darwin') {
-      require(global.moduleDataPath + '/discord_intents');
-    }
-  } catch (e) {
-    console.error('Error in early native init: ', e);
-  }
-}
 function hasArgvFlag(flag) {
   return process.argv.slice(1).includes(flag);
 }
@@ -288,7 +279,6 @@ if (pendingAppQuit) {
   app.quit();
 } else {
   discordProtocols.beforeReadyProtocolRegistration();
-  setupEarlyNative();
   setGPUFlags().then(app.whenReady).then(() => startApp()).catch(error => {
     console.error('Error bootstrapping: ', error);
   });
