@@ -111,6 +111,7 @@ let mainWindowId = BootstrapConstants.DEFAULT_MAIN_WINDOW_ID;
 let mainWindowInitialPath = null;
 let mainWindowDidFinishLoad = false;
 let mainWindowIsVisible = false;
+let triedWindowRestoration = false;
 let insideAuthFlow = false;
 let lastCrashed = 0;
 let lastCrashedNonRenderer = 0;
@@ -179,6 +180,7 @@ function setWindowVisible(isVisible, andUnminimize) {
   }
   mainWindow.setSkipTaskbar(!isVisible);
   mainWindowIsVisible = isVisible;
+  trySetupWindowRestoration();
 }
 function doAABBsOverlap(a, b) {
   const ax1 = a.x + a.width;
@@ -320,6 +322,22 @@ function setBackgroundColor(color) {
   (_mainWindow = mainWindow) === null || _mainWindow === void 0 ? void 0 : _mainWindow.setBackgroundColor(color);
   settings === null || settings === void 0 ? void 0 : settings.save();
 }
+function trySetupWindowRestoration() {
+  if (triedWindowRestoration || mainWindow == null || !mainWindowIsVisible) {
+    return;
+  }
+  triedWindowRestoration = true;
+  if (process.platform === 'darwin') {
+    includeOptionalModule(global.moduleDataPath + '/discord_intents', module => {
+      try {
+        var _module$setupWindowRe;
+        (_module$setupWindowRe = module.setupWindowRestoration) === null || _module$setupWindowRe === void 0 ? void 0 : _module$setupWindowRe.call(module, mainWindow.getNativeWindowHandle(), 'main');
+      } catch (e) {
+        console.error('Failed to setup window restoration:', e);
+      }
+    });
+  }
+}
 async function launchMainAppWindow(isVisible) {
   var _analytics$getDesktop2;
   if (mainWindow) {
@@ -366,18 +384,10 @@ async function launchMainAppWindow(isVisible) {
   applyWindowBoundsToConfig(mainWindowOptions);
   _bootstrapModules.analytics === null || _bootstrapModules.analytics === void 0 ? void 0 : (_analytics$getDesktop2 = _bootstrapModules.analytics.getDesktopTTI) === null || _analytics$getDesktop2 === void 0 ? void 0 : _analytics$getDesktop2.call(_bootstrapModules.analytics).trackMainWindowCreated();
   mainWindow = new _electron.BrowserWindow(mainWindowOptions);
+  mainWindowIsVisible = isVisible;
+  triedWindowRestoration = false;
   mainWindowId = mainWindow.id;
   global.mainWindowId = mainWindowId;
-  if (process.platform === 'darwin') {
-    includeOptionalModule(global.moduleDataPath + '/discord_intents', module => {
-      try {
-        var _module$setupWindowRe;
-        (_module$setupWindowRe = module.setupWindowRestoration) === null || _module$setupWindowRe === void 0 ? void 0 : _module$setupWindowRe.call(module, mainWindow.getNativeWindowHandle(), 'main');
-      } catch (e) {
-        console.error('Failed to setup window restoration:', e);
-      }
-    });
-  }
   includeOptionalModule('./ElectronTestRpc', module => module.initialize(mainWindow));
   console.log(`Clearing GPU cache...`);
   try {
@@ -648,6 +658,7 @@ async function launchMainAppWindow(isVisible) {
       e.preventDefault();
     });
   }
+  trySetupWindowRestoration();
   loadMainPage();
 }
 let updaterState = _Constants.UpdaterEvents.UPDATE_NOT_AVAILABLE;
