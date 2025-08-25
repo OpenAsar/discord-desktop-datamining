@@ -17,7 +17,7 @@
 | media | 1 |
 | modules | 1 |
 | notifications | 1 |
-| overlay2 | 1 |
+| overlay2 | 2 |
 | rpc | 1 |
 | sekrit | 1 |
 | spellcheck | 1 |
