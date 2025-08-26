@@ -81,6 +81,14 @@ const getWebappEndpoint = () => {
   }
   return endpoint;
 };
+function getWebappLaunchPath() {
+  const explicitSetting = settings === null || settings === void 0 ? void 0 : settings.get('WEBAPP_PATH', null);
+  if (explicitSetting != null) {
+    return explicitSetting;
+  }
+  const isConferenceModeEnabled = settings === null || settings === void 0 ? void 0 : settings.get('enableConferenceMode', false);
+  return `${isConferenceModeEnabled ? _Constants.WEBAPP_PATHS.CONFERENCE_MODE : _Constants.WEBAPP_PATHS.APP}?_=${Date.now()}`;
+}
 const WEBAPP_ENDPOINT = exports.WEBAPP_ENDPOINT = getWebappEndpoint();
 function getSanitizedPath(path) {
   return new _url.default.URL(path, WEBAPP_ENDPOINT).pathname;
@@ -97,7 +105,7 @@ function getSanitizedProtocolUrl(fullUrl) {
   } catch (_) {}
   return null;
 }
-const WEBAPP_PATH = settings === null || settings === void 0 ? void 0 : settings.get('WEBAPP_PATH', `/app?_=${Date.now()}`);
+const WEBAPP_PATH = getWebappLaunchPath();
 const URL_TO_LOAD = `${WEBAPP_ENDPOINT}${WEBAPP_PATH}`;
 const MIN_WIDTH = settings === null || settings === void 0 ? void 0 : settings.get('MIN_WIDTH', 940);
 const MIN_HEIGHT = settings === null || settings === void 0 ? void 0 : settings.get('MIN_HEIGHT', 500);

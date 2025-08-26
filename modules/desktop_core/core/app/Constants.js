@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.UpdaterEvents = exports.MenuEvents = exports.AnalyticsEvents = exports.AllowedMediaOrigins = void 0;
+exports.WEBAPP_PATHS = exports.UpdaterEvents = exports.MenuEvents = exports.AnalyticsEvents = exports.AllowedMediaOrigins = void 0;
 exports.init = init;
 const UpdaterEvents = exports.UpdaterEvents = {
   UPDATE_NOT_AVAILABLE: 'UPDATE_NOT_AVAILABLE',
@@ -34,6 +34,10 @@ const MenuEvents = exports.MenuEvents = {
 };
 const AllowedMediaOrigins = exports.AllowedMediaOrigins = {
   K_ID: 'https://d3ogqhtsivkon3.cloudfront.net'
+};
+const WEBAPP_PATHS = exports.WEBAPP_PATHS = {
+  APP: '/app',
+  CONFERENCE_MODE: '/conference-mode'
 };
 function init(bootstrapConstants) {
   const APP_NAME = bootstrapConstants.APP_NAME;
