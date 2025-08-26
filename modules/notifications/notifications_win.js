@@ -154,7 +154,7 @@ var ToastBuilder = /*#__PURE__*/function () {
         xml += "<text>".concat(escapeXml(this.body), "</text>");
       }
       if (this.icon) {
-        xml += "<image placement='appLogoOverride' src='".concat(this.icon, "' />");
+        xml += "<image placement='appLogoOverride' src='".concat(escapeXml(this.icon), "' />");
       }
       xml += "</binding></visual>";
       // We play the sound from the javascript layer

@@ -81,6 +81,14 @@ const getWebappEndpoint = () => {
   }
   return endpoint;
 };
+function getWebappLaunchPath() {
+  const explicitSetting = settings === null || settings === void 0 ? void 0 : settings.get('WEBAPP_PATH', null);
+  if (explicitSetting != null) {
+    return explicitSetting;
+  }
+  const isConferenceModeEnabled = settings === null || settings === void 0 ? void 0 : settings.get('enableConferenceMode', false);
+  return `${isConferenceModeEnabled ? _Constants.WEBAPP_PATHS.CONFERENCE_MODE : _Constants.WEBAPP_PATHS.APP}?_=${Date.now()}`;
+}
 const WEBAPP_ENDPOINT = exports.WEBAPP_ENDPOINT = getWebappEndpoint();
 function getSanitizedPath(path) {
   return new _url.default.URL(path, WEBAPP_ENDPOINT).pathname;
@@ -97,7 +105,7 @@ function getSanitizedProtocolUrl(fullUrl) {
   } catch (_) {}
   return null;
 }
-const WEBAPP_PATH = settings === null || settings === void 0 ? void 0 : settings.get('WEBAPP_PATH', `/app?_=${Date.now()}`);
+const WEBAPP_PATH = getWebappLaunchPath();
 const URL_TO_LOAD = `${WEBAPP_ENDPOINT}${WEBAPP_PATH}`;
 const MIN_WIDTH = settings === null || settings === void 0 ? void 0 : settings.get('MIN_WIDTH', 940);
 const MIN_HEIGHT = settings === null || settings === void 0 ? void 0 : settings.get('MIN_HEIGHT', 500);
@@ -119,8 +127,6 @@ const retryUpdateOptions = {
   skip_host_delta: false,
   skip_module_delta: {},
   skip_all_module_delta: false,
-  skip_windows_arch_update: BootstrapConstants.DISABLE_WINDOWS_64BIT_TRANSITION,
-  optin_windows_transition_progression: BootstrapConstants.OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION,
   allow_optional_updates: false
 };
 function getMainWindowId() {
@@ -368,16 +374,6 @@ async function launchMainAppWindow(isVisible) {
   mainWindow = new _electron.BrowserWindow(mainWindowOptions);
   mainWindowId = mainWindow.id;
   global.mainWindowId = mainWindowId;
-  if (process.platform === 'darwin') {
-    includeOptionalModule(global.moduleDataPath + '/discord_intents', module => {
-      try {
-        var _module$setupWindowRe;
-        (_module$setupWindowRe = module.setupWindowRestoration) === null || _module$setupWindowRe === void 0 ? void 0 : _module$setupWindowRe.call(module, mainWindow.getNativeWindowHandle(), 'main');
-      } catch (e) {
-        console.error('Failed to setup window restoration:', e);
-      }
-    });
-  }
   includeOptionalModule('./ElectronTestRpc', module => module.initialize(mainWindow));
   console.log(`Clearing GPU cache...`);
   try {
@@ -979,6 +975,15 @@ function init() {
   _ipcMain.default.on('SETTINGS_UPDATE_BACKGROUND_COLOR', (_event, backgroundColor) => {
     if (getBackgroundColor() !== backgroundColor) {
       setBackgroundColor(backgroundColor);
+    }
+  });
+  _ipcMain.default.on(_constants.IPCEvents.WINDOW_SET_TRAFFIC_LIGHT_POSITION, (_event, position) => {
+    if (process.platform !== 'darwin') return;
+    if (mainWindow == null || mainWindow.isDestroyed()) return;
+    try {
+      mainWindow.setWindowButtonPosition(position);
+    } catch (e) {
+      console.error('Failed to set traffic light position', e);
     }
   });
   _ipcMain.default.on('OPEN_EXTERNAL_URL', (_event, externalUrl) => {

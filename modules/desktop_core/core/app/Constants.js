@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.UpdaterEvents = exports.MenuEvents = exports.AnalyticsEvents = exports.AllowedMediaOrigins = void 0;
+exports.WEBAPP_PATHS = exports.UpdaterEvents = exports.MenuEvents = exports.AnalyticsEvents = exports.AllowedMediaOrigins = void 0;
 exports.init = init;
 const UpdaterEvents = exports.UpdaterEvents = {
   UPDATE_NOT_AVAILABLE: 'UPDATE_NOT_AVAILABLE',
@@ -35,6 +35,10 @@ const MenuEvents = exports.MenuEvents = {
 const AllowedMediaOrigins = exports.AllowedMediaOrigins = {
   K_ID: 'https://d3ogqhtsivkon3.cloudfront.net'
 };
+const WEBAPP_PATHS = exports.WEBAPP_PATHS = {
+  APP: '/app',
+  CONFERENCE_MODE: '/conference-mode'
+};
 function init(bootstrapConstants) {
   const APP_NAME = bootstrapConstants.APP_NAME;
   const APP_NAME_FOR_HUMANS = bootstrapConstants.APP_NAME_FOR_HUMANS;
@@ -42,8 +46,6 @@ function init(bootstrapConstants) {
   const NEW_UPDATE_ENDPOINT = bootstrapConstants.NEW_UPDATE_ENDPOINT;
   const UPDATE_ENDPOINT = bootstrapConstants.UPDATE_ENDPOINT;
   const APP_ID = bootstrapConstants.APP_ID;
-  const DISABLE_WINDOWS_64BIT_TRANSITION = bootstrapConstants.DISABLE_WINDOWS_64BIT_TRANSITION;
-  const OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION = bootstrapConstants.OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION;
   const ALLOW_OPTIONAL_UPDATES = bootstrapConstants.ALLOW_OPTIONAL_UPDATES;
   const OPTIN_OPTIONAL_UPDATES = bootstrapConstants.OPTIN_OPTIONAL_UPDATES;
   const LOG_LEVEL = bootstrapConstants.LOG_LEVEL;
@@ -51,8 +53,6 @@ function init(bootstrapConstants) {
   const exported = {
     APP_NAME,
     APP_NAME_FOR_HUMANS,
-    DISABLE_WINDOWS_64BIT_TRANSITION,
-    OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION,
     ALLOW_OPTIONAL_UPDATES,
     OPTIN_OPTIONAL_UPDATES,
     LOG_LEVEL,
