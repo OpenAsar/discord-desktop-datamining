@@ -34,7 +34,7 @@ if (_utils.isOSX) {
       }, () => {
         return ['badge', 'banner', 'list', 'sound'];
       }, identifier => {
-        sendToAllWindows('USER_SETTINGS_OPEN', 'Notifications', identifier);
+        sendToAllWindows('USER_SETTINGS_OPEN', identifier, 'Notifications');
       });
       _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.NOTIFICATIONS_GET_AUTHORIZATION, async (_event, provisional) => {
         return await lib.getAuthorization(provisional);
