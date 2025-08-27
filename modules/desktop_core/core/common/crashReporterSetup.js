@@ -8,6 +8,7 @@ exports.init = init;
 exports.isInitialized = isInitialized;
 exports.metadata = void 0;
 var _child_process = _interopRequireDefault(require("child_process"));
+var _fs = _interopRequireDefault(require("fs"));
 var blackbox = _interopRequireWildcard(require("./blackbox"));
 var processUtils = _interopRequireWildcard(require("./processUtils"));
 function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
@@ -92,13 +93,35 @@ function init(buildInfo, sentry) {
     const xdgCurrentDesktop = process.env.XDG_CURRENT_DESKTOP ?? 'unknown';
     const gdmSession = process.env.GDMSESSION ?? 'unknown';
     metadata['wm'] = `${xdgCurrentDesktop},${gdmSession}`;
+    let runtimeEnvironment = 'native';
+    if (process.env.FLATPAK_ID != null) {
+      runtimeEnvironment = 'flatpak';
+    } else if (process.env.SNAP != null || process.env.SNAP_NAME != null) {
+      runtimeEnvironment = 'snap';
+    } else if (process.env.APPIMAGE != null || process.env.APPDIR != null) {
+      runtimeEnvironment = 'appimage';
+    }
+    metadata['runtime_environment'] = runtimeEnvironment;
+    let displayServer = 'unknown';
+    if (process.env.XDG_SESSION_TYPE != null) {
+      displayServer = process.env.XDG_SESSION_TYPE;
+    }
+    metadata['display_server'] = displayServer;
     try {
       metadata['distro'] = _child_process.default.execFileSync('lsb_release', ['-ds'], {
         timeout: 100,
         maxBuffer: 512,
         encoding: 'utf-8'
       }).trim();
-    } catch (_) {}
+    } catch (_) {
+      try {
+        const osRelease = _fs.default.readFileSync('/etc/os-release', 'utf-8');
+        const prettyNameMatch = osRelease.match(/^PRETTY_NAME="?([^"\n]+)"?$/m);
+        if (prettyNameMatch != null) {
+          metadata['distro'] = prettyNameMatch[1];
+        }
+      } catch (_) {}
+    }
   }
   initialized = true;
 }
