@@ -367,8 +367,8 @@ async function launchMainAppWindow(isVisible) {
   if (process.platform === 'darwin') {
     mainWindowOptions.titleBarStyle = 'hidden';
     mainWindowOptions.trafficLightPosition = {
-      x: 10,
-      y: 10
+      x: 9,
+      y: 8
     };
   }
   applyWindowBoundsToConfig(mainWindowOptions);
