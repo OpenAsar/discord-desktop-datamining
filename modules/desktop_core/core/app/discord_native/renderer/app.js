@@ -41,10 +41,13 @@ function dockSetBadge(badge) {
   return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.APP_DOCK_SET_BADGE, badge);
 }
 async function dockBounce(type) {
-  await _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.APP_DOCK_BOUNCE, type);
+  return await _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.APP_DOCK_BOUNCE, type);
 }
 function dockCancelBounce(id) {
-  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.APP_DOCK_CANCEL_BOUNCE, id);
+  if (typeof id === 'number' && !isNaN(id) && id >= 0) {
+    return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.APP_DOCK_CANCEL_BOUNCE, id);
+  }
+  return Promise.resolve();
 }
 function relaunch() {
   return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.APP_RELAUNCH);
