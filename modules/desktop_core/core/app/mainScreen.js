@@ -368,7 +368,7 @@ async function launchMainAppWindow(isVisible) {
     mainWindowOptions.titleBarStyle = 'hidden';
     mainWindowOptions.trafficLightPosition = {
       x: 9,
-      y: 8
+      y: 9
     };
   }
   applyWindowBoundsToConfig(mainWindowOptions);
