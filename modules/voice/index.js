@@ -165,7 +165,13 @@ if (process.platform === 'darwin') {
 if (process.platform === 'linux') {
   // from WebRTC DesktopCapturer::IsRunningUnderWayland()
   const sessionType = process.env.XDG_SESSION_TYPE;
-  if (sessionType?.startsWith('wayland') && process.env.WAYLAND_DISPLAY != null) {
+  const isUnderWayland = sessionType?.startsWith('wayland') && process.env.WAYLAND_DISPLAY != null;
+
+  const currentDesktop = process.env.XDG_CURRENT_DESKTOP;
+  const isUnderGamescope = currentDesktop?.includes('gamescope') && process.env.GAMESCOPE_WAYLAND_DISPLAY != null;
+  const isSteamDeckBuildEnabled = VoiceEngine.isSteamDeckBuildEnabled();
+
+  if (isUnderWayland || (isUnderGamescope && isSteamDeckBuildEnabled)) {
     features.declareSupported('native_screenshare_picker');
   }
 }
