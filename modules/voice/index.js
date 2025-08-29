@@ -138,7 +138,7 @@ features.declareSupported('set_video_device_by_id');
 features.declareSupported('loopback');
 features.declareSupported('experiment_config');
 features.declareSupported('remote_locus_network_control');
-features.declareSupported('connection_replay');
+//features.declareSupported('connection_replay');
 features.declareSupported('simulcast');
 features.declareSupported('simulcast_bugfix');
 features.declareSupported('direct_video');
