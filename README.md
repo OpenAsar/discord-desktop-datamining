@@ -13,7 +13,7 @@
 | erlpack | 1 |
 | game_utils | 1 |
 | hook | 1 |
-| krisp | 1 |
+| krisp | 2 |
 | media | 1 |
 | modules | 1 |
 | notifications | 1 |
@@ -23,7 +23,7 @@
 | spellcheck | 1 |
 | utils | 22 |
 | vigilante | 1 |
-| voice | 11 |
+| voice | 12 |
 | voice_filters | 7 |
 | zstd | 1 |
 
