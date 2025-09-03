@@ -21,10 +21,10 @@
 | rpc | 1 |
 | sekrit | 1 |
 | spellcheck | 1 |
-| utils | 20 |
+| utils | 21 |
 | vigilante | 1 |
 | voice | 10 |
-| voice_filters | 4 |
+| voice_filters | 5 |
 | zstd | 1 |
 
 ## branches
