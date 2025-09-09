@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.getCrashFiles = getCrashFiles;
 exports.getPath = getPath;
 exports.getSquirrelLogs = getSquirrelLogs;
+exports.getSystemServiceLogs = getSystemServiceLogs;
 exports.getUpdaterLogs = getUpdaterLogs;
 var _electron = _interopRequireDefault(require("electron"));
 var _fs = _interopRequireDefault(require("fs"));
@@ -60,6 +61,30 @@ async function getUpdaterLogs() {
     const updaterLogFolder = _path.default.resolve(exeBaseFolder, '..');
     const files = await orderedFiles(updaterLogFolder);
     const logFiles = files.filter(f => f.endsWith('updater_rCURRENT.log'));
+    return logFiles;
+  } else {
+    return [];
+  }
+}
+function capitalizeFirstLetter(s) {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+async function getSystemServiceLogs() {
+  if (_processUtils.IS_WIN) {
+    var _ref, _ref$DiscordNative, _ref$DiscordNative$ap, _ref$DiscordNative$ap2;
+    let commonFilesPath = process.env['CommonProgramFiles'];
+    if (commonFilesPath == null) {
+      const programFilesPath = process.env['ProgramFiles'];
+      if (programFilesPath == null) {
+        return [];
+      }
+      commonFilesPath = _path.default.join(programFilesPath, 'Common Files');
+    }
+    const releaseChannel = ((_ref = window) === null || _ref === void 0 ? void 0 : (_ref$DiscordNative = _ref.DiscordNative) === null || _ref$DiscordNative === void 0 ? void 0 : (_ref$DiscordNative$ap = (_ref$DiscordNative$ap2 = _ref$DiscordNative.app).getReleaseChannel) === null || _ref$DiscordNative$ap === void 0 ? void 0 : _ref$DiscordNative$ap.call(_ref$DiscordNative$ap2)) ?? 'stable';
+    const channelFolder = releaseChannel === 'stable' ? 'Discord' : `Discord${capitalizeFirstLetter(releaseChannel)}`;
+    const discordServiceLogFolder = _path.default.join(commonFilesPath, 'Discord', channelFolder, 'logs');
+    const files = await orderedFiles(discordServiceLogFolder);
+    const logFiles = files.filter(f => f.endsWith('admin_rCURRENT.log'));
     return logFiles;
   } else {
     return [];
