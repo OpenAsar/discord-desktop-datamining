@@ -44,7 +44,6 @@ exports.maybeDownloadVoiceFilterFile = maybeDownloadVoiceFilterFile;
 exports.openFiles = openFiles;
 exports.readLogFiles = readLogFiles;
 exports.saveWithDialog = saveWithDialog;
-exports.saveWithDialog2 = saveWithDialog2;
 exports.showItemInFolder = showItemInFolder;
 exports.showOpenDialog = showOpenDialog;
 exports.stopVoiceFilterDownloads = stopVoiceFilterDownloads;
@@ -69,10 +68,6 @@ function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e
 const uploadHookCrashSequence = (0, _utils.createLock)();
 const combineWebRtcLogsSequence = (0, _utils.createLock)();
 async function saveWithDialog(fileContents, fileName, defaultDirectory) {
-  const result = await saveWithDialog2(fileContents, fileName, defaultDirectory, true);
-  return (result === null || result === void 0 ? void 0 : result.directory) ?? null;
-}
-async function saveWithDialog2(fileContents, fileName, defaultDirectory, throwOnCancel = false) {
   if ((0, _files.containsInvalidFileChar)(fileName)) {
     throw new Error('fileName has invalid characters');
   }
@@ -92,25 +87,11 @@ async function saveWithDialog2(fileContents, fileName, defaultDirectory, throwOn
     }];
   }
   const results = await _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.FILE_MANAGER_SHOW_SAVE_DIALOG, options);
-  if (results == null || results.filePath == null) {
-    return null;
+  if (results != null && results.filePath != null) {
+    _fs.default.writeFileSync(results.filePath, fileContents);
+    return _path.default.dirname(results.filePath);
   }
-  if (results.canceled || results.filePath === '') {
-    if (throwOnCancel) {
-      throw new Error('Save dialog was canceled by user');
-    }
-    return {
-      canceledByUser: true,
-      filePath: '',
-      directory: ''
-    };
-  }
-  _fs.default.writeFileSync(results.filePath, fileContents);
-  return {
-    canceledByUser: false,
-    filePath: results.filePath,
-    directory: _path.default.dirname(results.filePath)
-  };
+  return null;
 }
 async function showOpenDialog({
   filters,

@@ -145,15 +145,7 @@ var ToastBuilder = /*#__PURE__*/function () {
   }, {
     key: "build",
     value: function build() {
-      /*
-       // Disabled due to inconsistent focus activation, as well as issues with
-       // inconsistent Discord protcol handling when multiple Discord channels are installed
-      let xml =
-        this.fallbackDeepLink != null
-          ? `<toast launch="${escapeXml(this.fallbackDeepLink)}" activationType="protocol">`
-          : `<toast>`;
-      */
-      var xml = '<toast>';
+      var xml = this.fallbackDeepLink != null ? "<toast launch=\"".concat(escapeXml(this.fallbackDeepLink), "\" activationType=\"protocol\">") : "<toast>";
       xml += "<visual><binding template=\"ToastGeneric\">";
       if (this.title) {
         xml += "<text>".concat(escapeXml(this.title), "</text>");

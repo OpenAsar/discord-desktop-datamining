@@ -138,7 +138,7 @@ features.declareSupported('set_video_device_by_id');
 features.declareSupported('loopback');
 features.declareSupported('experiment_config');
 features.declareSupported('remote_locus_network_control');
-//features.declareSupported('connection_replay');
+features.declareSupported('connection_replay');
 features.declareSupported('simulcast');
 features.declareSupported('simulcast_bugfix');
 features.declareSupported('direct_video');
@@ -165,13 +165,7 @@ if (process.platform === 'darwin') {
 if (process.platform === 'linux') {
   // from WebRTC DesktopCapturer::IsRunningUnderWayland()
   const sessionType = process.env.XDG_SESSION_TYPE;
-  const isUnderWayland = sessionType?.startsWith('wayland') && process.env.WAYLAND_DISPLAY != null;
-
-  const currentDesktop = process.env.XDG_CURRENT_DESKTOP;
-  const isUnderGamescope = currentDesktop?.includes('gamescope') && process.env.GAMESCOPE_WAYLAND_DISPLAY != null;
-  const isSteamDeckBuildEnabled = VoiceEngine.isSteamDeckBuildEnabled();
-
-  if (isUnderWayland || (isUnderGamescope && isSteamDeckBuildEnabled)) {
+  if (sessionType?.startsWith('wayland') && process.env.WAYLAND_DISPLAY != null) {
     features.declareSupported('native_screenshare_picker');
   }
 }
@@ -258,7 +252,6 @@ function bindConnectionInstance(instance) {
 
     setOnVideoCallback: (callback) => instance.setOnVideoCallback(callback),
     setOnFirstFrameCallback: (callback) => instance.setOnFirstFrameCallback(callback),
-    setOnFirstFrameDeliveredStatsCallback: (callback) => instance.setOnFirstFrameDeliveredStatsCallback(callback),
     setVideoBroadcast: (broadcasting) => instance.setVideoBroadcast(broadcasting),
     setDesktopSource: (id, videoHook, type) => instance.setDesktopSource(id, videoHook, type),
     setDesktopSourceWithOptions: (options) => instance.setDesktopSourceWithOptions(options),
