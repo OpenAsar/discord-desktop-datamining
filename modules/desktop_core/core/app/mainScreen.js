@@ -127,8 +127,6 @@ const retryUpdateOptions = {
   skip_host_delta: false,
   skip_module_delta: {},
   skip_all_module_delta: false,
-  skip_windows_arch_update: BootstrapConstants.DISABLE_WINDOWS_64BIT_TRANSITION,
-  optin_windows_transition_progression: BootstrapConstants.OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION,
   allow_optional_updates: false
 };
 function getMainWindowId() {
