@@ -23,8 +23,6 @@ const APP_PROTOCOL = 'Discord';
 const API_ENDPOINT = (settings === null || settings === void 0 ? void 0 : settings.get('API_ENDPOINT')) || 'https://discord.com/api';
 const UPDATE_ENDPOINT = (settings === null || settings === void 0 ? void 0 : settings.get('UPDATE_ENDPOINT')) || API_ENDPOINT;
 const NEW_UPDATE_ENDPOINT = (settings === null || settings === void 0 ? void 0 : settings.get('NEW_UPDATE_ENDPOINT')) || 'https://updates.discord.com/';
-const DISABLE_WINDOWS_64BIT_TRANSITION = settings === null || settings === void 0 ? void 0 : settings.get('DISABLE_WINDOWS_64BIT_TRANSITION', false);
-const OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION = settings === null || settings === void 0 ? void 0 : settings.get('OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION', false);
 const ALLOW_OPTIONAL_UPDATES = settings === null || settings === void 0 ? void 0 : settings.get('ALLOW_OPTIONAL_UPDATES', true);
 const OPTIN_OPTIONAL_UPDATES = settings === null || settings === void 0 ? void 0 : settings.get('OPTIN_OPTIONAL_UPDATES', false);
 const LOG_LEVEL = (settings === null || settings === void 0 ? void 0 : settings.get('LOG_LEVEL')) || 'info';
@@ -42,8 +40,6 @@ const bootstrapConstants = {
   APP_PROTOCOL,
   API_ENDPOINT,
   NEW_UPDATE_ENDPOINT,
-  DISABLE_WINDOWS_64BIT_TRANSITION,
-  OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION,
   ALLOW_OPTIONAL_UPDATES,
   OPTIN_OPTIONAL_UPDATES,
   LOG_LEVEL,
