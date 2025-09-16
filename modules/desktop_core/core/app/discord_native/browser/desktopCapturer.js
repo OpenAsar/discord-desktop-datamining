@@ -12,7 +12,16 @@ function mapDiscordDesktopCaptureSourcesToElectron(options) {
     fetchWindowIcons: true
   };
 }
-_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.DESKTOP_CAPTURER_GET_SOURCES, (_, opts) => {
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.DESKTOP_CAPTURER_GET_SOURCES, async (_, opts) => {
   const electronOptions = mapDiscordDesktopCaptureSourcesToElectron(opts);
-  return _electron.default.desktopCapturer.getSources(electronOptions);
+  const sources = await _electron.default.desktopCapturer.getSources(electronOptions);
+  return sources.map(source => {
+    var _source$appIcon;
+    return {
+      id: source.id,
+      name: source.name,
+      url: source.thumbnail.toDataURL(),
+      icon: (_source$appIcon = source.appIcon) === null || _source$appIcon === void 0 ? void 0 : _source$appIcon.toDataURL()
+    };
+  });
 });

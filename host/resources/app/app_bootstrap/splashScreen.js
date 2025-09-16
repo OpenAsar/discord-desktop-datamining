@@ -117,6 +117,8 @@ async function updateUntilCurrent(widevineCDM) {
     skip_host_delta: false,
     skip_module_delta: {},
     skip_all_module_delta: false,
+    skip_windows_arch_update: _Constants.default.DISABLE_WINDOWS_64BIT_TRANSITION,
+    optin_windows_transition_progression: _Constants.default.OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION,
     allow_optional_updates: allowOptionalUpdates
   };
   while (true) {
@@ -149,7 +151,11 @@ async function updateUntilCurrent(widevineCDM) {
         }
       });
       if (!installedAnything) {
-        await newUpdater.startCurrentVersion({});
+        const queryOptions = {
+          skip_windows_arch_update: _Constants.default.DISABLE_WINDOWS_64BIT_TRANSITION,
+          optin_windows_transition_progression: _Constants.default.OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION
+        };
+        await newUpdater.startCurrentVersion(queryOptions);
         newUpdater.setRunningInBackground();
         newUpdater.collectGarbage();
         console.log(`Checking CDM status...`);
