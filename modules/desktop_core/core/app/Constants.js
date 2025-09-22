@@ -33,7 +33,8 @@ const MenuEvents = exports.MenuEvents = {
   CHECK_FOR_UPDATES: 'menu:check-for-updates'
 };
 const AllowedMediaOrigins = exports.AllowedMediaOrigins = {
-  K_ID: 'https://d3ogqhtsivkon3.cloudfront.net'
+  K_ID: 'https://d3ogqhtsivkon3.cloudfront.net',
+  K_ID_V2: 'https://family.k-id.com'
 };
 const WEBAPP_PATHS = exports.WEBAPP_PATHS = {
   APP: '/app',
