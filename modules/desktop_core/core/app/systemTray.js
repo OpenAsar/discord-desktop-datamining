@@ -213,7 +213,7 @@ function show() {
   }
   const guid = process.platform === 'win32' ? TrayGuidByChannel[buildInfo.releaseChannel] : undefined;
   try {
-    atomTray = new _electron.Tray(currentIcon, guid);
+    atomTray = guid !== undefined ? new _electron.Tray(currentIcon, guid) : new _electron.Tray(currentIcon);
     atomTray.setToolTip(_Constants.APP_NAME);
     setContextMenu();
     atomTray.on('click', options.onTrayClicked);

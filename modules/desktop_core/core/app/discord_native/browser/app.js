@@ -5,8 +5,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.injectBuildInfo = injectBuildInfo;
 exports.injectModuleUpdater = injectModuleUpdater;
-exports.injectOptinWindowsTransitionProgression = injectOptinWindowsTransitionProgression;
-exports.injectSkipWindowsArchUpdate = injectSkipWindowsArchUpdate;
 exports.injectUpdater = injectUpdater;
 var _electron = _interopRequireDefault(require("electron"));
 var process = _interopRequireWildcard(require("process"));
@@ -14,17 +12,9 @@ var _DiscordIPC = require("../common/DiscordIPC");
 function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
 function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
-let injectedSkipWindowsArchUpdate = null;
-let injectedOptinWindowsTransition = null;
 let injectedBuildInfo = null;
 let injectedModuleUpdater = null;
 let injectedUpdater = null;
-function injectSkipWindowsArchUpdate(skipArchUpdate) {
-  injectedSkipWindowsArchUpdate = skipArchUpdate;
-}
-function injectOptinWindowsTransitionProgression(optin) {
-  injectedOptinWindowsTransition = optin;
-}
 function injectBuildInfo(buildInfo) {
   injectedBuildInfo = buildInfo;
 }
@@ -41,24 +31,10 @@ _DiscordIPC.DiscordIPC.main.on(_DiscordIPC.IPCEvents.APP_GET_HOST_VERSION_SYNC, 
   event.returnValue = _electron.default.app.getVersion();
 });
 async function newUpdaterGetModuleVersions(updater) {
-  let queryOptions;
-  if (injectedSkipWindowsArchUpdate != null && injectedOptinWindowsTransition != null) {
-    queryOptions = {
-      skip_windows_arch_update: injectedSkipWindowsArchUpdate,
-      optin_windows_transition_progression: injectedOptinWindowsTransition
-    };
-  }
-  return (await updater.queryCurrentVersionsWithOptions(queryOptions)).current_modules;
+  return (await updater.queryCurrentVersionsWithOptions({})).current_modules;
 }
 function newUpdaterGetBuildNumber(updater) {
-  let queryOptions;
-  if (injectedSkipWindowsArchUpdate != null && injectedOptinWindowsTransition != null) {
-    queryOptions = {
-      skip_windows_arch_update: injectedSkipWindowsArchUpdate,
-      optin_windows_transition_progression: injectedOptinWindowsTransition
-    };
-  }
-  const version = updater.queryCurrentVersionsWithOptionsSync(queryOptions);
+  const version = updater.queryCurrentVersionsWithOptionsSync({});
   if (version.running_update != null) {
     return version.running_update.metadata_version;
   }

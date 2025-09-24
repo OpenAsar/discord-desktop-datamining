@@ -33,7 +33,8 @@ const MenuEvents = exports.MenuEvents = {
   CHECK_FOR_UPDATES: 'menu:check-for-updates'
 };
 const AllowedMediaOrigins = exports.AllowedMediaOrigins = {
-  K_ID: 'https://d3ogqhtsivkon3.cloudfront.net'
+  K_ID: 'https://d3ogqhtsivkon3.cloudfront.net',
+  K_ID_V2: 'https://family.k-id.com'
 };
 const WEBAPP_PATHS = exports.WEBAPP_PATHS = {
   APP: '/app',
@@ -46,8 +47,6 @@ function init(bootstrapConstants) {
   const NEW_UPDATE_ENDPOINT = bootstrapConstants.NEW_UPDATE_ENDPOINT;
   const UPDATE_ENDPOINT = bootstrapConstants.UPDATE_ENDPOINT;
   const APP_ID = bootstrapConstants.APP_ID;
-  const DISABLE_WINDOWS_64BIT_TRANSITION = bootstrapConstants.DISABLE_WINDOWS_64BIT_TRANSITION;
-  const OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION = bootstrapConstants.OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION;
   const ALLOW_OPTIONAL_UPDATES = bootstrapConstants.ALLOW_OPTIONAL_UPDATES;
   const OPTIN_OPTIONAL_UPDATES = bootstrapConstants.OPTIN_OPTIONAL_UPDATES;
   const LOG_LEVEL = bootstrapConstants.LOG_LEVEL;
@@ -55,8 +54,6 @@ function init(bootstrapConstants) {
   const exported = {
     APP_NAME,
     APP_NAME_FOR_HUMANS,
-    DISABLE_WINDOWS_64BIT_TRANSITION,
-    OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION,
     ALLOW_OPTIONAL_UPDATES,
     OPTIN_OPTIONAL_UPDATES,
     LOG_LEVEL,

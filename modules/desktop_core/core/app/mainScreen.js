@@ -127,8 +127,6 @@ const retryUpdateOptions = {
   skip_host_delta: false,
   skip_module_delta: {},
   skip_all_module_delta: false,
-  skip_windows_arch_update: BootstrapConstants.DISABLE_WINDOWS_64BIT_TRANSITION,
-  optin_windows_transition_progression: BootstrapConstants.OPTIN_WINDOWS_64BIT_TRANSITION_PROGRESSION,
   allow_optional_updates: false
 };
 function getMainWindowId() {
@@ -408,7 +406,7 @@ async function launchMainAppWindow(isVisible) {
         callback(result);
         return;
       case 'media':
-        callback((0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, _Constants.AllowedMediaOrigins.K_ID));
+        callback((0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, _Constants.AllowedMediaOrigins.K_ID) || (0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, _Constants.AllowedMediaOrigins.K_ID_V2));
         return;
     }
     callback(false);
@@ -425,7 +423,7 @@ async function launchMainAppWindow(isVisible) {
           return (0, _securityUtils.checkUrlOriginMatches)(details.embeddingOrigin, WEBAPP_ENDPOINT);
         }
       case 'media':
-        return (0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, _Constants.AllowedMediaOrigins.K_ID) || (0, _securityUtils.checkUrlOriginMatches)(requestingOrigin, WEBAPP_ENDPOINT);
+        return (0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, _Constants.AllowedMediaOrigins.K_ID) || (0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, _Constants.AllowedMediaOrigins.K_ID_V2) || (0, _securityUtils.checkUrlOriginMatches)(requestingOrigin, WEBAPP_ENDPOINT);
     }
     return false;
   });

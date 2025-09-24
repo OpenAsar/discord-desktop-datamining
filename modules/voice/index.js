@@ -168,16 +168,24 @@ if (process.platform === 'linux') {
   const isUnderWayland = sessionType?.startsWith('wayland') && process.env.WAYLAND_DISPLAY != null;
 
   const currentDesktop = process.env.XDG_CURRENT_DESKTOP;
-  const isUnderGamescope = currentDesktop?.includes('gamescope') && process.env.GAMESCOPE_WAYLAND_DISPLAY != null;
-  const isSteamDeckBuildEnabled = VoiceEngine.isSteamDeckBuildEnabled();
+  // we only want to enable the gamescope capturer if we're running in a non-nested gamescope session
+  const isUnderGamescope =
+    !isUnderWayland && currentDesktop?.includes('gamescope') && process.env.GAMESCOPE_WAYLAND_DISPLAY != null;
+  const isVaapiEnabled = VoiceEngine.isVaapiEnabled();
 
-  if (isUnderWayland || (isUnderGamescope && isSteamDeckBuildEnabled)) {
+  if (isUnderWayland) {
     features.declareSupported('native_screenshare_picker');
+  }
+  if (isVaapiEnabled) {
+    features.declareSupported('vaapi');
+  }
+  if (isUnderGamescope && isVaapiEnabled) {
+    features.declareSupported('gamescope_capture');
   }
 }
 
 if (
-  (process.platform === 'win32' && process.arch !== 'arm64')
+  process.platform === 'win32'
   || (process.platform === 'darwin' && versionGreaterThanOrEqual(os.release(), '16.0.0'))
 ) {
   features.declareSupported('mediapipe');
