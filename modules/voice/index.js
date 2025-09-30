@@ -267,6 +267,7 @@ function bindConnectionInstance(instance) {
     setOnVideoCallback: (callback) => instance.setOnVideoCallback(callback),
     setOnFirstFrameCallback: (callback) => instance.setOnFirstFrameCallback(callback),
     setOnFirstFrameDeliveredStatsCallback: (callback) => instance.setOnFirstFrameDeliveredStatsCallback(callback),
+    setOnFirstFrameEncryptedStatsCallback: (callback) => instance.setOnFirstFrameEncryptedStatsCallback(callback),
     setVideoBroadcast: (broadcasting) => instance.setVideoBroadcast(broadcasting),
     setDesktopSource: (id, videoHook, type) => instance.setDesktopSource(id, videoHook, type),
     setDesktopSourceWithOptions: (options) => instance.setDesktopSourceWithOptions(options),
