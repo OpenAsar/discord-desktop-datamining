@@ -81,7 +81,6 @@ var DesktopOverlayModuleInterface = _objectSpread(_objectSpread({}, DesktopOverl
       if (previousTargetGamePID === 0) {
         DesktopOverlay.show();
       } else if (targetGamePID !== 0 && targetGamePID !== previousTargetGamePID) {
-        DesktopOverlay.hide();
         reloadHostWindowCallback(targetGamePID);
       }
       focus(targetGamePID);
