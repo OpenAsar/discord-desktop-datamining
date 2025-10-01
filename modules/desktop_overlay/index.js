@@ -82,6 +82,22 @@ var DesktopOverlayModuleInterface = _objectSpread(_objectSpread({}, DesktopOverl
         DesktopOverlay.show();
       } else if (targetGamePID !== 0 && targetGamePID !== previousTargetGamePID) {
         reloadHostWindowCallback(targetGamePID);
+      } else {
+        // Ok, so.
+        //
+        // 1. Native does not call this callback when a relevant EVENT_OBJECT_DESTROY
+        // is received, despite it changing its own targetPid_ to 0.
+        //
+        // 2. Native hides the overlay before invoking this callback.
+        //
+        // Therefore, without this else statement, the overlay will stay hidden.
+        // This is because (2) is done, but (1) means that our previousTargetGamePID
+        // has not changed to 0, which means that reloadHostWindowCallback is not
+        // called.
+        //
+        // TODO: Native should call this callback on every change of
+        // its targetPid_, meaning that it should be called on EVENT_OBJECT_DESTROY.
+        DesktopOverlay.show();
       }
       focus(targetGamePID);
     };
