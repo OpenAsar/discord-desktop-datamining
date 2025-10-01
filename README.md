@@ -14,7 +14,7 @@
 | game_utils | 1 |
 | hook | 1 |
 | krisp | 1 |
-| media | 1 |
+| media | 2 |
 | modules | 1 |
 | notifications | 1 |
 | overlay2 | 1 |
@@ -23,7 +23,7 @@
 | spellcheck | 1 |
 | utils | 4 |
 | vigilante | 1 |
-| voice | 2 |
+| voice | 3 |
 | voice_filters | 1 |
 | zstd | 1 |
 
