@@ -75,14 +75,14 @@ var DesktopOverlayModuleInterface = _objectSpread(_objectSpread({}, DesktopOverl
     }
   },
   setFocusCallback: function setFocusCallback(focus) {
-    var wrappedCallback = function wrappedCallback(pid) {
+    var wrappedCallback = function wrappedCallback(pid, lastPid) {
       var previousTargetGamePID = targetGamePID;
       targetGamePID = pid;
       if (previousTargetGamePID === 0) {
         DesktopOverlay.show();
       } else if (targetGamePID !== 0 && targetGamePID !== previousTargetGamePID) {
         reloadHostWindowCallback(targetGamePID);
-      } else {
+      } else if (lastPid !== pid) {
         // Ok, so.
         //
         // 1. Native does not call this callback when a relevant EVENT_OBJECT_DESTROY
