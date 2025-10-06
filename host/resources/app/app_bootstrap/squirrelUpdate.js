@@ -12,7 +12,10 @@ exports.updateExistsSync = updateExistsSync;
 var _child_process = _interopRequireDefault(require("child_process"));
 var _fs = _interopRequireDefault(require("fs"));
 var _path = _interopRequireDefault(require("path"));
+var _updater = require("../common/updater");
+var _buildInfo = _interopRequireDefault(require("./buildInfo"));
 var windowsUtils = _interopRequireWildcard(require("./windowsUtils"));
+var _Constants = _interopRequireDefault(require("./Constants"));
 function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
 function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
@@ -89,6 +92,45 @@ function updateShortcuts(callback) {
 function uninstallProtocol(protocol, callback) {
   windowsUtils.spawnReg(['delete', 'HKCU\\Software\\Classes\\' + protocol, '/f'], callback);
 }
+function getSystemServiceHelperExe() {
+  var _versions$current_mod;
+  if (_buildInfo.default.releaseChannel === 'development' && _buildInfo.default.standaloneModules) {
+    return null;
+  }
+  if (!(0, _updater.tryInitUpdater)(_buildInfo.default, _Constants.default.NEW_UPDATE_ENDPOINT)) {
+    return null;
+  }
+  const updater = (0, _updater.getUpdater)();
+  if (updater == null) {
+    return null;
+  }
+  const versions = updater.queryCurrentVersionsSync();
+  const utilsVersion = versions === null || versions === void 0 ? void 0 : (_versions$current_mod = versions.current_modules) === null || _versions$current_mod === void 0 ? void 0 : _versions$current_mod.discord_utils;
+  if (utilsVersion == null) {
+    return null;
+  }
+  const hostPath = _path.default.dirname(process.resourcesPath);
+  const modulesPath = _path.default.join(hostPath, 'modules');
+  const utilsVersionedPath = _path.default.join(modulesPath, `discord_utils-${utilsVersion}`);
+  const utilsPath = _path.default.join(utilsVersionedPath, 'discord_utils');
+  const serviceHelperExe = _path.default.join(utilsPath, 'DiscordSystemHelper.exe');
+  if (!_fs.default.existsSync(serviceHelperExe)) {
+    return null;
+  }
+  return serviceHelperExe;
+}
+function uninstallSystemService(callback) {
+  const serviceHelperExe = getSystemServiceHelperExe();
+  if (serviceHelperExe != null) {
+    const args = ['uninstall', '--wait'];
+    if (_buildInfo.default.releaseChannel !== 'stable') {
+      args.push('--channel', _buildInfo.default.releaseChannel);
+    }
+    windowsUtils.spawn(serviceHelperExe, args, callback);
+  } else {
+    callback();
+  }
+}
 function maybeInstallNewUpdaterSeedDb() {
   const installerDbSrc = _path.default.join(appFolder, 'installer.db');
   const installerDbDest = _path.default.join(rootFolder, 'installer.db');
@@ -125,7 +167,9 @@ function handleStartupEvent(protocol, app, squirrelCommand) {
       removeShortcuts(() => {
         autoStart.uninstall(() => {
           uninstallProtocol(protocol, () => {
-            terminate(app);
+            uninstallSystemService(() => {
+              terminate(app);
+            });
           });
         });
       });
