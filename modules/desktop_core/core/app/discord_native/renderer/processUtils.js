@@ -6,10 +6,12 @@ Object.defineProperty(exports, "__esModule", {
 exports.flushCookies = flushCookies;
 exports.flushDNSCache = flushDNSCache;
 exports.flushStorageData = flushStorageData;
+exports.getBlinkMemoryInfo = getBlinkMemoryInfo;
 exports.getCPUCoreCount = getCPUCoreCount;
 exports.getCumulativeCPUUsage = getCumulativeCPUUsage;
 exports.getCurrentCPUUsagePercent = getCurrentCPUUsagePercent;
 exports.getGpuProcessId = getGpuProcessId;
+exports.getHeapStats = getHeapStats;
 exports.getLastCrash = getLastCrash;
 exports.getMainArgvSync = getMainArgvSync;
 exports.getProcessUptime = getProcessUptime;
@@ -94,6 +96,12 @@ function getMainArgvSync() {
 function getUsedHeapSize() {
   const heapStats = _process.default.getHeapStatistics();
   return heapStats.usedHeapSize;
+}
+function getHeapStats() {
+  return _process.default.getHeapStatistics();
+}
+function getBlinkMemoryInfo() {
+  return _process.default.getBlinkMemoryInfo();
 }
 function setCrashInformation(crashInformation, state) {
   void _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_SET_CRASH_INFORMATION, crashInformation, state);
