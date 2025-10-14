@@ -180,7 +180,15 @@ if (process.platform === 'linux') {
     features.declareSupported('vaapi');
   }
   if (isUnderGamescope && isVaapiEnabled) {
-    features.declareSupported('gamescope_capture');
+    // ensure we have access to the pipewire socket
+    const runtimeDir = process.env.PIPEWIRE_RUNTIME_DIR || process.env.XDG_RUNTIME_DIR || process.env.USERPROFILE;
+    if (runtimeDir) {
+      const socketName = runtimeDir + '/' + (process.env.PIPEWIRE_REMOTE || 'pipewire-0');
+      const sstat = fs.statSync(socketName, {throwIfNoEntry: false});
+      if (sstat && sstat.isSocket()) {
+        features.declareSupported('gamescope_capture');
+      }
+    }
   }
 }
 

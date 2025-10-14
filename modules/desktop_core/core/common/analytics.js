@@ -135,15 +135,17 @@ class DesktopTTIAnalytics {
     if (data === null) {
       return;
     }
-    const parsedData = JSON.parse(data);
-    if (parsedData.storeTimeMS == null || parsedData.sessionData == null) {
-      return;
-    }
-    const persistedData = parsedData;
-    if (Math.abs(Date.now() - persistedData.storeTimeMS) > durationDiffThresholdMS) {
-      return;
-    }
-    this.previousSessionData = persistedData.sessionData;
+    try {
+      const parsedData = JSON.parse(data);
+      if (parsedData.storeTimeMS == null || parsedData.sessionData == null) {
+        return;
+      }
+      const persistedData = parsedData;
+      if (Math.abs(Date.now() - persistedData.storeTimeMS) > durationDiffThresholdMS) {
+        return;
+      }
+      this.previousSessionData = persistedData.sessionData;
+    } catch (_e) {}
   }
   pushDesktopEvent(evt) {
     if (this.enablePushingEvents !== undefined && this.enablePushingEvents) {
