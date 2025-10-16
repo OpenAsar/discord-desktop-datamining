@@ -23,8 +23,8 @@
 | spellcheck | 1 |
 | utils | 2 |
 | vigilante | 1 |
-| voice | 4 |
-| voice_filters | 1 |
+| voice | 5 |
+| voice_filters | 2 |
 | zstd | 1 |
 
 ## branches
