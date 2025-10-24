@@ -16,14 +16,14 @@
 | krisp | 1 |
 | media | 1 |
 | modules | 1 |
-| notifications | 1 |
+| notifications | 2 |
 | overlay2 | 1 |
 | rpc | 1 |
 | sekrit | 1 |
 | spellcheck | 1 |
 | utils | 3 |
 | vigilante | 1 |
-| voice | 1 |
+| voice | 2 |
 | voice_filters | 1 |
 | zstd | 1 |
 
