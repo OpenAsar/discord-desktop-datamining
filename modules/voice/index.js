@@ -289,7 +289,7 @@ function bindConnectionInstance(instance) {
     setOnSoundshare: (callback) => instance.setOnSoundshare(callback),
     setOnSoundshareEnded: (callback) => instance.setOnSoundshareEnded(callback),
     setOnSoundshareFailed: (callback) => instance.setOnSoundshareFailed(callback),
-    setPTTActive: (active, priority) => instance.setPTTActive(active, priority),
+    setPTTActive: (active, priority, muteOverride) => instance.setPTTActive(active, priority, muteOverride),
     getStats: (callback) => instance.getStats(callback),
     getFilteredStats: (filter, callback) => instance.getFilteredStats(filter, callback),
     startReplay: () => instance.startReplay(),
