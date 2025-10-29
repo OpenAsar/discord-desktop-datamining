@@ -52,6 +52,7 @@ const audioSubsystem = appSettings
   : defaultAudioSubsystem;
 const offloadAdmControls = appSettings ? appSettings.getSync('offloadAdmControls', false) : false;
 const debugLogging = appSettings ? appSettings.getSync('debugLogging', true) : true;
+const asyncVideoInputDeviceInit = appSettings ? appSettings.getSync('asyncVideoInputDeviceInit', false) : false;
 
 function versionGreaterThanOrEqual(v1, v2) {
   const v1parts = v1.split('.').map(Number);
@@ -154,6 +155,7 @@ features.declareSupported('screen_soundshare');
 features.declareSupported('offload_adm_controls');
 features.declareSupported('audio_codec_red');
 features.declareSupported('sidechain_compression');
+features.declareSupported('async_video_input_device_init');
 
 if (process.platform === 'darwin') {
   features.declareSupported('screen_capture_kit');
@@ -361,6 +363,10 @@ VoiceEngine.setOffloadAdmControls = function (doOffload) {
   appSettings.set('offloadAdmControls', doOffload);
 };
 
+VoiceEngine.setAsyncVideoInputDeviceInitSetting = function (enable) {
+  appSettings.set('asyncVideoInputDeviceInit', enable);
+};
+
 VoiceEngine.setDebugLogging = function (enable) {
   if (appSettings == null) {
     log('warn', 'Unable to access app settings.');
@@ -564,6 +570,7 @@ VoiceEngine.initialize({
   useFakeAudioCapture,
   useFilesForFakeAudioCapture,
   offloadAdmControls,
+  asyncVideoInputDeviceInit,
 });
 
 module.exports = VoiceEngine;
