@@ -9,7 +9,9 @@ Object.defineProperty(exports, "basename", {
     return _path.basename;
   }
 });
+exports.checkMLModelFilesExist = checkMLModelFilesExist;
 exports.checkVoiceFilterFilesExist = checkVoiceFilterFilesExist;
+exports.cleanupUnusedMLModelFiles = cleanupUnusedMLModelFiles;
 exports.cleanupUnusedVoiceFilterFiles = cleanupUnusedVoiceFilterFiles;
 exports.combineWebRtcLogs = combineWebRtcLogs;
 Object.defineProperty(exports, "dirname", {
@@ -29,6 +31,8 @@ exports.getAssetCachePath = getAssetCachePath;
 exports.getAssetCachePathSync = getAssetCachePathSync;
 exports.getLogPath = getLogPath;
 exports.getLogPathSync = getLogPathSync;
+exports.getMLDataDir = getMLDataDir;
+exports.getMLDataDirSync = getMLDataDirSync;
 exports.getModuleDataPathSync = getModuleDataPathSync;
 exports.getModulePath = getModulePath;
 exports.getVoiceFilterDataDir = getVoiceFilterDataDir;
@@ -40,6 +44,7 @@ Object.defineProperty(exports, "join", {
   }
 });
 exports.logLevelSync = logLevelSync;
+exports.maybeDownloadMLModelFile = maybeDownloadMLModelFile;
 exports.maybeDownloadVoiceFilterFile = maybeDownloadVoiceFilterFile;
 exports.openFiles = openFiles;
 exports.readLogFiles = readLogFiles;
@@ -47,6 +52,7 @@ exports.saveWithDialog = saveWithDialog;
 exports.saveWithDialog2 = saveWithDialog2;
 exports.showItemInFolder = showItemInFolder;
 exports.showOpenDialog = showOpenDialog;
+exports.stopMLModelDownloads = stopMLModelDownloads;
 exports.stopVoiceFilterDownloads = stopVoiceFilterDownloads;
 exports.uploadDiscordHookCrashes = uploadDiscordHookCrashes;
 var _fs = _interopRequireDefault(require("fs"));
@@ -294,6 +300,178 @@ async function cleanupUnusedVoiceFilterFiles(neededFileNames) {
     errors
   };
 }
+const mlModelDownloaders = [];
+async function maybeDownloadMLModelFile(cdnURL, fileName, onProgress) {
+  if (!cdnURL.startsWith('https://cdn.discordapp.com/assets/content')) {
+    throw new Error('ML Models invalid CDN URL');
+  }
+  if ((0, _files.containsInvalidFileChar)(fileName)) {
+    throw new Error('ML Models fileName has invalid characters');
+  }
+  if (!Boolean(fileName)) {
+    throw new Error('ML Models fileName is not set');
+  }
+  let mlModelsDataPath;
+  try {
+    mlModelsDataPath = await getMLDataDir();
+  } catch (cause) {
+    throw new Error('ML Models unable to get path of data dir', {
+      cause
+    });
+  }
+  try {
+    await (0, _promises.mkdir)(mlModelsDataPath, {
+      recursive: true
+    });
+  } catch (cause) {
+    throw new Error('ML Models unable create data dir', {
+      cause
+    });
+  }
+  const finishedFilePath = _path.default.join(mlModelsDataPath, fileName);
+  try {
+    await _fs.default.promises.access(finishedFilePath);
+    return {
+      fetchedFromNetwork: false
+    };
+  } catch {}
+  const partialFileName = `${fileName}.partial`;
+  const partialFilePath = _path.default.join(mlModelsDataPath, partialFileName);
+  const dl = new _nodeDownloaderHelper.DownloaderHelper(cdnURL, mlModelsDataPath, {
+    method: 'GET',
+    resumeOnIncomplete: true,
+    resumeOnIncompleteMaxRetry: 5,
+    resumeIfFileExists: true,
+    fileName: partialFileName,
+    retry: {
+      maxRetries: 3,
+      delay: 1000
+    },
+    removeOnStop: false,
+    removeOnFail: false,
+    progressThrottle: 200
+  });
+  mlModelDownloaders.push(new WeakRef(dl));
+  return new Promise((resolve, reject) => {
+    dl.on('end', ({
+      incomplete
+    }) => {
+      if (incomplete) {
+        reject(new Error('ML Models download incomplete'));
+      } else {
+        (0, _promises.rename)(partialFilePath, finishedFilePath).then(() => resolve({
+          fetchedFromNetwork: true
+        })).catch(reject);
+      }
+    });
+    dl.on('skip', () => {
+      (0, _promises.rename)(partialFilePath, finishedFilePath).then(() => resolve({
+        fetchedFromNetwork: false
+      })).catch(reject);
+    });
+    dl.on('progress.throttled', ({
+      downloaded: downloadedBytes,
+      total: totalBytes
+    }) => {
+      onProgress({
+        downloadedBytes,
+        totalBytes
+      });
+    });
+    dl.on('timeout', () => reject(new Error('ML Models timeout')));
+    dl.on('error', reject);
+    dl.on('stop', () => reject({
+      USER_CANCELED_DOWNLOAD: true
+    }));
+    dl.start().catch(reject);
+  });
+}
+function stopMLModelDownloads() {
+  while (mlModelDownloaders.length > 0) {
+    var _mlModelDownloaders$p;
+    const dl = (_mlModelDownloaders$p = mlModelDownloaders.pop()) === null || _mlModelDownloaders$p === void 0 ? void 0 : _mlModelDownloaders$p.deref();
+    void (dl === null || dl === void 0 ? void 0 : dl.stop());
+  }
+}
+async function checkMLModelFilesExist(files) {
+  let mlModelsDataPath;
+  try {
+    mlModelsDataPath = getMLDataDirSync();
+  } catch (cause) {
+    throw new Error('ML Models unable to get path of data dir', {
+      cause
+    });
+  }
+  const results = await Promise.all(files.map(async file => {
+    const fullPath = _path.default.join(mlModelsDataPath, file.fileName);
+    try {
+      await _fs.default.promises.access(fullPath);
+      return {
+        ...file,
+        exists: true
+      };
+    } catch (error) {
+      return {
+        ...file,
+        exists: false
+      };
+    }
+  }));
+  return results;
+}
+async function cleanupUnusedMLModelFiles(neededFileNames) {
+  const deletedFiles = [];
+  const errors = [];
+  try {
+    const mlModelsDataPath = getMLDataDirSync();
+    try {
+      await _fs.default.promises.access(mlModelsDataPath);
+    } catch {
+      return {
+        deletedFiles,
+        errors
+      };
+    }
+    const existingFiles = await _fs.default.promises.readdir(mlModelsDataPath);
+    const neededFileSet = new Set(neededFileNames);
+    const neededPartialFileSet = new Set(neededFileNames.map(fileName => `${fileName}.partial`));
+    for (const fileName of existingFiles) {
+      if (neededFileSet.has(fileName)) {
+        continue;
+      }
+      if (fileName.endsWith('.partial')) {
+        if (neededPartialFileSet.has(fileName)) {
+          continue;
+        }
+      } else {
+        if (fileName.startsWith('.') || !fileName.includes('.')) {
+          continue;
+        }
+      }
+      const fullPath = _path.default.join(mlModelsDataPath, fileName);
+      try {
+        await _fs.default.promises.unlink(fullPath);
+        deletedFiles.push(fileName);
+        console.log(`ML Models cleanup: Deleted unused file "${fileName}"`);
+      } catch (error) {
+        const errorMsg = `Failed to delete "${fileName}": ${error}`;
+        errors.push(errorMsg);
+        console.error(`ML Models cleanup: ${errorMsg}`);
+      }
+    }
+    if (deletedFiles.length > 0) {
+      console.log(`ML Models cleanup: Deleted ${deletedFiles.length} unused files`);
+    }
+  } catch (cause) {
+    const errorMsg = `ML Models cleanup failed: ${cause}`;
+    errors.push(errorMsg);
+    console.error(errorMsg);
+  }
+  return {
+    deletedFiles,
+    errors
+  };
+}
 function getAndCreateLogDirectorySync() {
   let logDir = null;
   try {
@@ -457,6 +635,13 @@ async function getVoiceFilterDataDir() {
 }
 function getVoiceFilterDataDirSync() {
   return _path.default.join(getAssetCachePathSync(), 'voice_filters');
+}
+async function getMLDataDir() {
+  const assetCachePath = await getAssetCachePath();
+  return _path.default.join(assetCachePath, 'ml');
+}
+function getMLDataDirSync() {
+  return _path.default.join(getAssetCachePathSync(), 'ml');
 }
 function getModulePath() {
   return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.FILE_MANAGER_GET_MODULE_PATH);

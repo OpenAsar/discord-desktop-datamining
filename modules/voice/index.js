@@ -52,6 +52,7 @@ const audioSubsystem = appSettings
   : defaultAudioSubsystem;
 const offloadAdmControls = appSettings ? appSettings.getSync('offloadAdmControls', false) : false;
 const debugLogging = appSettings ? appSettings.getSync('debugLogging', true) : true;
+const asyncVideoInputDeviceInit = appSettings ? appSettings.getSync('asyncVideoInputDeviceInit', false) : false;
 
 function versionGreaterThanOrEqual(v1, v2) {
   const v1parts = v1.split('.').map(Number);
@@ -154,6 +155,7 @@ features.declareSupported('screen_soundshare');
 features.declareSupported('offload_adm_controls');
 features.declareSupported('audio_codec_red');
 features.declareSupported('sidechain_compression');
+features.declareSupported('async_video_input_device_init');
 
 if (process.platform === 'darwin') {
   features.declareSupported('screen_capture_kit');
@@ -287,7 +289,7 @@ function bindConnectionInstance(instance) {
     setOnSoundshare: (callback) => instance.setOnSoundshare(callback),
     setOnSoundshareEnded: (callback) => instance.setOnSoundshareEnded(callback),
     setOnSoundshareFailed: (callback) => instance.setOnSoundshareFailed(callback),
-    setPTTActive: (active, priority) => instance.setPTTActive(active, priority),
+    setPTTActive: (active, priority, muteOverride) => instance.setPTTActive(active, priority, muteOverride),
     getStats: (callback) => instance.getStats(callback),
     getFilteredStats: (filter, callback) => instance.getFilteredStats(filter, callback),
     startReplay: () => instance.startReplay(),
@@ -359,6 +361,10 @@ VoiceEngine.queueAudioSubsystem = function (subsystem) {
 
 VoiceEngine.setOffloadAdmControls = function (doOffload) {
   appSettings.set('offloadAdmControls', doOffload);
+};
+
+VoiceEngine.setAsyncVideoInputDeviceInitSetting = function (enable) {
+  appSettings.set('asyncVideoInputDeviceInit', enable);
 };
 
 VoiceEngine.setDebugLogging = function (enable) {
@@ -564,6 +570,7 @@ VoiceEngine.initialize({
   useFakeAudioCapture,
   useFilesForFakeAudioCapture,
   offloadAdmControls,
+  asyncVideoInputDeviceInit,
 });
 
 module.exports = VoiceEngine;
