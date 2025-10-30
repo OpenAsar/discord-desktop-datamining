@@ -16,6 +16,7 @@ const modules = [
   'spellcheck',
   'hook',
   'modules',
+  'ml',
   'notifications',
   'overlay2',
   'game_utils',
