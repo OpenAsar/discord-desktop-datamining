@@ -2,7 +2,7 @@
 
 ## canary versions
 
-**host: 1.0.747**
+**host: 1.0.748**
 
 | module | version |
 | ------ | :-----: |
@@ -15,13 +15,14 @@
 | hook | 1 |
 | krisp | 1 |
 | media | 1 |
+| ml | 1 |
 | modules | 1 |
 | notifications | 1 |
 | overlay2 | 1 |
 | rpc | 1 |
 | sekrit | 1 |
 | spellcheck | 1 |
-| utils | 4 |
+| utils | 1 |
 | vigilante | 1 |
 | voice | 1 |
 | voice_filters | 1 |

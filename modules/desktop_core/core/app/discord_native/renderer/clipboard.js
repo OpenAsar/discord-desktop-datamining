@@ -23,6 +23,17 @@ function copyImage(imageArrayBuffer, imageSrc) {
     image: nativeImg
   });
 }
+function copyFile(filePath) {
+  (0, _assert.default)(filePath != null, 'File path is empty');
+  if (process.platform === 'darwin') {
+    _electron.default.clipboard.writeBuffer('public.file-url', Buffer.from(`file://${filePath}`, 'utf8'));
+  } else if (process.platform === 'win32') {
+    const buffer = Buffer.from(`${filePath}\0`, 'ucs2');
+    _electron.default.clipboard.writeBuffer('FileNameW', buffer);
+  } else {
+    _electron.default.clipboard.writeText(`file://${filePath}`);
+  }
+}
 function cut() {
   _electron.default.ipcRenderer.invoke(CLIPBOARD_CUT);
 }
@@ -35,6 +46,7 @@ function read() {
 module.exports = {
   copy,
   copyImage,
+  copyFile,
   cut,
   paste,
   read
