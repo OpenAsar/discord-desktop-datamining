@@ -1,8 +1,6 @@
 "use strict";
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+var _desktopConnectivityTests = require("./desktopConnectivityTests");
 if (process.platform === 'linux') {
   if (process.env.PULSE_LATENCY_MSEC === undefined) {
     process.env.PULSE_LATENCY_MSEC = '30';
@@ -202,17 +200,7 @@ if (!allowMultipleInstances) {
 }
 app.on('ready', (_event, launchInfo) => {
   var _launchInfo$userInfo;
-  let trackedNetErrQuicProtocol = false;
-  session.defaultSession.webRequest.onErrorOccurred(details => {
-    if (!trackedNetErrQuicProtocol && details.error.includes('net::ERR_QUIC_PROTOCOL_ERROR')) {
-      trackedNetErrQuicProtocol = true;
-      console.error(`WebRequest failed (${details.error}): '${details.method} ${details.url}'`);
-      const sentry = crashReporterSetup.getGlobalSentry();
-      if (sentry != null) {
-        sentry.captureMessage(`WebRequest failed: ${details.error}`, 'error');
-      }
-    }
-  });
+  (0, _desktopConnectivityTests.registerDesktopConnectivityTests)(session.defaultSession, app.getSystemLocale());
   if ((launchInfo === null || launchInfo === void 0 ? void 0 : (_launchInfo$userInfo = launchInfo.userInfo) === null || _launchInfo$userInfo === void 0 ? void 0 : _launchInfo$userInfo.fallbackDeepLink) != null) {
     openOrQueueUrl(launchInfo.userInfo.fallbackDeepLink);
   }
