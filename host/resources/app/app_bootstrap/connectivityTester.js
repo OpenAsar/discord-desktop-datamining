@@ -106,7 +106,7 @@ class DnsReporter {
   }
   encode(sessionNonce, result) {
     const builder = new DnsQueryBuilder(this.baseDomain);
-    builder.addLabel('idt', sessionNonce, encodeTimestamp(result.timestamp)).addLabelIf(this.clientLocale !== undefined, 'loc', this.clientLocale).addLabel('chk', result.checkId).addLabel('res', result.success ? 'ok' : 'err').addLabelIf(!result.success && result.error !== undefined, 'err', encodeError(result.error)).addLabel('dur', encodeDuration(result.durationMs));
+    builder.addLabel('idt', sessionNonce, encodeTimestamp(result.timestamp)).addLabelIf(this.clientLocale !== undefined, 'loc', this.clientLocale ?? 'unknown').addLabel('chk', result.checkId).addLabel('res', result.success ? 'ok' : 'err').addLabelIf(!result.success, 'err', result.error !== undefined ? encodeError(result.error) : 'unknown').addLabel('dur', encodeDuration(result.durationMs));
     return builder.build();
   }
   async report(sessionNonce, result) {
