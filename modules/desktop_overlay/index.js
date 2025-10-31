@@ -85,9 +85,6 @@ var DesktopOverlayModuleInterface = _objectSpread(_objectSpread({}, DesktopOverl
   },
   setFocusLostCallback: function setFocusLostCallback(focus) {
     DesktopOverlay.setFocusLostCallback(focus);
-  },
-  setAlwaysVisible: function setAlwaysVisible(alwaysVisible) {
-    DesktopOverlay.setAlwaysVisible(alwaysVisible);
   }
 });
 var _default = exports["default"] = DesktopOverlayModuleInterface;
