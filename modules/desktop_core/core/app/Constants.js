@@ -34,7 +34,8 @@ const MenuEvents = exports.MenuEvents = {
 };
 const AllowedMediaOrigins = exports.AllowedMediaOrigins = {
   K_ID: 'https://d3ogqhtsivkon3.cloudfront.net',
-  K_ID_V2: 'https://family.k-id.com'
+  K_ID_V2: 'https://family.k-id.com',
+  K_ID_FACE_SCAN: 'https://age-verification-k-id.privately.swiss'
 };
 const WEBAPP_PATHS = exports.WEBAPP_PATHS = {
   APP: '/app',
