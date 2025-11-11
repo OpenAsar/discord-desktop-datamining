@@ -12,6 +12,10 @@ const {
   Buffer
 } = require('node:buffer');
 const DEFAULT_REQUEST_TIMEOUT = 30000;
+const responseCallbacks = [];
+function registerResponseCallback(cb) {
+  responseCallbacks.push(cb);
+}
 function makeHTTPResponse({
   method,
   url,
@@ -30,6 +34,9 @@ function makeHTTPResponse({
 }
 function makeHTTPStatusError(response) {
   return Error(`HTTP Error: Status Code ${response.statusCode}`);
+}
+function handleCallbacks(args) {
+  responseCallbacks.forEach(cb => cb(args));
 }
 function handleHTTPResponse(resolve, reject, response, stream) {
   const totalBytes = parseInt(response.headers['content-length'] || '1', 10);
@@ -64,6 +71,26 @@ function handleHTTPResponse(resolve, reject, response, stream) {
     resolve(res);
   });
 }
+function wrapPromiseHandlers(url, netInterface, resolve, reject) {
+  return {
+    wrappedResolve: response => {
+      handleCallbacks({
+        url,
+        netInterface,
+        response
+      });
+      resolve(response);
+    },
+    wrappedReject: error => {
+      handleCallbacks({
+        url,
+        netInterface,
+        error
+      });
+      reject(error);
+    }
+  };
+}
 function nodeRequest({
   method,
   url,
@@ -74,6 +101,10 @@ function nodeRequest({
   stream
 }) {
   return new Promise((resolve, reject) => {
+    const {
+      wrappedResolve,
+      wrappedReject
+    } = wrapPromiseHandlers(url, 'node', resolve, reject);
     const req = (0, _request.default)({
       method,
       url,
@@ -84,8 +115,8 @@ function nodeRequest({
       timeout: timeout != null ? timeout : DEFAULT_REQUEST_TIMEOUT,
       body
     });
-    req.on('response', response => handleHTTPResponse(resolve, reject, response, stream));
-    req.on('error', err => reject(err));
+    req.on('response', response => handleHTTPResponse(wrappedResolve, wrappedReject, response, stream));
+    req.on('error', err => wrappedReject(err));
   });
 }
 async function electronRequest({
@@ -117,18 +148,22 @@ async function electronRequest({
     req.write(body, 'utf-8');
   }
   return new Promise((resolve, reject) => {
+    const {
+      wrappedResolve,
+      wrappedReject
+    } = wrapPromiseHandlers(url, 'electron', resolve, reject);
     const reqTimeout = setTimeout(() => {
       req.abort();
-      reject(new Error(`network timeout: ${url}`));
+      wrappedReject(new Error('network timeout'));
     }, timeout != null ? timeout : DEFAULT_REQUEST_TIMEOUT);
     req.on('login', (authInfo, callback) => callback());
     req.on('response', response => {
       clearTimeout(reqTimeout);
-      handleHTTPResponse(resolve, reject, response, stream);
+      handleHTTPResponse(wrappedResolve, wrappedReject, response, stream);
     });
     req.on('error', err => {
       clearTimeout(reqTimeout);
-      reject(err);
+      wrappedReject(err);
     });
     req.end();
   });
@@ -147,12 +182,13 @@ async function requestWithMethod(method, options) {
   try {
     return await electronRequest(options);
   } catch (err) {
-    console.log(`Error downloading with electron net: ${err.message}`);
+    console.log(`Error downloading with electron net: ${options.url} ${err.message}`);
     console.log('Falling back to node net library..');
   }
   return nodeRequest(options);
 }
 var _default = exports.default = {
-  get: requestWithMethod.bind(null, 'GET')
+  get: requestWithMethod.bind(null, 'GET'),
+  registerResponseCallback: registerResponseCallback.bind(null)
 };
 module.exports = exports.default;
