@@ -31,14 +31,12 @@ var DesktopOverlayModuleInterface = _objectSpread(_objectSpread({}, DesktopOverl
     destroyHostWindowCallback = destroy;
     reloadHostWindowCallback = reload;
   },
-  readyToShow: function readyToShow(pid) {
-    if (pid === targetGamePID) {
-      DesktopOverlay.show();
-    }
+  readyToShow: function readyToShow(_pid) {
+    // Deprecated. Just for compatibility.
   },
   trackGame: function () {
     var _trackGame = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(pid) {
-      var windowHandle;
+      var _windowHandle;
       return _regeneratorRuntime().wrap(function _callee$(_context) {
         while (1) switch (_context.prev = _context.next) {
           case 0:
@@ -49,8 +47,8 @@ var DesktopOverlayModuleInterface = _objectSpread(_objectSpread({}, DesktopOverl
             _context.next = 3;
             return createHostWindowCallback(pid);
           case 3:
-            windowHandle = _context.sent;
-            DesktopOverlay.setWindowHandle(windowHandle);
+            _windowHandle = _context.sent;
+            DesktopOverlay.setWindowHandle(_windowHandle);
           case 5:
             trackedGames.add(pid);
             DesktopOverlay.trackGame(pid);
@@ -75,39 +73,18 @@ var DesktopOverlayModuleInterface = _objectSpread(_objectSpread({}, DesktopOverl
     }
   },
   setFocusCallback: function setFocusCallback(focus) {
-    var wrappedCallback = function wrappedCallback(pid, lastPid) {
+    var wrappedCallback = function wrappedCallback(pid, windowHandle) {
       var previousTargetGamePID = targetGamePID;
       targetGamePID = pid;
-      if (previousTargetGamePID === 0) {
-        DesktopOverlay.show();
-      } else if (targetGamePID !== 0 && targetGamePID !== previousTargetGamePID) {
+      if (previousTargetGamePID !== 0 && targetGamePID !== 0 && targetGamePID !== previousTargetGamePID) {
         reloadHostWindowCallback(targetGamePID);
-      } else if (lastPid !== pid) {
-        // Ok, so.
-        //
-        // 1. Native does not call this callback when a relevant EVENT_OBJECT_DESTROY
-        // is received, despite it changing its own targetPid_ to 0.
-        //
-        // 2. Native hides the overlay before invoking this callback.
-        //
-        // Therefore, without this else statement, the overlay will stay hidden.
-        // This is because (2) is done, but (1) means that our previousTargetGamePID
-        // has not changed to 0, which means that reloadHostWindowCallback is not
-        // called.
-        //
-        // TODO: Native should call this callback on every change of
-        // its targetPid_, meaning that it should be called on EVENT_OBJECT_DESTROY.
-        DesktopOverlay.show();
       }
-      focus(targetGamePID);
+      focus(targetGamePID, windowHandle);
     };
     DesktopOverlay.setFocusCallback(wrappedCallback);
   },
   setFocusLostCallback: function setFocusLostCallback(focus) {
     DesktopOverlay.setFocusLostCallback(focus);
-  },
-  setAlwaysVisible: function setAlwaysVisible(alwaysVisible) {
-    DesktopOverlay.setAlwaysVisible(alwaysVisible);
   }
 });
 var _default = exports["default"] = DesktopOverlayModuleInterface;

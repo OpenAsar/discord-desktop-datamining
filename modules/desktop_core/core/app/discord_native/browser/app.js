@@ -50,10 +50,6 @@ _DiscordIPC.DiscordIPC.main.on(_DiscordIPC.IPCEvents.APP_GET_BUILD_NUMBER, event
   event.returnValue = null;
 });
 _DiscordIPC.DiscordIPC.main.on(_DiscordIPC.IPCEvents.APP_GET_ARCH, event => {
-  if (process.arch === 'ia32') {
-    event.returnValue = 'x86';
-    return;
-  }
   event.returnValue = process.arch;
 });
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.APP_GET_MODULE_VERSIONS, async () => {

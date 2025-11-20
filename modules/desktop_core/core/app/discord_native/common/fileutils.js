@@ -16,6 +16,7 @@ Object.defineProperty(exports, "dirname", {
     return _path.dirname;
   }
 });
+exports.ensureDirectoryExists = ensureDirectoryExists;
 Object.defineProperty(exports, "extname", {
   enumerable: true,
   get: function () {
@@ -49,7 +50,8 @@ const promiseFs = {
   unlink: _util.default.promisify(_originalFs.default.unlink),
   read: _util.default.promisify(_originalFs.default.read),
   readFile: _util.default.promisify(_originalFs.default.readFile),
-  close: _util.default.promisify(_originalFs.default.close)
+  close: _util.default.promisify(_originalFs.default.close),
+  mkdir: _util.default.promisify(_originalFs.default.mkdir)
 };
 const promiseZlib = {
   gzip: _util.default.promisify(_zlib.gzip)
@@ -105,6 +107,11 @@ function readFiles(filepaths, dataMaxSize, shouldGzip) {
       void promiseFs.close(handle);
     }
   }));
+}
+function ensureDirectoryExists(path) {
+  return promiseFs.mkdir(path, {
+    recursive: true
+  });
 }
 function getFilesnamesFromDirectory(path) {
   return promiseFs.readdir(path);

@@ -2,7 +2,7 @@
 
 ## development versions
 
-**host: 1.0.944**
+**host: 1.0.945**
 
 | module | version |
 | ------ | :-----: |
@@ -15,6 +15,7 @@
 | hook | 1 |
 | krisp | 1 |
 | media | 1 |
+| ml | 1 |
 | modules | 1 |
 | notifications | 1 |
 | overlay2 | 1 |

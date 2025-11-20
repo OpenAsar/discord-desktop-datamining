@@ -6,9 +6,16 @@ var _path = _interopRequireDefault(require("path"));
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 const LIVE_CLIENT_API_HOSTNAME = 'https://127.0.0.1:2999/liveclientdata/';
 let riotRootCA;
-function fetchLiveClientData(endpoint, riotId) {
-  const queryString = riotId != null ? `?riotId=${riotId}}` : '';
-  const url = new URL(`${LIVE_CLIENT_API_HOSTNAME}${endpoint}${queryString}`);
+function fetchLiveClientData(endpoint, params = {}) {
+  const queryString = new URLSearchParams({
+    ...(params.riotId != null ? {
+      riotId: params.riotId
+    } : {}),
+    ...(params.eventID != null ? {
+      eventID: params.eventID.toString()
+    } : {})
+  }).toString();
+  const url = new URL(`${LIVE_CLIENT_API_HOSTNAME}${endpoint}${(queryString === null || queryString === void 0 ? void 0 : queryString.length) > 0 ? `?${queryString}` : ''}`);
   if (riotRootCA == null) {
     riotRootCA = _fs.default.readFileSync(_path.default.join(__dirname, '../../data/riotgames.pem'));
   }
