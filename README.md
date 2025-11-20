@@ -8,7 +8,7 @@
 | ------ | :-----: |
 | cloudsync | 1 |
 | desktop_core | 1 |
-| desktop_overlay | 3 |
+| desktop_overlay | 5 |
 | dispatch | 1 |
 | erlpack | 1 |
 | game_utils | 2 |
@@ -24,7 +24,7 @@
 | spellcheck | 1 |
 | utils | 6 |
 | vigilante | 1 |
-| voice | 7 |
+| voice | 8 |
 | voice_filters | 1 |
 | zstd | 1 |
 
