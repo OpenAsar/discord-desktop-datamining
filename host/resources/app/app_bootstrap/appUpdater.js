@@ -20,7 +20,7 @@ function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return 
 function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 const USE_PINNED_UPDATE_MANIFEST = 'USE_PINNED_UPDATE_MANIFEST';
-function winUpdateRegVersion(updater) {
+function winUpdateRegVersion(updater, callback) {
   if (process.platform !== 'win32') {
     return;
   }
@@ -50,8 +50,8 @@ function winUpdateRegVersion(updater) {
   } catch (_) {
     return;
   }
-  const queue = [['HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\' + ('Discord' + releaseChannelSuffix), '/v', 'DisplayVersion', '/d', hostVersionStr, '/f']];
-  windowsUtils.addToRegistry(queue, () => {});
+  const queue = [['HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\' + ('Discord' + releaseChannelSuffix), '/v', 'DisplayVersion', '/d', hostVersionStr]];
+  windowsUtils.addToRegistry(queue, callback);
 }
 function update(startMinimized, doneCallback, showCallback) {
   const settings = (0, _appSettings.getSettings)();
@@ -63,8 +63,9 @@ function update(startMinimized, doneCallback, showCallback) {
     const firstRun = require('./firstRun');
     if (updater != null) {
       updater.on('host-updated', () => {
-        autoStart.update(() => {});
-        winUpdateRegVersion(updater);
+        autoStart.update(() => {
+          winUpdateRegVersion(updater, () => {});
+        });
       });
       updater.on('unhandled-exception', _errorHandler.fatal);
       updater.on(_updater.INCONSISTENT_INSTALLER_STATE_ERROR, _errorHandler.fatal);
