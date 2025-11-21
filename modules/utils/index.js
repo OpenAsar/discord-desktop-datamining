@@ -119,7 +119,8 @@ function findWarpCli() {
     }
   }
 
-  if (warpCliPath == null) {
+  if (warpCliPath == null || !fs.existsSync(warpCliPath)) {
+    stopWarpListener();
     throw new Error('Failed to locate warp-cli');
   }
 
@@ -190,7 +191,7 @@ module.exports.runWarpCommand = async (...params) => {
     }
   }
 
-  const args = ['-j', '--accept-tos'].concat(params);
+  const args = ['-j'].concat(params);
 
   let stdout;
   try {
@@ -233,7 +234,7 @@ function startWarpListener() {
   }
   warpEmitterStartTime = now;
 
-  warpListenerSubprocess = childProcess.spawn(warpCliPath, ['-j', '-l', '--accept-tos', 'status'], {
+  warpListenerSubprocess = childProcess.spawn(warpCliPath, ['-j', '-l', 'status'], {
     windowsHide: true,
     stdio: ['ignore', 'pipe', 'ignore'],
   });
@@ -250,6 +251,12 @@ function startWarpListener() {
       warpEventEmitter.emit('update', JSON.parse(line));
     } catch {}
   });
+}
+
+function stopWarpListener() {
+  warpListenerSubprocess?.kill();
+  warpListenerSubprocess = null;
+  warpEmitterStartTime = null;
 }
 
 module.exports.onWarpEvent = (func) => {
