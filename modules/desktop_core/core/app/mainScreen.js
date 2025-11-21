@@ -360,7 +360,6 @@ async function launchMainAppWindow(isVisible) {
   };
   if (process.platform === 'linux') {
     mainWindowOptions.icon = _path.default.join(_path.default.dirname(_electron.app.getPath('exe')), 'discord.png');
-    mainWindowOptions.frame = true;
   }
   if (process.platform === 'darwin') {
     mainWindowOptions.titleBarStyle = 'hidden';
