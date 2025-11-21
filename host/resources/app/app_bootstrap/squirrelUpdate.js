@@ -75,51 +75,6 @@ function createShortcuts(callback, updateOnly) {
   }
   spawnUpdate(createShortcutArgs, callback);
 }
-function getHostVersion() {
-  if (_buildInfo.default.releaseChannel === 'development' && _buildInfo.default.standaloneModules) {
-    return null;
-  }
-  let updater = (0, _updater.getUpdater)();
-  if (updater == null) {
-    if (!(0, _updater.tryInitUpdater)(_buildInfo.default, _Constants.default.NEW_UPDATE_ENDPOINT)) {
-      return null;
-    }
-    updater = (0, _updater.getUpdater)();
-    if (updater == null) {
-      return null;
-    }
-  }
-  const versions = updater.queryCurrentVersionsSync();
-  const hostVersion = versions === null || versions === void 0 ? void 0 : versions.current_host;
-  if (hostVersion == null) {
-    return null;
-  }
-  try {
-    return hostVersion[0] + '.' + hostVersion[1] + '.' + hostVersion[2];
-  } catch (_) {
-    return null;
-  }
-}
-function updateAppHostVersion(hostVersion, callback) {
-  const releaseChannelSuffix = (() => {
-    if (_buildInfo.default.releaseChannel === 'stable') {
-      return '';
-    } else if (_buildInfo.default.releaseChannel === 'ptb') {
-      return 'PTB';
-    } else if (_buildInfo.default.releaseChannel === 'canary') {
-      return 'Canary';
-    } else if (_buildInfo.default.releaseChannel === 'development') {
-      return 'Development';
-    }
-    return null;
-  })();
-  if (releaseChannelSuffix == null) {
-    return;
-  }
-  const appName = 'Discord' + releaseChannelSuffix;
-  const queue = [['HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\' + appName, '/v', 'DisplayVersion', '/d', hostVersion, '/f']];
-  windowsUtils.addToRegistry(queue, callback);
-}
 function installProtocol(protocol, callback) {
   const queue = [['HKCU\\Software\\Classes\\' + protocol, '/ve', '/d', `URL:${protocol} Protocol`], ['HKCU\\Software\\Classes\\' + protocol, '/v', 'URL Protocol'], ['HKCU\\Software\\Classes\\' + protocol + '\\DefaultIcon', '/ve', '/d', '"' + process.execPath + '",-1'], ['HKCU\\Software\\Classes\\' + protocol + '\\shell\\open\\command', '/ve', '/d', `"${process.execPath}" --url -- "%1"`]];
   windowsUtils.addToRegistry(queue, callback);
@@ -203,14 +158,7 @@ function handleStartupEvent(protocol, app, squirrelCommand) {
       updateShortcuts(() => {
         autoStart.update(() => {
           installProtocol(protocol, () => {
-            const hostVersion = getHostVersion();
-            if (hostVersion != null) {
-              updateAppHostVersion(hostVersion, () => {
-                terminate(app);
-              });
-            } else {
-              terminate(app);
-            }
+            terminate(app);
           });
         });
       });
