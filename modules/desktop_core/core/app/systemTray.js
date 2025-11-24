@@ -211,7 +211,7 @@ function show() {
     console.error('systemTray: Cannot create tray icon: currentIcon is null');
     return;
   }
-  const guid = process.platform === 'win32' ? TrayGuidByChannel[buildInfo.releaseChannel] : undefined;
+  const guid = ['win32', 'darwin'].includes(process.platform) ? TrayGuidByChannel[buildInfo.releaseChannel] : undefined;
   try {
     atomTray = guid !== undefined ? new _electron.Tray(currentIcon, guid) : new _electron.Tray(currentIcon);
     atomTray.setToolTip(_Constants.APP_NAME);
