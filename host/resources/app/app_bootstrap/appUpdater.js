@@ -50,6 +50,7 @@ function winUpdateRegVersion(updater, callback) {
   } catch (_) {
     return;
   }
+  console.log(`Updating registry install version to: ${hostVersionStr}`);
   const queue = [['HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\' + ('Discord' + releaseChannelSuffix), '/v', 'DisplayVersion', '/d', hostVersionStr]];
   windowsUtils.addToRegistry(queue, callback);
 }
@@ -63,9 +64,8 @@ function update(startMinimized, doneCallback, showCallback) {
     const firstRun = require('./firstRun');
     if (updater != null) {
       updater.on('host-updated', () => {
-        autoStart.update(() => {
-          winUpdateRegVersion(updater, () => {});
-        });
+        autoStart.update(() => {});
+        winUpdateRegVersion(updater, () => {});
       });
       updater.on('unhandled-exception', _errorHandler.fatal);
       updater.on(_updater.INCONSISTENT_INSTALLER_STATE_ERROR, _errorHandler.fatal);
