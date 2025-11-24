@@ -41,18 +41,12 @@ function winUpdateRegVersion(updater, callback) {
   }
   const versions = updater.queryCurrentVersionsSync();
   const hostVersion = versions === null || versions === void 0 ? void 0 : versions.current_host;
-  if (hostVersion == null) {
+  if (hostVersion == null || hostVersion.length !== 3) {
     return;
   }
-  let hostVersionStr = '0.0.0';
-  try {
-    hostVersionStr = hostVersion[0] + '.' + hostVersion[1] + '.' + hostVersion[2];
-  } catch (_) {
-    return;
-  }
+  const hostVersionStr = hostVersion[0] + '.' + hostVersion[1] + '.' + hostVersion[2];
   console.log(`Updating registry install version to: ${hostVersionStr}`);
-  const queue = [['HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\' + ('Discord' + releaseChannelSuffix), '/v', 'DisplayVersion', '/d', hostVersionStr]];
-  windowsUtils.addToRegistry(queue, callback);
+  windowsUtils.addToRegistry([['HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\' + ('Discord' + releaseChannelSuffix), '/v', 'DisplayVersion', '/d', hostVersionStr]], callback);
 }
 function update(startMinimized, doneCallback, showCallback) {
   const settings = (0, _appSettings.getSettings)();
