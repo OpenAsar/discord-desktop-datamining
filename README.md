@@ -12,7 +12,7 @@
 | dispatch | 1 |
 | erlpack | 1 |
 | game_utils | 1 |
-| hook | 1 |
+| hook | 2 |
 | krisp | 1 |
 | media | 1 |
 | ml | 1 |
