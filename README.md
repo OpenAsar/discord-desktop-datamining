@@ -24,7 +24,7 @@
 | spellcheck | 1 |
 | utils | 3 |
 | vigilante | 1 |
-| voice | 2 |
+| voice | 3 |
 | voice_filters | 3 |
 | zstd | 1 |
 
