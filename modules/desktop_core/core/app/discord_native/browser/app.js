@@ -103,3 +103,6 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.APP_UNPAUSE_FRAME_EVICT
   var _unpauseFrameEviction, _ref2;
   return (_unpauseFrameEviction = (_ref2 = _electron.default.app).unpauseFrameEvictionManager) === null || _unpauseFrameEviction === void 0 ? void 0 : _unpauseFrameEviction.call(_ref2);
 });
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.APP_GET_PREFERRED_SYSTEM_LANGUAGES, async () => {
+  return _electron.default.app.getPreferredSystemLanguages();
+});

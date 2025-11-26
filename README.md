@@ -2,7 +2,7 @@
 
 ## ptb versions
 
-**host: 1.0.1168**
+**host: 1.0.1169**
 
 | module | version |
 | ------ | :-----: |
@@ -12,7 +12,7 @@
 | dispatch | 1 |
 | erlpack | 1 |
 | game_utils | 1 |
-| hook | 2 |
+| hook | 1 |
 | krisp | 1 |
 | media | 1 |
 | ml | 1 |
