@@ -12,7 +12,7 @@
 | dispatch | 1 |
 | erlpack | 1 |
 | game_utils | 1 |
-| hook | 1 |
+| hook | 2 |
 | krisp | 1 |
 | media | 1 |
 | ml | 1 |
@@ -24,7 +24,7 @@
 | spellcheck | 1 |
 | utils | 3 |
 | vigilante | 1 |
-| voice | 3 |
+| voice | 4 |
 | voice_filters | 1 |
 | zstd | 1 |
 
