@@ -14,11 +14,40 @@ var _appSettings = require("./appSettings");
 var _buildInfo = _interopRequireDefault(require("./buildInfo"));
 var _errorHandler = require("./errorHandler");
 var splashScreen = _interopRequireWildcard(require("./splashScreen"));
+var windowsUtils = _interopRequireWildcard(require("./windowsUtils"));
 var _Constants = _interopRequireDefault(require("./Constants"));
 function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
 function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 const USE_PINNED_UPDATE_MANIFEST = 'USE_PINNED_UPDATE_MANIFEST';
+function winUpdateRegVersion(updater, callback) {
+  if (process.platform !== 'win32') {
+    return;
+  }
+  const releaseChannelSuffix = (() => {
+    if (_buildInfo.default.releaseChannel === 'stable') {
+      return '';
+    } else if (_buildInfo.default.releaseChannel === 'ptb') {
+      return 'PTB';
+    } else if (_buildInfo.default.releaseChannel === 'canary') {
+      return 'Canary';
+    } else if (_buildInfo.default.releaseChannel === 'development') {
+      return 'Development';
+    }
+    return null;
+  })();
+  if (releaseChannelSuffix == null) {
+    return;
+  }
+  const versions = updater.queryCurrentVersionsSync();
+  const hostVersion = versions === null || versions === void 0 ? void 0 : versions.current_host;
+  if (hostVersion == null || hostVersion.length !== 3) {
+    return;
+  }
+  const hostVersionStr = hostVersion[0] + '.' + hostVersion[1] + '.' + hostVersion[2];
+  console.log(`Updating registry install version to: ${hostVersionStr}`);
+  windowsUtils.addToRegistry([['HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\' + ('Discord' + releaseChannelSuffix), '/v', 'DisplayVersion', '/d', hostVersionStr]], callback);
+}
 function update(startMinimized, doneCallback, showCallback) {
   const settings = (0, _appSettings.getSettings)();
   const isStandaloneModules = _buildInfo.default.releaseChannel === 'development' && _buildInfo.default.standaloneModules;
@@ -30,6 +59,7 @@ function update(startMinimized, doneCallback, showCallback) {
     if (updater != null) {
       updater.on('host-updated', () => {
         autoStart.update(() => {});
+        winUpdateRegVersion(updater, () => {});
       });
       updater.on('unhandled-exception', _errorHandler.fatal);
       updater.on(_updater.INCONSISTENT_INSTALLER_STATE_ERROR, _errorHandler.fatal);
