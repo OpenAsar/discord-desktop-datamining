@@ -61,6 +61,9 @@ function pauseFrameEvictor() {
 function unpauseFrameEvictor() {
   return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.APP_UNPAUSE_FRAME_EVICTOR);
 }
+function getPreferredSystemLanguages() {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.APP_GET_PREFERRED_SYSTEM_LANGUAGES);
+}
 function registerUserInteractionHandler(elementId, eventType, callback) {
   const element = document.getElementById(elementId);
   if (element == null) {
@@ -94,5 +97,6 @@ module.exports = {
   getDefaultDoubleClickAction,
   pauseFrameEvictor,
   unpauseFrameEvictor,
+  getPreferredSystemLanguages,
   registerUserInteractionHandler
 };

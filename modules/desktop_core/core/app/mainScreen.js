@@ -360,7 +360,6 @@ async function launchMainAppWindow(isVisible) {
   };
   if (process.platform === 'linux') {
     mainWindowOptions.icon = _path.default.join(_path.default.dirname(_electron.app.getPath('exe')), 'discord.png');
-    mainWindowOptions.frame = true;
   }
   if (process.platform === 'darwin') {
     mainWindowOptions.titleBarStyle = 'hidden';
@@ -406,7 +405,7 @@ async function launchMainAppWindow(isVisible) {
         callback(result);
         return;
       case 'media':
-        callback((0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, _Constants.AllowedMediaOrigins.K_ID) || (0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, _Constants.AllowedMediaOrigins.K_ID_V2) || (0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, _Constants.AllowedMediaOrigins.K_ID_FACE_SCAN));
+        callback((0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, _Constants.AllowedMediaOrigins.K_ID) || (0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, _Constants.AllowedMediaOrigins.K_ID_V2) || (0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, _Constants.AllowedMediaOrigins.K_ID_FACE_SCAN) || (0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, _Constants.AllowedMediaOrigins.PERSONA_FACE_SCAN));
         return;
     }
     callback(false);
@@ -423,7 +422,7 @@ async function launchMainAppWindow(isVisible) {
           return (0, _securityUtils.checkUrlOriginMatches)(details.embeddingOrigin, WEBAPP_ENDPOINT);
         }
       case 'media':
-        return (0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, _Constants.AllowedMediaOrigins.K_ID) || (0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, _Constants.AllowedMediaOrigins.K_ID_V2) || (0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, _Constants.AllowedMediaOrigins.K_ID_FACE_SCAN) || (0, _securityUtils.checkUrlOriginMatches)(requestingOrigin, WEBAPP_ENDPOINT);
+        return (0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, _Constants.AllowedMediaOrigins.K_ID) || (0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, _Constants.AllowedMediaOrigins.K_ID_V2) || (0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, _Constants.AllowedMediaOrigins.K_ID_FACE_SCAN) || (0, _securityUtils.checkUrlOriginMatches)(details.requestingUrl, _Constants.AllowedMediaOrigins.PERSONA_FACE_SCAN) || (0, _securityUtils.checkUrlOriginMatches)(requestingOrigin, WEBAPP_ENDPOINT);
     }
     return false;
   });

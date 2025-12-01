@@ -158,6 +158,7 @@ features.declareSupported('audio_codec_red');
 features.declareSupported('sidechain_compression');
 features.declareSupported('async_video_input_device_init');
 features.declareSupported('async_clips_source_deinit');
+features.declareSupported('port_aware_latency_testing');
 
 if (process.platform === 'darwin') {
   features.declareSupported('screen_capture_kit');
