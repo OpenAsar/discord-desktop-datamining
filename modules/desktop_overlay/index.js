@@ -26,6 +26,8 @@ var reloadHostWindowCallback = function reloadHostWindowCallback(pid) {};
 var trackedGames = new Set();
 var targetGamePID = 0;
 var DesktopOverlayModuleInterface = _objectSpread(_objectSpread({}, DesktopOverlay), {}, {
+  // Version number so app can know which version of native code is present and act accordingly
+  version: 1,
   setHostWindowCallbacks: function setHostWindowCallbacks(create, destroy, reload) {
     createHostWindowCallback = create;
     destroyHostWindowCallback = destroy;
@@ -73,13 +75,13 @@ var DesktopOverlayModuleInterface = _objectSpread(_objectSpread({}, DesktopOverl
     }
   },
   setFocusCallback: function setFocusCallback(focus) {
-    var wrappedCallback = function wrappedCallback(pid, windowHandle) {
+    var wrappedCallback = function wrappedCallback(pid, windowHandle, windowClass) {
       var previousTargetGamePID = targetGamePID;
       targetGamePID = pid;
       if (previousTargetGamePID !== 0 && targetGamePID !== 0 && targetGamePID !== previousTargetGamePID) {
         reloadHostWindowCallback(targetGamePID);
       }
-      focus(targetGamePID, windowHandle);
+      focus(targetGamePID, windowHandle, windowClass);
     };
     DesktopOverlay.setFocusCallback(wrappedCallback);
   },

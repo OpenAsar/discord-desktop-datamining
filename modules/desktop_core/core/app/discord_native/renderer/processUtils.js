@@ -3,6 +3,8 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.disablePAMemoryProfiler = disablePAMemoryProfiler;
+exports.enablePAMemoryProfiler = enablePAMemoryProfiler;
 exports.flushCookies = flushCookies;
 exports.flushDNSCache = flushDNSCache;
 exports.flushStorageData = flushStorageData;
@@ -14,6 +16,9 @@ exports.getGpuProcessId = getGpuProcessId;
 exports.getHeapStats = getHeapStats;
 exports.getLastCrash = getLastCrash;
 exports.getMainArgvSync = getMainArgvSync;
+exports.getPartitionAllocatorStats = getPartitionAllocatorStats;
+exports.getPerfAttributedPAMemory = getPerfAttributedPAMemory;
+exports.getPerfAttributedPAMemoryCallstacks = getPerfAttributedPAMemoryCallstacks;
 exports.getProcessUptime = getProcessUptime;
 exports.getSystemInfo = getSystemInfo;
 exports.getUsedHeapSize = getUsedHeapSize;
@@ -102,6 +107,26 @@ function getHeapStats() {
 }
 function getBlinkMemoryInfo() {
   return _process.default.getBlinkMemoryInfo();
+}
+function getPartitionAllocatorStats() {
+  var _ref, _ref$discordMemoryPro, _ref$discordMemoryPro2;
+  return (_ref = _electron.default) === null || _ref === void 0 ? void 0 : (_ref$discordMemoryPro = _ref.discordMemoryProfiler) === null || _ref$discordMemoryPro === void 0 ? void 0 : (_ref$discordMemoryPro2 = _ref$discordMemoryPro.getPartitionAllocatorStats) === null || _ref$discordMemoryPro2 === void 0 ? void 0 : _ref$discordMemoryPro2.call(_ref$discordMemoryPro);
+}
+function enablePAMemoryProfiler(config) {
+  var _ref2, _ref2$discordMemoryPr, _ref2$discordMemoryPr2;
+  (_ref2 = _electron.default) === null || _ref2 === void 0 ? void 0 : (_ref2$discordMemoryPr = _ref2.discordMemoryProfiler) === null || _ref2$discordMemoryPr === void 0 ? void 0 : (_ref2$discordMemoryPr2 = _ref2$discordMemoryPr.enableProfiling) === null || _ref2$discordMemoryPr2 === void 0 ? void 0 : _ref2$discordMemoryPr2.call(_ref2$discordMemoryPr, config);
+}
+function disablePAMemoryProfiler() {
+  var _ref3, _ref3$discordMemoryPr, _ref3$discordMemoryPr2;
+  (_ref3 = _electron.default) === null || _ref3 === void 0 ? void 0 : (_ref3$discordMemoryPr = _ref3.discordMemoryProfiler) === null || _ref3$discordMemoryPr === void 0 ? void 0 : (_ref3$discordMemoryPr2 = _ref3$discordMemoryPr.disableProfiling) === null || _ref3$discordMemoryPr2 === void 0 ? void 0 : _ref3$discordMemoryPr2.call(_ref3$discordMemoryPr);
+}
+function getPerfAttributedPAMemory() {
+  var _ref4, _ref4$discordMemoryPr, _ref4$discordMemoryPr2;
+  return (_ref4 = _electron.default) === null || _ref4 === void 0 ? void 0 : (_ref4$discordMemoryPr = _ref4.discordMemoryProfiler) === null || _ref4$discordMemoryPr === void 0 ? void 0 : (_ref4$discordMemoryPr2 = _ref4$discordMemoryPr.getTypeNameMemoryAllocated) === null || _ref4$discordMemoryPr2 === void 0 ? void 0 : _ref4$discordMemoryPr2.call(_ref4$discordMemoryPr);
+}
+function getPerfAttributedPAMemoryCallstacks(options) {
+  var _ref5, _ref5$discordMemoryPr, _ref5$discordMemoryPr2;
+  return (_ref5 = _electron.default) === null || _ref5 === void 0 ? void 0 : (_ref5$discordMemoryPr = _ref5.discordMemoryProfiler) === null || _ref5$discordMemoryPr === void 0 ? void 0 : (_ref5$discordMemoryPr2 = _ref5$discordMemoryPr.getTypeNameMemoryCallstacks) === null || _ref5$discordMemoryPr2 === void 0 ? void 0 : _ref5$discordMemoryPr2.call(_ref5$discordMemoryPr, options);
 }
 function setCrashInformation(crashInformation, state) {
   void _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_SET_CRASH_INFORMATION, crashInformation, state);
