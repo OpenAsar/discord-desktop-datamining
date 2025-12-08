@@ -14,7 +14,7 @@
 | game_utils | 1 |
 | hook | 1 |
 | krisp | 1 |
-| media | 1 |
+| media | 2 |
 | ml | 1 |
 | modules | 1 |
 | notifications | 1 |
@@ -24,8 +24,8 @@
 | spellcheck | 1 |
 | utils | 1 |
 | vigilante | 1 |
-| voice | 1 |
-| voice_filters | 1 |
+| voice | 2 |
+| voice_filters | 2 |
 | zstd | 1 |
 
 ## branches
