@@ -26,8 +26,6 @@ var reloadHostWindowCallback = function reloadHostWindowCallback(pid) {};
 var trackedGames = new Set();
 var targetGamePID = 0;
 var DesktopOverlayModuleInterface = _objectSpread(_objectSpread({}, DesktopOverlay), {}, {
-  // Version number so app can know which version of native code is present and act accordingly
-  version: 1,
   setHostWindowCallbacks: function setHostWindowCallbacks(create, destroy, reload) {
     createHostWindowCallback = create;
     destroyHostWindowCallback = destroy;
