@@ -18,20 +18,23 @@ const appName = _path.default.basename(process.execPath, '.exe');
 const fullExeName = _path.default.basename(process.execPath);
 const updatePath = _path.default.join(_path.default.dirname(process.execPath), '..', 'Update.exe');
 function install(callback) {
-  const startMinimized = settings === null || settings === void 0 ? void 0 : settings.get('START_MINIMIZED', false);
-  let execPath = `"${updatePath}" --processStart ${fullExeName}`;
-  if (startMinimized) {
-    execPath = `${execPath} --process-start-args --start-minimized`;
-  }
-  const queue = [['HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run', '/v', appName, '/d', execPath]];
-  windowsUtils.addToRegistry(queue, callback);
+  uninstallStartupApproval(() => {
+    const startMinimized = settings === null || settings === void 0 ? void 0 : settings.get('START_MINIMIZED', false);
+    let execPath = `"${updatePath}" --processStart ${fullExeName}`;
+    if (startMinimized) {
+      execPath = `${execPath} --process-start-args --start-minimized`;
+    }
+    const queue = [['HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run', '/v', appName, '/d', execPath]];
+    windowsUtils.addToRegistry(queue, callback);
+  });
 }
 function isInstalled(callback) {
-  const queryValue = ['HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run', '/v', appName];
-  queryValue.unshift('query');
-  windowsUtils.spawnReg(queryValue, (_error, stdout) => {
-    const doesOldKeyExist = stdout.indexOf(appName) >= 0;
-    callback(doesOldKeyExist);
+  isStartupInstalled(installed => {
+    if (!installed) {
+      callback(false);
+    } else {
+      isStartupApproved(callback);
+    }
   });
 }
 function update(callback) {
@@ -44,9 +47,39 @@ function update(callback) {
   });
 }
 function uninstall(callback) {
+  uninstallStartupEntry(() => {
+    uninstallStartupApproval(callback);
+  });
+}
+function uninstallStartupEntry(callback) {
   const queryValue = ['HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run', '/v', appName, '/f'];
   queryValue.unshift('delete');
-  windowsUtils.spawnReg(queryValue, () => {
-    callback();
+  windowsUtils.spawnReg(queryValue, () => callback());
+}
+function uninstallStartupApproval(callback) {
+  const queryValue = ['HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\Run', '/v', appName, '/f'];
+  queryValue.unshift('delete');
+  windowsUtils.spawnReg(queryValue, () => callback());
+}
+function isStartupInstalled(callback) {
+  const queryValue = ['HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run', '/v', appName];
+  queryValue.unshift('query');
+  windowsUtils.spawnReg(queryValue, (_error, stdout) => {
+    const doesOldKeyExist = stdout.indexOf(appName) >= 0;
+    callback(doesOldKeyExist);
+  });
+}
+function isStartupApproved(callback) {
+  const queryValue = ['HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\Run', '/v', appName];
+  queryValue.unshift('query');
+  windowsUtils.spawnReg(queryValue, (_error, stdout) => {
+    const match = stdout.match(/REG_BINARY\s+([0-9A-Fa-f]+)/);
+    if (match !== null) {
+      const hexValue = match[1];
+      const enabled = hexValue.substring(0, 2) === '00';
+      callback(enabled);
+    } else {
+      callback(true);
+    }
   });
 }
