@@ -115,6 +115,14 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_SET_BACKGROUND_T
   }
   return Promise.resolve();
 });
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_SET_FRAME_RATE, (_, key, fps) => {
+  const win = injectedGetWindow(key);
+  if (win != null) {
+    var _ref, _ref$setMaxFPS;
+    (_ref = win.webContents) === null || _ref === void 0 ? void 0 : (_ref$setMaxFPS = _ref.setMaxFPS) === null || _ref$setMaxFPS === void 0 ? void 0 : _ref$setMaxFPS.call(_ref, fps);
+  }
+  return Promise.resolve();
+});
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WINDOW_SET_CONTENT_PROTCTION, (_, enabled) => {
   const windows = injectedGetAllWindows();
   for (const window of windows) {
