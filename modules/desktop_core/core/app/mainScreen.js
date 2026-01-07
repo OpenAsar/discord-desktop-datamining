@@ -793,6 +793,15 @@ function setupAnalyticsEvents() {
   _ipcMain.default.on(_Constants.AnalyticsEvents.APP_LOADED, () => {
     webAppLoaded = true;
   });
+  _ipcMain.default.on(_Constants.AnalyticsEvents.APP_FIRST_RENDER_AFTER_READY_PAYLOAD, () => {
+    var _analytics$getDesktop5;
+    const a = _bootstrapModules.analytics === null || _bootstrapModules.analytics === void 0 ? void 0 : (_analytics$getDesktop5 = _bootstrapModules.analytics.getDesktopTTI) === null || _analytics$getDesktop5 === void 0 ? void 0 : _analytics$getDesktop5.call(_bootstrapModules.analytics);
+    if (a == null) {
+      return;
+    }
+    a.trackMainWindowJSAppInteractiveDuration();
+    a.trackFullInteractiveTTI();
+  });
 }
 function setupUpdaterEventsWithUpdater(updater) {
   _electron.app.on(_Constants.MenuEvents.CHECK_FOR_UPDATES, () => checkForUpdatesWithUpdater(updater));

@@ -56,8 +56,11 @@ var DesktopAnalyticsEventType = function (DesktopAnalyticsEventType) {
   DesktopAnalyticsEventType[DesktopAnalyticsEventType["MainWinLoadStart"] = 6] = "MainWinLoadStart";
   DesktopAnalyticsEventType[DesktopAnalyticsEventType["MainWinLoadComplete"] = 7] = "MainWinLoadComplete";
   DesktopAnalyticsEventType[DesktopAnalyticsEventType["MainWinJSAppLoadComplete"] = 8] = "MainWinJSAppLoadComplete";
-  DesktopAnalyticsEventType[DesktopAnalyticsEventType["FullTTIComplete"] = 9] = "FullTTIComplete";
-  DesktopAnalyticsEventType[DesktopAnalyticsEventType["FullTTICompleteWithRestart"] = 10] = "FullTTICompleteWithRestart";
+  DesktopAnalyticsEventType[DesktopAnalyticsEventType["MainWinJSAppInteractiveComplete"] = 9] = "MainWinJSAppInteractiveComplete";
+  DesktopAnalyticsEventType[DesktopAnalyticsEventType["FullTTIComplete"] = 10] = "FullTTIComplete";
+  DesktopAnalyticsEventType[DesktopAnalyticsEventType["FullTTICompleteWithRestart"] = 11] = "FullTTICompleteWithRestart";
+  DesktopAnalyticsEventType[DesktopAnalyticsEventType["FullInteractiveTTIComplete"] = 12] = "FullInteractiveTTIComplete";
+  DesktopAnalyticsEventType[DesktopAnalyticsEventType["FullInteractiveTTICompleteWithRestart"] = 13] = "FullInteractiveTTICompleteWithRestart";
   return DesktopAnalyticsEventType;
 }(DesktopAnalyticsEventType || {});
 function createDesktopAnalyticsEvent(type, durationMS) {
@@ -80,12 +83,18 @@ function createDesktopAnalyticsEvent(type, durationMS) {
           return 'mainwin_loadcomplete';
         case DesktopAnalyticsEventType.MainWinJSAppLoadComplete:
           return 'mainwin_loadjsappcomplete';
+        case DesktopAnalyticsEventType.MainWinJSAppInteractiveComplete:
+          return 'mainwin_interactive_jsappcomplete';
         case DesktopAnalyticsEventType.SplashRestart:
           return 'splash_restart';
         case DesktopAnalyticsEventType.FullTTIComplete:
           return 'full_tti_complete';
         case DesktopAnalyticsEventType.FullTTICompleteWithRestart:
           return 'full_tti_with_restart_complete';
+        case DesktopAnalyticsEventType.FullInteractiveTTIComplete:
+          return 'full_interactive_tti_complete';
+        case DesktopAnalyticsEventType.FullInteractiveTTICompleteWithRestart:
+          return 'full_interactive_tti_with_restart_complete';
       }
     }(type),
     process_uptime_ms: getDurationMS(),
@@ -112,7 +121,9 @@ class DesktopTTIAnalytics {
   previousSessionData = null;
   currentSessionData = new TTISessionData();
   trackedFullTTI = false;
+  trackedFullInteractiveTTI = false;
   trackedJSAppLoad = false;
+  trackedJSAppInteractive = false;
   constructor(enablePushingEvents) {
     this.enablePushingEvents = enablePushingEvents;
   }
@@ -205,6 +216,17 @@ class DesktopTTIAnalytics {
       this.pushDesktopEvent(evt);
     }
   }
+  trackMainWindowJSAppInteractiveDuration() {
+    if (this.trackedJSAppInteractive) {
+      return;
+    }
+    this.trackedJSAppInteractive = true;
+    if (this.currentSessionData.mainWindowCreationTime != null) {
+      const duration = getDurationMS() - this.currentSessionData.mainWindowCreationTime;
+      const evt = createDesktopAnalyticsEvent(DesktopAnalyticsEventType.MainWinJSAppInteractiveComplete, duration);
+      this.pushDesktopEvent(evt);
+    }
+  }
   trackSplashWindowRestart() {
     this.currentSessionData.splashRestartTimepoint = Date.now();
     this.currentSessionData.processDuration = getDurationMS();
@@ -231,11 +253,7 @@ class DesktopTTIAnalytics {
       console.warn('Desktop analytics failed to write serialized state to disk: ', e);
     }
   }
-  trackFullTTI() {
-    if (this.trackedFullTTI) {
-      return;
-    }
-    this.trackedFullTTI = true;
+  getRestartAndFullTTIDuration() {
     if (this.previousSessionData != null) {
       var _this$previousSession, _this$previousSession2;
       const prevTimepoint = (_this$previousSession = this.previousSessionData) === null || _this$previousSession === void 0 ? void 0 : _this$previousSession.splashRestartTimepoint;
@@ -248,10 +266,36 @@ class DesktopTTIAnalytics {
           fullDesktopDuration = null;
         }
       }
-      const evt = createDesktopAnalyticsEvent(DesktopAnalyticsEventType.FullTTICompleteWithRestart, fullDesktopDuration);
+      return fullDesktopDuration;
+    } else {
+      return undefined;
+    }
+  }
+  trackFullTTI() {
+    if (this.trackedFullTTI) {
+      return;
+    }
+    this.trackedFullTTI = true;
+    const fullDesktopDuration = this.getRestartAndFullTTIDuration();
+    if (fullDesktopDuration === undefined) {
+      const evt = createDesktopAnalyticsEvent(DesktopAnalyticsEventType.FullTTIComplete, null);
       this.pushDesktopEvent(evt);
     } else {
-      const evt = createDesktopAnalyticsEvent(DesktopAnalyticsEventType.FullTTIComplete, null);
+      const evt = createDesktopAnalyticsEvent(DesktopAnalyticsEventType.FullTTICompleteWithRestart, fullDesktopDuration);
+      this.pushDesktopEvent(evt);
+    }
+  }
+  trackFullInteractiveTTI() {
+    if (this.trackedFullInteractiveTTI) {
+      return;
+    }
+    this.trackedFullInteractiveTTI = true;
+    const fullDesktopDuration = this.getRestartAndFullTTIDuration();
+    if (fullDesktopDuration === undefined) {
+      const evt = createDesktopAnalyticsEvent(DesktopAnalyticsEventType.FullInteractiveTTIComplete, null);
+      this.pushDesktopEvent(evt);
+    } else {
+      const evt = createDesktopAnalyticsEvent(DesktopAnalyticsEventType.FullInteractiveTTICompleteWithRestart, fullDesktopDuration);
       this.pushDesktopEvent(evt);
     }
   }
