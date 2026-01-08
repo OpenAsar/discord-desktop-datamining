@@ -395,31 +395,6 @@ VoiceEngine.getDebugLogging = function () {
 const videoStreams = {};
 const directVideoStreams = {};
 
-const ensureCanvasContext = function (sinkId) {
-  let canvas = document.getElementById(sinkId);
-  if (canvas == null) {
-    for (const popout of window.popouts.values()) {
-      const element = popout.document != null && popout.document.getElementById(sinkId);
-      if (element != null) {
-        canvas = element;
-        break;
-      }
-    }
-
-    if (canvas == null) {
-      return null;
-    }
-  }
-
-  const context = canvas.getContext('2d');
-  if (context == null) {
-    log('info', `Failed to initialize context for sinkId ${sinkId}`);
-    return null;
-  }
-
-  return context;
-};
-
 let activeSinksChangeCallback;
 VoiceEngine.setActiveSinksChangeCallback = function (callback) {
   activeSinksChangeCallback = callback;
@@ -476,28 +451,7 @@ function addVideoOutputSinkInternal(sinkId, streamId, frameCallback) {
   }
 }
 
-VoiceEngine.addVideoOutputSink = function (sinkId, streamId, frameCallback) {
-  let canvasContext = null;
-  addVideoOutputSinkInternal(sinkId, streamId, (imageData) => {
-    if (canvasContext == null) {
-      canvasContext = ensureCanvasContext(sinkId);
-      if (canvasContext == null) {
-        return;
-      }
-    }
-    if (frameCallback != null) {
-      frameCallback(imageData.width, imageData.height);
-    }
-    // [adill] NB: Electron 9+ on macOS would show massive leaks in the the GPU helper process when a non-Discord
-    // window completely occludes the Discord window. Adding this tiny readback ameliorates the issue. We tried WebGL
-    // rendering which did not exhibit the issue, however, the context limit of 16 was too small to be a real
-    // alternative.
-    canvasContext.getImageData(0, 0, 1, 1);
-    canvasContext.putImageData(imageData, 0, 0);
-  });
-};
-
-VoiceEngine.removeVideoOutputSink = function (sinkId, streamId) {
+function removeVideoOutputSink(sinkId, streamId) {
   const sinks = videoStreams[streamId];
   if (sinks != null) {
     sinks.delete(sinkId);
@@ -508,7 +462,7 @@ VoiceEngine.removeVideoOutputSink = function (sinkId, streamId) {
       notifyActiveSinksChange(streamId);
     }
   }
-};
+}
 
 // We wrap the direct video calls so we can keep track of all active
 // video output sinks
@@ -533,12 +487,12 @@ VoiceEngine.getNextVideoOutputFrame = function (streamId) {
 
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      VoiceEngine.removeVideoOutputSink(nextVideoFrameSinkId, streamId);
+      removeVideoOutputSink(nextVideoFrameSinkId, streamId);
       reject(new Error('getNextVideoOutputFrame timeout'));
     }, 5000);
 
     addVideoOutputSinkInternal(nextVideoFrameSinkId, streamId, (imageData) => {
-      VoiceEngine.removeVideoOutputSink(nextVideoFrameSinkId, streamId);
+      removeVideoOutputSink(nextVideoFrameSinkId, streamId);
       resolve({
         width: imageData.width,
         height: imageData.height,
