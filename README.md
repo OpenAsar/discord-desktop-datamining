@@ -22,7 +22,7 @@
 | rpc | 2 |
 | sekrit | 1 |
 | spellcheck | 1 |
-| utils | 3 |
+| utils | 4 |
 | vigilante | 1 |
 | voice | 4 |
 | voice_filters | 1 |
