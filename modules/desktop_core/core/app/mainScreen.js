@@ -799,8 +799,10 @@ function setupAnalyticsEvents() {
     if (a == null) {
       return;
     }
-    a.trackMainWindowJSAppInteractiveDuration();
-    a.trackFullInteractiveTTI();
+    if (process.platform !== 'linux') {
+      a.trackMainWindowJSAppInteractiveDuration();
+      a.trackFullInteractiveTTI();
+    }
   });
 }
 function setupUpdaterEventsWithUpdater(updater) {
