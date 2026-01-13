@@ -13,9 +13,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 function createSafeEmitter() {
   var callbackMap = new Map();
   var addListener = function addListener(name, listener, once) {
-    var listeners = callbackMap[name];
+    var listeners = callbackMap.get(name);
     if (listeners == null) {
-      listeners = callbackMap[name] = new Set();
+      listeners = new Set();
+      callbackMap.set(name, listeners);
     }
     if (once) {
       var originalListener = listener;
@@ -27,7 +28,7 @@ function createSafeEmitter() {
     listeners.add(listener);
   };
   var invokeListener = function invokeListener(name) {
-    var listeners = callbackMap[name];
+    var listeners = callbackMap.get(name);
     if (listeners == null) {
       return;
     }
@@ -47,6 +48,9 @@ function createSafeEmitter() {
       _iterator.f();
     }
   };
+  var removeAllListeners = function removeAllListeners() {
+    callbackMap.clear();
+  };
   return {
     on: function on(name, callback) {
       return addListener(name, callback, false);
@@ -59,7 +63,8 @@ function createSafeEmitter() {
         args[_key2 - 1] = arguments[_key2];
       }
       return invokeListener.apply(void 0, [name].concat(args));
-    }
+    },
+    removeAllListeners: removeAllListeners
   };
 }
 var _default = exports["default"] = createSafeEmitter;

@@ -64,6 +64,9 @@ function unpauseFrameEvictor() {
 function getPreferredSystemLanguages() {
   return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.APP_GET_PREFERRED_SYSTEM_LANGUAGES);
 }
+function getOpenOnStart() {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.APP_GET_OPEN_ON_START);
+}
 function registerUserInteractionHandler(elementId, eventType, callback) {
   const element = document.getElementById(elementId);
   if (element == null) {
@@ -98,5 +101,6 @@ module.exports = {
   pauseFrameEvictor,
   unpauseFrameEvictor,
   getPreferredSystemLanguages,
+  getOpenOnStart,
   registerUserInteractionHandler
 };

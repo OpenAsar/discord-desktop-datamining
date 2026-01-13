@@ -79,7 +79,8 @@ function recastNetSocket(socket) {
       return didHandshake;
     },
     destroy: function destroy() {
-      return socket.destroy();
+      emitter.removeAllListeners();
+      socket.destroy();
     },
     write: function write(buffer) {
       return socket.write(Buffer.from(buffer));

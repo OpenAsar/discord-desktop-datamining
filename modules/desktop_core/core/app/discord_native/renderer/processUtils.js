@@ -4,7 +4,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.disablePAMemoryProfiler = disablePAMemoryProfiler;
+exports.disableProfilingV8Heap = disableProfilingV8Heap;
 exports.enablePAMemoryProfiler = enablePAMemoryProfiler;
+exports.enableProfilingV8Heap = enableProfilingV8Heap;
 exports.flushCookies = flushCookies;
 exports.flushDNSCache = flushDNSCache;
 exports.flushStorageData = flushStorageData;
@@ -20,6 +22,7 @@ exports.getPartitionAllocatorStats = getPartitionAllocatorStats;
 exports.getPerfAttributedPAMemory = getPerfAttributedPAMemory;
 exports.getPerfAttributedPAMemoryCallstacks = getPerfAttributedPAMemoryCallstacks;
 exports.getProcessUptime = getProcessUptime;
+exports.getProfilerV8MemoryCallstacks = getProfilerV8MemoryCallstacks;
 exports.getSystemInfo = getSystemInfo;
 exports.getUsedHeapSize = getUsedHeapSize;
 exports.purgeMemory = purgeMemory;
@@ -127,6 +130,18 @@ function getPerfAttributedPAMemory() {
 function getPerfAttributedPAMemoryCallstacks(options) {
   var _ref5, _ref5$discordMemoryPr, _ref5$discordMemoryPr2;
   return (_ref5 = _electron.default) === null || _ref5 === void 0 ? void 0 : (_ref5$discordMemoryPr = _ref5.discordMemoryProfiler) === null || _ref5$discordMemoryPr === void 0 ? void 0 : (_ref5$discordMemoryPr2 = _ref5$discordMemoryPr.getTypeNameMemoryCallstacks) === null || _ref5$discordMemoryPr2 === void 0 ? void 0 : _ref5$discordMemoryPr2.call(_ref5$discordMemoryPr, options);
+}
+function enableProfilingV8Heap(options) {
+  var _ref6, _ref6$discordMemoryPr, _ref6$discordMemoryPr2;
+  return (_ref6 = _electron.default) === null || _ref6 === void 0 ? void 0 : (_ref6$discordMemoryPr = _ref6.discordMemoryProfiler) === null || _ref6$discordMemoryPr === void 0 ? void 0 : (_ref6$discordMemoryPr2 = _ref6$discordMemoryPr.enableProfilingV8Heap) === null || _ref6$discordMemoryPr2 === void 0 ? void 0 : _ref6$discordMemoryPr2.call(_ref6$discordMemoryPr, options);
+}
+function disableProfilingV8Heap() {
+  var _ref7, _ref7$discordMemoryPr, _ref7$discordMemoryPr2;
+  return (_ref7 = _electron.default) === null || _ref7 === void 0 ? void 0 : (_ref7$discordMemoryPr = _ref7.discordMemoryProfiler) === null || _ref7$discordMemoryPr === void 0 ? void 0 : (_ref7$discordMemoryPr2 = _ref7$discordMemoryPr.disableProfilingV8Heap) === null || _ref7$discordMemoryPr2 === void 0 ? void 0 : _ref7$discordMemoryPr2.call(_ref7$discordMemoryPr);
+}
+function getProfilerV8MemoryCallstacks() {
+  var _ref8, _ref8$discordMemoryPr, _ref8$discordMemoryPr2;
+  return (_ref8 = _electron.default) === null || _ref8 === void 0 ? void 0 : (_ref8$discordMemoryPr = _ref8.discordMemoryProfiler) === null || _ref8$discordMemoryPr === void 0 ? void 0 : (_ref8$discordMemoryPr2 = _ref8$discordMemoryPr.getProfilerV8MemoryCallstacks) === null || _ref8$discordMemoryPr2 === void 0 ? void 0 : _ref8$discordMemoryPr2.call(_ref8$discordMemoryPr);
 }
 function setCrashInformation(crashInformation, state) {
   void _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_SET_CRASH_INFORMATION, crashInformation, state);

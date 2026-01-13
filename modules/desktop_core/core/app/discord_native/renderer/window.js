@@ -20,6 +20,7 @@ exports.setBackgroundThrottling = setBackgroundThrottling;
 exports.setContentProtection = setContentProtection;
 exports.setDevtoolsCallbacks = setDevtoolsCallbacks;
 exports.setFocusable = setFocusable;
+exports.setFrameRate = setFrameRate;
 exports.setMinimumSize = setMinimumSize;
 exports.setProgressBar = setProgressBar;
 exports.setWindowContentProtection = setWindowContentProtection;
@@ -84,6 +85,9 @@ function setZoomFactor(factor) {
 }
 function setBackgroundThrottling(enabled) {
   return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.WINDOW_SET_BACKGROUND_THROTTLING, enabled);
+}
+function setFrameRate(key, fps) {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.WINDOW_SET_FRAME_RATE, key, fps);
 }
 function setDevtoolsCallbacks(onOpened, onClosed) {
   devtoolsOpenedCallback = onOpened;

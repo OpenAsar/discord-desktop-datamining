@@ -40,5 +40,10 @@ module.exports = {
     return new Promise(function (resolve) {
       return _discord_media["default"].getSystemAnalyticsBlob(resolve);
     });
+  },
+  getMemoryUsageBlob: function getMemoryUsageBlob() {
+    return new Promise(function (resolve) {
+      return _discord_media["default"].getMemoryUsageBlob(resolve);
+    });
   }
 };
