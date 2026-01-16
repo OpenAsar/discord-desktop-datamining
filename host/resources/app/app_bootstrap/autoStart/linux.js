@@ -51,6 +51,7 @@ function isInstalled(callback) {
     _fs.default.stat(autostartFileName, (err, stats) => {
       if (err != null) {
         callback(false);
+        return;
       }
       callback(stats.isFile());
     });
