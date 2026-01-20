@@ -1,37 +1,37 @@
 {
-  "name": "discord_desktop_core",
-  "license": "UNLICENSED",
-  "description": "Discord Client for Desktop - Core App",
-  "main": "app/index.js",
-  "private": true,
-  "scripts": {
-    "eslint": "eslint . --ext .ts,.tsx --color --quiet",
-    "prettier": "prettier --write .",
-    "tsc": "tsc --pretty",
-    "jest": "jest"
-  },
-  "dependencies": {
-    "@discordapp/desktop-electron-test-rpc-protocol": "file:../../../discord_common/js/packages/desktop-electron-test-rpc-protocol",
-    "@discordapp/desktop-smoketest-common": "file:../../../discord_common/js/packages/desktop-smoketest-common",
-    "@discordapp/discord-native-types": "file:../../../discord_common/js/packages/discord-native-types",
-    "@discordapp/native-crash-codes": "file:../../../discord_common/js/packages/native-crash-codes",
-    "@sentry/browser": "7.112.0",
-    "@sentry/electron": "4.24.0",
-    "arch": "2.2.0",
-    "lodash": "4.17.21",
-    "mkdirp": "^1.0.2",
-    "node-downloader-helper": "^2.1.9",
-    "request": "2.88.0",
-    "rimraf": "^2.6.3",
-    "yauzl": "^2.10.0"
-  },
-  "devDependencies": {
-    "@types/jest": "28.1.4",
-    "@types/lodash": "4.14.159",
-    "@types/mkdirp": "1.0.2",
-    "@types/node": "17.0.8",
-    "@types/rimraf": "3.0.2",
-    "electron": "35.3.0",
-    "jest": "^27.1.0"
-  }
+    "name": "discord_desktop_core",
+    "license": "UNLICENSED",
+    "description": "Discord Client for Desktop - Core App",
+    "main": "app/index.js",
+    "private": true,
+    "scripts": {
+        "eslint": "eslint . --ext .ts,.tsx --color --quiet",
+        "prettier": "prettier --write .",
+        "tsc": "tsc --pretty",
+        "jest": "jest"
+    },
+    "dependencies": {
+        "@discordapp/desktop-electron-test-rpc-protocol": "file:../../../discord_common/js/packages/desktop-electron-test-rpc-protocol",
+        "@discordapp/desktop-smoketest-common": "file:../../../discord_common/js/packages/desktop-smoketest-common",
+        "@discordapp/discord-native-types": "file:../../../discord_common/js/packages/discord-native-types",
+        "@discordapp/native-crash-codes": "file:../../../discord_common/js/packages/native-crash-codes",
+        "@sentry/browser": "7.112.0",
+        "@sentry/electron": "4.24.0",
+        "arch": "2.2.0",
+        "lodash": "4.17.21",
+        "mkdirp": "^1.0.2",
+        "node-downloader-helper": "^2.1.9",
+        "request": "2.88.0",
+        "rimraf": "^2.6.3",
+        "yauzl": "^2.10.0"
+    },
+    "devDependencies": {
+        "@types/jest": "28.1.4",
+        "@types/lodash": "4.14.159",
+        "@types/mkdirp": "1.0.2",
+        "@types/node": "17.0.8",
+        "@types/rimraf": "3.0.2",
+        "electron": "37.6.1",
+        "jest": "^27.1.0"
+    }
 }

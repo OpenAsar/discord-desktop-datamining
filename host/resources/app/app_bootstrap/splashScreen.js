@@ -107,7 +107,7 @@ class TaskProgress {
     return false;
   }
 }
-async function updateUntilCurrent(widevineCDM) {
+async function updateUntilCurrent() {
   let allowOptionalUpdates = _Constants.default.ALLOW_OPTIONAL_UPDATES;
   if (allowOptionalUpdates) {
     allowOptionalUpdates = _Constants.default.OPTIN_OPTIONAL_UPDATES;
@@ -152,9 +152,6 @@ async function updateUntilCurrent(widevineCDM) {
         await newUpdater.startCurrentVersion({});
         newUpdater.setRunningInBackground();
         newUpdater.collectGarbage();
-        console.log(`Checking CDM status...`);
-        const componentStatus = await widevineCDM;
-        console.log(`CDM completed with status: ${componentStatus}`);
         launchMainWindow();
         updateBackoff.succeed();
         updateSplashState(LAUNCHING);
@@ -170,7 +167,7 @@ async function updateUntilCurrent(widevineCDM) {
     }
   }
 }
-function initOldUpdater(widevineCDM) {
+function initOldUpdater() {
   modulesListeners = {};
   addModulesListener(CHECKING_FOR_UPDATES, () => {
     console.log(`splashScreen: ${CHECKING_FOR_UPDATES}`);
@@ -187,19 +184,14 @@ function initOldUpdater(widevineCDM) {
     if (updateCount > 0) {
       splashInstalledUpdates = true;
     }
-    const splashCompletedWork = () => {
-      if (!succeeded) {
-        scheduleUpdateCheck();
-        updateSplashState(UPDATE_FAILURE);
-      } else if (updateCount === 0) {
-        moduleUpdater.setInBackground();
-        launchMainWindow();
-        updateSplashState(LAUNCHING);
-      }
-    };
-    void widevineCDM.finally(() => {
-      splashCompletedWork();
-    });
+    if (!succeeded) {
+      scheduleUpdateCheck();
+      updateSplashState(UPDATE_FAILURE);
+    } else if (updateCount === 0) {
+      moduleUpdater.setInBackground();
+      launchMainWindow();
+      updateSplashState(LAUNCHING);
+    }
   });
   addModulesListener(DOWNLOADING_MODULE, ({
     name,
@@ -305,61 +297,11 @@ function initSplash(startMinimized = false) {
   splashState = {};
   launchedMainWindow = false;
   updateAttempt = 0;
-  let widevineCDM;
-  if (_electron.components) {
-    console.log('CDM component API found');
-    const now = performance.now();
-    const componentPromise = _electron.components.whenReady().then(result => {
-      const status = 'cdm-ready-success';
-      analytics.getAnalytics().pushEvent('cdm', 'cdm_ready_complete', {
-        status: status,
-        duration_ms: performance.now() - now,
-        result: JSON.stringify(result)
-      });
-      return Promise.resolve(status);
-    }).catch(err => {
-      const status = 'cdm-ready-error';
-      console.log(`CDM component API load failure: ${JSON.stringify(err)}`);
-      analytics.getAnalytics().pushEvent('cdm', 'cdm_ready_complete', {
-        status: status,
-        duration_ms: performance.now() - now,
-        result: JSON.stringify(err)
-      });
-      return Promise.reject(status);
-    });
-    const timeoutPromise = new Promise((_resolve, reject) => {
-      const ms = 200;
-      setTimeout(() => {
-        return reject(`cdm-ready-timeout-${ms}`);
-      }, ms);
-    });
-    widevineCDM = Promise.race([componentPromise, timeoutPromise]);
-    widevineCDM = widevineCDM.then(result => {
-      console.log(`CDM completed with status: ${result}`);
-      analytics.getAnalytics().pushEvent('cdm', 'cdm_load_status', {
-        status: result
-      });
-      return result;
-    }).catch(e => {
-      console.log(`CDM completed with err: ${e}`);
-      analytics.getAnalytics().pushEvent('cdm', 'cdm_load_status', {
-        status: e
-      });
-      return e;
-    });
-  } else {
-    console.log('CDM component API not found, skipping');
-    const result = 'api-not-found';
-    widevineCDM = Promise.resolve(result);
-    analytics.getAnalytics().pushEvent('cdm', 'cdm_load_status', {
-      status: result
-    });
-  }
   newUpdater = (0, _updater.getUpdater)();
   if (newUpdater == null) {
-    initOldUpdater(widevineCDM);
+    initOldUpdater();
   }
-  launchSplashWindow(startMinimized, widevineCDM);
+  launchSplashWindow(startMinimized);
   quoteCachePath = _path.default.join(paths.getUserData(), 'quotes.json');
   _ipcMain.default.on('UPDATED_QUOTES', (_event, quotes) => cacheLatestQuotes(quotes));
 }
@@ -433,7 +375,7 @@ function resendSplashState() {
   }
   updateSplashState(lastSplashEventState);
 }
-function launchSplashWindow(startMinimized, widevineCDM) {
+function launchSplashWindow(startMinimized) {
   const windowConfig = {
     width: LOADING_WINDOW_WIDTH,
     height: LOADING_WINDOW_HEIGHT,
@@ -484,7 +426,7 @@ function launchSplashWindow(startMinimized, widevineCDM) {
       splashWindow.showInactive();
     }
     if (newUpdater != null) {
-      void updateUntilCurrent(widevineCDM);
+      void updateUntilCurrent();
     } else {
       moduleUpdater.installPendingUpdates();
     }
