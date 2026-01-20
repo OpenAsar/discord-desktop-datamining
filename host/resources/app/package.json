@@ -1,30 +1,30 @@
 {
-  "name": "discord",
-  "license": "UNLICENSED",
-  "description": "Discord Client for Desktop - Bootstrapper",
-  "main": "app_bootstrap/index.js",
-  "private": true,
-  "scripts": {
-    "eslint": "eslint . --ext .ts,.tsx --color --quiet",
-    "prettier": "prettier --write .",
-    "tsc": "tsc --pretty"
-  },
-  "dependencies": {
-    "@sentry/browser": "7.112.0",
-    "@sentry/electron": "4.24.0",
-    "arch": "2.2.0",
-    "electron-log": "5.2.0",
-    "mkdirp": "^1.0.2",
-    "request": "2.88.0",
-    "rimraf": "^2.6.3",
-    "yauzl": "^2.10.0"
-  },
-  "devDependencies": {
-    "@types/node": "*",
-    "@types/request": "^2.48.5",
-    "@types/mkdirp": "^1.0.2",
-    "@types/rimraf": "^3.0.0",
-    "devtron": "1.4.0",
-    "electron": "35.3.0"
-  }
+    "name": "discord",
+    "license": "UNLICENSED",
+    "description": "Discord Client for Desktop - Bootstrapper",
+    "main": "app_bootstrap/index.js",
+    "private": true,
+    "scripts": {
+        "eslint": "eslint . --ext .ts,.tsx --color --quiet",
+        "prettier": "prettier --write .",
+        "tsc": "tsc --pretty"
+    },
+    "dependencies": {
+        "@sentry/browser": "7.112.0",
+        "@sentry/electron": "4.24.0",
+        "arch": "2.2.0",
+        "electron-log": "5.2.0",
+        "mkdirp": "^1.0.2",
+        "request": "2.88.0",
+        "rimraf": "^2.6.3",
+        "yauzl": "^2.10.0"
+    },
+    "devDependencies": {
+        "@types/node": "*",
+        "@types/request": "^2.48.5",
+        "@types/mkdirp": "^1.0.2",
+        "@types/rimraf": "^3.0.0",
+        "devtron": "1.4.0",
+        "electron": "37.6.1"
+    }
 }
