@@ -95,11 +95,22 @@ function setupSettingsFlags() {
   }
   for (const s of switches) {
     if (validSwitches[s] !== 0) {
-      app.commandLine.appendSwitch(s, s);
+      app.commandLine.appendSwitch(s);
     }
   }
 }
 setupSettingsFlags();
+function setupH264MFSwitch() {
+  if (process.platform !== 'win32') {
+    return;
+  }
+  const settings = appSettings.getSettings();
+  const enableH264MFElectron = settings === null || settings === void 0 ? void 0 : settings.get('enableH264MFElectron', false);
+  if (enableH264MFElectron) {
+    app.commandLine.appendSwitch('enable-h264-mf');
+  }
+}
+setupH264MFSwitch();
 function NVIDIA(dev) {
   return [0x10de, dev];
 }
