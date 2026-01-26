@@ -10,7 +10,7 @@ const {
   SETTINGS_SET,
   SETTINGS_GET_SYNC
 } = require('../common/constants').IPCEvents;
-const RENDERER_SET_WHITELIST = ['audioSubsystem', 'offloadAdmControls', 'debugLogging', 'asyncVideoInputDeviceInit', 'asyncClipsSourceDeinit', 'ALWAYS_ALLOW_UPDATES', 'ALLOW_OPTIONAL_UPDATES', 'OPTIN_OPTIONAL_UPDATES'];
+const RENDERER_SET_WHITELIST = ['audioSubsystem', 'offloadAdmControls', 'debugLogging', 'asyncVideoInputDeviceInit', 'asyncClipsSourceDeinit', 'ALWAYS_ALLOW_UPDATES', 'ALLOW_OPTIONAL_UPDATES', 'OPTIN_OPTIONAL_UPDATES', 'enableH264MFElectron'];
 async function get(name, defaultValue) {
   return electron.ipcRenderer.invoke(SETTINGS_GET, name, defaultValue);
 }
