@@ -2,7 +2,7 @@
 
 ## ptb versions
 
-**host: 1.0.1175**
+**host: 1.0.1176**
 
 | module | version |
 | ------ | :-----: |
@@ -24,7 +24,7 @@
 | spellcheck | 1 |
 | utils | 1 |
 | vigilante | 1 |
-| voice | 2 |
+| voice | 1 |
 | voice_filters | 1 |
 | zstd | 1 |
 

@@ -51,14 +51,12 @@ function init(bootstrapConstants) {
   const UPDATE_ENDPOINT = bootstrapConstants.UPDATE_ENDPOINT;
   const APP_ID = bootstrapConstants.APP_ID;
   const ALLOW_OPTIONAL_UPDATES = bootstrapConstants.ALLOW_OPTIONAL_UPDATES;
-  const OPTIN_OPTIONAL_UPDATES = bootstrapConstants.OPTIN_OPTIONAL_UPDATES;
   const LOG_LEVEL = bootstrapConstants.LOG_LEVEL;
   const MAIN_APP_DIRNAME = __dirname;
   const exported = {
     APP_NAME,
     APP_NAME_FOR_HUMANS,
     ALLOW_OPTIONAL_UPDATES,
-    OPTIN_OPTIONAL_UPDATES,
     LOG_LEVEL,
     DEFAULT_MAIN_WINDOW_ID: 0,
     MAIN_APP_DIRNAME,
