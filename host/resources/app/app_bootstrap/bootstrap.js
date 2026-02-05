@@ -46,6 +46,9 @@ appSettings.init();
 const Constants = require('./Constants');
 const GPUSettings = require('./GPUSettings');
 function setupHardwareAcceleration() {
+  if (process.platform === 'darwin') {
+    return;
+  }
   const settings = appSettings.getSettings();
   if (!(settings === null || settings === void 0 ? void 0 : settings.get('enableHardwareAcceleration', true))) {
     app.disableHardwareAcceleration();
