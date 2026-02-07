@@ -15,7 +15,7 @@ const {
 } = require('electron');
 const url = require('url');
 const buildInfo = require('./buildInfo');
-const sentry = require('@sentry/electron');
+const sentry = require('@sentry/electron/main');
 const logger = require('./logger');
 app.setVersion(buildInfo.version);
 global.releaseChannel = buildInfo.releaseChannel;
@@ -30,12 +30,9 @@ const blackbox = require('../common/blackbox');
 blackbox.initialize(paths.getModuleDataPath(), buildInfo);
 const crashReporterSetup = require('../common/crashReporterSetup');
 const browser = require('@sentry/browser');
-const {
-  makeElectronOfflineTransport
-} = require('@sentry/electron/main');
 const sentryConfig = {
   sentry,
-  getTransport: dsnFunc => browser.makeMultiplexedTransport(makeElectronOfflineTransport, dsnFunc)
+  getTransport: dsnFunc => browser.makeMultiplexedTransport(sentry.makeElectronOfflineTransport, dsnFunc)
 };
 crashReporterSetup.init(buildInfo, sentryConfig);
 global.moduleDataPath = paths.getModuleDataPath();

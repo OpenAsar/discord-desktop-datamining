@@ -6,8 +6,8 @@ Object.defineProperty(exports, "__esModule", {
 exports.fatal = fatal;
 exports.handled = handled;
 exports.init = init;
-var Sentry = _interopRequireWildcard(require("@sentry/electron"));
-var _electron2 = require("electron");
+var Sentry = _interopRequireWildcard(require("@sentry/electron/main"));
+var _electron = require("electron");
 var _process = _interopRequireDefault(require("process"));
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
@@ -30,7 +30,7 @@ function init() {
         console.error(`${message} error: ${error}`);
         _process.default.exit(-1);
       }
-      _electron2.dialog.showErrorBox('A JavaScript error occurred in the main process', message);
+      _electron.dialog.showErrorBox('A JavaScript error occurred in the main process', message);
     }
   });
 }
@@ -44,7 +44,7 @@ function fatal(err) {
   if (consoleOutputOnly) {
     _process.default.exit(-1);
   }
-  _electron2.dialog.showMessageBox(options).then(() => _electron2.app.quit()).catch(error => {
+  _electron.dialog.showMessageBox(options).then(() => _electron.app.quit()).catch(error => {
     console.error('Error showing message box:', error);
   });
   Sentry.captureException(err);

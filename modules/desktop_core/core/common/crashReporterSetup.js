@@ -60,7 +60,7 @@ function initializeSentrySdk(config, buildInfo) {
     environment: buildInfo.releaseChannel,
     release: buildInfo.version,
     sampleRate: getSampleRate(buildInfo.releaseChannel),
-    autoSessionTracking: false,
+    integrations: defaults => defaults.filter(i => i.name !== 'MainProcessSession'),
     maxValueLength: 250,
     beforeSend(event, hint) {
       event.extra = metadata;
