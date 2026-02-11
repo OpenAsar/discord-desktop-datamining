@@ -12,6 +12,7 @@ Object.defineProperty(exports, "basename", {
 exports.checkMLModelFilesExist = checkMLModelFilesExist;
 exports.checkVoiceFilterFilesExist = checkVoiceFilterFilesExist;
 exports.cleanupUnusedMLModelFiles = cleanupUnusedMLModelFiles;
+exports.cleanupUnusedOpenH264Files = cleanupUnusedOpenH264Files;
 exports.cleanupUnusedVoiceFilterFiles = cleanupUnusedVoiceFilterFiles;
 exports.combineWebRtcLogs = combineWebRtcLogs;
 Object.defineProperty(exports, "dirname", {
@@ -35,6 +36,7 @@ exports.getMLDataDir = getMLDataDir;
 exports.getMLDataDirSync = getMLDataDirSync;
 exports.getModuleDataPathSync = getModuleDataPathSync;
 exports.getModulePath = getModulePath;
+exports.getOpenH264Dir = getOpenH264Dir;
 exports.getVoiceFilterDataDir = getVoiceFilterDataDir;
 exports.getVoiceFilterDataDirSync = getVoiceFilterDataDirSync;
 Object.defineProperty(exports, "join", {
@@ -45,6 +47,7 @@ Object.defineProperty(exports, "join", {
 });
 exports.logLevelSync = logLevelSync;
 exports.maybeDownloadMLModelFile = maybeDownloadMLModelFile;
+exports.maybeDownloadOpenH264 = maybeDownloadOpenH264;
 exports.maybeDownloadVoiceFilterFile = maybeDownloadVoiceFilterFile;
 exports.openFiles = openFiles;
 exports.readLogFiles = readLogFiles;
@@ -55,9 +58,13 @@ exports.showOpenDialog = showOpenDialog;
 exports.stopMLModelDownloads = stopMLModelDownloads;
 exports.stopVoiceFilterDownloads = stopVoiceFilterDownloads;
 exports.uploadDiscordHookCrashes = uploadDiscordHookCrashes;
+var _unbzip2Stream = _interopRequireDefault(require("@openpgp/unbzip2-stream"));
 var _fs = _interopRequireDefault(require("fs"));
 var _nodeDownloaderHelper = require("node-downloader-helper");
+var _nodeCrypto = require("node:crypto");
 var _promises = require("node:fs/promises");
+var _nodeStream = require("node:stream");
+var _promises2 = require("node:stream/promises");
 var _path = _interopRequireWildcard(require("path"));
 var blackbox = _interopRequireWildcard(require("../../../common/blackbox"));
 var _utils = require("../../../common/utils");
@@ -128,35 +135,27 @@ async function showOpenDialog({
   });
   return results.filePaths;
 }
-const voiceFilterDownloaders = [];
-async function maybeDownloadVoiceFilterFile(cdnURL, fileName, onProgress) {
-  if (!cdnURL.startsWith('https://cdn.discordapp.com/assets/content')) {
-    throw new Error('Voice Filters invalid CDN URL');
-  }
+async function maybeDownloadAsset(cdnURL, fileName, category, onProgress) {
+  const {
+    destination,
+    downloaders
+  } = category;
   if ((0, _files.containsInvalidFileChar)(fileName)) {
-    throw new Error('Voice Filters fileName has invalid characters');
+    throw new Error(category.name + ' fileName has invalid characters');
   }
   if (!Boolean(fileName)) {
-    throw new Error('Voice Filters fileName is not set');
-  }
-  let voiceFiltersDataPath;
-  try {
-    voiceFiltersDataPath = await getVoiceFilterDataDir();
-  } catch (cause) {
-    throw new Error('Voice Filters unable to get path of data dir', {
-      cause
-    });
+    throw new Error(category.name + ' fileName is not set');
   }
   try {
-    await (0, _promises.mkdir)(voiceFiltersDataPath, {
+    await (0, _promises.mkdir)(destination, {
       recursive: true
     });
   } catch (cause) {
-    throw new Error('Voice Filters unable create data dir', {
+    throw new Error(category.name + ' unable create data dir', {
       cause
     });
   }
-  const finishedFilePath = _path.default.join(voiceFiltersDataPath, fileName);
+  const finishedFilePath = _path.default.join(destination, fileName);
   try {
     await _fs.default.promises.access(finishedFilePath);
     return {
@@ -164,8 +163,8 @@ async function maybeDownloadVoiceFilterFile(cdnURL, fileName, onProgress) {
     };
   } catch {}
   const partialFileName = `${fileName}.partial`;
-  const partialFilePath = _path.default.join(voiceFiltersDataPath, partialFileName);
-  const dl = new _nodeDownloaderHelper.DownloaderHelper(cdnURL, voiceFiltersDataPath, {
+  const partialFilePath = _path.default.join(destination, partialFileName);
+  const dl = new _nodeDownloaderHelper.DownloaderHelper(cdnURL, destination, {
     method: 'GET',
     resumeOnIncomplete: true,
     resumeOnIncompleteMaxRetry: 5,
@@ -179,13 +178,13 @@ async function maybeDownloadVoiceFilterFile(cdnURL, fileName, onProgress) {
     removeOnFail: false,
     progressThrottle: 200
   });
-  voiceFilterDownloaders.push(new WeakRef(dl));
+  downloaders.push(new WeakRef(dl));
   return new Promise((resolve, reject) => {
     dl.on('end', ({
       incomplete
     }) => {
       if (incomplete) {
-        reject(new Error('Voice Filters download incomplete'));
+        reject(new Error(category.name + ' download incomplete'));
       } else {
         (0, _promises.rename)(partialFilePath, finishedFilePath).then(() => resolve({
           fetchedFromNetwork: true
@@ -206,13 +205,84 @@ async function maybeDownloadVoiceFilterFile(cdnURL, fileName, onProgress) {
         totalBytes
       });
     });
-    dl.on('timeout', () => reject(new Error('Voice Filters timeout')));
+    dl.on('timeout', () => reject(new Error(category.name + ' timeout')));
     dl.on('error', reject);
     dl.on('stop', () => reject({
       USER_CANCELED_DOWNLOAD: true
     }));
     dl.start().catch(reject);
   });
+}
+async function cleanupUnusedAssets(neededFileNames, assetPath, category) {
+  const deletedFiles = [];
+  const errors = [];
+  try {
+    try {
+      await _fs.default.promises.access(assetPath);
+    } catch {
+      return {
+        deletedFiles,
+        errors
+      };
+    }
+    const existingFiles = await _fs.default.promises.readdir(assetPath);
+    const neededFileSet = new Set(neededFileNames);
+    const neededPartialFileSet = new Set(neededFileNames.map(fileName => `${fileName}.partial`));
+    for (const fileName of existingFiles) {
+      if (neededFileSet.has(fileName)) {
+        continue;
+      }
+      if (fileName.endsWith('.partial')) {
+        if (neededPartialFileSet.has(fileName)) {
+          continue;
+        }
+      } else {
+        if (fileName.startsWith('.') || !fileName.includes('.')) {
+          continue;
+        }
+      }
+      const fullPath = _path.default.join(assetPath, fileName);
+      try {
+        await _fs.default.promises.unlink(fullPath);
+        deletedFiles.push(fileName);
+        console.log(`${category} cleanup: Deleted unused file "${fileName}"`);
+      } catch (error) {
+        const errorMsg = `Failed to delete "${fileName}": ${error}`;
+        errors.push(errorMsg);
+        console.error(`${category} cleanup: ${errorMsg}`);
+      }
+    }
+    if (deletedFiles.length > 0) {
+      console.log(`${category} cleanup: Deleted ${deletedFiles.length} unused files`);
+    }
+  } catch (cause) {
+    const errorMsg = `${category} cleanup failed: ${cause}`;
+    errors.push(errorMsg);
+    console.error(errorMsg);
+  }
+  return {
+    deletedFiles,
+    errors
+  };
+}
+const voiceFilterDownloaders = [];
+async function maybeDownloadVoiceFilterFile(cdnURL, fileName, onProgress) {
+  if (!cdnURL.startsWith('https://cdn.discordapp.com/assets/content')) {
+    throw new Error('Voice Filters invalid CDN URL');
+  }
+  let voiceFiltersDataPath;
+  try {
+    voiceFiltersDataPath = await getVoiceFilterDataDir();
+  } catch (cause) {
+    throw new Error('Voice Filters unable to get path of data dir', {
+      cause
+    });
+  }
+  return maybeDownloadAsset(cdnURL, fileName, {
+    name: 'Voice Filters',
+    destination: voiceFiltersDataPath,
+    downloaders: voiceFilterDownloaders
+  }, onProgress);
 }
 function stopVoiceFilterDownloads() {
   while (voiceFilterDownloaders.length > 0) {
@@ -248,68 +318,23 @@ async function checkVoiceFilterFilesExist(files) {
   return results;
 }
 async function cleanupUnusedVoiceFilterFiles(neededFileNames) {
-  const deletedFiles = [];
-  const errors = [];
+  let voiceFiltersDataPath;
   try {
-    const voiceFiltersDataPath = getVoiceFilterDataDirSync();
-    try {
-      await _fs.default.promises.access(voiceFiltersDataPath);
-    } catch {
-      return {
-        deletedFiles,
-        errors
-      };
-    }
-    const existingFiles = await _fs.default.promises.readdir(voiceFiltersDataPath);
-    const neededFileSet = new Set(neededFileNames);
-    const neededPartialFileSet = new Set(neededFileNames.map(fileName => `${fileName}.partial`));
-    for (const fileName of existingFiles) {
-      if (neededFileSet.has(fileName)) {
-        continue;
-      }
-      if (fileName.endsWith('.partial')) {
-        if (neededPartialFileSet.has(fileName)) {
-          continue;
-        }
-      } else {
-        if (fileName.startsWith('.') || !fileName.includes('.')) {
-          continue;
-        }
-      }
-      const fullPath = _path.default.join(voiceFiltersDataPath, fileName);
-      try {
-        await _fs.default.promises.unlink(fullPath);
-        deletedFiles.push(fileName);
-        console.log(`Voice Filters cleanup: Deleted unused file "${fileName}"`);
-      } catch (error) {
-        const errorMsg = `Failed to delete "${fileName}": ${error}`;
-        errors.push(errorMsg);
-        console.error(`Voice Filters cleanup: ${errorMsg}`);
-      }
-    }
-    if (deletedFiles.length > 0) {
-      console.log(`Voice Filters cleanup: Deleted ${deletedFiles.length} unused files`);
-    }
+    voiceFiltersDataPath = await getVoiceFilterDataDir();
   } catch (cause) {
     const errorMsg = `Voice Filters cleanup failed: ${cause}`;
-    errors.push(errorMsg);
     console.error(errorMsg);
+    return {
+      deletedFiles: [],
+      errors: [errorMsg]
+    };
   }
-  return {
-    deletedFiles,
-    errors
-  };
+  return cleanupUnusedAssets(neededFileNames, voiceFiltersDataPath, 'Voice Filters');
 }
 const mlModelDownloaders = [];
 async function maybeDownloadMLModelFile(cdnURL, fileName, onProgress) {
   if (!cdnURL.startsWith('https://cdn.discordapp.com/assets/content')) {
     throw new Error('ML Models invalid CDN URL');
-  }
-  if ((0, _files.containsInvalidFileChar)(fileName)) {
-    throw new Error('ML Models fileName has invalid characters');
-  }
-  if (!Boolean(fileName)) {
-    throw new Error('ML Models fileName is not set');
   }
   let mlModelsDataPath;
   try {
@@ -319,72 +344,11 @@ async function maybeDownloadMLModelFile(cdnURL, fileName, onProgress) {
       cause
     });
   }
-  try {
-    await (0, _promises.mkdir)(mlModelsDataPath, {
-      recursive: true
-    });
-  } catch (cause) {
-    throw new Error('ML Models unable create data dir', {
-      cause
-    });
-  }
-  const finishedFilePath = _path.default.join(mlModelsDataPath, fileName);
-  try {
-    await _fs.default.promises.access(finishedFilePath);
-    return {
-      fetchedFromNetwork: false
-    };
-  } catch {}
-  const partialFileName = `${fileName}.partial`;
-  const partialFilePath = _path.default.join(mlModelsDataPath, partialFileName);
-  const dl = new _nodeDownloaderHelper.DownloaderHelper(cdnURL, mlModelsDataPath, {
-    method: 'GET',
-    resumeOnIncomplete: true,
-    resumeOnIncompleteMaxRetry: 5,
-    resumeIfFileExists: true,
-    fileName: partialFileName,
-    retry: {
-      maxRetries: 3,
-      delay: 1000
-    },
-    removeOnStop: false,
-    removeOnFail: false,
-    progressThrottle: 200
-  });
-  mlModelDownloaders.push(new WeakRef(dl));
-  return new Promise((resolve, reject) => {
-    dl.on('end', ({
-      incomplete
-    }) => {
-      if (incomplete) {
-        reject(new Error('ML Models download incomplete'));
-      } else {
-        (0, _promises.rename)(partialFilePath, finishedFilePath).then(() => resolve({
-          fetchedFromNetwork: true
-        })).catch(reject);
-      }
-    });
-    dl.on('skip', () => {
-      (0, _promises.rename)(partialFilePath, finishedFilePath).then(() => resolve({
-        fetchedFromNetwork: false
-      })).catch(reject);
-    });
-    dl.on('progress.throttled', ({
-      downloaded: downloadedBytes,
-      total: totalBytes
-    }) => {
-      onProgress({
-        downloadedBytes,
-        totalBytes
-      });
-    });
-    dl.on('timeout', () => reject(new Error('ML Models timeout')));
-    dl.on('error', reject);
-    dl.on('stop', () => reject({
-      USER_CANCELED_DOWNLOAD: true
-    }));
-    dl.start().catch(reject);
-  });
+  return maybeDownloadAsset(cdnURL, fileName, {
+    name: 'ML Models',
+    destination: mlModelsDataPath,
+    downloaders: mlModelDownloaders
+  }, onProgress);
 }
 function stopMLModelDownloads() {
   while (mlModelDownloaders.length > 0) {
@@ -420,57 +384,91 @@ async function checkMLModelFilesExist(files) {
   return results;
 }
 async function cleanupUnusedMLModelFiles(neededFileNames) {
-  const deletedFiles = [];
-  const errors = [];
+  let mlModelsDataPath;
   try {
-    const mlModelsDataPath = getMLDataDirSync();
-    try {
-      await _fs.default.promises.access(mlModelsDataPath);
-    } catch {
-      return {
-        deletedFiles,
-        errors
-      };
-    }
-    const existingFiles = await _fs.default.promises.readdir(mlModelsDataPath);
-    const neededFileSet = new Set(neededFileNames);
-    const neededPartialFileSet = new Set(neededFileNames.map(fileName => `${fileName}.partial`));
-    for (const fileName of existingFiles) {
-      if (neededFileSet.has(fileName)) {
-        continue;
-      }
-      if (fileName.endsWith('.partial')) {
-        if (neededPartialFileSet.has(fileName)) {
-          continue;
-        }
-      } else {
-        if (fileName.startsWith('.') || !fileName.includes('.')) {
-          continue;
-        }
-      }
-      const fullPath = _path.default.join(mlModelsDataPath, fileName);
-      try {
-        await _fs.default.promises.unlink(fullPath);
-        deletedFiles.push(fileName);
-        console.log(`ML Models cleanup: Deleted unused file "${fileName}"`);
-      } catch (error) {
-        const errorMsg = `Failed to delete "${fileName}": ${error}`;
-        errors.push(errorMsg);
-        console.error(`ML Models cleanup: ${errorMsg}`);
-      }
-    }
-    if (deletedFiles.length > 0) {
-      console.log(`ML Models cleanup: Deleted ${deletedFiles.length} unused files`);
-    }
+    mlModelsDataPath = await getMLDataDir();
   } catch (cause) {
     const errorMsg = `ML Models cleanup failed: ${cause}`;
-    errors.push(errorMsg);
     console.error(errorMsg);
+    return {
+      deletedFiles: [],
+      errors: [errorMsg]
+    };
   }
-  return {
-    deletedFiles,
-    errors
-  };
+  return cleanupUnusedAssets(neededFileNames, mlModelsDataPath, 'ML Models');
+}
+async function maybeDownloadOpenH264(cdnURL, fileName, sha256, onProgress) {
+  if (!cdnURL.startsWith('https://ciscobinary.openh264.org/')) {
+    throw new Error('OpenH264 invalid CDN URL');
+  }
+  if (!cdnURL.endsWith('.bz2')) {
+    throw new Error('OpenH264 CDN URL must point to a bzip2 archive');
+  }
+  let openH264Path;
+  try {
+    openH264Path = await getOpenH264Dir();
+  } catch (cause) {
+    throw new Error('Unable to get OpenH264 path', {
+      cause
+    });
+  }
+  const filePath = _path.default.join(openH264Path, fileName);
+  try {
+    await _fs.default.promises.access(filePath);
+    return {
+      fetchedFromNetwork: false
+    };
+  } catch {}
+  const archiveName = fileName + '.bz2';
+  const result = await maybeDownloadAsset(cdnURL, archiveName, {
+    name: 'OpenH264',
+    destination: openH264Path,
+    downloaders: []
+  }, onProgress);
+  const archivePath = openH264Path + '/' + archiveName;
+  const stream = (0, _unbzip2Stream.default)(_nodeStream.Readable.toWeb(_fs.default.createReadStream(archivePath)));
+  const hash = (0, _nodeCrypto.createHash)('sha256');
+  try {
+    await (0, _promises2.pipeline)(stream, async function* (source) {
+      for await (const chunk of source) {
+        hash.update(chunk);
+        yield chunk;
+      }
+    }, _fs.default.createWriteStream(filePath));
+  } catch (cause) {
+    try {
+      await cleanupUnusedOpenH264Files([]);
+    } catch (e) {
+      console.warn('Removing bad OpenH264 download failed', e);
+    }
+    throw new Error('OpenH264 unbzip2 failed', {
+      cause
+    });
+  }
+  const calcSha = hash.digest('hex');
+  if (calcSha !== sha256) {
+    try {
+      await cleanupUnusedOpenH264Files([]);
+    } catch (e) {
+      console.warn('Removing bad OpenH264 download failed', e);
+    }
+    throw new Error('OpenH264 Expected sha256 ' + sha256 + ', but got ' + calcSha);
+  }
+  return result;
+}
+async function cleanupUnusedOpenH264Files(neededFileNames) {
+  let openH264Path;
+  try {
+    openH264Path = await getOpenH264Dir();
+  } catch (cause) {
+    const errorMsg = `OpenH264 cleanup failed: ${cause}`;
+    console.error(errorMsg);
+    return {
+      deletedFiles: [],
+      errors: [errorMsg]
+    };
+  }
+  return cleanupUnusedAssets(neededFileNames, openH264Path, 'OpenH264');
 }
 function getAndCreateLogDirectorySync() {
   let logDir = null;
@@ -642,6 +640,10 @@ async function getMLDataDir() {
 }
 function getMLDataDirSync() {
   return _path.default.join(getAssetCachePathSync(), 'ml');
+}
+async function getOpenH264Dir() {
+  const assetCachePath = await getAssetCachePath();
+  return _path.default.join(assetCachePath, 'openh264');
 }
 function getModulePath() {
   return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.FILE_MANAGER_GET_MODULE_PATH);

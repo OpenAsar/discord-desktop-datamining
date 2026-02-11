@@ -11,7 +11,7 @@ var _electron = require("electron");
 var _events = require("events");
 var _fs = _interopRequireDefault(require("fs"));
 var _path = _interopRequireDefault(require("path"));
-var _process = require("process");
+var _process = _interopRequireDefault(require("process"));
 var analytics = _interopRequireWildcard(require("./analytics"));
 function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
 function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
@@ -211,15 +211,15 @@ class Updater extends _events.EventEmitter {
       this.committedHostVersion = versions.current_host;
     }
     const hostPath = this._getHostPath();
-    const hostExePath = _path.default.join(hostPath, _path.default.basename(process.execPath));
-    if (_path.default.resolve(hostExePath) !== _path.default.resolve(process.execPath) && !(options === null || options === void 0 ? void 0 : options.allowObsoleteHost)) {
+    const hostExePath = _path.default.join(hostPath, _path.default.basename(_process.default.execPath));
+    if (_path.default.resolve(hostExePath) !== _path.default.resolve(_process.default.execPath) && !(options === null || options === void 0 ? void 0 : options.allowObsoleteHost)) {
       _electron.app.once('will-quit', () => {
         _child_process.default.spawn(hostExePath, [], {
           detached: true,
           stdio: 'inherit'
         });
       });
-      console.log(`Will Restart from ${_path.default.resolve(process.execPath)} to ${_path.default.resolve(hostExePath)}`);
+      console.log(`Will Restart from ${_path.default.resolve(_process.default.execPath)} to ${_path.default.resolve(hostExePath)}`);
       try {
         const paths = require('./paths');
         const userDataPath = paths.getUserData();
@@ -237,7 +237,7 @@ class Updater extends _events.EventEmitter {
       }
       const desktopTTI = analytics.getDesktopTTI();
       desktopTTI.trackSplashWindowRestart();
-      console.log(`Restarting from ${_path.default.resolve(process.execPath)} to ${_path.default.resolve(hostExePath)}`);
+      console.log(`Restarting from ${_path.default.resolve(_process.default.execPath)} to ${_path.default.resolve(hostExePath)}`);
       _electron.app.quit();
       this.emit('starting-new-host');
       return;
@@ -261,7 +261,7 @@ class Updater extends _events.EventEmitter {
     }
   }
   _recordDownloadProgress(name, progress) {
-    const now = String(_process.hrtime.bigint());
+    const now = String(_process.default.hrtime.bigint());
     if (progress.state === TASK_STATE_WORKING && !this.currentlyDownloading[name]) {
       this.currentlyDownloading[name] = true;
       this.updateEventHistory.push({
@@ -281,7 +281,7 @@ class Updater extends _events.EventEmitter {
     }
   }
   _recordInstallProgress(name, progress, newVersion, isDelta) {
-    const now = String(_process.hrtime.bigint());
+    const now = String(_process.default.hrtime.bigint());
     if (progress.state === TASK_STATE_WORKING && !this.currentlyInstalling[name]) {
       this.currentlyInstalling[name] = true;
       this.updateEventHistory.push({
@@ -436,7 +436,7 @@ function tryInitUpdater(buildInfo, repositoryUrl) {
   if (rootPath == null) {
     return false;
   }
-  const platform = getUpdaterPlatformName(process.platform);
+  const platform = getUpdaterPlatformName(_process.default.platform);
   let currentArch = null;
   if (platform === 'win') {
     currentArch = arch();
