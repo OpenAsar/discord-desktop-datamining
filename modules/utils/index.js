@@ -5,7 +5,6 @@ const readline = require('node:readline');
 const EventEmitter = require('node:events');
 const fs = require('fs');
 const path = require('path');
-const {inputCaptureSetWatcher, inputCaptureRegisterElement} = require('./input_capture');
 const {wrapInputEventRegister, wrapInputEventUnregister} = require('./input_event');
 const {getNotificationState} = require('windows-notification-state');
 
@@ -14,14 +13,19 @@ const {getNotificationState} = require('windows-notification-state');
 module.exports = require('./discord_utils.node');
 module.exports.clearCandidateGamesCallback = module.exports.setCandidateGamesCallback;
 
-inputCaptureSetWatcher(module.exports.inputWatchAll);
-delete module.exports.inputWatchAll;
-module.exports.inputCaptureRegisterElement = inputCaptureRegisterElement;
+const isElectronRenderer = typeof window !== 'undefined' && window.DiscordNative?.isRenderer;
+
+if (isElectronRenderer) {
+  const {inputCaptureSetWatcher, inputCaptureRegisterElement} = require('./input_capture');
+  inputCaptureSetWatcher(module.exports.inputWatchAll);
+  delete module.exports.inputWatchAll;
+  module.exports.inputCaptureRegisterElement = inputCaptureRegisterElement;
+} else {
+  delete module.exports.inputWatchAll;
+}
 
 module.exports.inputEventRegister = wrapInputEventRegister(module.exports.inputEventRegister);
 module.exports.inputEventUnregister = wrapInputEventUnregister(module.exports.inputEventUnregister);
-
-const isElectronRenderer = window?.DiscordNative?.isRenderer;
 let dataDirectory;
 if (isElectronRenderer) {
   try {
@@ -41,19 +45,23 @@ if (isElectronRenderer) {
 }
 
 // Init logging
-const isFileManagerAvailable = window?.DiscordNative?.fileManager;
-const isLogDirAvailable = isFileManagerAvailable?.getAndCreateLogDirectorySync;
-if (isLogDirAvailable) {
-  const logDirectory = window.DiscordNative.fileManager.getAndCreateLogDirectorySync();
-  const logLevel = window.DiscordNative.fileManager.logLevelSync();
-  module.exports.init({logDirectory: logDirectory, logLevel: logLevel});
+if (isElectronRenderer) {
+  const isFileManagerAvailable = window.DiscordNative?.fileManager;
+  const isLogDirAvailable = isFileManagerAvailable?.getAndCreateLogDirectorySync;
+  if (isLogDirAvailable) {
+    const logDirectory = window.DiscordNative.fileManager.getAndCreateLogDirectorySync();
+    const logLevel = window.DiscordNative.fileManager.logLevelSync();
+    module.exports.init({logDirectory: logDirectory, logLevel: logLevel});
+  } else {
+    console.warn('Unable to find log directory');
+    module.exports.init();
+  }
 } else {
-  console.warn('Unable to find log directory');
   module.exports.init();
 }
 
-if (process.platform === 'win32') {
-  const releaseChannel = window?.DiscordNative?.app?.getReleaseChannel?.();
+if (process.platform === 'win32' && isElectronRenderer) {
+  const releaseChannel = window.DiscordNative?.app?.getReleaseChannel?.();
   if (releaseChannel) {
     console.log('service release channel:', releaseChannel);
     module.exports.setServiceChannel?.(releaseChannel);
