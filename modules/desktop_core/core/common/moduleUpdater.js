@@ -20,7 +20,7 @@ var _fs = _interopRequireDefault(require("fs"));
 var _mkdirp = _interopRequireDefault(require("mkdirp"));
 var _os = _interopRequireDefault(require("os"));
 var _path = _interopRequireDefault(require("path"));
-var _process = require("process");
+var _process = _interopRequireDefault(require("process"));
 var _yauzl = _interopRequireDefault(require("yauzl"));
 var _Backoff = _interopRequireDefault(require("./Backoff"));
 var analytics = _interopRequireWildcard(require("./analytics"));
@@ -54,11 +54,11 @@ class Events extends _events.EventEmitter {
     this.history = [];
   }
   append(evt) {
-    evt.now = String(_process.hrtime.bigint());
+    evt.now = String(_process.default.hrtime.bigint());
     if (this._eventIsInteresting(evt)) {
       this.history.push(evt);
     }
-    process.nextTick(() => this.emit(evt.type, evt));
+    _process.default.nextTick(() => this.emit(evt.type, evt));
   }
   _eventIsInteresting(evt) {
     return evt.type !== DOWNLOADING_MODULE_PROGRESS && evt.type !== INSTALLING_MODULE_PROGRESS;
@@ -161,7 +161,7 @@ function initPathsOnly(_buildInfo) {
   }
 }
 function checkOSVersionSupported() {
-  if (process.platform === 'darwin') {
+  if (_process.default.platform === 'darwin') {
     try {
       const osVersion = _os.default.release();
       const osMajorVersion = Number(osVersion.split('.')[0]);
@@ -245,7 +245,7 @@ function init(_endpoint, _settings, _buildInfo) {
     host_version: buildInfo.version
   };
   if (_processUtils.IS_OSX) {
-    const appFolder = _path.default.resolve(process.execPath);
+    const appFolder = _path.default.resolve(_process.default.execPath);
     _fs.default.access(appFolder, _fs.default.constants.W_OK, err => {
       if (err != null) {
         const isInApplicationFolder = app.isInApplicationsFolder();
@@ -269,7 +269,7 @@ function init(_endpoint, _settings, _buildInfo) {
       }
     });
   }
-  switch (process.platform) {
+  switch (_process.default.platform) {
     case 'darwin':
       feedURL = `${endpoint}/updates/${buildInfo.releaseChannel}?platform=osx&version=${buildInfo.version}`;
       setFeedURL(feedURL);
@@ -410,7 +410,7 @@ function hostOnError(err) {
   }
 }
 async function checkForHostUpdates() {
-  if (process.platform === 'darwin' && (releaseChannel === 'development' || releaseChannel === 'canary')) {
+  if (_process.default.platform === 'darwin' && (releaseChannel === 'development' || releaseChannel === 'canary')) {
     let shouldSkipUpdate = false;
     try {
       logger.log('Performing host update pre-check (macOS only)...');
@@ -476,7 +476,7 @@ function setInBackground() {
   runningInBackground = true;
 }
 function getRemoteModuleName(name) {
-  if (_processUtils.IS_WIN && process.arch === 'x64') {
+  if (_processUtils.IS_WIN && _process.default.arch === 'x64') {
     return `${name}.x64`;
   }
   return name;
@@ -552,7 +552,7 @@ function addModuleToDownloadQueue(name, version, authToken) {
     version,
     data: authToken
   });
-  process.nextTick(() => processDownloadQueue());
+  _process.default.nextTick(() => processDownloadQueue());
 }
 async function processDownloadQueue() {
   if (download.active) return;
@@ -650,7 +650,7 @@ function finishModuleDownload(name, version, zipfile, receivedBytes, succeeded) 
     };
     if (succeeded) {
       backoff.succeed();
-      process.nextTick(continueDownloads);
+      _process.default.nextTick(continueDownloads);
     } else {
       logger.log(`Waiting ${Math.floor(backoff.current)}ms before next download.`);
       backoff.fail(continueDownloads);
@@ -666,7 +666,7 @@ function addModuleToUnzipQueue(name, version, zipfile) {
     version,
     data: zipfile
   });
-  process.nextTick(() => processUnzipQueue());
+  _process.default.nextTick(() => processUnzipQueue());
 }
 function processUnzipQueue() {
   if (unzip.active) return;
@@ -802,7 +802,7 @@ function finishModuleUnzip(unzippedModule, succeeded) {
     });
     return;
   }
-  process.nextTick(() => {
+  _process.default.nextTick(() => {
     unzip.active = false;
     processUnzipQueue();
   });
