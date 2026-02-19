@@ -53,7 +53,6 @@ const audioSubsystem = appSettings
 const offloadAdmControls = appSettings ? appSettings.getSync('offloadAdmControls', false) : false;
 const debugLogging = appSettings ? appSettings.getSync('debugLogging', true) : true;
 const asyncVideoInputDeviceInit = appSettings ? appSettings.getSync('asyncVideoInputDeviceInit', false) : false;
-const asyncClipsSourceDeinit = appSettings ? appSettings.getSync('asyncClipsSourceDeinit', false) : false;
 
 function versionGreaterThanOrEqual(v1, v2) {
   const v1parts = v1.split('.').map(Number);
@@ -157,7 +156,6 @@ features.declareSupported('offload_adm_controls');
 features.declareSupported('audio_codec_red');
 features.declareSupported('sidechain_compression');
 features.declareSupported('async_video_input_device_init');
-features.declareSupported('async_clips_source_deinit');
 features.declareSupported('port_aware_latency_testing');
 
 if (process.platform === 'darwin') {
@@ -265,7 +263,6 @@ function bindConnectionInstance(instance) {
     configureConnectionRetries: (baseDelay, maxDelay, maxAttempts) =>
       instance.configureConnectionRetries(baseDelay, maxDelay, maxAttempts),
     setOnSpeakingCallback: (callback) => instance.setOnSpeakingCallback(callback),
-    setOnNativeMuteToggleCallback: (callback) => instance.setOnNativeMuteToggleCallback?.(callback),
     setOnNativeMuteChangedCallback: (callback) => instance.setOnNativeMuteChangedCallback?.(callback),
     setOnSpeakingWhileMutedCallback: (callback) => instance.setOnSpeakingWhileMutedCallback(callback),
     setPingInterval: (interval) => instance.setPingInterval(interval),
@@ -367,10 +364,6 @@ VoiceEngine.setOffloadAdmControls = function (doOffload) {
 
 VoiceEngine.setAsyncVideoInputDeviceInitSetting = function (enable) {
   appSettings.set('asyncVideoInputDeviceInit', enable);
-};
-
-VoiceEngine.setAsyncClipsSourceDeinitSetting = function (enable) {
-  appSettings.set('asyncClipsSourceDeinit', enable);
 };
 
 VoiceEngine.setDebugLogging = function (enable) {
@@ -531,7 +524,6 @@ VoiceEngine.initialize({
   useFilesForFakeAudioCapture,
   offloadAdmControls,
   asyncVideoInputDeviceInit,
-  asyncClipsSourceDeinit,
 });
 
 module.exports = VoiceEngine;

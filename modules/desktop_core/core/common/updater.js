@@ -429,7 +429,7 @@ function getUpdaterPlatformName(platform) {
       return platform;
   }
 }
-function tryInitUpdater(buildInfo, repositoryUrl) {
+function tryInitUpdater(buildInfo, repositoryUrl, useRustBspatch) {
   const paths = require('./paths');
   const rootPath = paths.getInstallPath();
   const userDataPath = paths.getUserData();
@@ -448,7 +448,8 @@ function tryInitUpdater(buildInfo, repositoryUrl) {
     repository_url: repositoryUrl,
     root_path: rootPath,
     current_os_arch: currentArch,
-    user_data_path: userDataPath
+    user_data_path: userDataPath,
+    use_rust_bspatch: useRustBspatch
   });
   const eventCachePath = _path.default.join(userDataPath, EVENT_CACHE_FILENAME);
   if (_fs.default.existsSync(eventCachePath)) {

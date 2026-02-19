@@ -97,7 +97,7 @@ function getSystemServiceHelperExe() {
   if (_buildInfo.default.releaseChannel === 'development' && _buildInfo.default.standaloneModules) {
     return null;
   }
-  if (!(0, _updater.tryInitUpdater)(_buildInfo.default, _Constants.default.NEW_UPDATE_ENDPOINT)) {
+  if (!(0, _updater.tryInitUpdater)(_buildInfo.default, _Constants.default.NEW_UPDATE_ENDPOINT, _Constants.default.USE_RUST_BSPATCH)) {
     return null;
   }
   const updater = (0, _updater.getUpdater)();

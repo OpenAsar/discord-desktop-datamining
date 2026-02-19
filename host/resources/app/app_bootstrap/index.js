@@ -22,12 +22,13 @@ if (mode === 'app') {
   const appSettings = require('./appSettings');
   appSettings.init();
   const {
-    NEW_UPDATE_ENDPOINT
+    NEW_UPDATE_ENDPOINT,
+    USE_RUST_BSPATCH
   } = require('./Constants');
   const isStandaloneModules = _buildInfo.default.releaseChannel === 'development' && _buildInfo.default.standaloneModules;
   if (!_buildInfo.default.debug && !isStandaloneModules && _buildInfo.default.newUpdater) {
     var _getUpdater;
-    if (!(0, _updater.tryInitUpdater)(_buildInfo.default, NEW_UPDATE_ENDPOINT)) {
+    if (!(0, _updater.tryInitUpdater)(_buildInfo.default, NEW_UPDATE_ENDPOINT, USE_RUST_BSPATCH)) {
       throw new Error('Failed to initialize modules in overlay host.');
     }
     (_getUpdater = (0, _updater.getUpdater)()) === null || _getUpdater === void 0 ? void 0 : _getUpdater.startCurrentVersionSync({
