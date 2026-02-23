@@ -25,6 +25,7 @@ const UPDATE_ENDPOINT = (settings === null || settings === void 0 ? void 0 : set
 const NEW_UPDATE_ENDPOINT = (settings === null || settings === void 0 ? void 0 : settings.get('NEW_UPDATE_ENDPOINT')) || 'https://updates.discord.com/';
 const ALLOW_OPTIONAL_UPDATES = settings === null || settings === void 0 ? void 0 : settings.get('ALLOW_OPTIONAL_UPDATES', true);
 const LOG_LEVEL = (settings === null || settings === void 0 ? void 0 : settings.get('LOG_LEVEL')) || 'info';
+const USE_RUST_BSPATCH = settings === null || settings === void 0 ? void 0 : settings.get('USE_RUST_BSPATCH', false);
 var IPCEvents = function (IPCEvents) {
   IPCEvents["GET_BUILD_OVERRIDE_STATUS"] = "DISCORD_GET_BUILD_OVERRIDE_STATUS";
   IPCEvents["CLEAR_BUILD_OVERRIDE"] = "DISCORD_CLEAR_BUILD_OVERRIDE";
@@ -42,6 +43,7 @@ const bootstrapConstants = {
   ALLOW_OPTIONAL_UPDATES,
   LOG_LEVEL,
   UPDATE_ENDPOINT,
+  USE_RUST_BSPATCH,
   IPCEvents
 };
 var _default = exports.default = bootstrapConstants;
