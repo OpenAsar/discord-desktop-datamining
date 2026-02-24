@@ -2,7 +2,7 @@
 
 ## canary versions
 
-**host: 1.0.831**
+**host: 1.0.832**
 
 | module | version |
 | ------ | :-----: |
@@ -21,7 +21,7 @@
 | overlay2 | 1 |
 | rpc | 1 |
 | spellcheck | 1 |
-| utils | 1 |
+| utils | 2 |
 | voice | 1 |
 | voice_filters | 1 |
 | zstd | 1 |
