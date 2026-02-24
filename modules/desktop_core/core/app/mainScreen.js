@@ -996,12 +996,6 @@ function init() {
       console.error('Failed to set traffic light position', e);
     }
   });
-  _ipcMain.default.on(_constants.IPCEvents.NAVIGATION_HISTORY_CLEAR, () => {
-    if (mainWindow != null && !mainWindow.isDestroyed()) {
-      var _mainWindow$webConten;
-      (_mainWindow$webConten = mainWindow.webContents.navigationHistory) === null || _mainWindow$webConten === void 0 ? void 0 : _mainWindow$webConten.clear();
-    }
-  });
   _ipcMain.default.on('OPEN_EXTERNAL_URL', (_event, externalUrl) => {
     (0, _securityUtils.saferShellOpenExternal)(externalUrl).catch(() => {
       console.error('Failed to open external URL', externalUrl);
