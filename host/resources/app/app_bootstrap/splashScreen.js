@@ -108,10 +108,7 @@ class TaskProgress {
   }
 }
 async function updateUntilCurrent() {
-  let allowOptionalUpdates = _Constants.default.ALLOW_OPTIONAL_UPDATES;
-  if (allowOptionalUpdates) {
-    allowOptionalUpdates = _Constants.default.OPTIN_OPTIONAL_UPDATES;
-  }
+  const allowOptionalUpdates = _Constants.default.ALLOW_OPTIONAL_UPDATES;
   console.log(`allowOptionalUpdates: ${allowOptionalUpdates}`);
   const retryOptions = {
     skip_host_delta: false,

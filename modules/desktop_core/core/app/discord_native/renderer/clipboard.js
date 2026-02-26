@@ -43,11 +43,19 @@ function paste() {
 function read() {
   return _electron.default.clipboard.readText();
 }
+function hasMixedContent() {
+  const formats = _electron.default.clipboard.availableFormats();
+  const textContent = _electron.default.clipboard.readText();
+  const hasText = textContent != null && textContent.trim().length > 0;
+  const hasImage = formats.some(f => f.startsWith('image/') || f === 'CF_DIB' || f === 'CF_BITMAP' || f === 'CF_DIBV5' || f.toLowerCase().includes('image') || f.toLowerCase().includes('bitmap'));
+  return hasText && hasImage;
+}
 module.exports = {
   copy,
   copyImage,
   copyFile,
   cut,
   paste,
-  read
+  read,
+  hasMixedContent
 };

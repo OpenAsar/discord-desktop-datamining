@@ -26,21 +26,12 @@ if (_utils.isOSX && majorVersion >= 21) {
       return Promise.reject(new Error('Module data path unset'));
     }
     const webAuthnPath = _path.default.join(moduleDataPath, 'discord_webauthn');
-    return new Promise((resolve, reject) => {
-      let lib;
-      try {
-        lib = require(webAuthnPath);
-      } catch (e) {
-        reject(new Error('WebAuthn module not found.'));
-        return;
-      }
-      lib[method](challenge, (error, result) => {
-        if (error !== '') {
-          reject(new Error(error));
-        } else {
-          resolve(result);
-        }
-      });
+    return new Promise(resolve => {
+      const lib = require(webAuthnPath);
+      lib[method](challenge, (code, message) => resolve({
+        code,
+        message
+      }));
     });
   }
 }

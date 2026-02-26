@@ -11,6 +11,9 @@ var _electron = require("electron");
 var _appSettings = require("./bootstrapModules/appSettings");
 const settings = _appSettings.appSettings.getSettings();
 function getEnableHardwareAcceleration() {
+  if (process.platform === 'darwin') {
+    return true;
+  }
   if (settings == null) {
     return false;
   }
