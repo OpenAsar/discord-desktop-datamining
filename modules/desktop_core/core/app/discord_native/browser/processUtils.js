@@ -5,8 +5,11 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.processUtilsSettings = void 0;
 var _electron = _interopRequireDefault(require("electron"));
+var _fs = _interopRequireDefault(require("fs"));
 var _os = _interopRequireDefault(require("os"));
+var _path = _interopRequireDefault(require("path"));
 var _process = _interopRequireDefault(require("process"));
+var _paths = require("../../bootstrapModules/paths");
 var _DiscordIPC = require("../common/DiscordIPC");
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 const processUtilsSettings = exports.processUtilsSettings = {
@@ -49,17 +52,31 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_CPU_U
     totalCumulativeUsage
   });
 });
-_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_LAST_CRASH, () => {
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_LAST_CRASH, async () => {
   const lastCrashReport = _electron.default.crashReporter.getLastCrashReport();
-  return Promise.resolve({
+  let pendingMinidumpPath = null;
+  const moduleDataPath = _paths.paths.getModuleDataPath();
+  if (moduleDataPath != null) {
+    const crashlogsPath = _path.default.join(moduleDataPath, 'crashlogs');
+    const sentinelPath = _path.default.join(crashlogsPath, 'pending_minidump.txt');
+    try {
+      const filename = (await _fs.default.promises.readFile(sentinelPath, 'utf-8')).trim();
+      if (filename.length > 0) {
+        pendingMinidumpPath = _path.default.join(crashlogsPath, filename);
+        await _fs.default.promises.unlink(sentinelPath);
+      }
+    } catch {}
+  }
+  return {
     date: (lastCrashReport === null || lastCrashReport === void 0 ? void 0 : lastCrashReport.date) ?? null,
     id: (lastCrashReport === null || lastCrashReport === void 0 ? void 0 : lastCrashReport.id) ?? null,
     rendererCrashReason: processUtilsSettings.rendererCrashReason,
     rendererCrashExitCode: processUtilsSettings.rendererCrashExitCode,
     storedInformation: processUtilsSettings.lastRunsStoredInformation,
     lastMemoryInformation: processUtilsSettings.lastMemoryInformation,
-    highestMemoryInformation: processUtilsSettings.highestMemoryInformation
-  });
+    highestMemoryInformation: processUtilsSettings.highestMemoryInformation,
+    pendingMinidumpPath
+  };
 });
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_SYSTEM_INFO, async () => {
   return {
