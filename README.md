@@ -2,7 +2,7 @@
 
 ## ptb versions
 
-**host: 1.0.1179**
+**host: 1.0.1180**
 
 | module | version |
 | ------ | :-----: |
@@ -20,10 +20,8 @@
 | notifications | 1 |
 | overlay2 | 1 |
 | rpc | 1 |
-| sekrit | 1 |
 | spellcheck | 1 |
 | utils | 1 |
-| vigilante | 1 |
 | voice | 1 |
 | voice_filters | 1 |
 | zstd | 1 |
