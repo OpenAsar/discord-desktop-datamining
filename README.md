@@ -22,7 +22,7 @@
 | rpc | 1 |
 | spellcheck | 1 |
 | utils | 15 |
-| voice | 10 |
+| voice | 11 |
 | voice_filters | 1 |
 | zstd | 1 |
 
