@@ -24,6 +24,7 @@ exports.getPerfAttributedPAMemoryCallstacks = getPerfAttributedPAMemoryCallstack
 exports.getProcessUptime = getProcessUptime;
 exports.getProfilerV8MemoryCallstacks = getProfilerV8MemoryCallstacks;
 exports.getSystemInfo = getSystemInfo;
+exports.getSystemMetrics = getSystemMetrics;
 exports.getUsedHeapSize = getUsedHeapSize;
 exports.purgeMemory = purgeMemory;
 exports.setCrashInformation = setCrashInformation;
@@ -155,4 +156,7 @@ function setMemoryInformation(memoryInformation) {
 }
 function getGpuProcessId() {
   return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_GPU_PROCESS_ID);
+}
+function getSystemMetrics() {
+  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_SYSTEM_METRICS);
 }

@@ -118,6 +118,23 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_SET_MEMOR
   }
   return Promise.resolve();
 });
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_SYSTEM_METRICS, () => {
+  const cpus = _os.default.cpus();
+  let totalIdle = 0;
+  let totalTick = 0;
+  for (const cpu of cpus) {
+    for (const type of Object.values(cpu.times)) {
+      totalTick += type;
+    }
+    totalIdle += cpu.times.idle;
+  }
+  return Promise.resolve({
+    cpuTotalTick: totalTick,
+    cpuTotalIdle: totalIdle,
+    memoryTotal: _os.default.totalmem(),
+    memoryFree: _os.default.freemem()
+  });
+});
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_GPU_PROCESS_ID, () => {
   for (const processMetric of _electron.default.app.getAppMetrics()) {
     if (processMetric.type === 'GPU') {
