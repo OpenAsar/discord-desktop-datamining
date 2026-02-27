@@ -110,9 +110,13 @@ function setupH264MFSwitch() {
   }
   const settings = appSettings.getSettings();
   const enableH264MFElectron = settings === null || settings === void 0 ? void 0 : settings.get('enableH264MFElectron', false);
+  const enableH264MFZeroCopy = settings === null || settings === void 0 ? void 0 : settings.get('enableH264MFZeroCopy', false);
   const hardwareAccelEnabled = settings === null || settings === void 0 ? void 0 : settings.get('enableHardwareAcceleration', true);
   if (enableH264MFElectron && !hardwareAccelEnabled) {
     app.commandLine.appendSwitch('enable-h264-mf');
+    if (enableH264MFZeroCopy) {
+      app.commandLine.appendSwitch('enable-h264-mf-zero-copy');
+    }
   }
 }
 setupH264MFSwitch();
