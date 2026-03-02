@@ -14,6 +14,7 @@ const {
   Menu
 } = require('electron');
 const url = require('url');
+const path = require('path');
 const buildInfo = require('./buildInfo');
 const sentry = require('@sentry/electron');
 const logger = require('./logger');
@@ -109,12 +110,32 @@ function setupH264MFSwitch() {
   }
   const settings = appSettings.getSettings();
   const enableH264MFElectron = settings === null || settings === void 0 ? void 0 : settings.get('enableH264MFElectron', false);
+  const enableH264MFZeroCopy = settings === null || settings === void 0 ? void 0 : settings.get('enableH264MFZeroCopy', false);
   const hardwareAccelEnabled = settings === null || settings === void 0 ? void 0 : settings.get('enableHardwareAcceleration', true);
   if (enableH264MFElectron && !hardwareAccelEnabled) {
     app.commandLine.appendSwitch('enable-h264-mf');
+    if (enableH264MFZeroCopy) {
+      app.commandLine.appendSwitch('enable-h264-mf-zero-copy');
+    }
   }
 }
 setupH264MFSwitch();
+function setupLibOpenH264Switch() {
+  if (process.platform !== 'linux') {
+    return;
+  }
+  const settings = appSettings.getSettings();
+  const enableLibOpenH264 = settings === null || settings === void 0 ? void 0 : settings.get('enableLibOpenH264Electron', false);
+  if (enableLibOpenH264) {
+    const assetCachePath = paths.getAssetCachePath();
+    if (assetCachePath != null) {
+      app.commandLine.appendSwitch('enable-libopenh264');
+      const openh264Path = path.join(assetCachePath, 'openh264', 'libopenh264-2.5.1-linux64.7.so');
+      app.commandLine.appendSwitch('openh264-library-path', openh264Path);
+    }
+  }
+}
+setupLibOpenH264Switch();
 function NVIDIA(dev) {
   return [0x10de, dev];
 }

@@ -3,6 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.OPENH264_LIBRARY_FILE_NAME = void 0;
 Object.defineProperty(exports, "basename", {
   enumerable: true,
   get: function () {
@@ -37,6 +38,7 @@ exports.getMLDataDirSync = getMLDataDirSync;
 exports.getModuleDataPathSync = getModuleDataPathSync;
 exports.getModulePath = getModulePath;
 exports.getOpenH264Dir = getOpenH264Dir;
+exports.getOpenH264LibraryPathSync = getOpenH264LibraryPathSync;
 exports.getVoiceFilterDataDir = getVoiceFilterDataDir;
 exports.getVoiceFilterDataDirSync = getVoiceFilterDataDirSync;
 Object.defineProperty(exports, "join", {
@@ -644,6 +646,10 @@ function getMLDataDirSync() {
 async function getOpenH264Dir() {
   const assetCachePath = await getAssetCachePath();
   return _path.default.join(assetCachePath, 'openh264');
+}
+const OPENH264_LIBRARY_FILE_NAME = exports.OPENH264_LIBRARY_FILE_NAME = 'libopenh264-2.5.1-linux64.7.so';
+function getOpenH264LibraryPathSync() {
+  return _path.default.join(getAssetCachePathSync(), 'openh264', OPENH264_LIBRARY_FILE_NAME);
 }
 function getModulePath() {
   return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.FILE_MANAGER_GET_MODULE_PATH);
