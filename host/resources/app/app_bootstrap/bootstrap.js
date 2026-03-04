@@ -29,6 +29,7 @@ const paths = require('../common/paths');
 paths.init(buildInfo);
 const blackbox = require('../common/blackbox');
 blackbox.initialize(paths.getModuleDataPath(), buildInfo);
+blackbox.captureMinidumpFromCrashpadSync();
 const crashReporterSetup = require('../common/crashReporterSetup');
 const browser = require('@sentry/browser');
 const {
