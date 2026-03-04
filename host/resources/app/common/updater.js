@@ -18,6 +18,7 @@ function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; 
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 const arch = require('arch');
 let instance;
+let currentVersion;
 const TASK_STATE_COMPLETE = exports.TASK_STATE_COMPLETE = 'Complete';
 const TASK_STATE_FAILED = exports.TASK_STATE_FAILED = 'Failed';
 const TASK_STATE_WAITING = exports.TASK_STATE_WAITING = 'Waiting';
@@ -31,7 +32,7 @@ class Updater extends _events.EventEmitter {
     let nativeUpdaterModule = options.nativeUpdaterModule;
     if (nativeUpdaterModule == null) {
       try {
-        nativeUpdaterModule = require('../../../updater');
+        nativeUpdaterModule = require(getUpdaterModule(_process.default.platform));
       } catch (e) {
         if (e.code === 'MODULE_NOT_FOUND') {
           return;
@@ -206,20 +207,50 @@ class Updater extends _events.EventEmitter {
     const [major, minor, revision] = this.committedHostVersion;
     return _path.default.join(this.rootPath, `app-${`${major}.${minor}.${revision}`}`);
   }
+  _getHostExePath(platform) {
+    const hostPath = this._getHostPath();
+    if (platform === 'osx') {
+      const components = _process.default.execPath.split(_path.default.sep);
+      for (let i = components.length - 1; i >= 0; i--) {
+        if (components[i].endsWith('.app')) {
+          return _path.default.join(hostPath, components[i]);
+        }
+      }
+    }
+    return _path.default.join(hostPath, _path.default.basename(_process.default.execPath));
+  }
+  _updateMacOSHostVersion(hostExePath) {
+    this._handleSyncResponse(this._sendRequestSync({
+      UpdateMacOSHostVersion: {
+        host_exe_path: hostExePath
+      }
+    }));
+  }
   _startCurrentVersionInner(options, versions) {
     if (this.committedHostVersion == null) {
       this.committedHostVersion = versions.current_host;
     }
-    const hostPath = this._getHostPath();
-    const hostExePath = _path.default.join(hostPath, _path.default.basename(_process.default.execPath));
-    if (_path.default.resolve(hostExePath) !== _path.default.resolve(_process.default.execPath) && !(options === null || options === void 0 ? void 0 : options.allowObsoleteHost)) {
-      _electron.app.once('will-quit', () => {
-        _child_process.default.spawn(hostExePath, [], {
-          detached: true,
-          stdio: 'inherit'
+    const platform = getUpdaterPlatformName(_process.default.platform);
+    const hostExePath = this._getHostExePath(platform);
+    let hostUpdateNeeded = false;
+    if (platform === 'osx') {
+      hostUpdateNeeded = currentVersion !== this.committedHostVersion.join('.') && !(options === null || options === void 0 ? void 0 : options.allowObsoleteHost);
+    } else {
+      hostUpdateNeeded = _path.default.resolve(hostExePath) !== _path.default.resolve(_process.default.execPath) && !(options === null || options === void 0 ? void 0 : options.allowObsoleteHost);
+    }
+    if (hostUpdateNeeded) {
+      if (platform === 'osx') {
+        this._updateMacOSHostVersion(hostExePath);
+        console.log(`Started hosted updater from ${_path.default.resolve(_process.default.execPath)} to ${this.committedHostVersion.join('.')}`);
+      } else {
+        _electron.app.once('will-quit', () => {
+          _child_process.default.spawn(hostExePath, [], {
+            detached: true,
+            stdio: 'inherit'
+          });
         });
-      });
-      console.log(`Will Restart from ${_path.default.resolve(_process.default.execPath)} to ${_path.default.resolve(hostExePath)}`);
+        console.log(`Will Restart from ${_path.default.resolve(_process.default.execPath)} to ${_path.default.resolve(hostExePath)}`);
+      }
       try {
         const paths = require('./paths');
         const userDataPath = paths.getUserData();
@@ -237,7 +268,11 @@ class Updater extends _events.EventEmitter {
       }
       const desktopTTI = analytics.getDesktopTTI();
       desktopTTI.trackSplashWindowRestart();
-      console.log(`Restarting from ${_path.default.resolve(_process.default.execPath)} to ${_path.default.resolve(hostExePath)}`);
+      if (platform === 'osx') {
+        console.log(`Quitting for update from ${_path.default.resolve(_process.default.execPath)} to ${_path.default.resolve(hostExePath)}`);
+      } else {
+        console.log(`Restarting from ${_path.default.resolve(_process.default.execPath)} after updating host to ${this.committedHostVersion.join('.')}`);
+      }
       _electron.app.quit();
       this.emit('starting-new-host');
       return;
@@ -429,9 +464,20 @@ function getUpdaterPlatformName(platform) {
       return platform;
   }
 }
+function getUpdaterModule(platform) {
+  switch (platform) {
+    case 'darwin':
+      return _path.default.join(_process.default.execPath, '..', '..', 'Resources', 'updater.node');
+    case 'win32':
+      return _path.default.join(_process.default.execPath, '..', 'updater.node');
+    default:
+      console.error(`getUpdaterModulePath: Unsupported platform: ${platform}`);
+      return '';
+  }
+}
 function tryInitUpdater(buildInfo, repositoryUrl, useRustBspatch) {
   const paths = require('./paths');
-  const rootPath = paths.getInstallPath();
+  const rootPath = paths.getRootPath();
   const userDataPath = paths.getUserData();
   if (rootPath == null) {
     return false;
@@ -442,6 +488,10 @@ function tryInitUpdater(buildInfo, repositoryUrl, useRustBspatch) {
     currentArch = arch();
     console.log(`Determined current Windows architecture: ${currentArch}`);
   }
+  if (platform === 'osx') {
+    currentArch = _child_process.default.execSync('uname -m').toString().trim() === 'arm64' ? 'arm64' : 'x64';
+    console.log(`Determined current Mac architecture: ${currentArch}`);
+  }
   instance = new Updater({
     release_channel: buildInfo.releaseChannel,
     platform: platform,
@@ -451,6 +501,7 @@ function tryInitUpdater(buildInfo, repositoryUrl, useRustBspatch) {
     user_data_path: userDataPath,
     use_rust_bspatch: useRustBspatch
   });
+  currentVersion = buildInfo.version;
   const eventCachePath = _path.default.join(userDataPath, EVENT_CACHE_FILENAME);
   if (_fs.default.existsSync(eventCachePath)) {
     try {

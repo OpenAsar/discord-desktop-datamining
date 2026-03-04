@@ -51,7 +51,7 @@ function winUpdateRegVersion(updater, callback) {
 function update(startMinimized, doneCallback, showCallback) {
   const settings = (0, _appSettings.getSettings)();
   const isStandaloneModules = _buildInfo.default.releaseChannel === 'development' && _buildInfo.default.standaloneModules;
-  if (!isStandaloneModules && (0, _updater.tryInitUpdater)(_buildInfo.default, _Constants.default.NEW_UPDATE_ENDPOINT, _Constants.default.USE_RUST_BSPATCH)) {
+  if (_Constants.default.USE_NEW_UPDATER && !isStandaloneModules && (0, _updater.tryInitUpdater)(_buildInfo.default, _Constants.default.NEW_UPDATE_ENDPOINT, _Constants.default.USE_RUST_BSPATCH)) {
     const updater = (0, _updater.getUpdater)();
     const usePinnedUpdateManifest = (settings === null || settings === void 0 ? void 0 : settings.get(USE_PINNED_UPDATE_MANIFEST)) ?? false;
     const autoStart = require('./autoStart');
