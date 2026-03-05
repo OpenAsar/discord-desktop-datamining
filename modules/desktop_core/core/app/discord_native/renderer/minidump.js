@@ -180,6 +180,25 @@ class MINIDUMP_LOCATION_DESCRIPTOR {
     this.rva = reader.readuint32();
   }
 }
+class MINIDUMP_THREAD_NAME_LIST {
+  static U32_SIZE = 1;
+  constructor(reader) {
+    this.numberOfThreadNames = reader.readuint32();
+  }
+  static async read(reader, position) {
+    return new MINIDUMP_THREAD_NAME_LIST(await reader.read(MINIDUMP_THREAD_NAME_LIST.U32_SIZE, position));
+  }
+}
+class MINIDUMP_THREAD_NAME {
+  static U32_SIZE = 3;
+  constructor(reader) {
+    this.threadId = reader.readuint32();
+    this.threadNameRva = reader.readuint64();
+  }
+  static async read(reader, position) {
+    return new MINIDUMP_THREAD_NAME(await reader.read(MINIDUMP_THREAD_NAME.U32_SIZE, position));
+  }
+}
 class MINIDUMP_MODULE_LIST {
   static U32_SIZE = 1;
   constructor(reader) {
@@ -340,6 +359,7 @@ async function readMinidump(file) {
       switch (entry.streamType) {
         case MinidumpStreamType.ExceptionStream:
         case MinidumpStreamType.ModuleListStream:
+        case MinidumpStreamType.ThreadNamesStream:
           break;
         default:
           continue;
@@ -355,6 +375,28 @@ async function readMinidump(file) {
     info.exceptionString = exceptionStream.getExceptionCodeString();
     const exceptionAddrString = exceptionStream.exceptionAddress.toString(16);
     console.log(`readMinidump exceptionCode: ${info.exceptionString}, exceptionAddress ${exceptionAddrString}`);
+    const threadNamesStreamEntry = streamLookup[MinidumpStreamType.ThreadNamesStream];
+    if (threadNamesStreamEntry != null) {
+      try {
+        const threadNamesList = await MINIDUMP_THREAD_NAME_LIST.read(reader, threadNamesStreamEntry.dataOffset);
+        if (threadNamesList.numberOfThreadNames > 0 && threadNamesList.numberOfThreadNames <= 0x400) {
+          let threadNameOffset = threadNamesStreamEntry.dataOffset + 4;
+          for (let i = 0; i < threadNamesList.numberOfThreadNames; ++i) {
+            const threadName = await MINIDUMP_THREAD_NAME.read(reader, threadNameOffset);
+            threadNameOffset += MINIDUMP_THREAD_NAME.U32_SIZE * 4;
+            if (threadName.threadId === exceptionStream.threadId) {
+              const nameRva = Number(threadName.threadNameRva);
+              if (nameRva !== 0) {
+                info.exceptionThreadName = await reader.readMinidumpString(nameRva);
+              }
+              break;
+            }
+          }
+        }
+      } catch (e) {
+        console.log(`readMinidump: Error reading thread names: ${e}`);
+      }
+    }
     const moduleStreamEntry = streamLookup[MinidumpStreamType.ModuleListStream];
     if (moduleStreamEntry == null) {
       return info;

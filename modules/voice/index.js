@@ -52,6 +52,10 @@ const audioSubsystem = appSettings
   : defaultAudioSubsystem;
 const offloadAdmControls = appSettings ? appSettings.getSync('offloadAdmControls', false) : false;
 const debugLogging = appSettings ? appSettings.getSync('debugLogging', true) : true;
+const maxLogBytesRaw = appSettings ? appSettings.getSync('maxLogBytes', 5000000) : 5000000;
+// Clamp to [1, 2^32-1] to safely fit in a size_t on both 32-bit and 64-bit platforms; reject NaN/Infinity/negatives/zero.
+const maxLogBytes =
+  Number.isFinite(maxLogBytesRaw) && maxLogBytesRaw > 0 ? Math.min(Math.trunc(maxLogBytesRaw), 0xffffffff) : 5000000;
 const asyncVideoInputDeviceInit = appSettings ? appSettings.getSync('asyncVideoInputDeviceInit', false) : false;
 
 function versionGreaterThanOrEqual(v1, v2) {
@@ -518,6 +522,7 @@ VoiceEngine.initialize({
   logLevel,
   dataDirectory,
   logDirectory,
+  maxLogBytes,
   useFakeVideoCapture,
   useFileForFakeVideoCapture,
   useFakeAudioCapture,

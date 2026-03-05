@@ -89,6 +89,7 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.APP_DOCK_CANCEL_BOUNCE,
   }
 });
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.APP_RELAUNCH, async () => {
+  _electron.default.session.defaultSession.flushStorageData();
   _electron.default.app.relaunch();
   _electron.default.app.exit(0);
 });
