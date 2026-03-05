@@ -35,7 +35,7 @@ function ensureDispatch() {
   if (dispatch != null) {
     return;
   }
-  dispatch = DiscordNative.nativeModules.requireModule('discord_dispatch');
+  dispatch = DesktopNativeUtils.requireModule('discord_dispatch');
 }
 
 function normalizePathForCloudSync(installPath) {
