@@ -62,9 +62,9 @@ function initializeSentrySdk(config, buildInfo) {
     sampleRate: getSampleRate(buildInfo.releaseChannel),
     autoSessionTracking: false,
     maxValueLength: 250,
-    beforeSend(event, hint) {
+    beforeSend(event) {
       event.extra = metadata;
-      void blackbox.addSentryReport(event, hint);
+      void blackbox.addSentryReport(event);
       return event;
     },
     ignoreErrors: ['EADDRINUSE', 'ResizeObserver loop limit exceeded', 'ResizeObserver loop completed with undelivered notifications.', 'EACCES: permission denied', 'BetterDiscord', 'VencordPatcher', 'mwittrien.github.io', 'Error: getaddrinfo ENOTFOUND raw.githubusercontent.com'],

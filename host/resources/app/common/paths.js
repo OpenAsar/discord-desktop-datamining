@@ -9,6 +9,7 @@ exports.getInstallPath = getInstallPath;
 exports.getLogPath = getLogPath;
 exports.getModuleDataPath = getModuleDataPath;
 exports.getResources = getResources;
+exports.getRootPath = getRootPath;
 exports.getUserData = getUserData;
 exports.getUserDataVersioned = getUserDataVersioned;
 exports.init = init;
@@ -17,6 +18,9 @@ var _mkdirp = _interopRequireDefault(require("mkdirp"));
 var _originalFs = _interopRequireDefault(require("original-fs"));
 var _path = _interopRequireDefault(require("path"));
 var _rimraf = _interopRequireDefault(require("rimraf"));
+var processUtils = _interopRequireWildcard(require("./processUtils"));
+function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
+function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 let userDataPath = null;
 let userDataVersionedPath = null;
@@ -25,6 +29,7 @@ let moduleDataPath = null;
 let assetCachePath = null;
 let logPath = null;
 let installPath = null;
+let rootPath = null;
 function determineAppUserDataRoot() {
   const userDataPath = process.env.DISCORD_USER_DATA_DIR;
   if (userDataPath != null) {
@@ -91,6 +96,13 @@ function init(buildInfo) {
   const exeDir = _path.default.dirname(app.getPath('exe'));
   if (/^app-[0-9]+\.[0-9]+\.[0-9]+/.test(_path.default.basename(exeDir))) {
     installPath = _path.default.join(exeDir, '..');
+  } else if (processUtils.IS_OSX) {
+    installPath = _path.default.join(exeDir, '..', '..', '..');
+  }
+  if (processUtils.IS_OSX) {
+    rootPath = userDataPath;
+  } else {
+    rootPath = installPath;
   }
 }
 function getUserData() {
@@ -113,4 +125,7 @@ function getLogPath() {
 }
 function getInstallPath() {
   return installPath;
+}
+function getRootPath() {
+  return rootPath;
 }

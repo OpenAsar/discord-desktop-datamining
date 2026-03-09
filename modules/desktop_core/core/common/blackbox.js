@@ -5,6 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.addMessage = addMessage;
 exports.addSentryReport = addSentryReport;
+exports.captureMinidumpFromCrashpadSync = captureMinidumpFromCrashpadSync;
 exports.initialize = initialize;
 exports.initializeRenderer = initializeRenderer;
 exports.minidumpFiles = exports.logFiles = void 0;
@@ -22,6 +23,54 @@ let logfile = undefined;
 let initialized = false;
 let storedModulepath = null;
 const addMessageSequence = (0, _utils.createLock)();
+function captureMinidumpFromCrashpadSync() {
+  if (storedModulepath == null || process.platform !== 'win32') return;
+  try {
+    const reportsDir = _path.default.join(_electron.default.app.getPath('crashDumps'), 'reports');
+    let dirContents;
+    try {
+      dirContents = _fs.default.readdirSync(reportsDir);
+    } catch (e) {
+      return;
+    }
+    const dmpFiles = dirContents.filter(f => f.endsWith('.dmp')).map(f => {
+      const fullPath = _path.default.join(reportsDir, f);
+      return {
+        fullPath,
+        mtime: _fs.default.statSync(fullPath).mtimeMs
+      };
+    }).sort((a, b) => b.mtime - a.mtime);
+    if (dmpFiles.length === 0) return;
+    if (Date.now() - dmpFiles[0].mtime > 60_000) return;
+    const crashlogsDir = _path.default.join(storedModulepath, 'crashlogs');
+    if (!_fs.default.existsSync(crashlogsDir)) {
+      _fs.default.mkdirSync(crashlogsDir, {
+        recursive: true
+      });
+    }
+    const existingDmps = _fs.default.readdirSync(crashlogsDir).filter(f => f.endsWith('.dmp')).map(f => ({
+      fullPath: _path.default.join(crashlogsDir, f),
+      mtime: _fs.default.statSync(_path.default.join(crashlogsDir, f)).mtimeMs
+    })).sort((a, b) => b.mtime - a.mtime);
+    if (existingDmps.length > MAX_FILE_COUNT) {
+      for (let i = MAX_FILE_COUNT; i < existingDmps.length; i++) {
+        try {
+          _fs.default.unlinkSync(existingDmps[i].fullPath);
+        } catch {}
+      }
+    }
+    const filenameStamp = new Date().toLocaleString('en-US', {
+      timeZoneName: 'short'
+    }).replace(/[^\d\w]/g, '_');
+    const dmpFilename = `${filenameStamp}-${fileWriteCounter++}-minidump.dmp`;
+    const dmpPath = _path.default.join(crashlogsDir, dmpFilename);
+    _fs.default.writeFileSync(dmpPath, _fs.default.readFileSync(dmpFiles[0].fullPath));
+    _fs.default.writeFileSync(_path.default.join(crashlogsDir, 'pending_minidump.txt'), dmpFilename);
+    console.log(`blackbox: captured minidump ${dmpFilename} from Crashpad`);
+  } catch (e) {
+    console.error(`blackbox: captureMinidumpFromCrashpadSync error ${e === null || e === void 0 ? void 0 : e.message}`);
+  }
+}
 class Files {
   static directory = undefined;
   constructor(name, extension) {
@@ -102,17 +151,6 @@ class Files {
 }
 const minidumpFiles = exports.minidumpFiles = new Files('minidump', 'dmp');
 const logFiles = exports.logFiles = new Files('events', 'log');
-async function writeMinidump(minidump) {
-  try {
-    const filepath = await minidumpFiles.getNewFilename();
-    if (filepath == null) return null;
-    await _fs.default.promises.writeFile(filepath, minidump);
-    return filepath;
-  } catch (e) {
-    console.error(`blackbox: writeMinidump error ${e === null || e === void 0 ? void 0 : e.message}`);
-    return null;
-  }
-}
 async function openLog(forcenew) {
   if (forcenew || logfile === undefined) {
     if (logfile != null) {
@@ -151,15 +189,8 @@ async function addMessage(message) {
     }
   });
 }
-async function addSentryReport(event, hint) {
+async function addSentryReport(event) {
   try {
-    for (const attachment of (hint === null || hint === void 0 ? void 0 : hint.attachments) ?? []) {
-      if (attachment.attachmentType === 'event.minidump' && attachment.data != null) {
-        const buffer = Buffer.from(attachment.data);
-        const minidumpfilename = await writeMinidump(buffer);
-        await addMessage(`Wrote ${buffer.byteLength} byte minidump to ${minidumpfilename}`);
-      }
-    }
     await addMessage(`Sentry report: ${JSON.stringify(event)}`);
   } catch (e) {
     console.error(`blackbox: addSentryReport error ${e === null || e === void 0 ? void 0 : e.message}`);
@@ -223,7 +254,10 @@ async function initializeCore(modulepath, buildInfo) {
     attachWindowEvents(window);
   }
   _electron.default.app.on('child-process-gone', (_, details) => addMessage(`❌ child-process-gone ${_util.default.inspect(details)}`));
-  _electron.default.app.on('render-process-gone', (_, __, details) => addMessage(`❌ render-process-gone ${_util.default.inspect(details)}`));
+  _electron.default.app.on('render-process-gone', (_, __, details) => {
+    void addMessage(`❌ render-process-gone ${_util.default.inspect(details)}`);
+    captureMinidumpFromCrashpadSync();
+  });
   _electron.default.app.on('before-quit', () => addMessage(`before-quit`));
   _electron.default.app.on('will-quit', () => addMessage(`will-quit`));
   _electron.default.app.on('quit', (_, exitCode) => addMessage(`quit ${exitCode}`));
