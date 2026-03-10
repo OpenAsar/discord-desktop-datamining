@@ -23,7 +23,7 @@
 | spellcheck | 1 |
 | utils | 10 |
 | voice | 4 |
-| voice_filters | 2 |
+| voice_filters | 3 |
 | zstd | 1 |
 
 ## branches
