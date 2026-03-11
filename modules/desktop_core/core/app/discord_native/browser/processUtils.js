@@ -118,6 +118,11 @@ _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_SET_MEMOR
   }
   return Promise.resolve();
 });
+_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_SET_CRASH_REASON, (_, reason) => {
+  processUtilsSettings.rendererCrashReason = reason;
+  processUtilsSettings.rendererCrashExitCode = 1;
+  return Promise.resolve();
+});
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_SYSTEM_METRICS, () => {
   const cpus = _os.default.cpus();
   let totalIdle = 0;

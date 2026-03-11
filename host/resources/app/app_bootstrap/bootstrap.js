@@ -109,15 +109,12 @@ function setupH264MFSwitch() {
   if (process.platform !== 'win32') {
     return;
   }
+  app.commandLine.appendSwitch('enable-h264-mf');
   const settings = appSettings.getSettings();
-  const enableH264MFElectron = settings === null || settings === void 0 ? void 0 : settings.get('enableH264MFElectron', false);
   const enableH264MFZeroCopy = settings === null || settings === void 0 ? void 0 : settings.get('enableH264MFZeroCopy', false);
   const hardwareAccelEnabled = settings === null || settings === void 0 ? void 0 : settings.get('enableHardwareAcceleration', true);
-  if (enableH264MFElectron && !hardwareAccelEnabled) {
-    app.commandLine.appendSwitch('enable-h264-mf');
-    if (enableH264MFZeroCopy) {
-      app.commandLine.appendSwitch('enable-h264-mf-zero-copy');
-    }
+  if (!hardwareAccelEnabled && enableH264MFZeroCopy) {
+    app.commandLine.appendSwitch('enable-h264-mf-zero-copy');
   }
 }
 setupH264MFSwitch();
@@ -127,7 +124,8 @@ function setupLibOpenH264Switch() {
   }
   const settings = appSettings.getSettings();
   const enableLibOpenH264 = settings === null || settings === void 0 ? void 0 : settings.get('enableLibOpenH264Electron', false);
-  if (enableLibOpenH264) {
+  const openH264Enabled = settings === null || settings === void 0 ? void 0 : settings.get('openH264Enabled', true);
+  if (enableLibOpenH264 && openH264Enabled) {
     const assetCachePath = paths.getAssetCachePath();
     if (assetCachePath != null) {
       app.commandLine.appendSwitch('enable-libopenh264');
@@ -146,6 +144,7 @@ const workarounds = [{
   predicate: () => process.platform === 'win32'
 }];
 async function setGPUFlags() {
+  performance.mark('bootstrap-gpuflags');
   const info = await app.getGPUInfo('basic');
   for (const gpu of info.gpuDevice) {
     for (const workaround of workarounds) {
@@ -160,6 +159,7 @@ async function setGPUFlags() {
       }
     }
   }
+  performance.measure('bootstrap-gpuflags-duration', 'bootstrap-gpuflags');
 }
 function hasArgvFlag(flag) {
   return process.argv.slice(1).includes(flag);
@@ -260,10 +260,13 @@ app.on('will-finish-launching', () => {
   });
 });
 function startUpdate() {
+  performance.mark('bootstrap-startupdate');
   console.log('Starting updater.');
   const startMinimized = hasArgvFlag('--start-minimized');
   appUpdater.update(startMinimized, () => {
     try {
+      performance.measure('bootstrap-startupdate-duration', 'bootstrap-startupdate');
+      performance.mark('bootstrap-coremodule-startup');
       coreModule = requireNative('discord_desktop_core');
       coreModule.startup({
         Constants,
@@ -279,6 +282,7 @@ function startUpdate() {
         splashScreen,
         updater
       });
+      performance.measure('bootstrap-coremodule-startup-duration', 'bootstrap-coremodule-startup');
       if (initialUrl != null) {
         coreModule.handleOpenUrl(initialUrl);
         initialUrl = null;
@@ -287,10 +291,12 @@ function startUpdate() {
       errorHandler.fatal(err);
     }
   }, () => {
+    performance.mark('bootstrap-coremodule-show-mainwin');
     coreModule.setMainWindowVisible(!startMinimized);
   });
 }
 function startApp() {
+  performance.mark('bootstrap-startapp');
   console.log('Starting app.');
   paths.cleanOldVersions(buildInfo);
   const startupMenu = require('./startupMenu');

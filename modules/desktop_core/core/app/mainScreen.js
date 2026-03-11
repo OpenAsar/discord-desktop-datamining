@@ -303,6 +303,7 @@ function launchApplication(applicationId) {
 }
 const loadMainPage = () => {
   var _analytics$getDesktop;
+  performance.mark('mainscreen-loadmainpage');
   _bootstrapModules.analytics === null || _bootstrapModules.analytics === void 0 ? void 0 : (_analytics$getDesktop = _bootstrapModules.analytics.getDesktopTTI) === null || _analytics$getDesktop === void 0 ? void 0 : _analytics$getDesktop.call(_bootstrapModules.analytics).trackMainWindowLoadStart();
   lastPageLoadFailed = false;
   mainWindow.loadURL(URL_TO_LOAD);
@@ -314,6 +315,7 @@ const loadMainPage = () => {
       }
     }
   }, 60000);
+  performance.measure('mainscreen-loadmainpage-duration', 'mainscreen-loadmainpage');
 };
 const DEFAULT_BACKGROUND_COLOR = '#2f3136';
 const BACKGROUND_COLOR_KEY = 'BACKGROUND_COLOR';
@@ -328,6 +330,7 @@ function setBackgroundColor(color) {
 }
 async function launchMainAppWindow(isVisible) {
   var _analytics$getDesktop2;
+  performance.mark('mainscreen-launch-window');
   if (mainWindow) {
     mainWindow.destroy();
   }
@@ -619,12 +622,14 @@ async function launchMainAppWindow(isVisible) {
       return false;
     });
   }
+  performance.mark('mainscreen-launch-window-misc-setup');
   setupSystemTray();
   setupAppBadge();
   setupAppConfig();
   setupPopouts();
   thumbarButtons.init();
   mouse.init();
+  performance.measure('mainscreen-launch-window-misc-setup-duration', 'mainscreen-launch-window-misc-setup');
   if (process.platform === 'linux' || process.platform === 'win32') {
     systemTray.show();
     mainWindow.on('close', e => {
@@ -644,6 +649,7 @@ async function launchMainAppWindow(isVisible) {
     });
   }
   loadMainPage();
+  performance.measure('mainscreen-launch-window-duration', 'mainscreen-launch-window');
 }
 let updaterState = _Constants.UpdaterEvents.UPDATE_NOT_AVAILABLE;
 function includeOptionalModule(path, cb) {
