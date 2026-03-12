@@ -315,7 +315,6 @@ const loadMainPage = () => {
       }
     }
   }, 60000);
-  performance.measure('mainscreen-loadmainpage-duration', 'mainscreen-loadmainpage');
 };
 const DEFAULT_BACKGROUND_COLOR = '#2f3136';
 const BACKGROUND_COLOR_KEY = 'BACKGROUND_COLOR';
@@ -797,6 +796,7 @@ function setupAnalyticsEvents() {
     a.trackFullTTI();
   });
   _ipcMain.default.on(_Constants.AnalyticsEvents.APP_LOADED, () => {
+    performance.measure('mainscreen-loadmainpage-duration', 'mainscreen-loadmainpage');
     webAppLoaded = true;
   });
   _ipcMain.default.on(_Constants.AnalyticsEvents.APP_FIRST_RENDER_AFTER_READY_PAYLOAD, () => {
