@@ -796,7 +796,6 @@ function setupAnalyticsEvents() {
     a.trackFullTTI();
   });
   _ipcMain.default.on(_Constants.AnalyticsEvents.APP_LOADED, () => {
-    performance.measure('mainscreen-loadmainpage-duration', 'mainscreen-loadmainpage');
     webAppLoaded = true;
   });
   _ipcMain.default.on(_Constants.AnalyticsEvents.APP_FIRST_RENDER_AFTER_READY_PAYLOAD, () => {

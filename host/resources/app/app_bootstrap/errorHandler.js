@@ -6,8 +6,12 @@ Object.defineProperty(exports, "__esModule", {
 exports.fatal = fatal;
 exports.handled = handled;
 exports.init = init;
+var Sentry = _interopRequireWildcard(require("@sentry/electron"));
+var _electron2 = require("electron");
 var _process = _interopRequireDefault(require("process"));
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
+function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
 const HANDLED_ERROR_INTERVAL = 3;
 const HANDLED_ERROR_LIMIT = 10;
 let handledErrorCounter = 0;
@@ -26,10 +30,7 @@ function init() {
         console.error(`${message} error: ${error}`);
         _process.default.exit(-1);
       }
-      const {
-        dialog
-      } = require('electron');
-      dialog.showErrorBox('A JavaScript error occurred in the main process', message);
+      _electron2.dialog.showErrorBox('A JavaScript error occurred in the main process', message);
     }
   });
 }
@@ -43,15 +44,10 @@ function fatal(err) {
   if (consoleOutputOnly) {
     _process.default.exit(-1);
   }
-  const {
-    app,
-    dialog
-  } = require('electron');
-  dialog.showMessageBox(options).then(() => app.quit()).catch(error => {
+  _electron2.dialog.showMessageBox(options).then(() => _electron2.app.quit()).catch(error => {
     console.error('Error showing message box:', error);
   });
-  const sentry = require('@sentry/electron/main');
-  sentry.captureException(err);
+  Sentry.captureException(err);
 }
 function handled(err) {
   if (global.releaseChannel !== 'ptb' && global.releaseChannel !== 'canary' && global.releaseChannel !== 'development') {
@@ -67,8 +63,7 @@ function handled(err) {
   }
   if (totalHandledErrors < HANDLED_ERROR_LIMIT && handledErrorCounter++ % HANDLED_ERROR_INTERVAL === 0) {
     console.warn('Reporting non-fatal error', err);
-    const sentry = require('@sentry/electron/main');
-    sentry.captureException(err);
+    Sentry.captureException(err);
     totalHandledErrors++;
   }
 }

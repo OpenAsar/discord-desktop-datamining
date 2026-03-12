@@ -7,7 +7,12 @@ exports.getGlobalSentry = getGlobalSentry;
 exports.init = init;
 exports.isInitialized = isInitialized;
 exports.metadata = void 0;
+var _child_process = _interopRequireDefault(require("child_process"));
 var _fs = _interopRequireDefault(require("fs"));
+var blackbox = _interopRequireWildcard(require("./blackbox"));
+var processUtils = _interopRequireWildcard(require("./processUtils"));
+function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
+function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 let gSentry = null;
 let initialized = false;
@@ -59,7 +64,6 @@ function initializeSentrySdk(config, buildInfo) {
     maxValueLength: 250,
     beforeSend(event) {
       event.extra = metadata;
-      const blackbox = require('./blackbox');
       void blackbox.addSentryReport(event);
       return event;
     },
@@ -85,7 +89,6 @@ function init(buildInfo, sentry) {
   sentryMetadata['environment'] = buildInfo.releaseChannel;
   sentryMetadata['release'] = buildInfo.version;
   metadata['sentry'] = sentryMetadata;
-  const processUtils = require('./processUtils');
   if (processUtils.IS_LINUX) {
     const xdgCurrentDesktop = process.env.XDG_CURRENT_DESKTOP ?? 'unknown';
     const gdmSession = process.env.GDMSESSION ?? 'unknown';
@@ -105,8 +108,7 @@ function init(buildInfo, sentry) {
     }
     metadata['display_server'] = displayServer;
     try {
-      const childProcess = require('node:child_process');
-      metadata['distro'] = childProcess.execFileSync('lsb_release', ['-ds'], {
+      metadata['distro'] = _child_process.default.execFileSync('lsb_release', ['-ds'], {
         timeout: 100,
         maxBuffer: 512,
         encoding: 'utf-8'
@@ -127,7 +129,6 @@ function buildSentryDSN(dsnKey) {
   return 'https://' + dsnKey + '@' + SENTRY_PROJECT_HOST + '.ingest.sentry.io/' + SENTRY_PROJECT_ID;
 }
 function getSentryDSN(releaseChannel) {
-  const processUtils = require('./processUtils');
   if (processUtils.IS_LINUX) {
     return buildSentryDSN(LINUX_SENTRY_DSN_KEY);
   } else if (processUtils.IS_OSX) {
@@ -140,7 +141,6 @@ function getSentryDSN(releaseChannel) {
   return DEFAULT_SENTRY_DSN;
 }
 function getSampleRate(releaseChannel) {
-  const processUtils = require('./processUtils');
   if (processUtils.IS_LINUX) {
     return LINUX_SENTRY_SAMPLE;
   } else if (processUtils.IS_OSX) {

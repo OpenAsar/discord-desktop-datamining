@@ -9,8 +9,15 @@ exports.restart = restart;
 exports.spawnUpdate = spawnUpdate;
 exports.spawnUpdateInstall = spawnUpdateInstall;
 exports.updateExistsSync = updateExistsSync;
+var _child_process = _interopRequireDefault(require("child_process"));
 var _fs = _interopRequireDefault(require("fs"));
 var _path = _interopRequireDefault(require("path"));
+var _updater = require("../common/updater");
+var _buildInfo = _interopRequireDefault(require("./buildInfo"));
+var windowsUtils = _interopRequireWildcard(require("./windowsUtils"));
+var _Constants = _interopRequireDefault(require("./Constants"));
+function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
+function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 const appFolder = _path.default.resolve(process.execPath, '..');
 const rootFolder = _path.default.resolve(appFolder, '..');
@@ -18,8 +25,7 @@ const exeName = _path.default.basename(process.execPath);
 const updateExe = _path.default.join(rootFolder, 'Update.exe');
 function spawnUpdateInstall(updateUrl, progressCallback) {
   return new Promise((resolve, reject) => {
-    const childProcess = require('child_process');
-    const proc = childProcess.spawn(updateExe, ['--update', updateUrl]);
+    const proc = _child_process.default.spawn(updateExe, ['--update', updateUrl]);
     proc.on('error', reject);
     proc.on('exit', code => {
       if (code !== 0) {
@@ -51,7 +57,6 @@ function spawnUpdateInstall(updateUrl, progressCallback) {
   });
 }
 function spawnUpdate(args, callback) {
-  const windowsUtils = require('./windowsUtils');
   windowsUtils.spawn(updateExe, args, callback);
 }
 function createShortcuts(callback, updateOnly) {
@@ -72,7 +77,6 @@ function createShortcuts(callback, updateOnly) {
 }
 function installProtocol(protocol, callback) {
   const queue = [['HKCU\\Software\\Classes\\' + protocol, '/ve', '/d', `URL:${protocol} Protocol`], ['HKCU\\Software\\Classes\\' + protocol, '/v', 'URL Protocol'], ['HKCU\\Software\\Classes\\' + protocol + '\\DefaultIcon', '/ve', '/d', '"' + process.execPath + '",-1'], ['HKCU\\Software\\Classes\\' + protocol + '\\shell\\open\\command', '/ve', '/d', `"${process.execPath}" --url -- "%1"`]];
-  const windowsUtils = require('./windowsUtils');
   windowsUtils.addToRegistry(queue, callback);
 }
 function terminate(app) {
@@ -86,23 +90,17 @@ function updateShortcuts(callback) {
   createShortcuts(callback, true);
 }
 function uninstallProtocol(protocol, callback) {
-  const windowsUtils = require('./windowsUtils');
   windowsUtils.spawnReg(['delete', 'HKCU\\Software\\Classes\\' + protocol, '/f'], callback);
 }
 function getSystemServiceHelperExe() {
   var _versions$current_mod;
-  if (buildInfo.releaseChannel === 'development' && buildInfo.standaloneModules) {
+  if (_buildInfo.default.releaseChannel === 'development' && _buildInfo.default.standaloneModules) {
     return null;
   }
-  const {
-    getUpdater,
-    tryInitUpdater
-  } = require('../common/updater');
-  const bootstrapConstants = require('./Constants');
-  if (!tryInitUpdater(buildInfo, bootstrapConstants.NEW_UPDATE_ENDPOINT, bootstrapConstants.USE_RUST_BSPATCH)) {
+  if (!(0, _updater.tryInitUpdater)(_buildInfo.default, _Constants.default.NEW_UPDATE_ENDPOINT, _Constants.default.USE_RUST_BSPATCH)) {
     return null;
   }
-  const updater = getUpdater();
+  const updater = (0, _updater.getUpdater)();
   if (updater == null) {
     return null;
   }
@@ -125,10 +123,9 @@ function uninstallSystemService(callback) {
   const serviceHelperExe = getSystemServiceHelperExe();
   if (serviceHelperExe != null) {
     const args = ['uninstall', '--wait'];
-    if (buildInfo.releaseChannel !== 'stable') {
-      args.push('--channel', buildInfo.releaseChannel);
+    if (_buildInfo.default.releaseChannel !== 'stable') {
+      args.push('--channel', _buildInfo.default.releaseChannel);
     }
-    const windowsUtils = require('./windowsUtils');
     windowsUtils.spawn(serviceHelperExe, args, callback);
   } else {
     callback();
@@ -193,8 +190,7 @@ function updateExistsSync() {
 function restart(app, newVersion) {
   app.once('will-quit', () => {
     const execPath = _path.default.resolve(rootFolder, `app-${newVersion}/${exeName}`);
-    const childProcess = require('child_process');
-    childProcess.spawn(execPath, [], {
+    _child_process.default.spawn(execPath, [], {
       detached: true
     });
   });

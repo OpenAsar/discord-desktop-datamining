@@ -1,8 +1,6 @@
 "use strict";
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+var _desktopConnectivityTests = require("./desktopConnectivityTests");
 if (process.platform === 'linux') {
   if (process.env.PULSE_LATENCY_MSEC === undefined) {
     process.env.PULSE_LATENCY_MSEC = '30';
@@ -19,6 +17,7 @@ const url = require('url');
 const path = require('path');
 const buildInfo = require('./buildInfo');
 const sentry = require('@sentry/electron');
+const logger = require('./logger');
 app.setVersion(buildInfo.version);
 global.releaseChannel = buildInfo.releaseChannel;
 if (buildInfo.releaseChannel !== 'stable' && process.platform === 'linux') {
@@ -47,6 +46,7 @@ global.assetCachePath = paths.getAssetCachePath();
 const appSettings = require('./appSettings');
 appSettings.init();
 const Constants = require('./Constants');
+const GPUSettings = require('./GPUSettings');
 function setupHardwareAcceleration() {
   if (process.platform === 'darwin') {
     return;
@@ -180,6 +180,13 @@ if (process.platform === 'win32') {
     pendingAppQuit = true;
   }
 }
+const appUpdater = require('./appUpdater');
+const autoStart = require('./autoStart');
+const discordProtocols = require('./protocols');
+const moduleUpdater = require('../common/moduleUpdater');
+const requireNative = require('./requireNative');
+const splashScreen = require('./splashScreen');
+const updater = require('../common/updater');
 let coreModule;
 const allowMultipleInstances = hasArgvFlag('--multi-instance');
 const isFirstInstance = allowMultipleInstances ? true : app.requestSingleInstanceLock();
@@ -224,17 +231,13 @@ if (!allowMultipleInstances) {
       coreModule.handleOpenUrl(url);
     }
     if (!coreModule) {
-      const appUpdater = require('./appUpdater');
       appUpdater.focusSplash();
     }
   });
 }
 app.on('ready', (_event, launchInfo) => {
   var _launchInfo$userInfo;
-  const {
-    registerDesktopConnectivityTests
-  } = require('./desktopConnectivityTests');
-  registerDesktopConnectivityTests(session.defaultSession, app.getSystemLocale());
+  (0, _desktopConnectivityTests.registerDesktopConnectivityTests)(session.defaultSession, app.getSystemLocale());
   if ((launchInfo === null || launchInfo === void 0 ? void 0 : (_launchInfo$userInfo = launchInfo.userInfo) === null || _launchInfo$userInfo === void 0 ? void 0 : _launchInfo$userInfo.fallbackDeepLink) != null) {
     openOrQueueUrl(launchInfo.userInfo.fallbackDeepLink);
   }
@@ -260,18 +263,10 @@ function startUpdate() {
   performance.mark('bootstrap-startupdate');
   console.log('Starting updater.');
   const startMinimized = hasArgvFlag('--start-minimized');
-  const appUpdater = require('./appUpdater');
   appUpdater.update(startMinimized, () => {
     try {
       performance.measure('bootstrap-startupdate-duration', 'bootstrap-startupdate');
       performance.mark('bootstrap-coremodule-startup');
-      const GPUSettings = require('./GPUSettings');
-      const autoStart = require('./autoStart');
-      const logger = require('./logger');
-      const moduleUpdater = require('../common/moduleUpdater');
-      const requireNative = require('./requireNative');
-      const splashScreen = require('./splashScreen');
-      const updater = require('../common/updater');
       coreModule = requireNative('discord_desktop_core');
       coreModule.startup({
         Constants,
@@ -314,7 +309,6 @@ if (pendingAppQuit) {
   console.log('Quitting secondary instance.');
   app.quit();
 } else {
-  const discordProtocols = require('./protocols');
   discordProtocols.beforeReadyProtocolRegistration();
   setGPUFlags().then(app.whenReady).then(() => startApp()).catch(error => {
     console.error('Error bootstrapping: ', error);
