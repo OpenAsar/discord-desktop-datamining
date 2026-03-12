@@ -9,6 +9,7 @@ exports.startup = startup;
 var _electron = require("electron");
 let mainScreen;
 function startup(bootstrapModules) {
+  performance.mark('coremodule-index-startup');
   require('./bootstrapModules/bootstrapModules').init(bootstrapModules);
   require('./bootstrapModules/paths');
   require('./bootstrapModules/splashScreen');
@@ -100,6 +101,7 @@ function startup(bootstrapModules) {
     return getPopoutWindowByKey(key);
   }, () => [...getAllPopoutWindows(), _electron.BrowserWindow.fromId(mainScreen.getMainWindowId())]);
   setNewWindowEvent(window => windowNative.newWindowEvent(window));
+  performance.measure('coremodule-index-startup-duration', 'coremodule-index-startup');
 }
 function handleOpenUrl(url) {
   if (mainScreen == null) {
