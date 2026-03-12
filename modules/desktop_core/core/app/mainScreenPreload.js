@@ -51,7 +51,7 @@ if (window.opener === null) {
     webAuthn: require('./discord_native/renderer/webauthn')
   };
   const crashReporterSetup = require('../common/crashReporterSetup');
-  const sentry = require('@sentry/electron');
+  const sentry = require('@sentry/electron/renderer');
   const browser = require('@sentry/browser');
   if (crashReporterSetup && !crashReporterSetup.isInitialized()) {
     const buildInfo = {

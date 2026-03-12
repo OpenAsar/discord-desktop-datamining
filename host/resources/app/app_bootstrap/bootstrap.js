@@ -16,7 +16,7 @@ const {
 const url = require('url');
 const path = require('path');
 const buildInfo = require('./buildInfo');
-const sentry = require('@sentry/electron');
+const sentry = require('@sentry/electron/main');
 const logger = require('./logger');
 app.setVersion(buildInfo.version);
 global.releaseChannel = buildInfo.releaseChannel;
