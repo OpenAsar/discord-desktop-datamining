@@ -28,7 +28,10 @@ errorHandler.init();
 const paths = require('../common/paths');
 paths.init(buildInfo);
 const blackbox = require('../common/blackbox');
-blackbox.initialize(paths.getModuleDataPath(), buildInfo);
+const moduleDataPath = paths.getModuleDataPath();
+if (moduleDataPath != null) {
+  void blackbox.initialize(moduleDataPath, buildInfo);
+}
 blackbox.captureMinidumpFromCrashpadSync();
 const crashReporterSetup = require('../common/crashReporterSetup');
 const browser = require('@sentry/browser');
@@ -40,9 +43,9 @@ const sentryConfig = {
   getTransport: dsnFunc => browser.makeMultiplexedTransport(makeElectronOfflineTransport, dsnFunc)
 };
 crashReporterSetup.init(buildInfo, sentryConfig);
-global.moduleDataPath = paths.getModuleDataPath();
-global.logPath = paths.getLogPath();
-global.assetCachePath = paths.getAssetCachePath();
+global.moduleDataPath = paths.getModuleDataPath() ?? undefined;
+global.logPath = paths.getLogPath() ?? undefined;
+global.assetCachePath = paths.getAssetCachePath() ?? undefined;
 const appSettings = require('./appSettings');
 appSettings.init();
 const Constants = require('./Constants');
