@@ -254,14 +254,16 @@ class Updater extends _events.EventEmitter {
       try {
         const paths = require('./paths');
         const userDataPath = paths.getUserData();
-        const eventCachePath = _path.default.join(userDataPath, EVENT_CACHE_FILENAME);
-        const updaterEvents = this.queryAndTruncateHistory();
-        if (updaterEvents.length > 0) {
-          _fs.default.writeFile(eventCachePath, JSON.stringify(updaterEvents), e => {
-            if (e != null) {
-              console.warn('splashScreen: Failed writing updaterEvents with error: ', e);
-            }
-          });
+        if (userDataPath !== null) {
+          const eventCachePath = _path.default.join(userDataPath, EVENT_CACHE_FILENAME);
+          const updaterEvents = this.queryAndTruncateHistory();
+          if (updaterEvents.length > 0) {
+            _fs.default.writeFile(eventCachePath, JSON.stringify(updaterEvents), e => {
+              if (e != null) {
+                console.warn('splashScreen: Failed writing updaterEvents with error: ', e);
+              }
+            });
+          }
         }
       } catch (e) {
         console.error(`Error caching updater events: ${e}`);
@@ -502,17 +504,19 @@ function tryInitUpdater(buildInfo, repositoryUrl, useRustBspatch) {
     use_rust_bspatch: useRustBspatch
   });
   currentVersion = buildInfo.version;
-  const eventCachePath = _path.default.join(userDataPath, EVENT_CACHE_FILENAME);
-  if (_fs.default.existsSync(eventCachePath)) {
-    try {
-      instance.updateEventHistory = JSON.parse(_fs.default.readFileSync(eventCachePath).toString('utf-8'));
-    } catch (e) {
-      console.log('Failed to read updater events cache with error ', e);
-    }
-    try {
-      _fs.default.unlinkSync(eventCachePath);
-    } catch (e) {
-      console.log('Failed to remove updater events cache with error ', e);
+  if (userDataPath !== null) {
+    const eventCachePath = _path.default.join(userDataPath, EVENT_CACHE_FILENAME);
+    if (_fs.default.existsSync(eventCachePath)) {
+      try {
+        instance.updateEventHistory = JSON.parse(_fs.default.readFileSync(eventCachePath).toString('utf-8'));
+      } catch (e) {
+        console.log('Failed to read updater events cache with error ', e);
+      }
+      try {
+        _fs.default.unlinkSync(eventCachePath);
+      } catch (e) {
+        console.log('Failed to remove updater events cache with error ', e);
+      }
     }
   }
   return instance.valid;
