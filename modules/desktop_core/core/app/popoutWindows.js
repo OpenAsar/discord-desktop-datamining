@@ -25,7 +25,7 @@ const DEFAULT_POPOUT_OPTIONS = {
   minWidth: MIN_POPOUT_WIDTH,
   minHeight: MIN_POPOUT_HEIGHT,
   transparent: false,
-  frame: false,
+  frame: process.platform === 'linux',
   resizable: true,
   show: true,
   titleBarStyle: process.platform === 'darwin' ? 'hidden' : undefined,

@@ -17,6 +17,7 @@ exports.setInBackground = setInBackground;
 exports.supportsEventObjects = void 0;
 var _events = require("events");
 var _fs = _interopRequireDefault(require("fs"));
+var _mkdirp = _interopRequireDefault(require("mkdirp"));
 var _os = _interopRequireDefault(require("os"));
 var _path = _interopRequireDefault(require("path"));
 var _process = _interopRequireDefault(require("process"));
@@ -215,9 +216,7 @@ function init(_endpoint, _settings, _buildInfo) {
     var _settings6;
     installedModulesFilePath = _path.default.join(moduleInstallPath, 'installed.json');
     moduleDownloadPath = _path.default.join(moduleInstallPath, 'pending');
-    _fs.default.mkdirSync(moduleDownloadPath, {
-      recursive: true
-    });
+    _mkdirp.default.sync(moduleDownloadPath);
     logger.log(`Module install path: ${moduleInstallPath}`);
     logger.log(`Module installed file path: ${installedModulesFilePath}`);
     logger.log(`Module download path: ${moduleDownloadPath}`);
@@ -423,21 +422,16 @@ async function checkForHostUpdates() {
         logger.log(`...no content; we're up to date.`);
         shouldSkipUpdate = true;
       } else {
-        if (response.body == null) {
-          logger.log(`...response body not provided (unexpected); can't update`);
+        const {
+          name: newVersion
+        } = JSON.parse(response.body);
+        logger.log(`...update available for ${newVersion}...`);
+        if (newVersion === currentVersion) {
+          logger.log(`...but we already have it; we're up to date.`);
           shouldSkipUpdate = true;
-        } else {
-          const {
-            name: newVersion
-          } = JSON.parse(response.body.toString('utf-8'));
-          logger.log(`...update available for ${newVersion}...`);
-          if (newVersion === currentVersion) {
-            logger.log(`...but we already have it; we're up to date.`);
-            shouldSkipUpdate = true;
-          } else if (newVersion === pendingVersionDownloaded) {
-            logger.log(`...but we've already downloaded it and are awaiting install.`);
-            shouldSkipUpdate = true;
-          }
+        } else if (newVersion === pendingVersionDownloaded) {
+          logger.log(`...but we've already downloaded it and are awaiting install.`);
+          shouldSkipUpdate = true;
         }
       }
     } catch (err) {
@@ -487,16 +481,6 @@ function getRemoteModuleName(name) {
   }
   return name;
 }
-function reportFailedUpdate(failureStr) {
-  checkingForUpdates = false;
-  logger.log(failureStr);
-  events.append({
-    type: UPDATE_CHECK_FINISHED,
-    succeeded: false,
-    updateCount: 0,
-    manualRequired: false
-  });
-}
 async function checkForModuleUpdates() {
   var _settings7;
   const query = {
@@ -514,14 +498,17 @@ async function checkForModuleUpdates() {
     });
     checkingForUpdates = false;
   } catch (err) {
-    reportFailedUpdate(`Failed fetching module versions: ${String(err)}`);
+    checkingForUpdates = false;
+    logger.log(`Failed fetching module versions: ${String(err)}`);
+    events.append({
+      type: UPDATE_CHECK_FINISHED,
+      succeeded: false,
+      updateCount: 0,
+      manualRequired: false
+    });
     return;
   }
-  if (response.body == null) {
-    reportFailedUpdate('Failed fetching module versions: empty response body');
-    return;
-  }
-  remoteModuleVersions = JSON.parse(response.body.toString('utf-8'));
+  remoteModuleVersions = JSON.parse(response.body);
   if ((_settings7 = settings) === null || _settings7 === void 0 ? void 0 : _settings7.get(USE_LOCAL_MODULE_VERSIONS)) {
     try {
       remoteModuleVersions = JSON.parse(_fs.default.readFileSync(localModuleVersionsFilePath).toString());
@@ -737,9 +724,7 @@ function processUnzipQueue() {
           return;
         }
         stream.on('error', e => onError(e, zipfile));
-        _fs.default.promises.mkdir(_path.default.join(extractRoot, _path.default.dirname(entry.fileName)), {
-          recursive: true
-        }).then(() => {
+        (0, _mkdirp.default)(_path.default.join(extractRoot, _path.default.dirname(entry.fileName))).then(() => {
           const tempFileName = _path.default.join(extractRoot, entry.fileName + '.tmp');
           const finalFileName = _path.default.join(extractRoot, entry.fileName);
           const writeStream = originalFs.createWriteStream(tempFileName);

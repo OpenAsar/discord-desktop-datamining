@@ -168,19 +168,17 @@ async function electronRequest({
     req.end();
   });
 }
-async function requestWithMethod(method, opts) {
-  let options;
-  if (typeof opts === 'string') {
+async function requestWithMethod(method, options) {
+  if (typeof options === 'string') {
     options = {
-      url: opts,
-      method
-    };
-  } else {
-    options = {
-      ...opts,
+      url: options,
       method
     };
   }
+  options = {
+    ...options,
+    method
+  };
   try {
     return await electronRequest(options);
   } catch (err) {

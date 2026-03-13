@@ -28,7 +28,6 @@ exports.getSystemMetrics = getSystemMetrics;
 exports.getUsedHeapSize = getUsedHeapSize;
 exports.purgeMemory = purgeMemory;
 exports.setCrashInformation = setCrashInformation;
-exports.setCrashReason = setCrashReason;
 exports.setMemoryInformation = setMemoryInformation;
 var _electron = _interopRequireDefault(require("electron"));
 var _os = _interopRequireDefault(require("os"));
@@ -154,9 +153,6 @@ function setMemoryInformation(memoryInformation) {
     memoryUsageKB: memoryInformation.memoryUsageKB,
     usedJSHeapSizeKB: memoryInformation.usedJSHeapSizeKB
   });
-}
-function setCrashReason(reason) {
-  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_SET_CRASH_REASON, reason);
 }
 function getGpuProcessId() {
   return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_GPU_PROCESS_ID);
