@@ -144,6 +144,7 @@ const workarounds = [{
   predicate: () => process.platform === 'win32'
 }];
 async function setGPUFlags() {
+  performance.mark('bootstrap-gpuflags');
   const info = await app.getGPUInfo('basic');
   for (const gpu of info.gpuDevice) {
     for (const workaround of workarounds) {
@@ -158,6 +159,7 @@ async function setGPUFlags() {
       }
     }
   }
+  performance.measure('bootstrap-gpuflags-duration', 'bootstrap-gpuflags');
 }
 function hasArgvFlag(flag) {
   return process.argv.slice(1).includes(flag);
@@ -258,10 +260,13 @@ app.on('will-finish-launching', () => {
   });
 });
 function startUpdate() {
+  performance.mark('bootstrap-startupdate');
   console.log('Starting updater.');
   const startMinimized = hasArgvFlag('--start-minimized');
   appUpdater.update(startMinimized, () => {
     try {
+      performance.measure('bootstrap-startupdate-duration', 'bootstrap-startupdate');
+      performance.mark('bootstrap-coremodule-startup');
       coreModule = requireNative('discord_desktop_core');
       coreModule.startup({
         Constants,
@@ -277,6 +282,7 @@ function startUpdate() {
         splashScreen,
         updater
       });
+      performance.measure('bootstrap-coremodule-startup-duration', 'bootstrap-coremodule-startup');
       if (initialUrl != null) {
         coreModule.handleOpenUrl(initialUrl);
         initialUrl = null;
@@ -285,10 +291,12 @@ function startUpdate() {
       errorHandler.fatal(err);
     }
   }, () => {
+    performance.mark('bootstrap-coremodule-show-mainwin');
     coreModule.setMainWindowVisible(!startMinimized);
   });
 }
 function startApp() {
+  performance.mark('bootstrap-startapp');
   console.log('Starting app.');
   paths.cleanOldVersions(buildInfo);
   const startupMenu = require('./startupMenu');
