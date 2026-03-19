@@ -124,9 +124,8 @@ function setupLibOpenH264Switch() {
     return;
   }
   const settings = appSettings.getSettings();
-  const enableLibOpenH264 = settings === null || settings === void 0 ? void 0 : settings.get('enableLibOpenH264Electron', false);
   const openH264Enabled = settings === null || settings === void 0 ? void 0 : settings.get('openH264Enabled', true);
-  if (enableLibOpenH264 && openH264Enabled) {
+  if (openH264Enabled) {
     const assetCachePath = paths.getAssetCachePath();
     if (assetCachePath != null) {
       app.commandLine.appendSwitch('enable-libopenh264');
