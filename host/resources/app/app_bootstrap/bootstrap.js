@@ -16,7 +16,7 @@ const {
 const url = require('url');
 const path = require('path');
 const buildInfo = require('./buildInfo');
-const sentry = require('@sentry/electron');
+const sentry = require('@sentry/electron/main');
 const logger = require('./logger');
 app.setVersion(buildInfo.version);
 global.releaseChannel = buildInfo.releaseChannel;
@@ -28,7 +28,10 @@ errorHandler.init();
 const paths = require('../common/paths');
 paths.init(buildInfo);
 const blackbox = require('../common/blackbox');
-blackbox.initialize(paths.getModuleDataPath(), buildInfo);
+const moduleDataPath = paths.getModuleDataPath();
+if (moduleDataPath != null) {
+  void blackbox.initialize(moduleDataPath, buildInfo);
+}
 blackbox.captureMinidumpFromCrashpadSync();
 const crashReporterSetup = require('../common/crashReporterSetup');
 const browser = require('@sentry/browser');
@@ -40,9 +43,9 @@ const sentryConfig = {
   getTransport: dsnFunc => browser.makeMultiplexedTransport(makeElectronOfflineTransport, dsnFunc)
 };
 crashReporterSetup.init(buildInfo, sentryConfig);
-global.moduleDataPath = paths.getModuleDataPath();
-global.logPath = paths.getLogPath();
-global.assetCachePath = paths.getAssetCachePath();
+global.moduleDataPath = paths.getModuleDataPath() ?? undefined;
+global.logPath = paths.getLogPath() ?? undefined;
+global.assetCachePath = paths.getAssetCachePath() ?? undefined;
 const appSettings = require('./appSettings');
 appSettings.init();
 const Constants = require('./Constants');
@@ -59,14 +62,17 @@ function setupHardwareAcceleration() {
 setupHardwareAcceleration();
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 const disabledFeatures = ['WinRetrieveSuggestionsOnlyOnDemand', 'HardwareMediaKeyHandling', 'MediaSessionService', 'UseEcoQoSForBackgroundProcess', 'IntensiveWakeUpThrottling', 'AllowAggressiveThrottlingWithWebSocket'];
-if (process.platform === 'darwin' && parseInt(require('os').release().split('.')[0]) < 24) {
-  disabledFeatures.push('ScreenCaptureKitMac');
-  disabledFeatures.push('ScreenCaptureKitMacWindow');
-  disabledFeatures.push('ScreenCaptureKitMacScreen');
-  disabledFeatures.push('ScreenCaptureKitPickerScreen');
-  disabledFeatures.push('ScreenCaptureKitStreamPickerSonoma');
-  disabledFeatures.push('WarmScreenCaptureSonoma');
-  disabledFeatures.push('UseSCContentSharingPicker');
+if (process.platform === 'darwin') {
+  const os = require('os');
+  if (parseInt(os.release().split('.')[0]) < 24) {
+    disabledFeatures.push('ScreenCaptureKitMac');
+    disabledFeatures.push('ScreenCaptureKitMacWindow');
+    disabledFeatures.push('ScreenCaptureKitMacScreen');
+    disabledFeatures.push('ScreenCaptureKitPickerScreen');
+    disabledFeatures.push('ScreenCaptureKitStreamPickerSonoma');
+    disabledFeatures.push('WarmScreenCaptureSonoma');
+    disabledFeatures.push('UseSCContentSharingPicker');
+  }
 }
 if (process.platform === 'win32') {
   app.commandLine.appendSwitch('disable-background-timer-throttling');
@@ -110,12 +116,7 @@ function setupH264MFSwitch() {
     return;
   }
   app.commandLine.appendSwitch('enable-h264-mf');
-  const settings = appSettings.getSettings();
-  const enableH264MFZeroCopy = settings === null || settings === void 0 ? void 0 : settings.get('enableH264MFZeroCopy', false);
-  const hardwareAccelEnabled = settings === null || settings === void 0 ? void 0 : settings.get('enableHardwareAcceleration', true);
-  if (!hardwareAccelEnabled && enableH264MFZeroCopy) {
-    app.commandLine.appendSwitch('enable-h264-mf-zero-copy');
-  }
+  app.commandLine.appendSwitch('enable-h264-mf-zero-copy');
 }
 setupH264MFSwitch();
 function setupLibOpenH264Switch() {
@@ -123,9 +124,8 @@ function setupLibOpenH264Switch() {
     return;
   }
   const settings = appSettings.getSettings();
-  const enableLibOpenH264 = settings === null || settings === void 0 ? void 0 : settings.get('enableLibOpenH264Electron', false);
   const openH264Enabled = settings === null || settings === void 0 ? void 0 : settings.get('openH264Enabled', true);
-  if (enableLibOpenH264 && openH264Enabled) {
+  if (openH264Enabled) {
     const assetCachePath = paths.getAssetCachePath();
     if (assetCachePath != null) {
       app.commandLine.appendSwitch('enable-libopenh264');

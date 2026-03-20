@@ -50,7 +50,7 @@ const defaultAudioSubsystem = process.platform === 'win32' ? 'experimental' : 's
 const audioSubsystem = appSettings
   ? appSettings.getSync('audioSubsystem', defaultAudioSubsystem)
   : defaultAudioSubsystem;
-const offloadAdmControls = appSettings ? appSettings.getSync('offloadAdmControls', false) : false;
+const offloadAdmControls = appSettings ? appSettings.getSync('offloadAdmControls', true) : true;
 const debugLogging = appSettings ? appSettings.getSync('debugLogging', true) : true;
 const maxLogBytesRaw = appSettings ? appSettings.getSync('maxLogBytes', 5000000) : 5000000;
 // Clamp to [1, 2^32-1] to safely fit in a size_t on both 32-bit and 64-bit platforms; reject NaN/Infinity/negatives/zero.

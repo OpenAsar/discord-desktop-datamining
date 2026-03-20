@@ -423,16 +423,21 @@ async function checkForHostUpdates() {
         logger.log(`...no content; we're up to date.`);
         shouldSkipUpdate = true;
       } else {
-        const {
-          name: newVersion
-        } = JSON.parse(response.body);
-        logger.log(`...update available for ${newVersion}...`);
-        if (newVersion === currentVersion) {
-          logger.log(`...but we already have it; we're up to date.`);
+        if (response.body == null) {
+          logger.log(`...response body not provided (unexpected); can't update`);
           shouldSkipUpdate = true;
-        } else if (newVersion === pendingVersionDownloaded) {
-          logger.log(`...but we've already downloaded it and are awaiting install.`);
-          shouldSkipUpdate = true;
+        } else {
+          const {
+            name: newVersion
+          } = JSON.parse(response.body.toString('utf-8'));
+          logger.log(`...update available for ${newVersion}...`);
+          if (newVersion === currentVersion) {
+            logger.log(`...but we already have it; we're up to date.`);
+            shouldSkipUpdate = true;
+          } else if (newVersion === pendingVersionDownloaded) {
+            logger.log(`...but we've already downloaded it and are awaiting install.`);
+            shouldSkipUpdate = true;
+          }
         }
       }
     } catch (err) {
@@ -482,6 +487,16 @@ function getRemoteModuleName(name) {
   }
   return name;
 }
+function reportFailedUpdate(failureStr) {
+  checkingForUpdates = false;
+  logger.log(failureStr);
+  events.append({
+    type: UPDATE_CHECK_FINISHED,
+    succeeded: false,
+    updateCount: 0,
+    manualRequired: false
+  });
+}
 async function checkForModuleUpdates() {
   var _settings7;
   const query = {
@@ -499,17 +514,14 @@ async function checkForModuleUpdates() {
     });
     checkingForUpdates = false;
   } catch (err) {
-    checkingForUpdates = false;
-    logger.log(`Failed fetching module versions: ${String(err)}`);
-    events.append({
-      type: UPDATE_CHECK_FINISHED,
-      succeeded: false,
-      updateCount: 0,
-      manualRequired: false
-    });
+    reportFailedUpdate(`Failed fetching module versions: ${String(err)}`);
     return;
   }
-  remoteModuleVersions = JSON.parse(response.body);
+  if (response.body == null) {
+    reportFailedUpdate('Failed fetching module versions: empty response body');
+    return;
+  }
+  remoteModuleVersions = JSON.parse(response.body.toString('utf-8'));
   if ((_settings7 = settings) === null || _settings7 === void 0 ? void 0 : _settings7.get(USE_LOCAL_MODULE_VERSIONS)) {
     try {
       remoteModuleVersions = JSON.parse(_fs.default.readFileSync(localModuleVersionsFilePath).toString());
