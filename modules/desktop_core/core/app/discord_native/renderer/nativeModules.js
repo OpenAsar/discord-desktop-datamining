@@ -5,6 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.canBootstrapNewUpdater = void 0;
 exports.ensureModule = ensureModule;
+exports.getUpdaterVersion = getUpdaterVersion;
 exports.requireModule = requireModule;
 var electron = _interopRequireWildcard(require("electron"));
 var commonConstants = _interopRequireWildcard(require("../common/constants"));
@@ -33,6 +34,9 @@ function getSanitizedModulePaths() {
 }
 function getHasNewUpdater() {
   return electron.ipcRenderer.sendSync(NATIVE_MODULES_GET_HAS_NEW_UPDATER);
+}
+function getUpdaterVersion() {
+  return 1;
 }
 async function ensureModule(name) {
   if (modulePromises[name] == null) {
