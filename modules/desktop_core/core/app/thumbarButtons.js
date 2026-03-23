@@ -40,11 +40,11 @@ function createButtons(event, buttons, isSystemDarkMode) {
   for (const button of buttons) {
     if (typeof button.name !== 'string') {
       console.error('setThumbarButtons: button.icon missing.');
-      return;
+      return [];
     }
     if (!(button.name in ThumbarButtonName)) {
       console.error(`setThumbarButtons: button.icon for unknown icon "${button.icon}.`);
-      return;
+      return [];
     }
     const buttonName = button.name;
     button.click = () => _ipcMain.default.reply(event, 'THUMBAR_BUTTONS_CLICKED', {
@@ -67,14 +67,14 @@ function setTouchbarButtons(event, buttons) {
   });
   const win = _electron.BrowserWindow.fromId((0, _mainScreen.getMainWindowId)());
   const touchbar = new _electron.TouchBar({
-    items: touchbarButtons.length === 0 ? null : touchbarButtons
+    items: touchbarButtons.length === 0 ? [] : touchbarButtons
   });
-  win.setTouchBar(touchbar);
+  win === null || win === void 0 ? void 0 : win.setTouchBar(touchbar);
 }
 function setThumbarButtons(event, buttons, isSystemDarkMode) {
-  buttons = createButtons(event, buttons, isSystemDarkMode);
+  const thumbarButtons = createButtons(event, buttons, isSystemDarkMode);
   const win = _electron.BrowserWindow.fromId((0, _mainScreen.getMainWindowId)());
-  if (!win.setThumbarButtons(buttons)) {
+  if (!(win === null || win === void 0 ? void 0 : win.setThumbarButtons(thumbarButtons))) {
     console.error('setThumbarButtons: setThumbarButtons failed', buttons);
   }
 }
