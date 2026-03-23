@@ -2,12 +2,12 @@
 
 ## canary versions
 
-**host: 1.0.875**
+**host: 1.0.876**
 
 | module | version |
 | ------ | :-----: |
 | cloudsync | 1 |
-| desktop_core | 1 |
+| desktop_core | 2 |
 | desktop_overlay | 1 |
 | dispatch | 1 |
 | erlpack | 1 |

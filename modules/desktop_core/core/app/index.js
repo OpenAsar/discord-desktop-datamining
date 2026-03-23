@@ -70,14 +70,17 @@ function startup(bootstrapModules) {
   require('./discord_native/browser/processUtils');
   require('./discord_native/browser/safeStorage');
   const settings = require('./discord_native/browser/settings');
-  settings.injectSettingsBackend(appSettings.getSettings());
+  const appSettingsInject = appSettings.getSettings();
+  if (appSettingsInject) {
+    settings.injectSettingsBackend(appSettingsInject);
+  }
   require('./discord_native/browser/spellCheck');
   const windowNative = require('./discord_native/browser/window');
   require('./discord_native/browser/webauthn');
   global.crashReporterMetadata = crashReporterSetup.metadata;
   global.mainAppDirname = Constants.MAIN_APP_DIRNAME;
   global.features = appFeatures.getFeatures();
-  global.appSettings = appSettings.getSettings();
+  global.appSettings = appSettingsInject;
   global.mainWindowId = Constants.DEFAULT_MAIN_WINDOW_ID;
   global.moduleUpdater = moduleUpdater;
   const enableDevtoolsSetting = global.appSettings.get('DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING', false);
