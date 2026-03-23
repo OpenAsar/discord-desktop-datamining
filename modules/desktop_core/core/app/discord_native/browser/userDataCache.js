@@ -14,29 +14,50 @@ const {
 } = _constants.IPCEvents;
 const features = (0, _appFeatures.getFeatures)();
 function getCachePath() {
-  return _path.default.join(_paths.paths.getUserData(), 'userDataCache.json');
+  const userData = _paths.paths.getUserData();
+  if (userData === null) {
+    return null;
+  }
+  return _path.default.join(userData, 'userDataCache.json');
 }
 function getMigratedPath() {
-  return _path.default.join(_paths.paths.getUserData(), 'domainMigrated');
+  const userData = _paths.paths.getUserData();
+  if (userData === null) {
+    return null;
+  }
+  return _path.default.join(userData, 'domainMigrated');
 }
 function cacheUserData(userData) {
-  _fs.default.writeFile(getCachePath(), userData, e => {
-    if (e) {
+  const cachePath = getCachePath();
+  if (cachePath === null) {
+    return;
+  }
+  _fs.default.writeFile(cachePath, userData, e => {
+    if (e !== null) {
       console.warn('Failed updating user data cache with error: ', e);
     }
   });
 }
 function getCachedUserData() {
+  const cachePath = getCachePath();
+  if (cachePath === null) {
+    return null;
+  }
   try {
-    return JSON.parse(_fs.default.readFileSync(getCachePath()));
+    return JSON.parse(_fs.default.readFileSync(cachePath).toString('utf-8'));
   } catch (_err) {}
   return null;
 }
 function deleteCachedUserData() {
   try {
-    _fs.default.unlinkSync(getCachePath());
-    _fs.default.writeFile(getMigratedPath(), '', e => {
-      if (e) {
+    const cachePath = getCachePath();
+    const migratedPath = getMigratedPath();
+    if (cachePath === null || migratedPath === null) {
+      return;
+    }
+    _fs.default.unlinkSync(cachePath);
+    _fs.default.writeFile(migratedPath, '', e => {
+      if (e !== null) {
         console.warn('Failed to create domainMigrated file with error: ', e);
       }
     });

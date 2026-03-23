@@ -1,5 +1,15 @@
 "use strict";
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.copy = copy;
+exports.copyFile = copyFile;
+exports.copyImage = copyImage;
+exports.cut = cut;
+exports.hasMixedContent = hasMixedContent;
+exports.paste = paste;
+exports.read = read;
 var _assert = _interopRequireDefault(require("assert"));
 var _electron = _interopRequireDefault(require("electron"));
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
@@ -9,10 +19,10 @@ const {
   CLIPBOARD_PASTE
 } = require('../common/constants').IPCEvents;
 function copy(text) {
-  if (text) {
+  if (text != null && text.length > 0) {
     _electron.default.clipboard.writeText(text);
   } else {
-    _electron.default.ipcRenderer.invoke(CLIPBOARD_COPY);
+    void _electron.default.ipcRenderer.invoke(CLIPBOARD_COPY);
   }
 }
 function copyImage(imageArrayBuffer, imageSrc) {
@@ -35,10 +45,10 @@ function copyFile(filePath) {
   }
 }
 function cut() {
-  _electron.default.ipcRenderer.invoke(CLIPBOARD_CUT);
+  void _electron.default.ipcRenderer.invoke(CLIPBOARD_CUT);
 }
 function paste() {
-  _electron.default.ipcRenderer.invoke(CLIPBOARD_PASTE);
+  void _electron.default.ipcRenderer.invoke(CLIPBOARD_PASTE);
 }
 function read() {
   return _electron.default.clipboard.readText();
@@ -50,12 +60,3 @@ function hasMixedContent() {
   const hasImage = formats.some(f => f.startsWith('image/') || f === 'CF_DIB' || f === 'CF_BITMAP' || f === 'CF_DIBV5' || f.toLowerCase().includes('image') || f.toLowerCase().includes('bitmap'));
   return hasText && hasImage;
 }
-module.exports = {
-  copy,
-  copyImage,
-  copyFile,
-  cut,
-  paste,
-  read,
-  hasMixedContent
-};
