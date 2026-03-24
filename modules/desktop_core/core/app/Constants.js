@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.WEBAPP_PATHS = exports.UpdaterEvents = exports.MenuEvents = exports.AnalyticsEvents = exports.AllowedMediaOrigins = void 0;
+exports.WEBAPP_PATHS = exports.UpdaterEvents = exports.UPDATE_ENDPOINT = exports.NEW_UPDATE_ENDPOINT = exports.MenuEvents = exports.MAIN_APP_DIRNAME = exports.LOG_LEVEL = exports.DEFAULT_MAIN_WINDOW_ID = exports.AnalyticsEvents = exports.AllowedMediaOrigins = exports.APP_NAME_FOR_HUMANS = exports.APP_NAME = exports.APP_ID = exports.API_ENDPOINT = exports.ALLOW_OPTIONAL_UPDATES = void 0;
 exports.init = init;
 const UpdaterEvents = exports.UpdaterEvents = {
   UPDATE_NOT_AVAILABLE: 'UPDATE_NOT_AVAILABLE',
@@ -42,6 +42,16 @@ const WEBAPP_PATHS = exports.WEBAPP_PATHS = {
   APP: '/app',
   CONFERENCE_MODE: '/conference-mode'
 };
+let APP_NAME = exports.APP_NAME = void 0;
+let APP_NAME_FOR_HUMANS = exports.APP_NAME_FOR_HUMANS = void 0;
+let API_ENDPOINT = exports.API_ENDPOINT = void 0;
+let NEW_UPDATE_ENDPOINT = exports.NEW_UPDATE_ENDPOINT = void 0;
+let UPDATE_ENDPOINT = exports.UPDATE_ENDPOINT = void 0;
+let APP_ID = exports.APP_ID = void 0;
+let ALLOW_OPTIONAL_UPDATES = exports.ALLOW_OPTIONAL_UPDATES = void 0;
+let LOG_LEVEL = exports.LOG_LEVEL = void 0;
+let DEFAULT_MAIN_WINDOW_ID = exports.DEFAULT_MAIN_WINDOW_ID = void 0;
+let MAIN_APP_DIRNAME = exports.MAIN_APP_DIRNAME = void 0;
 function init(bootstrapConstants) {
   const APP_NAME = bootstrapConstants.APP_NAME;
   const APP_NAME_FOR_HUMANS = bootstrapConstants.APP_NAME_FOR_HUMANS;

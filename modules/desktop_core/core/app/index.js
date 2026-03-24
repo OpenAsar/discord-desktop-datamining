@@ -71,7 +71,7 @@ function startup(bootstrapModules) {
   require('./discord_native/browser/safeStorage');
   const settings = require('./discord_native/browser/settings');
   const appSettingsInject = appSettings.getSettings();
-  if (appSettingsInject) {
+  if (appSettingsInject != null) {
     settings.injectSettingsBackend(appSettingsInject);
   }
   require('./discord_native/browser/spellCheck');
