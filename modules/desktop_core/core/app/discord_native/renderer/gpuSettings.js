@@ -1,6 +1,15 @@
 "use strict";
 
-const electron = require('electron');
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getEnableHardwareAcceleration = getEnableHardwareAcceleration;
+exports.setChromiumSwitches = setChromiumSwitches;
+exports.setEnableHardwareAcceleration = setEnableHardwareAcceleration;
+exports.setSetting = setSetting;
+var electron = _interopRequireWildcard(require("electron"));
+function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
+function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
 const {
   GPU_SETTINGS_SET_ENABLE_HWACCEL,
   GPU_SETTINGS_GET_ENABLE_HWACCEL_SYNC,
@@ -11,18 +20,12 @@ const hardwareAccelerationEnabled = electron.ipcRenderer.sendSync(GPU_SETTINGS_G
 function getEnableHardwareAcceleration() {
   return hardwareAccelerationEnabled;
 }
-async function setEnableHardwareAcceleration(enable) {
-  electron.ipcRenderer.invoke(GPU_SETTINGS_SET_ENABLE_HWACCEL, enable);
+function setEnableHardwareAcceleration(enable) {
+  void electron.ipcRenderer.invoke(GPU_SETTINGS_SET_ENABLE_HWACCEL, enable);
 }
-async function setChromiumSwitches(switches) {
-  electron.ipcRenderer.invoke(GPU_SETTINGS_SET_CHROMIUM_SWITCHES, switches);
+function setChromiumSwitches(switches) {
+  void electron.ipcRenderer.invoke(GPU_SETTINGS_SET_CHROMIUM_SWITCHES, switches);
 }
-async function setSetting(key, value) {
-  electron.ipcRenderer.invoke(GPU_SETTINGS_SET_SETTING, key, value);
+function setSetting(key, value) {
+  void electron.ipcRenderer.invoke(GPU_SETTINGS_SET_SETTING, key, value);
 }
-module.exports = {
-  getEnableHardwareAcceleration,
-  setEnableHardwareAcceleration,
-  setChromiumSwitches,
-  setSetting
-};

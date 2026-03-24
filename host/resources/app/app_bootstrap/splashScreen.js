@@ -146,6 +146,7 @@ async function updateUntilCurrent() {
         }
       });
       if (!installedAnything) {
+        performance.mark('splash-update-complete');
         await newUpdater.startCurrentVersion({});
         newUpdater.setRunningInBackground();
         newUpdater.collectGarbage();
@@ -185,6 +186,7 @@ function initOldUpdater() {
       scheduleUpdateCheck();
       updateSplashState(UPDATE_FAILURE);
     } else if (updateCount === 0) {
+      performance.mark('splash-update-complete');
       moduleUpdater.setInBackground();
       launchMainWindow();
       updateSplashState(LAUNCHING);
@@ -303,6 +305,7 @@ function initSplash(startMinimized = false) {
   _ipcMain.default.on('UPDATED_QUOTES', (_event, quotes) => cacheLatestQuotes(quotes));
 }
 function destroySplash() {
+  performance.mark('splash-destroy-splashwindow');
   stopUpdateTimeout();
   if (splashWindow == null || splashWindow.isDestroyed()) {
     console.error('splashScreen.destroySplash: splashWindow is null or destroyed.');
@@ -317,7 +320,20 @@ function destroySplash() {
     splashWindow.hide();
     splashWindow.close();
     splashWindow = null;
+    performance.measure('splash-window-duration', 'splash-window-launch');
     analytics.getDesktopTTI().trackSplashWindowDuration(splashInstalledUpdates);
+    const entries = performance.getEntries();
+    if (entries.length > 0) {
+      console.log(`Main process startup timing:`);
+      for (const e of entries) {
+        const label = `|  ${e.name}:`.padEnd(50);
+        if (e.entryType === 'mark') {
+          console.log(`${label} ${e.startTime.toFixed(2)}`);
+        } else if (e.entryType === 'measure') {
+          console.log(`${label} ${(e.startTime + e.duration).toFixed(2)} (${e.duration.toFixed(2)})`);
+        }
+      }
+    }
   }, 100);
 }
 function addModulesListener(event, listener) {
@@ -373,6 +389,8 @@ function resendSplashState() {
   updateSplashState(lastSplashEventState);
 }
 function launchSplashWindow(startMinimized) {
+  performance.mark('splash-window-launch');
+  analytics.getDesktopTTI().trackSplashWindowCreated();
   const windowConfig = {
     width: LOADING_WINDOW_WIDTH,
     height: LOADING_WINDOW_HEIGHT,
@@ -388,7 +406,6 @@ function launchSplashWindow(startMinimized) {
       preload: _path.default.join(__dirname, 'splashScreenPreload.js')
     }
   };
-  analytics.getDesktopTTI().trackSplashWindowCreated();
   splashWindow = new _electron.BrowserWindow(windowConfig);
   splashWindow.webContents.on('console-message', logger.ipcMainRendererLogger);
   splashWindow.webContents.on('will-navigate', e => e.preventDefault());
@@ -414,6 +431,7 @@ function launchSplashWindow(startMinimized) {
     });
   }
   _ipcMain.default.on('SPLASH_SCREEN_READY', () => {
+    performance.mark('splash-screen-ready');
     console.log('splashScreen: SPLASH_SCREEN_READY');
     const cachedQuote = chooseCachedQuote();
     if (cachedQuote) {
@@ -438,8 +456,10 @@ function launchSplashWindow(startMinimized) {
     pathname: _path.default.join(__dirname, 'splash', 'index.html')
   });
   void splashWindow.loadURL(splashUrl);
+  performance.measure('splash-window-loadurl-duration', 'splash-window-launch');
 }
 function launchMainWindow() {
+  performance.mark('splash-launch-mainwindow');
   console.log(`splashScreen.launchMainWindow: ${launchedMainWindow}`);
   removeModulesListeners();
   if (launchedMainWindow) {

@@ -1,11 +1,21 @@
 "use strict";
 
-const electron = require('electron');
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.canBootstrapNewUpdater = void 0;
+exports.ensureModule = ensureModule;
+exports.getUpdaterVersion = getUpdaterVersion;
+exports.requireModule = requireModule;
+var electron = _interopRequireWildcard(require("electron"));
+var commonConstants = _interopRequireWildcard(require("../common/constants"));
+function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
+function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
 const {
   NATIVE_MODULES_GET_PATHS,
   NATIVE_MODULES_INSTALL,
   NATIVE_MODULES_GET_HAS_NEW_UPDATER
-} = require('../common/constants').IPCEvents;
+} = commonConstants.IPCEvents;
 const modulePromises = {};
 function getSanitizedModulePaths() {
   let sanitizedModulePaths = [];
@@ -25,6 +35,9 @@ function getSanitizedModulePaths() {
 function getHasNewUpdater() {
   return electron.ipcRenderer.sendSync(NATIVE_MODULES_GET_HAS_NEW_UPDATER);
 }
+function getUpdaterVersion() {
+  return 1;
+}
 async function ensureModule(name) {
   if (modulePromises[name] == null) {
     modulePromises[name] = electron.ipcRenderer.invoke(NATIVE_MODULES_INSTALL, name);
@@ -42,9 +55,5 @@ function requireModule(name) {
   }
   return require(name);
 }
+const canBootstrapNewUpdater = exports.canBootstrapNewUpdater = !getHasNewUpdater();
 module.paths = getSanitizedModulePaths();
-module.exports = {
-  ensureModule,
-  requireModule,
-  canBootstrapNewUpdater: !getHasNewUpdater()
-};

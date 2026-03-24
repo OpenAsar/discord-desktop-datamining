@@ -5,16 +5,13 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.injectModuleUpdater = injectModuleUpdater;
 exports.injectUpdater = injectUpdater;
-const childProcess = require('child_process');
-const electron = require('electron');
-const {
-  once
-} = require('events');
-const path = require('path');
-const process = require('process');
-const {
-  getGlobalPaths
-} = require('../../../common/nodeGlobalPaths');
+var childProcess = _interopRequireWildcard(require("child_process"));
+var electron = _interopRequireWildcard(require("electron"));
+var path = _interopRequireWildcard(require("path"));
+var process = _interopRequireWildcard(require("process"));
+var _nodeGlobalPaths = require("../../../common/nodeGlobalPaths");
+function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
+function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
 const {
   NATIVE_MODULES_GET_PATHS,
   NATIVE_MODULES_INSTALL,
@@ -32,7 +29,7 @@ function injectUpdater(updater) {
 electron.ipcMain.on(NATIVE_MODULES_GET_PATHS, event => {
   event.returnValue = {
     mainAppDirname: global.mainAppDirname,
-    browserModulePaths: getGlobalPaths()
+    browserModulePaths: (0, _nodeGlobalPaths.getGlobalPaths)()
   };
 });
 async function newUpdaterInstall(updater, moduleName) {
@@ -50,7 +47,7 @@ electron.ipcMain.handle(NATIVE_MODULES_INSTALL, async (_, moduleName) => {
     return newUpdaterInstall(newUpdater, moduleName);
   }
   const updater = injectedModuleUpdater;
-  if (!updater) {
+  if (updater === null) {
     throw new Error('Module updater is not available!');
   }
   const waitForInstall = new Promise((resolve, reject) => {
@@ -67,13 +64,13 @@ electron.ipcMain.handle(NATIVE_MODULES_INSTALL, async (_, moduleName) => {
     updater.events.on(updater.INSTALLED_MODULE, installedHandler);
   });
   updater.install(moduleName, false);
-  await waitForInstall;
+  return await waitForInstall;
 });
 electron.ipcMain.on(NATIVE_MODULES_GET_HAS_NEW_UPDATER, event => {
   var _injectedUpdater2;
   event.returnValue = ((_injectedUpdater2 = injectedUpdater) === null || _injectedUpdater2 === void 0 ? void 0 : _injectedUpdater2.getUpdater()) != null;
 });
-electron.ipcMain.on(NATIVE_MODULES_FINISH_UPDATER_BOOTSTRAP, async (_, [major, minor, revision]) => {
+electron.ipcMain.on(NATIVE_MODULES_FINISH_UPDATER_BOOTSTRAP, (_, [major, minor, revision]) => {
   if (typeof major !== 'number' || typeof minor !== 'number' || typeof revision !== 'number') {
     throw new Error('You tried.');
   }

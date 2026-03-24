@@ -7,6 +7,9 @@ exports.default = void 0;
 var _electron = require("electron");
 var _securityUtils = require("../../common/securityUtils");
 var _Constants = require("../Constants");
+const {
+  APP_NAME_FOR_HUMANS
+} = require('../Constants');
 const SEPARATOR = {
   type: 'separator'
 };
@@ -19,7 +22,7 @@ const developerMenuSection = [SEPARATOR, {
 var _default = enableDevtools => [{
   role: 'appMenu',
   submenu: [{
-    label: `About ${_Constants.APP_NAME_FOR_HUMANS}`,
+    label: `About ${APP_NAME_FOR_HUMANS}`,
     role: 'about'
   }, {
     label: 'Check for Updates...',
@@ -34,14 +37,14 @@ var _default = enableDevtools => [{
   }, SEPARATOR, {
     role: 'services'
   }, SEPARATOR, {
-    label: `Hide ${_Constants.APP_NAME_FOR_HUMANS}`,
+    label: `Hide ${APP_NAME_FOR_HUMANS}`,
     role: 'hide'
   }, {
     role: 'hideOthers'
   }, {
     role: 'unhide'
   }, SEPARATOR, {
-    label: `Quit ${_Constants.APP_NAME_FOR_HUMANS}`,
+    label: `Quit ${APP_NAME_FOR_HUMANS}`,
     role: 'quit'
   }]
 }, {

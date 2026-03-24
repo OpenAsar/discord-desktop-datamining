@@ -6,12 +6,12 @@ Object.defineProperty(exports, "__esModule", {
 exports.flatten = flatten;
 exports.reconcileCrashReporterMetadata = reconcileCrashReporterMetadata;
 function flatten(metadata, prefix = null, root = null) {
-  root = root ? root : {};
-  prefix = prefix ? prefix : '';
+  root = root !== null ? root : {};
+  prefix = prefix !== null ? prefix : '';
   if (typeof metadata === 'object') {
     for (const key in metadata) {
-      const next_prefix = prefix === '' ? key : `${prefix}[${key}]`;
-      flatten(metadata[key], next_prefix, root);
+      const nextPrefix = prefix === '' ? key : `${prefix}[${key}]`;
+      flatten(metadata[key], nextPrefix, root);
     }
   } else {
     root[prefix] = String(metadata);
@@ -19,16 +19,16 @@ function flatten(metadata, prefix = null, root = null) {
   return root;
 }
 function reconcileCrashReporterMetadata(crashReporter, metadata) {
-  const new_metadata = flatten(metadata);
-  const old_metadata = crashReporter.getParameters();
-  for (const key in old_metadata) {
-    if (!new_metadata.hasOwnProperty(key)) {
+  const newMetadata = flatten(metadata);
+  const oldMetadata = crashReporter.getParameters();
+  for (const key in oldMetadata) {
+    if (!newMetadata.hasOwnProperty(key)) {
       crashReporter.removeExtraParameter(key);
     }
   }
-  for (const key in new_metadata) {
-    if (!old_metadata.hasOwnProperty(key)) {
-      crashReporter.addExtraParameter(key, String(new_metadata[key]));
+  for (const key in newMetadata) {
+    if (!oldMetadata.hasOwnProperty(key)) {
+      crashReporter.addExtraParameter(key, String(newMetadata[key]));
     }
   }
 }
