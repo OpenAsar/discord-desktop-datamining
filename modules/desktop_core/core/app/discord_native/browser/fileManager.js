@@ -3,20 +3,14 @@
 var _electron = _interopRequireDefault(require("electron"));
 var _DiscordIPC = require("../common/DiscordIPC");
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
-function maybeUseSmoketestPath() {
-  if (process.env.DISCORD_USER_DATA_DIR != null) {
-    return process.env.DISCORD_USER_DATA_DIR;
-  }
-  return null;
-}
 function getModulePath() {
-  return maybeUseSmoketestPath() ?? global.moduleDataPath ?? global.modulePath;
+  return global.moduleDataPath ?? global.modulePath;
 }
 function getLogPath() {
-  return maybeUseSmoketestPath() ?? global.logPath;
+  return global.logPath;
 }
 function getAssetCachePath() {
-  return maybeUseSmoketestPath() ?? global.assetCachePath;
+  return global.assetCachePath;
 }
 _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.FILE_MANAGER_GET_MODULE_PATH, async () => {
   return getModulePath();

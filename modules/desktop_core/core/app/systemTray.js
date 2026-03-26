@@ -12,11 +12,11 @@ var _securityUtils = require("../common/securityUtils");
 var _appSettings = require("./bootstrapModules/appSettings");
 var _ipcMain = _interopRequireDefault(require("./ipcMain"));
 var _utils = require("./utils");
-var _Constants = require("./Constants");
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 const {
-  buildInfo
-} = require('./bootstrapModules/buildInfo');
+  APP_NAME
+} = require('./Constants');
+const buildInfo = require('./bootstrapModules/buildInfo').buildInfo;
 const settings = _appSettings.appSettings.getSettings();
 const TrayIconNames = {
   DEFAULT: 'tray',
@@ -43,13 +43,13 @@ const TrayGuidByChannel = {
   development: '6603ea8b-b21d-46e9-8ea5-d87b9105613f'
 };
 let hasInit = exports.hasInit = false;
-let currentIcon;
+let currentIcon = null;
 let options;
 let menuItems;
 let contextMenu;
-let atomTray;
+let atomTray = null;
 let trayIcons;
-let applications;
+let applications = null;
 function init(_options) {
   if (hasInit) {
     console.warn('systemTray: Has already init! Cancelling init.');
@@ -104,7 +104,7 @@ function initializeMenuItems() {
     click: onToggleDeafen
   };
   menuItems[MenuItems.OPEN] = {
-    label: `Open ${_Constants.APP_NAME}`,
+    label: `Open ${APP_NAME}`,
     type: 'normal',
     visible: process.platform === 'linux',
     click: onTrayClicked
@@ -122,7 +122,7 @@ function initializeMenuItems() {
     click: onCheckForUpdates
   };
   menuItems[MenuItems.QUIT] = {
-    label: `Quit ${_Constants.APP_NAME}`,
+    label: `Quit ${APP_NAME}`,
     role: 'quit'
   };
   menuItems[MenuItems.ACKNOWLEDGEMENTS] = {
@@ -140,7 +140,7 @@ function buildContextMenu() {
   contextMenu = [menuItems[MenuItems.SECRET], separator, ...(hasApplications ? [...applications, separator] : []), menuItems[MenuItems.OPEN], menuItems[MenuItems.MUTE], menuItems[MenuItems.DEAFEN], menuItems[MenuItems.VOICE_SETTINGS], menuItems[MenuItems.CHECK_UPDATE], menuItems[MenuItems.ACKNOWLEDGEMENTS], separator, menuItems[MenuItems.QUIT]];
 }
 function setTrayIcon(icon) {
-  currentIcon = trayIcons[icon];
+  currentIcon = icon !== null ? trayIcons[icon] : null;
   if (icon == null) {
     hide();
     return;
@@ -214,7 +214,7 @@ function show() {
   const guid = ['win32', 'darwin'].includes(process.platform) ? TrayGuidByChannel[buildInfo.releaseChannel] : undefined;
   try {
     atomTray = guid !== undefined ? new _electron.Tray(currentIcon, guid) : new _electron.Tray(currentIcon);
-    atomTray.setToolTip(_Constants.APP_NAME);
+    atomTray.setToolTip(APP_NAME);
     setContextMenu();
     atomTray.on('click', options.onTrayClicked);
   } catch (e) {
@@ -229,7 +229,10 @@ function hide() {
   atomTray = null;
 }
 function displayHowToCloseHint() {
-  if (settings.get('trayBalloonShown') != null || atomTray == null) {
+  if (settings == null || atomTray == null) {
+    return;
+  }
+  if (settings.get('trayBalloonShown') != null) {
     return;
   }
   settings.set('trayBalloonShown', true);
