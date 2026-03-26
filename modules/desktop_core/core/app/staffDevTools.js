@@ -104,19 +104,18 @@ async function _getTokenFromDisk(userDataPath) {
     try {
       const data = await _fs.default.promises.readFile(_path.default.join(leveldbDir, file));
       const str = data.toString('latin1');
-      const encryptedMatch = str.match(/"(dQw4w9WgXcQ:[A-Za-z0-9+/=]+)"/);
-      if (encryptedMatch != null) {
-        const encryptedPart = encryptedMatch[1].substring(ENCRYPTED_PREFIX.length);
+      const encryptedMatches = [...str.matchAll(/"(dQw4w9WgXcQ:[A-Za-z0-9+/=]+)"/g)];
+      if (encryptedMatches.length > 0) {
+        const encryptedPart = encryptedMatches[encryptedMatches.length - 1][1].substring(ENCRYPTED_PREFIX.length);
         try {
           return _electron.safeStorage.decryptString(Buffer.from(encryptedPart, 'base64'));
         } catch (e) {
-          log(`Token decryption failed: ${e instanceof Error ? e.message : e}`);
-          return null;
+          log(`Token decryption failed in ${file}: ${e instanceof Error ? e.message : e}`);
         }
       }
-      const plaintextMatch = str.match(/"([\w-]{24,}\.[\w-]{6,}\.[\w-]{27,})"/);
-      if (plaintextMatch != null) {
-        return plaintextMatch[1];
+      const plaintextMatches = [...str.matchAll(/"([\w-]{24,}\.[\w-]{6,}\.[\w-]{27,})"/g)];
+      if (plaintextMatches.length > 0) {
+        return plaintextMatches[plaintextMatches.length - 1][1];
       }
     } catch (_e) {}
   }
