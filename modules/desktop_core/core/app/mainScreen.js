@@ -309,7 +309,7 @@ const loadMainPage = () => {
   lastPageLoadFailed = false;
   mainWindow.loadURL(URL_TO_LOAD);
   setTimeout(() => {
-    if (!webAppLoaded) {
+    if (!webAppLoaded && Math.random() < 0.05) {
       const sentry = _crashReporterSetup.crashReporterSetup.getGlobalSentry();
       if (sentry != null) {
         sentry.captureMessage('WebApp timed out loading (timeout=60s)');
