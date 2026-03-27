@@ -227,6 +227,9 @@ if (process.platform === 'win32') {
   features.declareSupported('voice_subsystem_deferred_switch');
   features.declareSupported('voice_bypass_system_audio_input_processing');
   features.declareSupported('clips');
+  if (VoiceEngine.setClipsModulePath !== undefined) {
+    features.declareSupported('clips_v3');
+  }
 }
 
 function bindConnectionInstance(instance) {
