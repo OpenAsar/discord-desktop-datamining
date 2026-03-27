@@ -57,7 +57,7 @@ function _getAssetUrl() {
     return _regeneratorRuntime().wrap(function _callee$(_context) {
       while (1) switch (_context.prev = _context.next) {
         case 0:
-          if (assetUrl) {
+          if (!(assetUrl == null || assetUrl === '')) {
             _context.next = 2;
             break;
           }
@@ -155,19 +155,19 @@ var ToastBuilder = /*#__PURE__*/function () {
       */
       var xml = '<toast>';
       xml += "<visual><binding template=\"ToastGeneric\">";
-      if (this.title) {
+      if (this.title != null && this.title !== '') {
         xml += "<text>".concat(escapeXml(this.title), "</text>");
       }
-      if (this.body) {
+      if (this.body != null && this.body !== '') {
         xml += "<text>".concat(escapeXml(this.body), "</text>");
       }
-      if (this.icon) {
+      if (this.icon != null && this.icon !== '') {
         xml += "<image placement='appLogoOverride' src='".concat(escapeXml(this.icon), "' />");
       }
       xml += "</binding></visual>";
       // We play the sound from the javascript layer
       xml += "<audio silent='true' />";
-      if (this.supportsHeaders() && this.threadIdentifier && this.groupName) {
+      if (this.supportsHeaders() && this.threadIdentifier != null && this.threadIdentifier !== '' && this.groupName != null && this.groupName !== '') {
         xml += "<header id='".concat(escapeXml(this.threadIdentifier), "' title='").concat(escapeXml(this.groupName), "' arguments='").concat(escapeXml(this.threadIdentifier), "' />");
       }
       if (Array.isArray(this.actions)) {
@@ -178,10 +178,10 @@ var ToastBuilder = /*#__PURE__*/function () {
           for (_iterator.s(); !(_step = _iterator.n()).done;) {
             var action = _step.value;
             var actionXml = "<action content=\"".concat(escapeXml(action.content), "\" arguments=\"").concat(escapeXml(action.args), "\" ");
-            if (action.hintTooltip) {
+            if (action.hintTooltip != null && action.hintTooltip !== '') {
               actionXml += "hint-toolTip=\"".concat(escapeXml(action.hintTooltip), "\" ");
             }
-            if (action.hintButtonStyle) {
+            if (action.hintButtonStyle != null) {
               actionXml += "hint-buttonStyle=\"".concat(escapeXml(action.hintButtonStyle), "\" ");
             }
             actionXml += "/>";

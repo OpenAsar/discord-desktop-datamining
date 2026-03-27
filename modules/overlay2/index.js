@@ -9,7 +9,7 @@ function _interopRequireDefault(e) { return e && e.__esModule ? e : { "default":
 // eslint-disable-next-line import/no-unresolved, import/extensions
 
 var isOverlayContext = typeof window !== 'undefined' && window != null && window.__OVERLAY__ || document.getElementById('__OVERLAY__SENTINEL__') != null || /overlay/.test(window.location.pathname);
-var isElectronRenderer = typeof window !== 'undefined' && window != null && window.DiscordNative && window.DiscordNative.isRenderer;
+var isElectronRenderer = typeof window !== 'undefined' && window != null && window.DiscordNative != null && Boolean(window.DiscordNative.isRenderer);
 var features = isElectronRenderer ? window.DiscordNative.features : global.features;
 var clickZoneCallback;
 var interceptInput = false;
