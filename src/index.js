@@ -10,6 +10,7 @@ const modules = [
   'desktop_overlay',
   'krisp',
   'dispatch',
+  'clips',
   'utils',
   'media',
   'sekrit',
