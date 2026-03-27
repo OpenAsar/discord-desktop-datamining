@@ -10,8 +10,10 @@ Object.defineProperty(exports, "basename", {
     return _path.basename;
   }
 });
+exports.checkClipsFilesExist = checkClipsFilesExist;
 exports.checkMLModelFilesExist = checkMLModelFilesExist;
 exports.checkVoiceFilterFilesExist = checkVoiceFilterFilesExist;
+exports.cleanupUnusedClipsFiles = cleanupUnusedClipsFiles;
 exports.cleanupUnusedMLModelFiles = cleanupUnusedMLModelFiles;
 exports.cleanupUnusedOpenH264Files = cleanupUnusedOpenH264Files;
 exports.cleanupUnusedVoiceFilterFiles = cleanupUnusedVoiceFilterFiles;
@@ -31,6 +33,8 @@ Object.defineProperty(exports, "extname", {
 exports.getAndCreateLogDirectorySync = getAndCreateLogDirectorySync;
 exports.getAssetCachePath = getAssetCachePath;
 exports.getAssetCachePathSync = getAssetCachePathSync;
+exports.getClipsDataDir = getClipsDataDir;
+exports.getClipsDataDirSync = getClipsDataDirSync;
 exports.getLogPath = getLogPath;
 exports.getLogPathSync = getLogPathSync;
 exports.getMLDataDir = getMLDataDir;
@@ -48,6 +52,7 @@ Object.defineProperty(exports, "join", {
   }
 });
 exports.logLevelSync = logLevelSync;
+exports.maybeDownloadClipsFile = maybeDownloadClipsFile;
 exports.maybeDownloadMLModelFile = maybeDownloadMLModelFile;
 exports.maybeDownloadOpenH264 = maybeDownloadOpenH264;
 exports.maybeDownloadVoiceFilterFile = maybeDownloadVoiceFilterFile;
@@ -57,6 +62,7 @@ exports.saveWithDialog = saveWithDialog;
 exports.saveWithDialog2 = saveWithDialog2;
 exports.showItemInFolder = showItemInFolder;
 exports.showOpenDialog = showOpenDialog;
+exports.stopClipsDownloads = stopClipsDownloads;
 exports.stopMLModelDownloads = stopMLModelDownloads;
 exports.stopVoiceFilterDownloads = stopVoiceFilterDownloads;
 exports.uploadDiscordHookCrashes = uploadDiscordHookCrashes;
@@ -399,6 +405,72 @@ async function cleanupUnusedMLModelFiles(neededFileNames) {
   }
   return cleanupUnusedAssets(neededFileNames, mlModelsDataPath, 'ML Models');
 }
+const clipsDownloaders = [];
+async function maybeDownloadClipsFile(cdnURL, fileName, onProgress) {
+  if (!cdnURL.startsWith('https://cdn.discordapp.com/assets/content/')) {
+    throw new Error('Clips invalid CDN URL');
+  }
+  let clipsDataPath;
+  try {
+    clipsDataPath = await getClipsDataDir();
+  } catch (cause) {
+    throw new Error('Clips unable to get path of data dir', {
+      cause
+    });
+  }
+  return maybeDownloadAsset(cdnURL, fileName, {
+    name: 'Clips',
+    destination: clipsDataPath,
+    downloaders: clipsDownloaders
+  }, onProgress);
+}
+function stopClipsDownloads() {
+  while (clipsDownloaders.length > 0) {
+    var _clipsDownloaders$pop;
+    const dl = (_clipsDownloaders$pop = clipsDownloaders.pop()) === null || _clipsDownloaders$pop === void 0 ? void 0 : _clipsDownloaders$pop.deref();
+    void (dl === null || dl === void 0 ? void 0 : dl.stop());
+  }
+}
+async function checkClipsFilesExist(files) {
+  let clipsDataPath;
+  try {
+    clipsDataPath = getClipsDataDirSync();
+  } catch (cause) {
+    throw new Error('Clips unable to get path of data dir', {
+      cause
+    });
+  }
+  const results = await Promise.all(files.map(async file => {
+    const fullPath = _path.default.join(clipsDataPath, file.fileName);
+    try {
+      await _fs.default.promises.access(fullPath);
+      return {
+        ...file,
+        exists: true
+      };
+    } catch (error) {
+      return {
+        ...file,
+        exists: false
+      };
+    }
+  }));
+  return results;
+}
+async function cleanupUnusedClipsFiles(neededFileNames) {
+  let clipsDataPath;
+  try {
+    clipsDataPath = await getClipsDataDir();
+  } catch (cause) {
+    const errorMsg = `Clips cleanup failed: ${cause}`;
+    console.error(errorMsg);
+    return {
+      deletedFiles: [],
+      errors: [errorMsg]
+    };
+  }
+  return cleanupUnusedAssets(neededFileNames, clipsDataPath, 'Clips');
+}
 async function maybeDownloadOpenH264(cdnURL, fileName, sha256, onProgress) {
   if (!cdnURL.startsWith('https://ciscobinary.openh264.org/')) {
     throw new Error('OpenH264 invalid CDN URL');
@@ -642,6 +714,13 @@ async function getMLDataDir() {
 }
 function getMLDataDirSync() {
   return _path.default.join(getAssetCachePathSync(), 'ml');
+}
+async function getClipsDataDir() {
+  const assetCachePath = await getAssetCachePath();
+  return _path.default.join(assetCachePath, 'clips');
+}
+function getClipsDataDirSync() {
+  return _path.default.join(getAssetCachePathSync(), 'clips');
 }
 async function getOpenH264Dir() {
   const assetCachePath = await getAssetCachePath();
