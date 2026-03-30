@@ -31,6 +31,7 @@ var _ipcMain = _interopRequireDefault(require("./ipcMain"));
 var mouse = _interopRequireWildcard(require("./mouse"));
 var _networkDebugUtils = require("./networkDebugUtils");
 var popoutWindows = _interopRequireWildcard(require("./popoutWindows"));
+var _staffDevTools = require("./staffDevTools");
 var systemTray = _interopRequireWildcard(require("./systemTray"));
 var thumbarButtons = _interopRequireWildcard(require("./thumbarButtons"));
 var _Constants = require("./Constants");
@@ -308,7 +309,7 @@ const loadMainPage = () => {
   lastPageLoadFailed = false;
   mainWindow.loadURL(URL_TO_LOAD);
   setTimeout(() => {
-    if (!webAppLoaded) {
+    if (!webAppLoaded && Math.random() < 0.05) {
       const sentry = _crashReporterSetup.crashReporterSetup.getGlobalSentry();
       if (sentry != null) {
         sentry.captureMessage('WebApp timed out loading (timeout=60s)');
@@ -499,6 +500,12 @@ async function launchMainAppWindow(isVisible) {
     if (!lastPageLoadFailed) {
       connectionBackoff.succeed();
       _splashScreen.splashScreen.pageReady();
+      if (settings === null || settings === void 0 ? void 0 : settings.get(_staffDevTools._STAFF_DEV_TOOLS_KEY, false)) {
+        (0, _staffDevTools.tryLoadStaffDevToolsModule)(mainWindow, WEBAPP_ENDPOINT).catch(e => {
+          const sentry = _crashReporterSetup.crashReporterSetup.getGlobalSentry();
+          sentry === null || sentry === void 0 ? void 0 : sentry.captureMessage(`[STAFF_DEV_TOOLS] Unexpected error: ${e instanceof Error ? e.message : e}`);
+        });
+      }
     }
   });
   mainWindow.webContents.on('render-process-gone', (e, details) => {
@@ -796,6 +803,7 @@ function setupAnalyticsEvents() {
     a.trackFullTTI();
   });
   _ipcMain.default.on(_Constants.AnalyticsEvents.APP_LOADED, () => {
+    performance.measure('mainscreen-loadmainpage-duration', 'mainscreen-loadmainpage');
     webAppLoaded = true;
   });
   _ipcMain.default.on(_Constants.AnalyticsEvents.APP_FIRST_RENDER_AFTER_READY_PAYLOAD, () => {

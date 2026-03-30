@@ -1,8 +1,15 @@
 "use strict";
 
-const electron = require('electron');
-const http = require('http');
-const https = require('https');
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getAPIEndpoint = getAPIEndpoint;
+exports.makeChunkedRequest = makeChunkedRequest;
+var electron = _interopRequireWildcard(require("electron"));
+var http = _interopRequireWildcard(require("http"));
+var https = _interopRequireWildcard(require("https"));
+function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
+function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
 const {
   CONSTANTS_GET
 } = require('../common/constants').IPCEvents;
@@ -13,16 +20,19 @@ async function getAPIEndpoint() {
   }
   return apiEndpoint;
 }
-async function makeChunkedRequest(route, chunks, options) {
+function makeChunkedRequest(route, chunks, options, callback) {
+  return _makeChunkedRequest(route, chunks, options).then(body => callback(null, body)).catch(err => callback(err));
+}
+async function _makeChunkedRequest(route, chunks, options) {
   const {
     method,
     chunkInterval,
     token,
     contentType
   } = options;
-  let httpModule = http;
+  let httpRequest = http.request;
   if (route.startsWith('https')) {
-    httpModule = https;
+    httpRequest = https.request;
   }
   const apiEndpoint = await getAPIEndpoint();
   if (apiEndpoint == null) {
@@ -36,8 +46,8 @@ async function makeChunkedRequest(route, chunks, options) {
     url.pathname = `${apiEndpointUrl.pathname}${url.pathname}`;
   }
   return new Promise(async (resolve, reject) => {
-    let writeTimeout;
-    const req = httpModule.request(url.toString(), {
+    let writeTimeout = null;
+    const req = httpRequest(url.toString(), {
       method,
       headers: {
         authorization: token,
@@ -58,7 +68,7 @@ async function makeChunkedRequest(route, chunks, options) {
       });
     });
     req.on('error', e => {
-      if (writeTimeout != null) {
+      if (writeTimeout !== null) {
         clearTimeout(writeTimeout);
       }
       reject(e);
@@ -73,9 +83,3 @@ async function makeChunkedRequest(route, chunks, options) {
     req.end();
   });
 }
-module.exports = {
-  getAPIEndpoint,
-  makeChunkedRequest: function (route, chunks, options, callback) {
-    makeChunkedRequest(route, chunks, options).then(body => callback(null, body)).catch(err => callback(err));
-  }
-};

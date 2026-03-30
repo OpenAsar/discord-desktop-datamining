@@ -161,7 +161,8 @@ class AutoUpdaterLinux extends _events.EventEmitter {
 let autoUpdater;
 switch (process.platform) {
   case 'darwin':
-    autoUpdater = require('electron').autoUpdater;
+    const electron = require('electron');
+    autoUpdater = electron.autoUpdater;
     break;
   case 'win32':
     autoUpdater = new AutoUpdaterWin32();
