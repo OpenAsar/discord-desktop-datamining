@@ -9,9 +9,11 @@ var _electron = require("electron");
 var _fs = _interopRequireDefault(require("fs"));
 var _path = _interopRequireDefault(require("path"));
 var _url = _interopRequireDefault(require("url"));
+var _buildInfo = require("./bootstrapModules/buildInfo");
 var _crashReporterSetup = require("./bootstrapModules/crashReporterSetup");
 var _paths = require("./bootstrapModules/paths");
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+const buildInfo = _buildInfo.buildInfo;
 const LOG_PREFIX = '[STAFF_DEV_TOOLS]';
 function log(message) {
   console.log(`${LOG_PREFIX} ${message}`);
@@ -149,7 +151,31 @@ async function tryLoadStaffDevToolsModule(mainWindow, webappEndpoint) {
     _staffDevToolsLoading = null;
   }
 }
+function _tryLoadLocalDevModule() {
+  if (buildInfo.localModulesRoot == null) {
+    return false;
+  }
+  const localModulePath = _path.default.join(buildInfo.localModulesRoot, '..', '..', 'native_modules', 'discord_staff_dev_tools');
+  if (!_fs.default.existsSync(_path.default.join(localModulePath, 'package.json'))) {
+    return false;
+  }
+  try {
+    const discordStaffDevTools = require(localModulePath);
+    discordStaffDevTools.init();
+    discordStaffDevTools.installBridge();
+    global.features.declareSupported('staff_dev_tools');
+    _staffDevToolsModule = discordStaffDevTools;
+    log('Module loaded from local native_modules (dev mode)');
+    return true;
+  } catch (e) {
+    log(`Local module load failed: ${e instanceof Error ? e.message : e}`);
+    return false;
+  }
+}
 async function _tryLoadStaffDevToolsModuleImpl(mainWindow, webappEndpoint) {
+  if (_tryLoadLocalDevModule()) {
+    return;
+  }
   const userDataPath = _paths.paths.getUserData();
   if (userDataPath == null) {
     log('Aborted: userDataPath is null');
