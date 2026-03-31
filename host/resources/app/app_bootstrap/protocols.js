@@ -4,11 +4,15 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.beforeReadyProtocolRegistration = beforeReadyProtocolRegistration;
-var _electron = require("electron");
-var _constants = require("../common/constants");
 function beforeReadyProtocolRegistration() {
-  _electron.protocol.registerSchemesAsPrivileged([{
-    scheme: _constants.DISCORD_CLIP_PROTOCOL,
+  const {
+    protocol
+  } = require('electron');
+  const {
+    DISCORD_CLIP_PROTOCOL
+  } = require('../common/constants');
+  protocol.registerSchemesAsPrivileged([{
+    scheme: DISCORD_CLIP_PROTOCOL,
     privileges: {
       standard: true,
       secure: true,
