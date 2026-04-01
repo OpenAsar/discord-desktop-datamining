@@ -12,11 +12,9 @@ Object.defineProperty(exports, "basename", {
 });
 exports.checkClipsFilesExist = checkClipsFilesExist;
 exports.checkMLModelFilesExist = checkMLModelFilesExist;
-exports.checkVoiceFilterFilesExist = checkVoiceFilterFilesExist;
 exports.cleanupUnusedClipsFiles = cleanupUnusedClipsFiles;
 exports.cleanupUnusedMLModelFiles = cleanupUnusedMLModelFiles;
 exports.cleanupUnusedOpenH264Files = cleanupUnusedOpenH264Files;
-exports.cleanupUnusedVoiceFilterFiles = cleanupUnusedVoiceFilterFiles;
 exports.combineWebRtcLogs = combineWebRtcLogs;
 Object.defineProperty(exports, "dirname", {
   enumerable: true,
@@ -43,8 +41,6 @@ exports.getModuleDataPathSync = getModuleDataPathSync;
 exports.getModulePath = getModulePath;
 exports.getOpenH264Dir = getOpenH264Dir;
 exports.getOpenH264LibraryPathSync = getOpenH264LibraryPathSync;
-exports.getVoiceFilterDataDir = getVoiceFilterDataDir;
-exports.getVoiceFilterDataDirSync = getVoiceFilterDataDirSync;
 Object.defineProperty(exports, "join", {
   enumerable: true,
   get: function () {
@@ -55,7 +51,6 @@ exports.logLevelSync = logLevelSync;
 exports.maybeDownloadClipsFile = maybeDownloadClipsFile;
 exports.maybeDownloadMLModelFile = maybeDownloadMLModelFile;
 exports.maybeDownloadOpenH264 = maybeDownloadOpenH264;
-exports.maybeDownloadVoiceFilterFile = maybeDownloadVoiceFilterFile;
 exports.openFiles = openFiles;
 exports.readLogFiles = readLogFiles;
 exports.saveWithDialog = saveWithDialog;
@@ -64,7 +59,6 @@ exports.showItemInFolder = showItemInFolder;
 exports.showOpenDialog = showOpenDialog;
 exports.stopClipsDownloads = stopClipsDownloads;
 exports.stopMLModelDownloads = stopMLModelDownloads;
-exports.stopVoiceFilterDownloads = stopVoiceFilterDownloads;
 exports.uploadDiscordHookCrashes = uploadDiscordHookCrashes;
 var _unbzip2Stream = _interopRequireDefault(require("@openpgp/unbzip2-stream"));
 var _fs = _interopRequireDefault(require("fs"));
@@ -272,72 +266,6 @@ async function cleanupUnusedAssets(neededFileNames, assetPath, category) {
     deletedFiles,
     errors
   };
-}
-const voiceFilterDownloaders = [];
-async function maybeDownloadVoiceFilterFile(cdnURL, fileName, onProgress) {
-  if (!cdnURL.startsWith('https://cdn.discordapp.com/assets/content')) {
-    throw new Error('Voice Filters invalid CDN URL');
-  }
-  let voiceFiltersDataPath;
-  try {
-    voiceFiltersDataPath = await getVoiceFilterDataDir();
-  } catch (cause) {
-    throw new Error('Voice Filters unable to get path of data dir', {
-      cause
-    });
-  }
-  return maybeDownloadAsset(cdnURL, fileName, {
-    name: 'Voice Filters',
-    destination: voiceFiltersDataPath,
-    downloaders: voiceFilterDownloaders
-  }, onProgress);
-}
-function stopVoiceFilterDownloads() {
-  while (voiceFilterDownloaders.length > 0) {
-    var _voiceFilterDownloade;
-    const dl = (_voiceFilterDownloade = voiceFilterDownloaders.pop()) === null || _voiceFilterDownloade === void 0 ? void 0 : _voiceFilterDownloade.deref();
-    void (dl === null || dl === void 0 ? void 0 : dl.stop());
-  }
-}
-async function checkVoiceFilterFilesExist(files) {
-  let voiceFiltersDataPath;
-  try {
-    voiceFiltersDataPath = getVoiceFilterDataDirSync();
-  } catch (cause) {
-    throw new Error('Voice Filters unable to get path of data dir', {
-      cause
-    });
-  }
-  const results = await Promise.all(files.map(async file => {
-    const fullPath = _path.default.join(voiceFiltersDataPath, file.fileName);
-    try {
-      await _fs.default.promises.access(fullPath);
-      return {
-        ...file,
-        exists: true
-      };
-    } catch (error) {
-      return {
-        ...file,
-        exists: false
-      };
-    }
-  }));
-  return results;
-}
-async function cleanupUnusedVoiceFilterFiles(neededFileNames) {
-  let voiceFiltersDataPath;
-  try {
-    voiceFiltersDataPath = await getVoiceFilterDataDir();
-  } catch (cause) {
-    const errorMsg = `Voice Filters cleanup failed: ${cause}`;
-    console.error(errorMsg);
-    return {
-      deletedFiles: [],
-      errors: [errorMsg]
-    };
-  }
-  return cleanupUnusedAssets(neededFileNames, voiceFiltersDataPath, 'Voice Filters');
 }
 const mlModelDownloaders = [];
 async function maybeDownloadMLModelFile(cdnURL, fileName, onProgress) {
@@ -700,13 +628,6 @@ function showItemInFolder(path) {
 async function openFiles(dialogOptions, maxSize) {
   const filenames = await showOpenDialog(dialogOptions);
   return (0, _fileutils.readFulfilledFiles)(filenames, maxSize, true);
-}
-async function getVoiceFilterDataDir() {
-  const assetCachePath = await getAssetCachePath();
-  return _path.default.join(assetCachePath, 'voice_filters');
-}
-function getVoiceFilterDataDirSync() {
-  return _path.default.join(getAssetCachePathSync(), 'voice_filters');
 }
 async function getMLDataDir() {
   const assetCachePath = await getAssetCachePath();
