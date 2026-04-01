@@ -21,6 +21,15 @@ if (_utils.isOSX && majorVersion >= 21) {
   _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WEBAUTHN_AUTHENTICATE_MAC, (_event, challenge) => {
     return callNative('webAuthnAuthenticate', challenge);
   });
+  _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WEBAUTHN_SIGNAL_ALL_ACCEPTED_CREDENTIALS, (_event, rpId, userId, allAcceptedCredentialIds) => {
+    return callSignalNative('signalAllAcceptedCredentials', rpId, userId, [...allAcceptedCredentialIds]);
+  });
+  _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WEBAUTHN_SIGNAL_CURRENT_USER_DETAILS, (_event, rpId, userId, name, displayName) => {
+    return callSignalNative('signalCurrentUserDetails', rpId, userId, name, displayName);
+  });
+  _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.WEBAUTHN_SIGNAL_UNKNOWN_CREDENTIAL, (_event, rpId, credentialId) => {
+    return callSignalNative('signalUnknownCredential', rpId, credentialId);
+  });
   function callNative(method, challenge) {
     if (moduleDataPath == null) {
       return Promise.reject(new Error('Module data path unset'));
@@ -32,6 +41,16 @@ if (_utils.isOSX && majorVersion >= 21) {
         code,
         message
       }));
+    });
+  }
+  function callSignalNative(method, ...args) {
+    if (moduleDataPath == null) {
+      return Promise.resolve();
+    }
+    const webAuthnPath = _path.default.join(moduleDataPath, 'discord_webauthn');
+    return new Promise(resolve => {
+      const lib = require(webAuthnPath);
+      lib[method](...args, () => resolve());
     });
   }
 }
