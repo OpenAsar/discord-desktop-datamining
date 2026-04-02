@@ -755,6 +755,13 @@ function processUnzipQueue() {
               originalFs.unlinkSync(finalFileName);
             } catch (err) {}
             try {
+              if (!_processUtils.IS_WIN) {
+                const mask = _fs.default.constants.S_IRWXU | _fs.default.constants.S_IRWXG | _fs.default.constants.S_IRWXO;
+                const permissions = entry.externalFileAttributes >> 16 & mask;
+                if (permissions !== 0) {
+                  originalFs.chmodSync(tempFileName, permissions);
+                }
+              }
               originalFs.renameSync(tempFileName, finalFileName);
             } catch (err) {
               onError(err, zipfile);

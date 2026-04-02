@@ -19,7 +19,7 @@ global.mainAppDirname = __dirname;
 global.features.declareSupported('overlay-hidpi');
 _electron.app.disableHardwareAcceleration();
 _electron.app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
-_electron.app.whenReady().then(function () {
+void _electron.app.whenReady().then(function () {
   var buildInfo = require(_path["default"].join(_process["default"].resourcesPath, 'build_info.json'));
 
   // eslint-disable import/no-unresolved

@@ -46,8 +46,6 @@ if (window.opener === null) {
     safeStorage: require('./discord_native/renderer/safeStorage'),
     hardware: require('./discord_native/renderer/hardware'),
     riotGames: require('./discord_native/renderer/riotGames'),
-    remoteApp: app,
-    remotePowerMonitor: powerMonitor,
     webAuthn: require('./discord_native/renderer/webauthn')
   };
   const crashReporterSetup = require('../common/crashReporterSetup');
