@@ -69,7 +69,7 @@ function handleAccelerators(contents, event) {
   return true;
 }
 function createRenderer(pid, url) {
-  if (renderers[pid]) {
+  if (renderers[pid] != null) {
     return;
   }
   var _require = require('url'),
@@ -140,7 +140,7 @@ function createRenderer(pid, url) {
       action: 'deny'
     };
   });
-  renderer.window.loadURL(renderer.url);
+  void renderer.window.loadURL(renderer.url);
 }
 function loadOverlay(pid) {
   var renderer = renderers[pid];
@@ -240,7 +240,7 @@ function loadOverlay(pid) {
     });
     renderer.backoff.fail(function () {
       _overlay_module["default"].logMessage("Retrying overlay URL load ".concat(renderer.url));
-      renderer.window.loadURL(renderer.url);
+      void renderer.window.loadURL(renderer.url);
     });
   });
   renderer.window.webContents.on('did-finish-load', function () {
@@ -268,7 +268,7 @@ function loadOverlay(pid) {
     });
   }
   renderer.url = renderer.overlayURL;
-  renderer.window.loadURL(renderer.url);
+  void renderer.window.loadURL(renderer.url);
 }
 function destroyRenderer(pid) {
   var renderer = renderers[pid];
@@ -279,7 +279,7 @@ function destroyRenderer(pid) {
   if (renderer.backoff) {
     renderer.backoff.cancel();
   }
-  if (renderer.window && !renderer.window.isDestroyed()) {
+  if (!renderer.window.isDestroyed()) {
     renderer.window.destroy();
   }
   delete renderers[pid];
