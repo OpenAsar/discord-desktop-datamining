@@ -439,6 +439,7 @@ function launchSplashWindow(startMinimized) {
     }
     if (splashWindow != null && !startMinimized) {
       splashWindow.showInactive();
+      analytics.getDesktopTTI().trackSplashWindowShown();
     }
     if (newUpdater != null) {
       void updateUntilCurrent();
