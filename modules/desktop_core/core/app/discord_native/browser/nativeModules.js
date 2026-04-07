@@ -3,6 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.getModulePath = getModulePath;
 exports.injectModuleUpdater = injectModuleUpdater;
 exports.injectUpdater = injectUpdater;
 var childProcess = _interopRequireWildcard(require("child_process"));
@@ -16,7 +17,8 @@ const {
   NATIVE_MODULES_GET_PATHS,
   NATIVE_MODULES_INSTALL,
   NATIVE_MODULES_FINISH_UPDATER_BOOTSTRAP,
-  NATIVE_MODULES_GET_HAS_NEW_UPDATER
+  NATIVE_MODULES_GET_HAS_NEW_UPDATER,
+  NATIVE_MODULES_GET_MODULE_PATH
 } = require('../common/constants').IPCEvents;
 let injectedModuleUpdater = null;
 let injectedUpdater = null;
@@ -83,4 +85,15 @@ electron.ipcMain.on(NATIVE_MODULES_FINISH_UPDATER_BOOTSTRAP, (_, [major, minor, 
   });
   console.log(`Restarting from ${path.resolve(process.execPath)} to ${path.resolve(hostExePath)}`);
   electron.app.quit();
+});
+function getModulePath(name) {
+  var _injectedUpdater3;
+  const newUpdater = (_injectedUpdater3 = injectedUpdater) === null || _injectedUpdater3 === void 0 ? void 0 : _injectedUpdater3.getUpdater();
+  if (newUpdater != null) {
+    return newUpdater.committedModulePaths.get(name) ?? null;
+  }
+  return null;
+}
+electron.ipcMain.on(NATIVE_MODULES_GET_MODULE_PATH, (event, name) => {
+  event.returnValue = getModulePath(name) ?? null;
 });
