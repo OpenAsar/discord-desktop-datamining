@@ -2,7 +2,7 @@
 
 ## development versions
 
-**host: 1.0.966**
+**host: 1.0.967**
 
 | module | version |
 | ------ | :-----: |
@@ -23,7 +23,6 @@
 | spellcheck | 1 |
 | utils | 1 |
 | voice | 1 |
-| voice_filters | 1 |
 | zstd | 1 |
 
 ## branches

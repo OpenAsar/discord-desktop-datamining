@@ -2,7 +2,7 @@
     "name": "discord_desktop_core",
     "license": "UNLICENSED",
     "description": "Discord Client for Desktop - Core App",
-    "main": "app/index.js",
+    "main": "bundle.js",
     "private": true,
     "scripts": {
         "eslint": "eslint . --ext .ts,.tsx --color --quiet",
@@ -16,8 +16,11 @@
         "@discordapp/discord-native-types": "file:../../../discord_common/js/packages/discord-native-types",
         "@discordapp/native-crash-codes": "file:../../../discord_common/js/packages/native-crash-codes",
         "@openpgp/unbzip2-stream": "2.0.0",
-        "@sentry/browser": "7.112.0",
-        "@sentry/electron": "4.24.0",
+        "@sentry/browser": "10.36.0",
+        "@sentry/electron": "7.7.0",
+        "@sentry/types": "10.36.0",
+        "@types/jest": "28.1.4",
+        "@types/lodash": "4.14.159",
         "arch": "2.2.0",
         "lodash": "4.17.21",
         "node-downloader-helper": "^2.1.9",
@@ -25,8 +28,6 @@
         "yauzl": "^2.10.0"
     },
     "devDependencies": {
-        "@types/jest": "28.1.4",
-        "@types/lodash": "4.14.159",
         "@types/node": "22.14.0",
         "electron": "37.6.1",
         "jest": "^27.1.0"
