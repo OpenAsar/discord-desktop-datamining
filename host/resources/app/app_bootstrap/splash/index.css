@@ -1,0 +1,298 @@
+:root {
+  --primary-font: 'gg sans', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif;
+  --monospace-font: Menlo, Consolas, Monaco, monospace;
+  --brand-purple: #5865f2;
+  --hint-purple: #bbc0fb;
+  --dark-purple: #4e59e0;
+
+  --status-red: #ed4245;
+  --status-green: #3ba55c;
+  --status-yellow: #fee75c;
+  --status-grey: #747f8d;
+
+  --link: #00b0f4;
+
+  --white: #fff;
+  --white-1: #f9f9f9;
+  --white-2: #f3f3f3;
+  --white-3: #f0f0f0;
+  --white-4: #eceeef;
+  --white-5: #ebebeb;
+  --white-6: #e9e7e7;
+  --white-7: #dbdde1;
+  --white-8: #cdcdcd;
+  --placeholder: #dadddf;
+
+  --black: #000;
+  --orange: #f26522;
+  --guilds-grey: #1e2124;
+  --channels-grey: #2e3136;
+  --account-grey: #282b30;
+  --chat-grey: #36393e;
+  --unread-grey: #8a8e94;
+  --grey-1: #99aab5;
+  --grey-2: #87909c;
+  --grey-3: #737f8d;
+  --grey-4: #949494;
+
+  --twitch: #593695;
+  --youtube: #cb2120;
+  --xbox: #107c10;
+}
+
+@font-face {
+  font-family: gg sans;
+  font-weight: 400;
+  src: url('./fonts/ggsans-400-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: gg sans;
+  font-weight: 500;
+  src: url('./fonts/ggsans-500-medium.woff2') format('woff2');
+}
+
+* {
+  box-sizing: border-box;
+  user-select: none;
+  cursor: default;
+}
+
+body,
+html {
+  -webkit-app-region: drag;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  width: 300px;
+  height: 300px;
+  background-color: var(--account-grey);
+}
+
+#splash {
+  -webkit-app-region: drag;
+  background: var(--account-grey);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+  transform: translateZ(0);
+  padding-bottom: 10px;
+}
+
+.splash-inner {
+  text-align: center;
+
+  img,
+  video {
+    size: 200px;
+  }
+
+  video {
+    visibility: hidden;
+
+    &.loaded {
+      visibility: visible;
+    }
+  }
+
+  .splash-text {
+    position: relative;
+    top: -30px;
+
+    > span {
+      color: var(--unread-grey);
+      font-size: 12px;
+      font-family: var(--primary-font);
+      font-weight: 600;
+      display: block;
+
+      &.splash-status {
+        color: var(--white);
+        font-weight: 500;
+        font-size: 16px;
+        font-variant-numeric: tabular-nums;
+      }
+    }
+  }
+}
+
+.splash-inner-dl .dice-image {
+  position: absolute;
+  left: 77px;
+  top: 45px;
+  width: 146px;
+  height: 100px;
+
+  background: url('./images/img_lucky_dice.png') center center no-repeat;
+  background-size: contain;
+}
+
+.dl-update-message {
+  font-family: var(--primary-font);
+  font-style: medium;
+  font-size: 18px;
+  color: var(--white);
+  padding-left: 20px;
+  padding-right: 20px;
+  top: 169px;
+  left: 0;
+  margin: 0;
+  position: absolute;
+  text-align: center;
+}
+
+.dl-version-message {
+  font-family: var(--primary-font);
+  font-style: medium;
+  font-size: 12px;
+  color: var(--unread-grey);
+  text-transform: uppercase;
+  position: absolute;
+  width: 100%;
+  bottom: 12px;
+  left: 0;
+  margin: 0;
+  text-align: center;
+}
+
+.dl-select-frame {
+  -webkit-app-region: no-drag;
+  font-family: var(--primary-font);
+  overflow: hidden;
+
+  position: absolute;
+  width: 100%;
+  height: 130px;
+  top: 220px;
+  left: 0;
+  margin: 0;
+}
+
+.dl-select {
+  position: absolute;
+  left: 20px;
+  top: 0;
+  width: 165px;
+  height: 44px;
+  margin-right: 10px;
+  color: var(--white);
+}
+
+.dl-select select {
+  width: 100%;
+  height: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+  background: var(--account-grey);
+  color: var(--white);
+  padding: 0 30px 0 10px;
+  font-size: 14px;
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.dl-select select:focus {
+  border-color: var(--brand-purple);
+  box-shadow: 0 0 0 1px var(--brand-purple);
+}
+
+.dl-select select option {
+  background: var(--account-grey);
+  color: var(--white);
+  padding: 8px 10px;
+}
+
+.dl-select select option:hover,
+.dl-select select option:focus,
+.dl-select select option:checked {
+  background: var(--dark-purple);
+  color: var(--white);
+}
+
+.dl-select:after {
+  content: '';
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--unread-grey);
+  pointer-events: none;
+}
+
+.dl-button {
+  position: absolute;
+  left: 195px;
+  top: 0;
+  width: 85px;
+  height: 44px;
+
+  background-color: var(--brand-purple);
+  color: var(--white);
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 3px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dl-button:hover {
+  background-color: var(--dark-purple);
+}
+
+.splash-inner-dl .splash-build-override > span {
+  font-size: 14px;
+}
+
+.progress {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+
+  .progress-bar {
+    height: 8px;
+    border-radius: 4px;
+    width: 180px;
+    background-color: rgba(255, 255, 255, 0.1);
+
+    .complete {
+      border-radius: 4px;
+      box-shadow:
+        0 2px 4px 0 rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+      height: 100%;
+      background-color: var(--grey-3);
+    }
+  }
+}
+
+.progress-placeholder {
+  margin-top: 10px;
+  height: 8px;
+}
+
+.build-override-clear-button {
+  background: none;
+  border: none;
+  color: var(--dark-purple);
+  cursor: pointer;
+  text-decoration: underline;
+  margin-top: 5px;
+  margin-left: 5px;
+  font-size: 11px;
+  -webkit-app-region: no-drag;
+}
+
+.build-override-clear-button:hover {
+  text-decoration: none;
+}
