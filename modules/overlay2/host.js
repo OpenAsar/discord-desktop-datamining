@@ -1,287 +1,348 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 exports.createRenderer = createRenderer;
 exports.destroyRenderer = destroyRenderer;
 exports.eventHandler = eventHandler;
-const electron_1 = require("electron");
-const Backoff_1 = __importDefault(require("./Backoff"));
-const overlay_module_1 = __importDefault(require("./overlay_module"));
-const securityUtils_1 = require("./securityUtils");
-const ipcMain = {
-    on: (event, callback) => electron_1.ipcMain.on(`DISCORD_${event}`, callback),
-    removeListener: (event, callback) => electron_1.ipcMain.removeListener(`DISCORD_${event}`, callback),
+var _electron = require("electron");
+var _Backoff = _interopRequireDefault(require("./Backoff"));
+var _overlay_module = _interopRequireDefault(require("./overlay_module"));
+var _securityUtils = require("./securityUtils");
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { "default": e }; }
+/* eslint-disable no-console */
+/* eslint-disable @typescript-eslint/ban-types */
+
+// eslint-disable-next-line import/no-unresolved
+
+// eslint-disable-next-line import/no-unresolved
+
+// IPC events must be prefixed with `DISCORD_`
+var ipcMain = {
+  on: function on(event, callback) {
+    return _electron.ipcMain.on("DISCORD_".concat(event), callback);
+  },
+  removeListener: function removeListener(event, callback) {
+    return _electron.ipcMain.removeListener("DISCORD_".concat(event), callback);
+  }
 };
-ipcMain.on('OPEN_EXTERNAL_URL', (_e, externalUrl) => {
-    (0, securityUtils_1.saferShellOpenExternal)(externalUrl).catch((_err) => {
-        console.error('Failed to open external URL', externalUrl);
-    });
+ipcMain.on('OPEN_EXTERNAL_URL', function (_e, externalUrl) {
+  (0, _securityUtils.saferShellOpenExternal)(externalUrl)["catch"](function (_err) {
+    console.error('Failed to open external URL', externalUrl);
+  });
 });
-function webContentsSend(win, event, ...args) {
-    if (win != null && win.webContents != null) {
-        win.webContents.send(`DISCORD_${event}`, ...args);
+function webContentsSend(win, event) {
+  if (win != null && win.webContents != null) {
+    var _win$webContents;
+    for (var _len = arguments.length, args = new Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
+      args[_key - 2] = arguments[_key];
     }
+    (_win$webContents = win.webContents).send.apply(_win$webContents, ["DISCORD_".concat(event)].concat(args));
+  }
 }
-const renderers = {};
-const accelerators = {
-    Z: 'undo',
-    Y: 'redo',
-    X: 'cut',
-    C: 'copy',
-    V: 'paste',
-    A: 'selectAll',
+var renderers = {};
+var accelerators = {
+  Z: 'undo',
+  Y: 'redo',
+  X: 'cut',
+  C: 'copy',
+  V: 'paste',
+  A: 'selectAll'
 };
 function handleAccelerators(contents, event) {
-    if (event['type'] !== 'keyDown') {
-        return false;
-    }
-    if (!event['modifiers'] || !event['modifiers'].includes('control')) {
-        return false;
-    }
-    const fname = accelerators[event['keyCode']];
-    if (fname == null) {
-        return false;
-    }
-    const fn = contents[fname];
-    if (!fn) {
-        return false;
-    }
-    fn.apply(contents);
-    return true;
+  if (event['type'] !== 'keyDown') {
+    return false;
+  }
+  if (!event['modifiers'] || !event['modifiers'].includes('control')) {
+    return false;
+  }
+  var fname = accelerators[event['keyCode']];
+  if (fname == null) {
+    return false;
+  }
+  var fn = contents[fname];
+  if (!fn) {
+    return false;
+  }
+  fn.apply(contents);
+  return true;
 }
 function createRenderer(pid, url) {
-    if (renderers[pid] != null) {
-        return;
+  if (renderers[pid] != null) {
+    return;
+  }
+  var _require = require('url'),
+    URL = _require.URL;
+  var urlWithPid = new URL(url);
+  urlWithPid.searchParams.append('pid', pid.toString());
+  url = urlWithPid.toString();
+  renderers[pid] = {
+    pid: pid,
+    url: "file://".concat(__dirname, "/start.html?pid=").concat(pid.toString()),
+    overlayURL: url,
+    backoff: new _Backoff["default"](1000, 30000),
+    window: new _electron.BrowserWindow({
+      show: false,
+      skipTaskbar: true,
+      transparent: true,
+      webPreferences: {
+        offscreen: true,
+        nodeIntegration: false,
+        sandbox: false,
+        preload: require.resolve('discord_desktop_core/core.asar/app/mainScreenPreload.js'),
+        enableRemoteModule: false,
+        contextIsolation: true
+      }
+    })
+  };
+  var renderer = renderers[pid];
+  _overlay_module["default"].connectProcess(pid);
+  if (renderer.window.webContents._setDiscordOverlayProcessId) {
+    renderer.window.webContents._setDiscordOverlayProcessId(pid);
+  }
+
+  // "paint" event will be skipped if direct frame delivery is enabled.
+
+  renderer.window.webContents.on('render-process-gone', function (_e, details) {
+    _overlay_module["default"].logMessage("Overlay for pid ".concat(renderer.pid, " crashed (").concat(details.reason, " | exit code: ").concat(details.exitCode, ")"));
+    _overlay_module["default"].sendCommand(renderer.pid, {
+      message: 'relay',
+      _relay: 'renderer_crashed'
+    });
+    destroyRenderer(pid);
+  });
+  renderer.window.webContents.on('preload-error', function (_event, _input, error) {
+    _overlay_module["default"].logMessage("Overlay for pid ".concat(renderer.pid, " crashed in preload: ").concat(error, "\n").concat(error.stack));
+    _overlay_module["default"].sendCommand(renderer.pid, {
+      message: 'relay',
+      _relay: 'renderer_preload_crashed'
+    });
+    destroyRenderer(pid);
+  });
+  renderer.window.webContents.on('console-message', function (_event, _level, message, _lineNo, _sourceId) {
+    _overlay_module["default"].logMessage("OverlayRenderer[".concat(pid, "]: ").concat(message));
+  });
+  renderer.window.webContents.on('paint', function (_event, _dirty, image, legacyWidth, legacyHeight) {
+    // [adill] support electron <=1.8.4 which sent a (buffer, width, height) instead of (image)
+    if (Buffer.isBuffer(image)) {
+      var width = legacyWidth;
+      var height = legacyHeight;
+      _overlay_module["default"].sendFramebuffer(renderer.pid, image, width, height);
+      return;
     }
-    const { URL } = require('url');
-    const urlWithPid = new URL(url);
-    urlWithPid.searchParams.append('pid', pid.toString());
-    url = urlWithPid.toString();
-    renderers[pid] = {
-        pid,
-        url: `file://${__dirname}/start.html?pid=${pid.toString()}`,
-        overlayURL: url,
-        backoff: new Backoff_1.default(1000, 30000),
-        window: new electron_1.BrowserWindow({
-            show: false,
-            skipTaskbar: true,
-            transparent: true,
-            webPreferences: {
-                offscreen: true,
-                nodeIntegration: false,
-                sandbox: false,
-                preload: require.resolve('discord_desktop_core/core.asar/app/mainScreenPreload.js'),
-                enableRemoteModule: false,
-                contextIsolation: true,
-            },
-        }),
+    _overlay_module["default"].sendFramebuffer(renderer.pid, image.getBitmap(), image.getSize().width, image.getSize().height);
+  });
+  renderer.window.webContents.setWindowOpenHandler(function (_ref) {
+    var url = _ref.url;
+    webContentsSend(renderer.window, 'REQUEST_OPEN_EXTERNAL_URL', url);
+    return {
+      action: 'deny'
     };
-    const renderer = renderers[pid];
-    overlay_module_1.default.connectProcess(pid);
-    if (renderer.window.webContents._setDiscordOverlayProcessId) {
-        renderer.window.webContents._setDiscordOverlayProcessId(pid);
-    }
-    renderer.window.webContents.on('render-process-gone', (_e, details) => {
-        overlay_module_1.default.logMessage(`Overlay for pid ${renderer.pid} crashed (${details.reason} | exit code: ${details.exitCode})`);
-        overlay_module_1.default.sendCommand(renderer.pid, { message: 'relay', _relay: 'renderer_crashed' });
-        destroyRenderer(pid);
-    });
-    renderer.window.webContents.on('preload-error', (_event, _input, error) => {
-        overlay_module_1.default.logMessage(`Overlay for pid ${renderer.pid} crashed in preload: ${error}\n${error.stack}`);
-        overlay_module_1.default.sendCommand(renderer.pid, { message: 'relay', _relay: 'renderer_preload_crashed' });
-        destroyRenderer(pid);
-    });
-    renderer.window.webContents.on('console-message', (_event, _level, message, _lineNo, _sourceId) => {
-        overlay_module_1.default.logMessage(`OverlayRenderer[${pid}]: ${message}`);
-    });
-    renderer.window.webContents.on('paint', (_event, _dirty, image, legacyWidth, legacyHeight) => {
-        if (Buffer.isBuffer(image)) {
-            const width = legacyWidth;
-            const height = legacyHeight;
-            overlay_module_1.default.sendFramebuffer(renderer.pid, image, width, height);
-            return;
-        }
-        overlay_module_1.default.sendFramebuffer(renderer.pid, image.getBitmap(), image.getSize().width, image.getSize().height);
-    });
-    renderer.window.webContents.setWindowOpenHandler(({ url }) => {
-        webContentsSend(renderer.window, 'REQUEST_OPEN_EXTERNAL_URL', url);
-        return { action: 'deny' };
-    });
-    void renderer.window.loadURL(renderer.url);
+  });
+  void renderer.window.loadURL(renderer.url);
 }
 function loadOverlay(pid) {
-    const renderer = renderers[pid];
-    if (renderer == null) {
-        return;
+  var renderer = renderers[pid];
+  if (renderer == null) {
+    return;
+  }
+  if (renderer.url === renderer.overlayURL) {
+    return;
+  }
+  renderer.window.webContents.on('cursor-changed', function (_event, type) {
+    var cursor;
+    switch (type) {
+      case 'default':
+        cursor = 'IDC_ARROW';
+        break;
+      case 'pointer':
+        cursor = 'IDC_HAND';
+        break;
+      case 'crosshair':
+        cursor = 'IDC_CROSS';
+        break;
+      case 'text':
+        cursor = 'IDC_IBEAM';
+        break;
+      case 'wait':
+        cursor = 'IDC_WAIT';
+        break;
+      case 'help':
+        cursor = 'IDC_HELP';
+        break;
+      case 'move':
+        cursor = 'IDC_SIZEALL';
+        break;
+      case 'ns-resize':
+        cursor = 'IDC_SIZENS';
+        break;
+      case 'ew-resize':
+        cursor = 'IDC_SIZEWE';
+        break;
+      case 'nwse-resize':
+        cursor = 'IDC_SIZENWSE';
+        break;
+      case 'nesw-resize':
+        cursor = 'IDC_SIZENESW';
+        break;
+      case 'none':
+        cursor = '';
+        break;
     }
-    if (renderer.url === renderer.overlayURL) {
-        return;
+    if (cursor != null) {
+      _overlay_module["default"].sendCommand(renderer.pid, {
+        message: 'set_cursor',
+        cursor: cursor
+      });
     }
-    renderer.window.webContents.on('cursor-changed', (_event, type) => {
-        let cursor;
-        switch (type) {
-            case 'default':
-                cursor = 'IDC_ARROW';
-                break;
-            case 'pointer':
-                cursor = 'IDC_HAND';
-                break;
-            case 'crosshair':
-                cursor = 'IDC_CROSS';
-                break;
-            case 'text':
-                cursor = 'IDC_IBEAM';
-                break;
-            case 'wait':
-                cursor = 'IDC_WAIT';
-                break;
-            case 'help':
-                cursor = 'IDC_HELP';
-                break;
-            case 'move':
-                cursor = 'IDC_SIZEALL';
-                break;
-            case 'ns-resize':
-                cursor = 'IDC_SIZENS';
-                break;
-            case 'ew-resize':
-                cursor = 'IDC_SIZEWE';
-                break;
-            case 'nwse-resize':
-                cursor = 'IDC_SIZENWSE';
-                break;
-            case 'nesw-resize':
-                cursor = 'IDC_SIZENESW';
-                break;
-            case 'none':
-                cursor = '';
-                break;
-        }
-        if (cursor != null) {
-            overlay_module_1.default.sendCommand(renderer.pid, { message: 'set_cursor', cursor });
-        }
+  });
+  renderer.window.webContents.on('start-drag', function (_event, image, offset) {
+    _overlay_module["default"].sendCommand(renderer.pid, {
+      message: 'set_drag_state',
+      dragging: true,
+      image: image.getBitmap().toJSON().data,
+      size: image.getSize(),
+      offset: offset
     });
-    renderer.window.webContents.on('start-drag', (_event, image, offset) => {
-        overlay_module_1.default.sendCommand(renderer.pid, {
-            message: 'set_drag_state',
-            dragging: true,
-            image: image.getBitmap().toJSON().data,
-            size: image.getSize(),
-            offset,
+  });
+  renderer.window.webContents.on('stop-drag', function (_event) {
+    _overlay_module["default"].sendCommand(renderer.pid, {
+      message: 'set_drag_state',
+      dragging: false
+    });
+  });
+  renderer.window.webContents.on('ime-composition-range-changed', function (_event, start, end, bounds) {
+    _overlay_module["default"].sendCommand(renderer.pid, {
+      message: 'ime_composition_range_changed',
+      start: start,
+      end: end,
+      bounds: bounds
+    });
+  });
+  renderer.window.webContents.on('selection-bounds-changed', function (_event, anchor, focus, isAnchorFirst) {
+    _overlay_module["default"].sendCommand(renderer.pid, {
+      message: 'ime_selection_bounds_changed',
+      anchor: anchor,
+      focus: focus,
+      isAnchorFirst: isAnchorFirst
+    });
+  });
+  renderer.window.webContents.on('did-fail-load', function (_e, errCode, errDesc, validatedURL) {
+    if (validatedURL !== renderer.url) {
+      _overlay_module["default"].logMessage("Failed non-overlay URL load (".concat(validatedURL, ") with code ").concat(errCode, " and description ").concat(errDesc));
+      return;
+    }
+    _overlay_module["default"].logMessage("Failed overlay URL load (".concat(validatedURL, ") with code ").concat(errCode, " and description ").concat(errDesc));
+    _overlay_module["default"].sendCommand(renderer.pid, {
+      message: 'relay',
+      _relay: 'renderer_load_failed'
+    });
+    renderer.backoff.fail(function () {
+      _overlay_module["default"].logMessage("Retrying overlay URL load ".concat(renderer.url));
+      void renderer.window.loadURL(renderer.url);
+    });
+  });
+  renderer.window.webContents.on('did-finish-load', function () {
+    if (renderer.window.webContents.getURL() === renderer.overlayURL) {
+      renderer.window.focusOnWebView();
+      renderer.backoff.succeed();
+      _overlay_module["default"].logMessage('Overlay is ready to show');
+      renderer.window.webContents.invalidate();
+      // NB: allow a short window for repainting to ameliorate white-screen flashes some users experience.
+      // see https://github.com/electron/electron/pull/25448 for context as to why we aren't using
+      // `ready-to-show` -- tl;dr: it is not consistent and the hack fix in electron only "fixes"
+      // the event on the first page load. we load `start.html` as a canary test *before* loading the
+      // overlay url and, thusly, miss `ready-to-show` on some systems / chromium versions.
+      setTimeout(function () {
+        _overlay_module["default"].sendCommand(renderer.pid, {
+          message: 'relay',
+          _relay: 'ready_to_show'
         });
-    });
-    renderer.window.webContents.on('stop-drag', (_event) => {
-        overlay_module_1.default.sendCommand(renderer.pid, { message: 'set_drag_state', dragging: false });
-    });
-    renderer.window.webContents.on('ime-composition-range-changed', (_event, start, end, bounds) => {
-        overlay_module_1.default.sendCommand(renderer.pid, { message: 'ime_composition_range_changed', start, end, bounds });
-    });
-    renderer.window.webContents.on('selection-bounds-changed', (_event, anchor, focus, isAnchorFirst) => {
-        overlay_module_1.default.sendCommand(renderer.pid, { message: 'ime_selection_bounds_changed', anchor, focus, isAnchorFirst });
-    });
-    renderer.window.webContents.on('did-fail-load', (_e, errCode, errDesc, validatedURL) => {
-        if (validatedURL !== renderer.url) {
-            overlay_module_1.default.logMessage(`Failed non-overlay URL load (${validatedURL}) with code ${errCode} and description ${errDesc}`);
-            return;
-        }
-        overlay_module_1.default.logMessage(`Failed overlay URL load (${validatedURL}) with code ${errCode} and description ${errDesc}`);
-        overlay_module_1.default.sendCommand(renderer.pid, { message: 'relay', _relay: 'renderer_load_failed' });
-        renderer.backoff.fail(() => {
-            overlay_module_1.default.logMessage(`Retrying overlay URL load ${renderer.url}`);
-            void renderer.window.loadURL(renderer.url);
-        });
-    });
-    renderer.window.webContents.on('did-finish-load', () => {
-        if (renderer.window.webContents.getURL() === renderer.overlayURL) {
-            renderer.window.focusOnWebView();
-            renderer.backoff.succeed();
-            overlay_module_1.default.logMessage('Overlay is ready to show');
-            renderer.window.webContents.invalidate();
-            setTimeout(() => {
-                overlay_module_1.default.sendCommand(renderer.pid, { message: 'relay', _relay: 'ready_to_show' });
-            }, 200);
-        }
-    });
-    if (renderer.window.webContents.sendImeEvent) {
-        overlay_module_1.default.sendCommand(renderer.pid, { message: 'notify_ime_supported' });
+      }, 200);
     }
-    renderer.url = renderer.overlayURL;
-    void renderer.window.loadURL(renderer.url);
+  });
+  if (renderer.window.webContents.sendImeEvent) {
+    _overlay_module["default"].sendCommand(renderer.pid, {
+      message: 'notify_ime_supported'
+    });
+  }
+  renderer.url = renderer.overlayURL;
+  void renderer.window.loadURL(renderer.url);
 }
 function destroyRenderer(pid) {
-    const renderer = renderers[pid];
-    if (renderer == null) {
-        return;
-    }
-    overlay_module_1.default.disconnectProcess(pid);
-    if (renderer.backoff) {
-        renderer.backoff.cancel();
-    }
-    if (!renderer.window.isDestroyed()) {
-        renderer.window.destroy();
-    }
-    delete renderers[pid];
+  var renderer = renderers[pid];
+  if (renderer == null) {
+    return;
+  }
+  _overlay_module["default"].disconnectProcess(pid);
+  if (renderer.backoff) {
+    renderer.backoff.cancel();
+  }
+  if (!renderer.window.isDestroyed()) {
+    renderer.window.destroy();
+  }
+  delete renderers[pid];
 }
 function needsTranslation(event) {
-    return 'msg' in event || !('type' in event);
+  return 'msg' in event || !('type' in event);
 }
 function eventHandler(pid, event) {
-    const renderer = renderers[pid];
-    if (renderer == null || renderer.window == null || renderer.window.isDestroyed()) {
-        return;
+  var renderer = renderers[pid];
+  if (renderer == null || renderer.window == null || renderer.window.isDestroyed()) {
+    return;
+  }
+  var _screen = require('electron').screen;
+  if (event.message === 'graphics_info') {
+    if (event.width > 0 && event.height > 0) {
+      _overlay_module["default"].logMessage("Resizing overlay renderer to ".concat(event.width, "x").concat(event.height));
+      if (global.features.supports('overlay-hidpi')) {
+        var screenRect = {
+          x: 0,
+          y: 0,
+          width: event.width,
+          height: event.height
+        };
+        var dipRect = _screen.screenToDipRect(renderer.window, screenRect);
+        renderer.window.setContentSize(dipRect.width, dipRect.height);
+      } else {
+        renderer.window.setContentSize(event.width, event.height);
+      }
+      renderer.window.webContents.setFrameRate(60);
+    } else {
+      renderer.window.webContents.setFrameRate(1);
     }
-    const _screen = require('electron').screen;
-    if (event.message === 'graphics_info') {
-        if (event.width > 0 && event.height > 0) {
-            overlay_module_1.default.logMessage(`Resizing overlay renderer to ${event.width}x${event.height}`);
-            if (global.features.supports('overlay-hidpi')) {
-                const screenRect = { x: 0, y: 0, width: event.width, height: event.height };
-                const dipRect = _screen.screenToDipRect(renderer.window, screenRect);
-                renderer.window.setContentSize(dipRect.width, dipRect.height);
-            }
-            else {
-                renderer.window.setContentSize(event.width, event.height);
-            }
-            renderer.window.webContents.setFrameRate(60);
+    renderer.window.webContents.invalidate();
+  } else if (event.message === 'input_event') {
+    renderer.window.focusOnWebView();
+    var translated = needsTranslation(event) ? _overlay_module["default"].translateInputEvent(event) : event;
+    if (translated) {
+      if (!handleAccelerators(renderer.window.webContents, translated)) {
+        if (global.features.supports('overlay-hidpi') && translated.x && translated.y) {
+          var dipPoint = _screen.screenToDipPoint({
+            x: translated.x,
+            y: translated.y
+          });
+          translated.x = dipPoint.x;
+          translated.y = dipPoint.y;
         }
-        else {
-            renderer.window.webContents.setFrameRate(1);
-        }
-        renderer.window.webContents.invalidate();
+        renderer.window.webContents.sendInputEvent(translated);
+      }
     }
-    else if (event.message === 'input_event') {
-        renderer.window.focusOnWebView();
-        const translated = needsTranslation(event) ? overlay_module_1.default.translateInputEvent(event) : event;
-        if (translated) {
-            if (!handleAccelerators(renderer.window.webContents, translated)) {
-                if (global.features.supports('overlay-hidpi') && translated.x && translated.y) {
-                    const dipPoint = _screen.screenToDipPoint({ x: translated.x, y: translated.y });
-                    translated.x = dipPoint.x;
-                    translated.y = dipPoint.y;
-                }
-                renderer.window.webContents.sendInputEvent(translated);
-            }
-        }
+  } else if (event.message === 'renderer_started') {
+    _overlay_module["default"].logMessage("Overlay renderer for ".concat(pid, " started successfully."));
+    renderer.started = true;
+    if (!renderer.first_framebuffer) {
+      renderer.window.webContents.invalidate();
+    } else {
+      loadOverlay(pid);
     }
-    else if (event.message === 'renderer_started') {
-        overlay_module_1.default.logMessage(`Overlay renderer for ${pid} started successfully.`);
-        renderer.started = true;
-        if (!renderer.first_framebuffer) {
-            renderer.window.webContents.invalidate();
-        }
-        else {
-            loadOverlay(pid);
-        }
+  } else if (event.message === 'first_framebuffer') {
+    renderer.first_framebuffer = true;
+    if (renderer.started) {
+      loadOverlay(pid);
     }
-    else if (event.message === 'first_framebuffer') {
-        renderer.first_framebuffer = true;
-        if (renderer.started) {
-            loadOverlay(pid);
-        }
-    }
-    else if (event.message === 'ime') {
-        renderer.window.webContents.sendImeEvent(event);
-    }
+  } else if (event.message === 'ime') {
+    renderer.window.webContents.sendImeEvent(event);
+  }
 }
