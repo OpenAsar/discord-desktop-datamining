@@ -534,4 +534,11 @@ VoiceEngine.initialize({
   asyncVideoInputDeviceInit,
 });
 
+VoiceEngine.setupKrispPath = function () {
+  const krispPath = DiscordNative.nativeModules.getModulePath('discord_krisp');
+  if (krispPath != null) {
+    VoiceEngine.setKrispPath(krispPath);
+  }
+};
+
 module.exports = VoiceEngine;

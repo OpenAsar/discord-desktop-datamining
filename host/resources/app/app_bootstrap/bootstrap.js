@@ -316,7 +316,10 @@ if (pendingAppQuit) {
 } else {
   const discordProtocols = require('./protocols');
   discordProtocols.beforeReadyProtocolRegistration();
-  setGPUFlags().then(app.whenReady).then(() => startApp()).catch(error => {
+  setGPUFlags().then(app.whenReady).then(() => {
+    analytics.getDesktopTTI().trackMainAppReady();
+    startApp();
+  }).catch(error => {
     console.error('Error bootstrapping: ', error);
   });
 }

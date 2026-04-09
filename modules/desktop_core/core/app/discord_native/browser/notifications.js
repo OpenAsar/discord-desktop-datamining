@@ -6,6 +6,7 @@ var _path = _interopRequireDefault(require("path"));
 var _appFeatures = require("../../appFeatures");
 var _utils = require("../../utils");
 var _DiscordIPC = require("../common/DiscordIPC");
+var _nativeModules = require("./nativeModules");
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
 function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
@@ -26,7 +27,7 @@ if (_utils.isOSX) {
   }
   if (majorVersion >= 21 && moduleDataPath != null) {
     try {
-      const modulePath = _path.default.join(moduleDataPath, 'discord_notifications');
+      const modulePath = (0, _nativeModules.getModulePath)('discord_notifications') ?? _path.default.join(moduleDataPath, 'discord_notifications');
       const lib = require(modulePath);
       lib.setDataPath(modulePath);
       lib.setCallbacks((action, identifier, userText, fallbackDeepLink) => {

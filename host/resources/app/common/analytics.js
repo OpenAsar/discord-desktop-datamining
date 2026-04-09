@@ -40,6 +40,7 @@ function getAnalytics() {
   return analyticsInstance;
 }
 const DESKTOP_TTI_TYPE = 'desktop_tti';
+const DESKTOP_TTI_V2_TYPE = 'desktop_tti_v2';
 const durationDiffThresholdMS = 30 * 60_000;
 function getDurationMS() {
   (0, _assert.default)(process.type === 'browser', 'Expected process to be main');
@@ -103,6 +104,7 @@ function createDesktopAnalyticsEvent(type, durationMS) {
 const DESKTOP_ANALYTICS_CACHE_FILENAME = 'desktop_analytics_cache.json';
 class TTISessionData {
   mainWindowCreationTime = null;
+  mainWindowShownTime = null;
   splashCreationTime = null;
   splashRestartTimepoint = null;
   processDuration = null;
@@ -117,6 +119,19 @@ function getCacheFilePath() {
   } catch (e) {}
   return null;
 }
+class TTIV2Data {
+  mainInitTime = null;
+  mainAppReadyTime = null;
+  splashWindowCreated = null;
+  splashWindowShown = null;
+  splashWindowDuration = null;
+  mainWindowCreated = null;
+  mainWindowShown = null;
+  mainWindowHiddenDuration = null;
+  mainWindowDocumentLoad = null;
+  mainWindowLoadWebapp = null;
+  mainWindowInteractiveWebapp = null;
+}
 class DesktopTTIAnalytics {
   previousSessionData = null;
   currentSessionData = new TTISessionData();
@@ -124,8 +139,14 @@ class DesktopTTIAnalytics {
   trackedFullInteractiveTTI = false;
   trackedJSAppLoad = false;
   trackedJSAppInteractive = false;
+  trackedDetailedTTI = false;
+  installedUpdates = false;
+  details = new TTIV2Data();
   constructor(enablePushingEvents) {
     this.enablePushingEvents = enablePushingEvents;
+  }
+  hadRestart() {
+    return this.previousSessionData != null;
   }
   loadPreviousSessionData() {
     const cachePath = getCacheFilePath();
@@ -163,17 +184,31 @@ class DesktopTTIAnalytics {
       analyticsInstance.pushEvent(DESKTOP_TTI_TYPE, 'desktop_tti', evt);
     }
   }
+  pushV2Event(evt) {
+    if (this.enablePushingEvents !== undefined && this.enablePushingEvents) {
+      analyticsInstance.pushEvent(DESKTOP_TTI_V2_TYPE, 'desktop_tti_v2', evt);
+    }
+  }
   trackMainAppTimeToInit() {
     const evt = createDesktopAnalyticsEvent(DesktopAnalyticsEventType.MainAppInit, null);
+    this.details.mainInitTime = evt.process_uptime_ms;
     this.pushDesktopEvent(evt);
     this.loadPreviousSessionData();
+  }
+  trackMainAppReady() {
+    this.details.mainAppReadyTime = getDurationMS();
   }
   trackSplashWindowCreated() {
     this.currentSessionData.splashCreationTime = getDurationMS();
     const evt = createDesktopAnalyticsEvent(DesktopAnalyticsEventType.SplashCreated, null);
+    this.details.splashWindowCreated = evt.process_uptime_ms;
     this.pushDesktopEvent(evt);
   }
+  trackSplashWindowShown() {
+    this.details.splashWindowShown = getDurationMS();
+  }
   trackSplashWindowDuration(installedUpdates) {
+    this.installedUpdates = installedUpdates;
     if (this.currentSessionData.splashCreationTime != null) {
       let evtType;
       if (installedUpdates) {
@@ -184,12 +219,26 @@ class DesktopTTIAnalytics {
       const duration = getDurationMS() - this.currentSessionData.splashCreationTime;
       const evt = createDesktopAnalyticsEvent(evtType, duration);
       this.pushDesktopEvent(evt);
+      if (this.details.splashWindowShown != null) {
+        this.details.splashWindowDuration = getDurationMS() - this.details.splashWindowShown;
+      }
     }
   }
   trackMainWindowCreated() {
     this.currentSessionData.mainWindowCreationTime = getDurationMS();
     const evt = createDesktopAnalyticsEvent(DesktopAnalyticsEventType.MainWinCreated, null);
+    this.details.mainWindowCreated = evt.process_uptime_ms;
     this.pushDesktopEvent(evt);
+  }
+  trackMainWindowShown() {
+    this.currentSessionData.mainWindowShownTime = getDurationMS();
+    this.details.mainWindowShown = this.currentSessionData.mainWindowShownTime;
+    if (this.currentSessionData.mainWindowCreationTime != null) {
+      this.details.mainWindowHiddenDuration = this.currentSessionData.mainWindowShownTime - this.currentSessionData.mainWindowCreationTime;
+    }
+  }
+  trackMainWindowDocumentLoad() {
+    this.details.mainWindowDocumentLoad = getDurationMS();
   }
   trackMainWindowLoadStart() {
     if (this.currentSessionData.mainWindowCreationTime != null) {
@@ -215,6 +264,9 @@ class DesktopTTIAnalytics {
       const evt = createDesktopAnalyticsEvent(DesktopAnalyticsEventType.MainWinJSAppLoadComplete, duration);
       this.pushDesktopEvent(evt);
     }
+    if (this.currentSessionData.mainWindowShownTime != null) {
+      this.details.mainWindowLoadWebapp = getDurationMS() - this.currentSessionData.mainWindowShownTime;
+    }
   }
   trackMainWindowJSAppInteractiveDuration() {
     if (this.trackedJSAppInteractive) {
@@ -225,6 +277,9 @@ class DesktopTTIAnalytics {
       const duration = getDurationMS() - this.currentSessionData.mainWindowCreationTime;
       const evt = createDesktopAnalyticsEvent(DesktopAnalyticsEventType.MainWinJSAppInteractiveComplete, duration);
       this.pushDesktopEvent(evt);
+    }
+    if (this.currentSessionData.mainWindowShownTime != null) {
+      this.details.mainWindowInteractiveWebapp = getDurationMS() - this.currentSessionData.mainWindowShownTime;
     }
   }
   trackSplashWindowRestart() {
@@ -299,6 +354,62 @@ class DesktopTTIAnalytics {
       const evt = createDesktopAnalyticsEvent(DesktopAnalyticsEventType.FullInteractiveTTICompleteWithRestart, fullDesktopDuration);
       this.pushDesktopEvent(evt);
     }
+  }
+  trackDetailedTTI(bundleStats, fullInteractiveTTIMs) {
+    if (this.trackedDetailedTTI) {
+      return;
+    }
+    this.trackedDetailedTTI = true;
+    let fullTTI = fullInteractiveTTIMs;
+    const restartDuration = this.getRestartAndFullTTIDuration();
+    if (restartDuration !== undefined) {
+      fullTTI = restartDuration;
+    }
+    const event = {
+      full_tti_duration_ms: fullTTI,
+      main_init_time_ms: this.details.mainInitTime,
+      main_appready_time_ms: this.details.mainAppReadyTime,
+      splash_window_created_time_ms: this.details.splashWindowCreated,
+      splash_window_shown_time_ms: this.details.splashWindowShown,
+      splash_window_shown_duration_ms: this.details.splashWindowDuration,
+      main_window_created_time_ms: this.details.mainWindowCreated,
+      main_window_shown_time_ms: this.details.mainWindowShown,
+      main_window_hidden_duration_ms: this.details.mainWindowHiddenDuration,
+      main_window_document_load_time_ms: this.details.mainWindowDocumentLoad,
+      main_window_webapp_load_duration_ms: this.details.mainWindowLoadWebapp,
+      main_window_webapp_interactive_duration_ms: this.details.mainWindowInteractiveWebapp,
+      main_window_webapp_bundle_name: bundleStats.main_window_webapp_bundle_name ?? null,
+      main_window_webapp_bundle_ttfb_ms: bundleStats.main_window_webapp_bundle_ttfb_ms ?? null,
+      main_window_webapp_bundle_download_decompress_duration_ms: bundleStats.main_window_webapp_bundle_download_decompress_duration_ms ?? null,
+      main_window_webapp_bundle_compressed_size_bytes: bundleStats.main_window_webapp_bundle_compressed_size_bytes ?? null,
+      main_window_webapp_bundle_uncompressed_size_bytes: bundleStats.main_window_webapp_bundle_uncompressed_size_bytes ?? null,
+      main_window_webapp_bundle_transfer_size_bytes: bundleStats.main_window_webapp_bundle_transfer_size_bytes ?? null,
+      main_window_webapp_bundle_compile_foreground_duration_us: bundleStats.main_window_webapp_bundle_compile_foreground_duration_us ?? null,
+      main_window_webapp_bundle_compile_background_duration_us: bundleStats.main_window_webapp_bundle_compile_background_duration_us ?? null,
+      main_window_webapp_bundle_compile_streamed: bundleStats.main_window_webapp_bundle_compile_streamed ?? null,
+      connection_rtt_ms: bundleStats.connection_rtt_ms ?? null,
+      connection_downlink_kbps: bundleStats.connection_downlink_kbps ?? null,
+      main_window_navigation_start_time_ms: null,
+      main_window_first_paint_time_ms: null,
+      main_window_first_contentful_paint_time_ms: null,
+      had_update: this.installedUpdates,
+      had_restart: this.hadRestart()
+    };
+    const navOrigin = bundleStats.main_window_navigation_origin_ms;
+    if (navOrigin != null) {
+      const processStartMs = Date.now() - Math.ceil(process.uptime() * 1_000);
+      const navStartProcessRelative = Math.round(navOrigin - processStartMs);
+      event.main_window_navigation_start_time_ms = navStartProcessRelative;
+      const fp = bundleStats.main_window_first_paint_time_ms;
+      if (fp != null) {
+        event.main_window_first_paint_time_ms = navStartProcessRelative + fp;
+      }
+      const fcp = bundleStats.main_window_first_contentful_paint_time_ms;
+      if (fcp != null) {
+        event.main_window_first_contentful_paint_time_ms = navStartProcessRelative + fcp;
+      }
+    }
+    this.pushV2Event(event);
   }
 }
 exports.DesktopTTIAnalytics = DesktopTTIAnalytics;

@@ -5,6 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.canBootstrapNewUpdater = void 0;
 exports.ensureModule = ensureModule;
+exports.getModulePath = getModulePath;
 exports.getUpdaterVersion = getUpdaterVersion;
 exports.requireModule = requireModule;
 var electron = _interopRequireWildcard(require("electron"));
@@ -14,7 +15,8 @@ function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; 
 const {
   NATIVE_MODULES_GET_PATHS,
   NATIVE_MODULES_INSTALL,
-  NATIVE_MODULES_GET_HAS_NEW_UPDATER
+  NATIVE_MODULES_GET_HAS_NEW_UPDATER,
+  NATIVE_MODULES_GET_MODULE_PATH
 } = commonConstants.IPCEvents;
 const modulePromises = {};
 function getSanitizedModulePaths() {
@@ -36,7 +38,7 @@ function getHasNewUpdater() {
   return electron.ipcRenderer.sendSync(NATIVE_MODULES_GET_HAS_NEW_UPDATER);
 }
 function getUpdaterVersion() {
-  return 1;
+  return 2;
 }
 async function ensureModule(name) {
   if (modulePromises[name] == null) {
@@ -54,6 +56,9 @@ function requireModule(name) {
     throw new Error('"' + String(name) + '" is not a whitelisted native module');
   }
   return require(name);
+}
+function getModulePath(name) {
+  return electron.ipcRenderer.sendSync(NATIVE_MODULES_GET_MODULE_PATH, name);
 }
 const canBootstrapNewUpdater = exports.canBootstrapNewUpdater = !getHasNewUpdater();
 module.paths = getSanitizedModulePaths();

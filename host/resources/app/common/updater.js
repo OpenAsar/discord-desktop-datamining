@@ -42,6 +42,7 @@ class Updater extends _events.EventEmitter {
     }
     this.committedHostVersion = null;
     this.committedModules = new Set();
+    this.committedModulePaths = new Map();
     this.rootPath = options.root_path;
     this.nextRequestId = 0;
     this.requests = new Map();
@@ -296,6 +297,7 @@ class Updater extends _events.EventEmitter {
       if (!this.committedModules.has(module) && !globalPathExists(moduleSearchPath)) {
         this.committedModules.add(module);
         addGlobalPath(moduleSearchPath);
+        this.committedModulePaths.set(module, _path.default.join(moduleSearchPath, module));
       }
     }
   }

@@ -16,6 +16,48 @@ if (window.opener === null) {
     discord
   } = require('electron');
   discord === null || discord === void 0 ? void 0 : discord.install('createDiscordStream');
+  const {
+    ipcRenderer
+  } = require('electron');
+  const {
+    IPCEvents
+  } = require('./discord_native/common/constants');
+  ipcRenderer.on(IPCEvents.APP_GET_MAIN_BUNDLE_STATS, () => {
+    var _connection, _connection2, _discord$stopScriptCo;
+    const PATTERN = /\/(?:assets\/)?web(?:\.\w+)?\.js$/;
+    const resources = performance.getEntriesByType('resource');
+    const entry = resources.find(e => (e.initiatorType === 'script' || e.initiatorType === 'link') && PATTERN.test(e.name));
+    if (entry == null) {
+      ipcRenderer.send(IPCEvents.APP_MAIN_BUNDLE_STATS, {});
+      return;
+    }
+    const stats = {
+      main_window_webapp_bundle_name: entry.name.split('/').pop() ?? null,
+      main_window_webapp_bundle_download_decompress_duration_ms: Math.round(entry.responseEnd - entry.responseStart),
+      main_window_webapp_bundle_ttfb_ms: Math.round(entry.responseStart - entry.fetchStart),
+      main_window_webapp_bundle_compressed_size_bytes: entry.encodedBodySize ?? null,
+      main_window_webapp_bundle_uncompressed_size_bytes: entry.decodedBodySize ?? null,
+      main_window_webapp_bundle_transfer_size_bytes: entry.transferSize ?? null,
+      connection_rtt_ms: ((_connection = navigator.connection) === null || _connection === void 0 ? void 0 : _connection.rtt) ?? null,
+      connection_downlink_kbps: ((_connection2 = navigator.connection) === null || _connection2 === void 0 ? void 0 : _connection2.downlink) != null ? Math.round(navigator.connection.downlink * 1000) : null
+    };
+    if ((discord === null || discord === void 0 ? void 0 : discord.getScriptCompilationTimings) != null) {
+      const timings = discord.getScriptCompilationTimings();
+      const timing = timings.find(t => PATTERN.test(t.url));
+      if (timing != null) {
+        stats.main_window_webapp_bundle_compile_foreground_duration_us = timing.foregroundTimeUs;
+        stats.main_window_webapp_bundle_compile_background_duration_us = timing.backgroundTimeUs;
+        stats.main_window_webapp_bundle_compile_streamed = timing.streamed;
+      }
+    }
+    stats.main_window_navigation_origin_ms = Math.round(performance.timeOrigin);
+    const [fp] = performance.getEntriesByName('first-paint');
+    const [fcp] = performance.getEntriesByName('first-contentful-paint');
+    stats.main_window_first_paint_time_ms = fp != null ? Math.round(fp.startTime) : null;
+    stats.main_window_first_contentful_paint_time_ms = fcp != null ? Math.round(fcp.startTime) : null;
+    discord === null || discord === void 0 ? void 0 : (_discord$stopScriptCo = discord.stopScriptCompilationTimings) === null || _discord$stopScriptCo === void 0 ? void 0 : _discord$stopScriptCo.call(discord);
+    ipcRenderer.send(IPCEvents.APP_MAIN_BUNDLE_STATS, stats);
+  });
   const app = require('./discord_native/renderer/app');
   const powerMonitor = require('./discord_native/renderer/powerMonitor');
   const DiscordNative = {
