@@ -541,4 +541,11 @@ VoiceEngine.setupKrispPath = function () {
   }
 };
 
+VoiceEngine.setupMLPath = function () {
+  const mlPath = DiscordNative.nativeModules.getModulePath('discord_ml');
+  if (mlPath != null) {
+    VoiceEngine.setMLPath(mlPath);
+  }
+};
+
 module.exports = VoiceEngine;

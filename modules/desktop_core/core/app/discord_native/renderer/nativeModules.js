@@ -38,7 +38,7 @@ function getHasNewUpdater() {
   return electron.ipcRenderer.sendSync(NATIVE_MODULES_GET_HAS_NEW_UPDATER);
 }
 function getUpdaterVersion() {
-  return 2;
+  return 3;
 }
 async function ensureModule(name) {
   if (modulePromises[name] == null) {
