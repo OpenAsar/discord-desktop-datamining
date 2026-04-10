@@ -11,7 +11,7 @@ exports.webAuthnRegister = webAuthnRegister;
 var _DiscordIPC = require("../common/DiscordIPC");
 const ConvertibleErrorCodes = ['EncodingError', 'UnknownError', 'NotAllowedError', 'InvalidStateError', 'NotSupportedError', 'SecurityError', 'SyntaxError', 'NetworkError'];
 function handleResponse(response) {
-  if (response.code === '') {
+  if (response.code == null) {
     return response.message;
   }
   const err = JSON.parse(response.message);
