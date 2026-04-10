@@ -9,7 +9,7 @@
 | cloudsync | 1 |
 | desktop_core | 3 |
 | desktop_overlay | 1 |
-| dispatch | 1 |
+| dispatch | 2 |
 | erlpack | 1 |
 | game_utils | 1 |
 | hook | 1 |
