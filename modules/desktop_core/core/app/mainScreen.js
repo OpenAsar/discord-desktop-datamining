@@ -475,11 +475,15 @@ async function launchMainAppWindow(isVisible) {
     popoutWindows.setupPopout(extendedWindow, frameName, options, WEBAPP_ENDPOINT);
     adjustWindowBounds(childWindow);
   });
+  mainWindow.webContents.once('did-finish-load', () => {
+    var _analytics$getDesktop3;
+    _bootstrapModules.analytics === null || _bootstrapModules.analytics === void 0 ? void 0 : (_analytics$getDesktop3 = _bootstrapModules.analytics.getDesktopTTI) === null || _analytics$getDesktop3 === void 0 ? void 0 : _analytics$getDesktop3.call(_bootstrapModules.analytics).trackMainWindowDocumentLoad();
+  });
   _ipcMain.default.on(_constants.IPCEvents.APP_ASYNC_INDEX_TSX_LOADED, () => {
     var _mainWindow2;
     if (!mainWindowDidFinishLoad) {
-      var _analytics$getDesktop3;
-      _bootstrapModules.analytics === null || _bootstrapModules.analytics === void 0 ? void 0 : (_analytics$getDesktop3 = _bootstrapModules.analytics.getDesktopTTI) === null || _analytics$getDesktop3 === void 0 ? void 0 : _analytics$getDesktop3.call(_bootstrapModules.analytics).trackMainWindowLoadDuration();
+      var _analytics$getDesktop4;
+      _bootstrapModules.analytics === null || _bootstrapModules.analytics === void 0 ? void 0 : (_analytics$getDesktop4 = _bootstrapModules.analytics.getDesktopTTI) === null || _analytics$getDesktop4 === void 0 ? void 0 : _analytics$getDesktop4.call(_bootstrapModules.analytics).trackMainWindowLoadDuration();
     }
     console.log(`ipcMain.on(IPCEvents.APP_ASYNC_INDEX_TSX_LOADED) ${lastPageLoadFailed} ${mainWindowDidFinishLoad}`);
     if (insideAuthFlow && mainWindow.webContents && (0, _securityUtils.checkUrlOriginMatches)(mainWindow.webContents.getURL(), WEBAPP_ENDPOINT)) {
@@ -794,8 +798,8 @@ function setupAnalyticsEvents() {
     webContentsSend(_Constants.AnalyticsEvents.APP_PUSH_ANALYTICS, events);
   });
   _ipcMain.default.on(_Constants.AnalyticsEvents.APP_VIEWED, () => {
-    var _analytics$getDesktop4;
-    const a = _bootstrapModules.analytics === null || _bootstrapModules.analytics === void 0 ? void 0 : (_analytics$getDesktop4 = _bootstrapModules.analytics.getDesktopTTI) === null || _analytics$getDesktop4 === void 0 ? void 0 : _analytics$getDesktop4.call(_bootstrapModules.analytics);
+    var _analytics$getDesktop5;
+    const a = _bootstrapModules.analytics === null || _bootstrapModules.analytics === void 0 ? void 0 : (_analytics$getDesktop5 = _bootstrapModules.analytics.getDesktopTTI) === null || _analytics$getDesktop5 === void 0 ? void 0 : _analytics$getDesktop5.call(_bootstrapModules.analytics);
     if (a == null) {
       return;
     }
@@ -806,9 +810,11 @@ function setupAnalyticsEvents() {
     performance.measure('mainscreen-loadmainpage-duration', 'mainscreen-loadmainpage');
     webAppLoaded = true;
   });
+  let fullInteractiveTTIMs = null;
   _ipcMain.default.on(_Constants.AnalyticsEvents.APP_FIRST_RENDER_AFTER_READY_PAYLOAD, () => {
-    var _analytics$getDesktop5;
-    const a = _bootstrapModules.analytics === null || _bootstrapModules.analytics === void 0 ? void 0 : (_analytics$getDesktop5 = _bootstrapModules.analytics.getDesktopTTI) === null || _analytics$getDesktop5 === void 0 ? void 0 : _analytics$getDesktop5.call(_bootstrapModules.analytics);
+    var _analytics$getDesktop6;
+    fullInteractiveTTIMs = Math.ceil(process.uptime() * 1_000);
+    const a = _bootstrapModules.analytics === null || _bootstrapModules.analytics === void 0 ? void 0 : (_analytics$getDesktop6 = _bootstrapModules.analytics.getDesktopTTI) === null || _analytics$getDesktop6 === void 0 ? void 0 : _analytics$getDesktop6.call(_bootstrapModules.analytics);
     if (a == null) {
       return;
     }
@@ -816,6 +822,11 @@ function setupAnalyticsEvents() {
       a.trackMainWindowJSAppInteractiveDuration();
       a.trackFullInteractiveTTI();
     }
+    webContentsSend('APP_GET_MAIN_BUNDLE_STATS');
+  });
+  _ipcMain.default.on(_constants.IPCEvents.APP_MAIN_BUNDLE_STATS, (_event, bundleStats) => {
+    var _analytics$getDesktop7;
+    _bootstrapModules.analytics === null || _bootstrapModules.analytics === void 0 ? void 0 : (_analytics$getDesktop7 = _bootstrapModules.analytics.getDesktopTTI) === null || _analytics$getDesktop7 === void 0 ? void 0 : _analytics$getDesktop7.call(_bootstrapModules.analytics).trackDetailedTTI(bundleStats, fullInteractiveTTIMs);
   });
 }
 function setupUpdaterEventsWithUpdater(updater) {
@@ -1047,5 +1058,9 @@ function handleOpenUrl(url) {
   mainWindow.focus();
 }
 function setMainWindowVisible(visible) {
+  if (visible) {
+    var _analytics$getDesktop8;
+    _bootstrapModules.analytics === null || _bootstrapModules.analytics === void 0 ? void 0 : (_analytics$getDesktop8 = _bootstrapModules.analytics.getDesktopTTI) === null || _analytics$getDesktop8 === void 0 ? void 0 : _analytics$getDesktop8.call(_bootstrapModules.analytics).trackMainWindowShown();
+  }
   setWindowVisible(visible, false);
 }
