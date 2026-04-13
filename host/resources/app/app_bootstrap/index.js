@@ -35,7 +35,7 @@ if (mode === 'app') {
       allowObsoleteHost: true
     });
   } else {
-    const moduleUpdater = require('../common/moduleUpdater');
+    const moduleUpdater = require('./moduleUpdater');
     moduleUpdater.initPathsOnly(buildInfo);
   }
   const requireNative = require('./requireNative');
