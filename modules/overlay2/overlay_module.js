@@ -1,6 +1,7 @@
 "use strict";
 
-// eslint-disable-next-line import/no-unresolved, import/extensions
+// TODO
+
 var Overlay = require('./discord_overlay2.node');
 
 // [adill] when the module was converted to use N-API we lost the ability to

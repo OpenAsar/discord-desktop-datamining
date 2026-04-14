@@ -272,8 +272,9 @@ function startUpdate() {
       const requireNative = require('./requireNative');
       const splashScreen = require('./splashScreen');
       const updater = require('../common/updater');
-      coreModule = requireNative('discord_desktop_core');
-      coreModule.startup({
+      const core = requireNative('discord_desktop_core');
+      coreModule = core;
+      core.startup({
         Constants,
         GPUSettings,
         analytics,
@@ -289,7 +290,7 @@ function startUpdate() {
       });
       performance.measure('bootstrap-coremodule-startup-duration', 'bootstrap-coremodule-startup');
       if (initialUrl != null) {
-        coreModule.handleOpenUrl(initialUrl);
+        core.handleOpenUrl(initialUrl);
         initialUrl = null;
       }
     } catch (err) {
