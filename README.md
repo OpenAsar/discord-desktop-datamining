@@ -2,7 +2,7 @@
 
 ## canary versions
 
-**host: 1.0.911**
+**host: 1.0.912**
 
 | module | version |
 | ------ | :-----: |
@@ -12,7 +12,7 @@
 | dispatch | 1 |
 | erlpack | 1 |
 | game_utils | 1 |
-| hook | 2 |
+| hook | 1 |
 | krisp | 1 |
 | media | 1 |
 | ml | 1 |
@@ -21,8 +21,8 @@
 | overlay2 | 1 |
 | rpc | 1 |
 | spellcheck | 1 |
-| utils | 2 |
-| voice | 2 |
+| utils | 1 |
+| voice | 1 |
 | zstd | 1 |
 
 ## branches
