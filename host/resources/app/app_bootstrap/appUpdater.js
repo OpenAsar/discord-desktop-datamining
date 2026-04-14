@@ -93,7 +93,7 @@ function update(startMinimized, doneCallback, showCallback) {
     }
     firstRun.performFirstRunTasks(updater);
   } else {
-    const moduleUpdater = require('../common/moduleUpdater');
+    const moduleUpdater = require('./moduleUpdater');
     moduleUpdater.init(bootstrapConstants.UPDATE_ENDPOINT, settings, buildInfo);
   }
   splashScreen.initSplash(startMinimized);

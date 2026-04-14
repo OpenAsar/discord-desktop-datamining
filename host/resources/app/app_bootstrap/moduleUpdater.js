@@ -21,11 +21,11 @@ var _os = _interopRequireDefault(require("os"));
 var _path = _interopRequireDefault(require("path"));
 var _process = _interopRequireDefault(require("process"));
 var _yauzl = _interopRequireDefault(require("yauzl"));
-var _Backoff = _interopRequireDefault(require("./Backoff"));
-var analytics = _interopRequireWildcard(require("./analytics"));
-var _nodeGlobalPaths = require("./nodeGlobalPaths");
-var paths = _interopRequireWildcard(require("./paths"));
-var _processUtils = require("./processUtils");
+var _Backoff = _interopRequireDefault(require("../common/Backoff"));
+var analytics = _interopRequireWildcard(require("../common/analytics"));
+var _nodeGlobalPaths = require("../common/nodeGlobalPaths");
+var paths = _interopRequireWildcard(require("../common/paths"));
+var _processUtils = require("../common/processUtils");
 function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
 function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
@@ -101,7 +101,7 @@ class LogStream {
     }
   }
 }
-const request = require('../app_bootstrap/request');
+const request = require('./request');
 const {
   app
 } = require('electron');
@@ -230,7 +230,7 @@ function init(_endpoint, _settings, _buildInfo) {
     cleanDownloadedModules(installedModules);
     bootstrapping = failedLoadingInstalledModules || ((_settings6 = settings) === null || _settings6 === void 0 ? void 0 : _settings6.get(ALWAYS_BOOTSTRAP_MODULES));
   }
-  hostUpdater = require('../app_bootstrap/hostUpdater');
+  hostUpdater = require('./hostUpdater');
   hostUpdater.on('checking-for-update', () => events.append({
     type: CHECKING_FOR_UPDATES
   }));

@@ -14,13 +14,13 @@ var _path = _interopRequireDefault(require("path"));
 var _url = _interopRequireDefault(require("url"));
 var _Backoff = _interopRequireDefault(require("../common/Backoff"));
 var analytics = _interopRequireWildcard(require("../common/analytics"));
-var moduleUpdater = _interopRequireWildcard(require("../common/moduleUpdater"));
 var paths = _interopRequireWildcard(require("../common/paths"));
 var _securityUtils = require("../common/securityUtils");
 var _updater = require("../common/updater");
 var _buildOverrideUtils = require("./buildOverrideUtils");
 var _ipcMain = _interopRequireDefault(require("./ipcMain"));
 var logger = _interopRequireWildcard(require("./logger"));
+var moduleUpdater = _interopRequireWildcard(require("./moduleUpdater"));
 var _Constants = _interopRequireDefault(require("./Constants"));
 function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
 function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }

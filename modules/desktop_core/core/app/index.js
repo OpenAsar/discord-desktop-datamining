@@ -10,7 +10,8 @@ var _electron = require("electron");
 let mainScreen;
 function startup(bootstrapModules) {
   performance.mark('coremodule-index-startup');
-  require('./bootstrapModules/bootstrapModules').init(bootstrapModules);
+  const bootstrapModulesModule = require('./bootstrapModules/bootstrapModules');
+  bootstrapModulesModule.init(bootstrapModules);
   require('./bootstrapModules/paths');
   require('./bootstrapModules/splashScreen');
   const {
