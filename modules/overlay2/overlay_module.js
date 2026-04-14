@@ -1,9 +1,5 @@
 "use strict";
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = void 0;
 // eslint-disable-next-line import/no-unresolved, import/extensions
 var Overlay = require('./discord_overlay2.node');
 
@@ -34,5 +30,4 @@ if (Overlay.broadcastCommand == null && Overlay.broadcastCommandJson != null) {
     Overlay.broadcastCommandJson(JSON.stringify(command));
   };
 }
-var _default = exports["default"] = Overlay;
-module.exports = exports.default;
+module.exports = Overlay;
