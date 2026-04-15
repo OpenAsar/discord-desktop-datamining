@@ -276,9 +276,7 @@ function destroyRenderer(pid) {
     return;
   }
   _overlay_module["default"].disconnectProcess(pid);
-  if (renderer.backoff) {
-    renderer.backoff.cancel();
-  }
+  renderer.backoff.cancel();
   if (!renderer.window.isDestroyed()) {
     renderer.window.destroy();
   }
