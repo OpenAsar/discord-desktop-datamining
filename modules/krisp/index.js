@@ -1,6 +1,6 @@
 const KrispModule = require('./discord_krisp.node');
 
-const isLogDirAvailable = window?.DiscordNative?.fileManager?.getAndCreateLogDirectorySync;
+const isLogDirAvailable = globalThis.window?.DiscordNative?.fileManager?.getAndCreateLogDirectorySync;
 let initializationParams;
 if (isLogDirAvailable) {
   const logDirectory = window.DiscordNative.fileManager.getAndCreateLogDirectorySync(window);

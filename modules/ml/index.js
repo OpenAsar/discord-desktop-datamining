@@ -2,7 +2,7 @@
 
 const MLModule = require('./discord_ml.node');
 
-const isElectronRenderer = window?.DiscordNative?.isRenderer != null;
+const isElectronRenderer = globalThis.window?.DiscordNative?.isRenderer != null;
 
 let dataDirectory;
 if (isElectronRenderer) {
@@ -16,7 +16,7 @@ if (isElectronRenderer) {
   }
 }
 
-const isLogDirAvailable = window?.DiscordNative?.fileManager?.getAndCreateLogDirectorySync;
+const isLogDirAvailable = globalThis.window?.DiscordNative?.fileManager?.getAndCreateLogDirectorySync;
 let initializationParams;
 if (isLogDirAvailable) {
   const logDirectory = window.DiscordNative.fileManager.getAndCreateLogDirectorySync(window);

@@ -33,7 +33,7 @@ if (isElectronRenderer) {
 }
 
 // Init logging
-const isFileManagerAvailable = window?.DiscordNative?.fileManager;
+const isFileManagerAvailable = globalThis.window?.DiscordNative?.fileManager;
 const isLogDirAvailable = isFileManagerAvailable?.getAndCreateLogDirectorySync;
 let logDirectory;
 if (isLogDirAvailable) {
