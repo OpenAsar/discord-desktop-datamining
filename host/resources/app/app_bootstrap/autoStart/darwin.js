@@ -1,21 +1,18 @@
 "use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.install = install;
+exports.update = update;
 exports.isInstalled = isInstalled;
 exports.uninstall = uninstall;
-exports.update = update;
 function install(callback) {
-  callback();
+    callback();
 }
 function update(callback) {
-  callback();
+    callback();
 }
 function isInstalled(callback) {
-  callback(false);
+    callback(false);
 }
 function uninstall(callback) {
-  callback();
+    callback();
 }

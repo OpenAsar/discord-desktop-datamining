@@ -1,39 +1,38 @@
 "use strict";
-
-var _assert = _interopRequireDefault(require("assert"));
-var _electron = _interopRequireDefault(require("electron"));
-var _lodash = _interopRequireDefault(require("lodash"));
-var _crashReporterUtils = require("../../../common/crashReporterUtils");
-var _crashReporterSetup = require("../../bootstrapModules/crashReporterSetup");
-var _DiscordIPC = require("../common/DiscordIPC");
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
-_DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.CRASH_REPORTER_UPDATE_METADATA, (_, additionalMetadata) => {
-  const metadata = _crashReporterSetup.crashReporterSetup.metadata;
-  (0, _assert.default)(metadata != null, 'Metadata imported improperly.');
-  const finalMetadata = _lodash.default.defaultsDeep(metadata, additionalMetadata ?? {});
-  (0, _crashReporterUtils.reconcileCrashReporterMetadata)(_electron.default.crashReporter, finalMetadata);
-  const sentry = _crashReporterSetup.crashReporterSetup.getGlobalSentry();
-  if (sentry != null) {
-    var _additionalMetadata$s;
-    const user = (_additionalMetadata$s = additionalMetadata.sentry) === null || _additionalMetadata$s === void 0 ? void 0 : _additionalMetadata$s.user;
-    if (user != null) {
-      sentry.setUser(user);
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const assert_1 = __importDefault(require("assert"));
+const electron_1 = __importDefault(require("electron"));
+const lodash_1 = __importDefault(require("lodash"));
+const crashReporterUtils_1 = require("../../../common/crashReporterUtils");
+const crashReporterSetup_1 = require("../../bootstrapModules/crashReporterSetup");
+const DiscordIPC_1 = require("../common/DiscordIPC");
+DiscordIPC_1.DiscordIPC.main.handle(DiscordIPC_1.IPCEvents.CRASH_REPORTER_UPDATE_METADATA, (_, additionalMetadata) => {
+    const metadata = crashReporterSetup_1.crashReporterSetup.metadata;
+    (0, assert_1.default)(metadata != null, 'Metadata imported improperly.');
+    const finalMetadata = lodash_1.default.defaultsDeep(metadata, additionalMetadata ?? {});
+    (0, crashReporterUtils_1.reconcileCrashReporterMetadata)(electron_1.default.crashReporter, finalMetadata);
+    const sentry = crashReporterSetup_1.crashReporterSetup.getGlobalSentry();
+    if (sentry != null) {
+        const user = additionalMetadata.sentry?.user;
+        if (user != null) {
+            sentry.setUser(user);
+        }
+        const nativeBuildNumber = additionalMetadata.nativeBuildNumber;
+        if (nativeBuildNumber != null) {
+            sentry.setTag('nativeBuildNumber', nativeBuildNumber);
+        }
+        const staff = additionalMetadata.staff;
+        if (staff != null) {
+            sentry.setTag('isStaff', staff.toString());
+        }
     }
-    const nativeBuildNumber = additionalMetadata.nativeBuildNumber;
-    if (nativeBuildNumber != null) {
-      sentry.setTag('nativeBuildNumber', nativeBuildNumber);
-    }
-    const staff = additionalMetadata.staff;
-    if (staff != null) {
-      sentry.setTag('isStaff', staff.toString());
-    }
-  }
-  return Promise.resolve({
-    metadata: finalMetadata
-  });
+    return Promise.resolve({ metadata: finalMetadata });
 });
-_electron.default.ipcMain.handle(_DiscordIPC.IPCEvents.UNHANDLED_JS_EXCEPTION, () => {
-  setTimeout(() => {
-    throw new Error('UNHANDLED_EXCEPTION ' + process.type);
-  }, 50);
+electron_1.default.ipcMain.handle(DiscordIPC_1.IPCEvents.UNHANDLED_JS_EXCEPTION, (_) => {
+    setTimeout(() => {
+        throw new Error('UNHANDLED_EXCEPTION ' + process.type);
+    }, 50);
 });

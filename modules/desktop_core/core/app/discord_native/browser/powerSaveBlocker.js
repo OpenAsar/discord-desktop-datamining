@@ -1,26 +1,53 @@
 "use strict";
-
-var electron = _interopRequireWildcard(require("electron"));
-function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
-function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
-const {
-  POWER_SAVE_BLOCKER_BLOCK_DISPLAY_SLEEP,
-  POWER_SAVE_BLOCKER_UNBLOCK_DISPLAY_SLEEP,
-  POWER_SAVE_BLOCKER_CLEANUP_DISPLAY_SLEEP
-} = require('../common/constants').IPCEvents;
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+const electron = __importStar(require("electron"));
+const { POWER_SAVE_BLOCKER_BLOCK_DISPLAY_SLEEP, POWER_SAVE_BLOCKER_UNBLOCK_DISPLAY_SLEEP, POWER_SAVE_BLOCKER_CLEANUP_DISPLAY_SLEEP, } = require('../common/constants').IPCEvents;
 const powerSaveBlockerIds = new Set();
-electron.ipcMain.handle(POWER_SAVE_BLOCKER_BLOCK_DISPLAY_SLEEP, () => {
-  const newId = electron.powerSaveBlocker.start('prevent-display-sleep');
-  powerSaveBlockerIds.add(newId);
-  return newId;
+electron.ipcMain.handle(POWER_SAVE_BLOCKER_BLOCK_DISPLAY_SLEEP, (_) => {
+    const newId = electron.powerSaveBlocker.start('prevent-display-sleep');
+    powerSaveBlockerIds.add(newId);
+    return newId;
 });
 electron.ipcMain.handle(POWER_SAVE_BLOCKER_UNBLOCK_DISPLAY_SLEEP, (_, id) => {
-  electron.powerSaveBlocker.stop(id);
-  powerSaveBlockerIds.delete(id);
-});
-electron.ipcMain.handle(POWER_SAVE_BLOCKER_CLEANUP_DISPLAY_SLEEP, () => {
-  for (const id of powerSaveBlockerIds) {
     electron.powerSaveBlocker.stop(id);
-  }
-  powerSaveBlockerIds.clear();
+    powerSaveBlockerIds.delete(id);
+});
+electron.ipcMain.handle(POWER_SAVE_BLOCKER_CLEANUP_DISPLAY_SLEEP, (_) => {
+    for (const id of powerSaveBlockerIds) {
+        electron.powerSaveBlocker.stop(id);
+    }
+    powerSaveBlockerIds.clear();
 });

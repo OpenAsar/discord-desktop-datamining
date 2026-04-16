@@ -1,12 +1,5 @@
 "use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-Object.defineProperty(exports, "buildInfo", {
-  enumerable: true,
-  get: function () {
-    return _bootstrapModules.buildInfo;
-  }
-});
-var _bootstrapModules = require("./bootstrapModules");
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.buildInfo = void 0;
+var bootstrapModules_1 = require("./bootstrapModules");
+Object.defineProperty(exports, "buildInfo", { enumerable: true, get: function () { return bootstrapModules_1.buildInfo; } });

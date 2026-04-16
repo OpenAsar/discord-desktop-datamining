@@ -1,80 +1,77 @@
 "use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.init = init;
-var _electron = require("electron");
-var _constants = require("./discord_native/common/constants");
-var _ipcMain = _interopRequireDefault(require("./ipcMain"));
-var _mainScreen = require("./mainScreen");
-var _utils = require("./utils");
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+const electron_1 = require("electron");
+const constants_1 = require("./discord_native/common/constants");
+const ipcMain_1 = __importDefault(require("./ipcMain"));
+const mainScreen_1 = require("./mainScreen");
+const utils_1 = require("./utils");
 let hasInit = false;
 const ThumbarButtonName = {
-  VIDEO: 'VIDEO',
-  MUTE: 'MUTE',
-  DEAFEN: 'DEAFEN',
-  DISCONNECT: 'DISCONNECT'
+    VIDEO: 'VIDEO',
+    MUTE: 'MUTE',
+    DEAFEN: 'DEAFEN',
+    DISCONNECT: 'DISCONNECT',
 };
 function init() {
-  if (hasInit) return;
-  hasInit = true;
-  _ipcMain.default.on(_constants.IPCEvents.THUMBAR_BUTTONS_UPDATE, (event, buttons, isSystemDarkMode) => {
-    if (_utils.isWindows) {
-      setThumbarButtons(event, buttons, isSystemDarkMode);
-    } else if (_utils.isOSX) {
-      setTouchbarButtons(event, buttons);
-    } else {
-      console.log(`thumbarButtons.init: Unknown operating system "${_utils.platform}".`);
-    }
-  });
+    if (hasInit)
+        return;
+    hasInit = true;
+    ipcMain_1.default.on(constants_1.IPCEvents.THUMBAR_BUTTONS_UPDATE, (event, buttons, isSystemDarkMode) => {
+        if (utils_1.isWindows) {
+            setThumbarButtons(event, buttons, isSystemDarkMode);
+        }
+        else if (utils_1.isOSX) {
+            setTouchbarButtons(event, buttons);
+        }
+        else {
+            console.log(`thumbarButtons.init: Unknown operating system "${utils_1.platform}".`);
+        }
+    });
 }
 function getButtonIcon(name, active, isSystemDarkMode) {
-  const root = ThumbarButtonName[name].toLowerCase();
-  const postfix = active ? '' : '-off';
-  const theme = isSystemDarkMode ? '' : '-light';
-  return (0, _utils.exposeModuleResource)(`app/images/thumbar/${_utils.platform}`, `${root}${postfix}${theme}.png`);
+    const root = ThumbarButtonName[name].toLowerCase();
+    const postfix = active ? '' : '-off';
+    const theme = isSystemDarkMode ? '' : '-light';
+    return (0, utils_1.exposeModuleResource)(`app/images/thumbar/${utils_1.platform}`, `${root}${postfix}${theme}.png`);
 }
 function createButtons(event, buttons, isSystemDarkMode) {
-  for (const button of buttons) {
-    if (typeof button.name !== 'string') {
-      console.error('setThumbarButtons: button.icon missing.');
-      return [];
+    for (const button of buttons) {
+        if (typeof button.name !== 'string') {
+            console.error('setThumbarButtons: button.icon missing.');
+            return [];
+        }
+        if (!(button.name in ThumbarButtonName)) {
+            console.error(`setThumbarButtons: button.icon for unknown icon "${button.icon}.`);
+            return [];
+        }
+        const buttonName = button.name;
+        button.click = () => ipcMain_1.default.reply(event, 'THUMBAR_BUTTONS_CLICKED', { buttonName });
+        button.icon = getButtonIcon(button.name, button.active ?? false, isSystemDarkMode);
     }
-    if (!(button.name in ThumbarButtonName)) {
-      console.error(`setThumbarButtons: button.icon for unknown icon "${button.icon}.`);
-      return [];
-    }
-    const buttonName = button.name;
-    button.click = () => _ipcMain.default.reply(event, 'THUMBAR_BUTTONS_CLICKED', {
-      buttonName
-    });
-    button.icon = getButtonIcon(button.name, button.active ?? false, isSystemDarkMode);
-  }
-  return buttons;
+    return buttons;
 }
 function setTouchbarButtons(event, buttons) {
-  buttons = createButtons(event, buttons, true);
-  const touchbarButtons = buttons.map(button => {
-    var _button$flags;
-    return new _electron.TouchBar.TouchBarButton({
-      accessibilityLabel: button.tooltip,
-      click: button.click,
-      icon: button.icon,
-      enabled: ((_button$flags = button.flags) === null || _button$flags === void 0 ? void 0 : _button$flags.includes('disabled')) ? false : true
+    buttons = createButtons(event, buttons, true);
+    const touchbarButtons = buttons.map((button) => new electron_1.TouchBar.TouchBarButton({
+        accessibilityLabel: button.tooltip,
+        click: button.click,
+        icon: button.icon,
+        enabled: button.flags?.includes('disabled') ? false : true,
+    }));
+    const win = electron_1.BrowserWindow.fromId((0, mainScreen_1.getMainWindowId)());
+    const touchbar = new electron_1.TouchBar({
+        items: touchbarButtons.length === 0 ? [] : touchbarButtons,
     });
-  });
-  const win = _electron.BrowserWindow.fromId((0, _mainScreen.getMainWindowId)());
-  const touchbar = new _electron.TouchBar({
-    items: touchbarButtons.length === 0 ? [] : touchbarButtons
-  });
-  win === null || win === void 0 ? void 0 : win.setTouchBar(touchbar);
+    win?.setTouchBar(touchbar);
 }
 function setThumbarButtons(event, buttons, isSystemDarkMode) {
-  const thumbarButtons = createButtons(event, buttons, isSystemDarkMode);
-  const win = _electron.BrowserWindow.fromId((0, _mainScreen.getMainWindowId)());
-  if (!(win === null || win === void 0 ? void 0 : win.setThumbarButtons(thumbarButtons))) {
-    console.error('setThumbarButtons: setThumbarButtons failed', buttons);
-  }
+    const thumbarButtons = createButtons(event, buttons, isSystemDarkMode);
+    const win = electron_1.BrowserWindow.fromId((0, mainScreen_1.getMainWindowId)());
+    if (!win?.setThumbarButtons(thumbarButtons)) {
+        console.error('setThumbarButtons: setThumbarButtons failed', buttons);
+    }
 }

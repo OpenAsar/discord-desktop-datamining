@@ -1,5 +1,4 @@
 "use strict";
-
-var _electron = require("electron");
+const electron_1 = require("electron");
 const menu = require('./' + process.platform);
-module.exports = _electron.Menu.buildFromTemplate(menu);
+module.exports = electron_1.Menu.buildFromTemplate(menu);
