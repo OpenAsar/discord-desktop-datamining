@@ -1,19 +1,19 @@
 "use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.release = exports.arch = exports.appArch = void 0;
-var _os = _interopRequireDefault(require("os"));
-var _process = _interopRequireDefault(require("process"));
-var _process$env$PROCESSO, _process$env$PROCESSO2, _process$env$PROCESSO3;
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
-const appArch = exports.appArch = _os.default.arch();
-let arch = exports.arch = _os.default.arch();
-if (_process.default.platform === 'win32' && _process.default.env['PROCESSOR_ARCHITEW6432'] != null) {
-  exports.arch = arch = 'x64';
+const os_1 = __importDefault(require("os"));
+const process_1 = __importDefault(require("process"));
+exports.appArch = os_1.default.arch();
+exports.arch = os_1.default.arch();
+if (process_1.default.platform === 'win32' && process_1.default.env['PROCESSOR_ARCHITEW6432'] != null) {
+    exports.arch = 'x64';
 }
-if (((_process$env$PROCESSO = _process.default.env['PROCESSOR_ARCHITECTURE']) === null || _process$env$PROCESSO === void 0 ? void 0 : _process$env$PROCESSO.toString().toLowerCase()) === 'arm64' || ((_process$env$PROCESSO2 = _process.default.env['PROCESSOR_ARCHITEW6432']) === null || _process$env$PROCESSO2 === void 0 ? void 0 : _process$env$PROCESSO2.toString().toLowerCase()) === 'arm64' || ((_process$env$PROCESSO3 = _process.default.env['PROCESSOR_IDENTIFIER']) === null || _process$env$PROCESSO3 === void 0 ? void 0 : _process$env$PROCESSO3.toString().toLowerCase().includes('arm'))) {
-  exports.arch = arch = 'arm64';
+if (process_1.default.env['PROCESSOR_ARCHITECTURE']?.toString().toLowerCase() === 'arm64'
+    || process_1.default.env['PROCESSOR_ARCHITEW6432']?.toString().toLowerCase() === 'arm64'
+    || process_1.default.env['PROCESSOR_IDENTIFIER']?.toString().toLowerCase().includes('arm')) {
+    exports.arch = 'arm64';
 }
-const release = exports.release = _os.default.release();
+exports.release = os_1.default.release();

@@ -1,12 +1,15 @@
 "use strict";
-
-var _electron = require("electron");
-const menu = [{
-  label: 'Discord',
-  submenu: [{
-    label: 'Quit',
-    click: () => _electron.app.quit(),
-    accelerator: 'Command+Q'
-  }]
-}];
+const electron_1 = require("electron");
+const menu = [
+    {
+        label: 'Discord',
+        submenu: [
+            {
+                label: 'Quit',
+                click: () => electron_1.app.quit(),
+                accelerator: 'Command+Q',
+            },
+        ],
+    },
+];
 module.exports = menu;

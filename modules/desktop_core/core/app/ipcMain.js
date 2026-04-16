@@ -1,15 +1,10 @@
 "use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-var _electron = require("electron");
-var _constants = require("./discord_native/common/constants");
-var _default = exports.default = {
-  on: (event, callback) => _electron.ipcMain.on((0, _constants.getDiscordIPCEvent)(event), callback),
-  removeListener: (event, callback) => _electron.ipcMain.removeListener((0, _constants.getDiscordIPCEvent)(event), callback),
-  reply: (event, channel, ...args) => event.sender.send((0, _constants.getDiscordIPCEvent)(channel), ...args),
-  handle: (event, callback) => _electron.ipcMain.handle((0, _constants.getDiscordIPCEvent)(event), callback)
+Object.defineProperty(exports, "__esModule", { value: true });
+const electron_1 = require("electron");
+const constants_1 = require("./discord_native/common/constants");
+exports.default = {
+    on: (event, callback) => electron_1.ipcMain.on((0, constants_1.getDiscordIPCEvent)(event), callback),
+    removeListener: (event, callback) => electron_1.ipcMain.removeListener((0, constants_1.getDiscordIPCEvent)(event), callback),
+    reply: (event, channel, ...args) => event.sender.send((0, constants_1.getDiscordIPCEvent)(channel), ...args),
+    handle: (event, callback) => electron_1.ipcMain.handle((0, constants_1.getDiscordIPCEvent)(event), callback),
 };
-module.exports = exports.default;

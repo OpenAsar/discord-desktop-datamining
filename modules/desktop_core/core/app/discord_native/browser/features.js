@@ -1,15 +1,11 @@
 "use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.injectFeaturesBackend = injectFeaturesBackend;
-var _DiscordIPC = require("../common/DiscordIPC");
+const DiscordIPC_1 = require("../common/DiscordIPC");
 let injectedFeatures = null;
 function injectFeaturesBackend(features) {
-  injectedFeatures = features;
+    injectedFeatures = features;
 }
-_DiscordIPC.DiscordIPC.main.on(_DiscordIPC.IPCEvents.FEATURES_GET_BROWSER_FEATURES, event => {
-  var _injectedFeatures;
-  event.returnValue = ((_injectedFeatures = injectedFeatures) === null || _injectedFeatures === void 0 ? void 0 : _injectedFeatures.getSupported()) ?? [];
+DiscordIPC_1.DiscordIPC.main.on(DiscordIPC_1.IPCEvents.FEATURES_GET_BROWSER_FEATURES, (event) => {
+    event.returnValue = injectedFeatures?.getSupported() ?? [];
 });

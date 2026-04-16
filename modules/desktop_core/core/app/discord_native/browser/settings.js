@@ -1,38 +1,64 @@
 "use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
 });
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.injectSettingsBackend = injectSettingsBackend;
-var electron = _interopRequireWildcard(require("electron"));
-function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
-function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
-const {
-  SETTINGS_GET,
-  SETTINGS_SET,
-  SETTINGS_GET_SYNC
-} = require('../common/constants').IPCEvents;
+const electron = __importStar(require("electron"));
+const { SETTINGS_GET, SETTINGS_SET, SETTINGS_GET_SYNC } = require('../common/constants').IPCEvents;
 let injectedSettings = null;
 function getSettings() {
-  return injectedSettings != null ? injectedSettings : {
-    get: () => {},
-    set: () => {},
-    save: () => {}
-  };
+    return injectedSettings != null
+        ? injectedSettings
+        : {
+            get: () => { },
+            set: () => { },
+            save: () => { },
+        };
 }
 function injectSettingsBackend(settings) {
-  injectedSettings = settings;
+    injectedSettings = settings;
 }
 electron.ipcMain.handle(SETTINGS_GET, (_, name, defaultValue) => {
-  const settings = getSettings();
-  return settings.get(name, defaultValue);
+    const settings = getSettings();
+    return settings.get(name, defaultValue);
 });
 electron.ipcMain.handle(SETTINGS_SET, (_, name, value) => {
-  const settings = getSettings();
-  settings.set(name, value);
-  settings.save();
+    const settings = getSettings();
+    settings.set(name, value);
+    settings.save();
 });
 electron.ipcMain.on(SETTINGS_GET_SYNC, (event, name, defaultValue) => {
-  const settings = getSettings();
-  event.returnValue = settings.get(name, defaultValue);
+    const settings = getSettings();
+    event.returnValue = settings.get(name, defaultValue);
 });

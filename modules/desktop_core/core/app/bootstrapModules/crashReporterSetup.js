@@ -1,8 +1,6 @@
 "use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.crashReporterSetup = void 0;
-var _bootstrapModules = require("./bootstrapModules");
-const crashReporterSetup = exports.crashReporterSetup = _bootstrapModules.crashReporterSetup ?? require('../../common/crashReporterSetup');
+const bootstrapModules_1 = require("./bootstrapModules");
+const crashReporterSetup = bootstrapModules_1.crashReporterSetup ?? require('../../common/crashReporterSetup');
+exports.crashReporterSetup = crashReporterSetup;
