@@ -1,9 +1,5 @@
 "use strict";
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
 var _appSettings = require("./appSettings");
 const {
   releaseChannel
@@ -25,8 +21,8 @@ const UPDATE_ENDPOINT = (settings === null || settings === void 0 ? void 0 : set
 const NEW_UPDATE_ENDPOINT = (settings === null || settings === void 0 ? void 0 : settings.get('NEW_UPDATE_ENDPOINT')) || 'https://updates.discord.com/';
 const ALLOW_OPTIONAL_UPDATES = settings === null || settings === void 0 ? void 0 : settings.get('ALLOW_OPTIONAL_UPDATES', true);
 const LOG_LEVEL = (settings === null || settings === void 0 ? void 0 : settings.get('LOG_LEVEL')) || 'info';
-const USE_RUST_BSPATCH = (settings === null || settings === void 0 ? void 0 : settings.get('USE_RUST_BSPATCH', false)) || process.platform === 'darwin';
-const USE_NEW_UPDATER = (settings === null || settings === void 0 ? void 0 : settings.get('USE_NEW_UPDATER', false)) || process.platform === 'win32';
+const USE_RUST_BSPATCH = (settings === null || settings === void 0 ? void 0 : settings.get('USE_RUST_BSPATCH', false)) || process.platform === 'darwin' || process.platform === 'linux';
+const USE_NEW_UPDATER = (settings === null || settings === void 0 ? void 0 : settings.get('USE_NEW_UPDATER', false)) || process.platform === 'win32' || process.platform === 'linux';
 var IPCEvents = function (IPCEvents) {
   IPCEvents["GET_BUILD_OVERRIDE_STATUS"] = "DISCORD_GET_BUILD_OVERRIDE_STATUS";
   IPCEvents["CLEAR_BUILD_OVERRIDE"] = "DISCORD_CLEAR_BUILD_OVERRIDE";
@@ -48,5 +44,4 @@ const bootstrapConstants = {
   USE_NEW_UPDATER,
   IPCEvents
 };
-var _default = exports.default = bootstrapConstants;
-module.exports = exports.default;
+module.exports = bootstrapConstants;

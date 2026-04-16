@@ -5,6 +5,7 @@ var _path = _interopRequireDefault(require("path"));
 var _appFeatures = require("../../appFeatures");
 var _utils = require("../../utils");
 var _DiscordIPC = require("../common/DiscordIPC");
+var _nativeModules = require("./nativeModules");
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 const features = (0, _appFeatures.getFeatures)();
 let majorVersion;
@@ -34,7 +35,7 @@ if (_utils.isOSX && majorVersion >= 21) {
     if (moduleDataPath == null) {
       return Promise.reject(new Error('Module data path unset'));
     }
-    const webAuthnPath = _path.default.join(moduleDataPath, 'discord_webauthn');
+    const webAuthnPath = (0, _nativeModules.getModulePath)('discord_webauthn') ?? _path.default.join(moduleDataPath, 'discord_webauthn');
     return new Promise(resolve => {
       const lib = require(webAuthnPath);
       lib[method](challenge, (code, message) => resolve({
@@ -47,7 +48,7 @@ if (_utils.isOSX && majorVersion >= 21) {
     if (moduleDataPath == null) {
       return Promise.resolve();
     }
-    const webAuthnPath = _path.default.join(moduleDataPath, 'discord_webauthn');
+    const webAuthnPath = (0, _nativeModules.getModulePath)('discord_webauthn') ?? _path.default.join(moduleDataPath, 'discord_webauthn');
     return new Promise(resolve => {
       const lib = require(webAuthnPath);
       lib[method](...args, () => resolve());

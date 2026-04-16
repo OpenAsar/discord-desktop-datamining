@@ -1,9 +1,5 @@
 "use strict";
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
 var _electron = require("electron");
 var _events = require("events");
 var _request = _interopRequireDefault(require("./request"));
@@ -171,5 +167,4 @@ switch (process.platform) {
     autoUpdater = new AutoUpdaterLinux();
     break;
 }
-var _default = exports.default = autoUpdater;
-module.exports = exports.default;
+module.exports = autoUpdater;

@@ -475,6 +475,7 @@ function getUpdaterModule(platform) {
     case 'darwin':
       return _path.default.join(_process.default.execPath, '..', '..', 'Resources', 'updater.node');
     case 'win32':
+    case 'linux':
       return _path.default.join(_process.default.execPath, '..', 'updater.node');
     default:
       console.error(`getUpdaterModulePath: Unsupported platform: ${platform}`);
@@ -490,13 +491,13 @@ function tryInitUpdater(buildInfo, repositoryUrl, useRustBspatch) {
   }
   const platform = getUpdaterPlatformName(_process.default.platform);
   let currentArch = null;
-  if (platform === 'win') {
-    currentArch = arch();
-    console.log(`Determined current Windows architecture: ${currentArch}`);
-  }
   if (platform === 'osx') {
     currentArch = _child_process.default.execSync('uname -m').toString().trim() === 'arm64' ? 'arm64' : 'x64';
     console.log(`Determined current Mac architecture: ${currentArch}`);
+  } else {
+    currentArch = arch();
+    const platName = platform === 'win' ? 'Windows' : 'Linux';
+    console.log(`Determined current ${platName} architecture: ${currentArch}`);
   }
   instance = new Updater({
     release_channel: buildInfo.releaseChannel,

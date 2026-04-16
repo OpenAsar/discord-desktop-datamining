@@ -1,10 +1,7 @@
 "use strict";
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = void 0;
-// eslint-disable-next-line import/no-unresolved, import/extensions
+// TODO
+
 var Overlay = require('./discord_overlay2.node');
 
 // [adill] when the module was converted to use N-API we lost the ability to
@@ -34,5 +31,4 @@ if (Overlay.broadcastCommand == null && Overlay.broadcastCommandJson != null) {
     Overlay.broadcastCommandJson(JSON.stringify(command));
   };
 }
-var _default = exports["default"] = Overlay;
-module.exports = exports.default;
+module.exports = Overlay;
