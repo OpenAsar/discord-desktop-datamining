@@ -33,7 +33,7 @@ if (isElectronRenderer) {
 }
 
 // Init logging
-const isFileManagerAvailable = window?.DiscordNative?.fileManager;
+const isFileManagerAvailable = globalThis.window?.DiscordNative?.fileManager;
 const isLogDirAvailable = isFileManagerAvailable?.getAndCreateLogDirectorySync;
 let logDirectory;
 if (isLogDirAvailable) {
@@ -538,6 +538,13 @@ VoiceEngine.setupKrispPath = function () {
   const krispPath = DiscordNative.nativeModules.getModulePath('discord_krisp');
   if (krispPath != null) {
     VoiceEngine.setKrispPath(krispPath);
+  }
+};
+
+VoiceEngine.setupMLPath = function () {
+  const mlPath = DiscordNative.nativeModules.getModulePath('discord_ml');
+  if (mlPath != null) {
+    VoiceEngine.setMLPath(mlPath);
   }
 };
 

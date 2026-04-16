@@ -1,11 +1,7 @@
 "use strict";
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
 var _electron = require("electron");
-var _default = exports.default = [{
+const menu = [{
   label: '&File',
   submenu: [{
     label: '&Exit',
@@ -13,4 +9,4 @@ var _default = exports.default = [{
     accelerator: 'Alt+F4'
   }]
 }];
-module.exports = exports.default;
+module.exports = menu;

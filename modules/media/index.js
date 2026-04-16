@@ -1,8 +1,9 @@
 "use strict";
 
-var _discord_media = _interopRequireDefault(require("./discord_media.node"));
-var _ref, _ref$DiscordNative; // eslint-disable-next-line import/no-unresolved, import/extensions
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { "default": e }; }
+var _ref, _ref$DiscordNative;
+// eslint-disable-next-line import/no-unresolved, import/extensions
+var _native = require('./discord_media.node');
+
 // Init logging
 var isFileManagerAvailable = (_ref = window) === null || _ref === void 0 ? void 0 : (_ref$DiscordNative = _ref.DiscordNative) === null || _ref$DiscordNative === void 0 ? void 0 : _ref$DiscordNative.fileManager;
 var isLogDirAvailable = isFileManagerAvailable === null || isFileManagerAvailable === void 0 ? void 0 : isFileManagerAvailable.getAndCreateLogDirectorySync;
@@ -34,16 +35,16 @@ if (isLogDirAvailable) {
     nativeAppArch: nativeAppArch !== null && nativeAppArch !== void 0 ? nativeAppArch : 'unknown'
   };
 }
-_discord_media["default"].initializeLogging(initializeArgs, nativeData);
+_native.initializeLogging(initializeArgs, nativeData);
 module.exports = {
   getSystemAnalyticsBlob: function getSystemAnalyticsBlob() {
     return new Promise(function (resolve) {
-      return _discord_media["default"].getSystemAnalyticsBlob(resolve);
+      return _native.getSystemAnalyticsBlob(resolve);
     });
   },
   getMemoryUsageBlob: function getMemoryUsageBlob() {
     return new Promise(function (resolve) {
-      return _discord_media["default"].getMemoryUsageBlob(resolve);
+      return _native.getMemoryUsageBlob(resolve);
     });
   }
 };

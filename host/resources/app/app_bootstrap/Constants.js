@@ -1,9 +1,5 @@
 "use strict";
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
 var _appSettings = require("./appSettings");
 const {
   releaseChannel
@@ -48,5 +44,4 @@ const bootstrapConstants = {
   USE_NEW_UPDATER,
   IPCEvents
 };
-var _default = exports.default = bootstrapConstants;
-module.exports = exports.default;
+module.exports = bootstrapConstants;

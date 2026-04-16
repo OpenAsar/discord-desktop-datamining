@@ -1,7 +1,7 @@
 const native = require('./discord_zstd.node');
 
 // Init logging
-const isFileManagerAvailable = window?.DiscordNative?.fileManager;
+const isFileManagerAvailable = globalThis.window?.DiscordNative?.fileManager;
 const isLogDirAvailable = isFileManagerAvailable?.getAndCreateLogDirectorySync;
 let initializeArgs = {};
 if (isLogDirAvailable) {
