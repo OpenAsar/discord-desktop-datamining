@@ -1,8 +1,5 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-const overlay_module_1 = __importDefault(require("./overlay_module"));
+const Overlay = require('./overlay_module');
 const isOverlayContext = (typeof window !== 'undefined' && window != null && window.__OVERLAY__)
     || document.getElementById('__OVERLAY__SENTINEL__') != null
     || /overlay/.test(window.location.pathname);
@@ -33,28 +30,28 @@ function eventHandler(pid, event) {
         }
     }
 }
-overlay_module_1.default._setEventHandler(eventHandler);
+Overlay._setEventHandler(eventHandler);
 if (isOverlayContext) {
     const { URL } = require('url');
     const url = new URL(window.location);
     const pid = parseInt(url.searchParams.get('pid'));
-    overlay_module_1.default.connectProcess(pid);
-    overlay_module_1.default.rendererStarted = () => {
-        overlay_module_1.default.sendCommand(pid, { message: 'notify_renderer_started' });
+    Overlay.connectProcess(pid);
+    Overlay.rendererStarted = () => {
+        Overlay.sendCommand(pid, { message: 'notify_renderer_started' });
     };
 }
-overlay_module_1.default.setClickZoneCallback = (callback) => {
+Overlay.setClickZoneCallback = (callback) => {
     clickZoneCallback = callback;
 };
-overlay_module_1.default.setInputLocked = (locked) => {
+Overlay.setInputLocked = (locked) => {
     interceptInput = !locked;
     const payload = { message: 'intercept_input', intercept: interceptInput };
-    overlay_module_1.default.broadcastCommand(payload);
+    Overlay.broadcastCommand(payload);
 };
-overlay_module_1.default.setImeExclusiveFullscreenCallback = (callback) => {
+Overlay.setImeExclusiveFullscreenCallback = (callback) => {
     imeExclusiveFullscreenCallback = callback;
 };
-overlay_module_1.default.setPerfInfoCallback = (callback) => {
+Overlay.setPerfInfoCallback = (callback) => {
     perfInfoCallback = callback;
 };
-module.exports = overlay_module_1.default;
+module.exports = Overlay;

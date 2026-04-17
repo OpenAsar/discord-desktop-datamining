@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const Overlay = require('./discord_overlay2.node');
 if (Overlay._setEventHandler == null && Overlay._setEventHandlerJson != null) {
     Overlay._setEventHandler = (handler) => {
