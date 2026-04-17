@@ -44,7 +44,7 @@ function recastWSSocket(socket, req) {
     };
 }
 function createWrappedWSServer(opts) {
-    if (opts.instanceId) {
+    if (opts.instanceId != null) {
         opts.server = origInstanceMap.get(opts.instanceId);
     }
     const wss = new ws.Server(opts);

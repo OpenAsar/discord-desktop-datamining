@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.wrapInputEventRegister = wrapInputEventRegister;
 exports.wrapInputEventUnregister = wrapInputEventUnregister;
+const discordNative = globalThis.window?.DiscordNative;
 const RESTRICTED_SCAN_CODE_RANGES = {
     win32: [[65, 90]],
     darwin: [[4, 29]],
@@ -25,12 +26,12 @@ const isRestrictedSingleCharacterKeybind = (buttons) => {
     if (deviceType !== 0) {
         return false;
     }
-    const scanCode = button[1];
+    const _scanCode = button[1];
     if (buttons.length === 1 && buttons[0].length === 2) {
         const deviceType = buttons[0][0];
         const scanCode = buttons[0][1];
         if (deviceType === 0) {
-            const restrictedRanges = RESTRICTED_SCAN_CODE_RANGES[window.DiscordNative.process.platform];
+            const restrictedRanges = RESTRICTED_SCAN_CODE_RANGES[discordNative.process.platform];
             for (const restrictedRange of restrictedRanges) {
                 if (scanCode >= restrictedRange[0] && scanCode <= restrictedRange[1]) {
                     return true;

@@ -2,8 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.inputCaptureSetWatcher = inputCaptureSetWatcher;
 exports.inputCaptureRegisterElement = inputCaptureRegisterElement;
+const discordNative = globalThis.window?.DiscordNative;
 const MOUSE_BUTTON_TYPE = 1;
-const LEFT_MOUSE_BUTTON_CODE = window.DiscordNative.process.platform === 'win32' ? 0 : 1;
+const LEFT_MOUSE_BUTTON_CODE = discordNative.process.platform === 'win32' ? 0 : 1;
 const SEQUENCE_CAPTURE_TIMEOUT = 5000;
 const MAX_SEQUENCE_LENGTH = 4;
 let inputWatchAll = null;
@@ -80,7 +81,7 @@ function inputCaptureRegisterElement(elementId, callback) {
         throw new Error('Input capturing is missing an input watcher');
     }
     const capturer = new InputCapturer(callback);
-    const registerUserInteractionHandler = window.DiscordNative.app.registerUserInteractionHandler;
+    const registerUserInteractionHandler = discordNative.app.registerUserInteractionHandler;
     const unregisterFunctions = [
         registerUserInteractionHandler(elementId, 'click', (_) => capturer.start()),
         registerUserInteractionHandler(elementId, 'focus', (_) => capturer.start()),
