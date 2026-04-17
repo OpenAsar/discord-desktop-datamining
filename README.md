@@ -21,7 +21,7 @@
 | overlay2 | 1 |
 | rpc | 2 |
 | spellcheck | 2 |
-| utils | 5 |
+| utils | 6 |
 | voice | 2 |
 | zstd | 2 |
 
