@@ -18,8 +18,8 @@ const UPDATE_ENDPOINT = settings?.get('UPDATE_ENDPOINT') || API_ENDPOINT;
 const NEW_UPDATE_ENDPOINT = settings?.get('NEW_UPDATE_ENDPOINT') || 'https://updates.discord.com/';
 const ALLOW_OPTIONAL_UPDATES = settings?.get('ALLOW_OPTIONAL_UPDATES', true);
 const LOG_LEVEL = settings?.get('LOG_LEVEL') || 'info';
-const USE_RUST_BSPATCH = settings?.get('USE_RUST_BSPATCH', false) || process.platform === 'darwin';
-const USE_NEW_UPDATER = settings?.get('USE_NEW_UPDATER', false) || process.platform === 'win32';
+const USE_RUST_BSPATCH = settings?.get('USE_RUST_BSPATCH', false) || process.platform === 'darwin' || process.platform === 'linux';
+const USE_NEW_UPDATER = settings?.get('USE_NEW_UPDATER', false) || process.platform === 'win32' || process.platform === 'linux';
 var IPCEvents;
 (function (IPCEvents) {
     IPCEvents["GET_BUILD_OVERRIDE_STATUS"] = "DISCORD_GET_BUILD_OVERRIDE_STATUS";
