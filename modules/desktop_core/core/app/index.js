@@ -10,7 +10,8 @@ var _electron = require("electron");
 let mainScreen;
 function startup(bootstrapModules) {
   performance.mark('coremodule-index-startup');
-  require('./bootstrapModules/bootstrapModules').init(bootstrapModules);
+  const bootstrapModulesModule = require('./bootstrapModules/bootstrapModules');
+  bootstrapModulesModule.init(bootstrapModules);
   require('./bootstrapModules/paths');
   require('./bootstrapModules/splashScreen');
   const {
@@ -60,10 +61,10 @@ function startup(bootstrapModules) {
   require('./discord_native/browser/userDataCache');
   const gpuSettings = require('./discord_native/browser/gpuSettings');
   gpuSettings.injectGpuSettingsBackend(GPUSettings);
-  require('./discord_native/browser/intents');
   const nativeModules = require('./discord_native/browser/nativeModules');
   nativeModules.injectModuleUpdater(moduleUpdater);
   nativeModules.injectUpdater(updater);
+  require('./discord_native/browser/intents');
   require('./discord_native/browser/notifications');
   require('./discord_native/browser/powerMonitor');
   require('./discord_native/browser/powerSaveBlocker');

@@ -1,11 +1,7 @@
 "use strict";
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
 var _electron = require("electron");
-var _default = exports.default = [{
+const menu = [{
   label: 'Discord',
   submenu: [{
     label: 'Quit',
@@ -13,4 +9,4 @@ var _default = exports.default = [{
     accelerator: 'Command+Q'
   }]
 }];
-module.exports = exports.default;
+module.exports = menu;

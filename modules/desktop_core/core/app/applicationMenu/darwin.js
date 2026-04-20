@@ -1,9 +1,5 @@
 "use strict";
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
 var _electron = require("electron");
 var _securityUtils = require("../../common/securityUtils");
 var _Constants = require("../Constants");
@@ -19,7 +15,7 @@ const developerMenuSection = [SEPARATOR, {
     role: 'toggleDevTools'
   }]
 }];
-var _default = enableDevtools => [{
+const createMenu = enableDevtools => [{
   role: 'appMenu',
   submenu: [{
     label: `About ${APP_NAME_FOR_HUMANS}`,
@@ -91,5 +87,4 @@ var _default = enableDevtools => [{
     click: () => _electron.app.emit(_Constants.MenuEvents.OPEN_HELP)
   }]
 }];
-exports.default = _default;
-module.exports = exports.default;
+module.exports = createMenu;

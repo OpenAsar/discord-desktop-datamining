@@ -4,13 +4,14 @@ var _path = _interopRequireDefault(require("path"));
 var _appFeatures = require("../../appFeatures");
 var _utils = require("../../utils");
 var _DiscordIPC = require("../common/DiscordIPC");
+var _nativeModules = require("./nativeModules");
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 if (_utils.isOSX) {
   try {
     if (moduleDataPath == null) {
       throw new Error('no moduleDataPath');
     }
-    const modulePath = _path.default.join(moduleDataPath, 'discord_intents');
+    const modulePath = (0, _nativeModules.getModulePath)('discord_intents') ?? _path.default.join(moduleDataPath, 'discord_intents');
     const lib = require(modulePath);
     lib.setDataPath(modulePath);
     _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.SEARCH_INDEX_DOMAINS, (_event, domains) => {

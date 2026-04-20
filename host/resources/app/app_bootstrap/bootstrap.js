@@ -180,7 +180,7 @@ if (process.platform === 'win32') {
     pendingAppQuit = true;
   }
 }
-let coreModule;
+let coreModule = null;
 const allowMultipleInstances = hasArgvFlag('--multi-instance');
 const isFirstInstance = allowMultipleInstances ? true : app.requestSingleInstanceLock();
 const exitImmediately = hasArgvFlag('--exit-immediately');
@@ -205,7 +205,7 @@ function extractUrlFromArgs(args) {
 }
 let initialUrl = extractUrlFromArgs(process.argv);
 function openOrQueueUrl(url) {
-  if (coreModule) {
+  if (coreModule != null) {
     coreModule.handleOpenUrl(url);
   } else {
     initialUrl = url;
@@ -220,10 +220,10 @@ if (!allowMultipleInstances) {
     const url = extractUrlFromArgs(args);
     if (url != null) {
       openOrQueueUrl(url);
-    } else if (coreModule) {
+    } else if (coreModule != null) {
       coreModule.handleOpenUrl(url);
     }
-    if (!coreModule) {
+    if (coreModule == null) {
       const appUpdater = require('./appUpdater');
       appUpdater.focusSplash();
     }
@@ -268,12 +268,13 @@ function startUpdate() {
       const GPUSettings = require('./GPUSettings');
       const autoStart = require('./autoStart');
       const logger = require('./logger');
-      const moduleUpdater = require('../common/moduleUpdater');
+      const moduleUpdater = require('./moduleUpdater');
       const requireNative = require('./requireNative');
       const splashScreen = require('./splashScreen');
       const updater = require('../common/updater');
-      coreModule = requireNative('discord_desktop_core');
-      coreModule.startup({
+      const core = requireNative('discord_desktop_core');
+      coreModule = core;
+      core.startup({
         Constants,
         GPUSettings,
         analytics,
@@ -289,7 +290,7 @@ function startUpdate() {
       });
       performance.measure('bootstrap-coremodule-startup-duration', 'bootstrap-coremodule-startup');
       if (initialUrl != null) {
-        coreModule.handleOpenUrl(initialUrl);
+        core.handleOpenUrl(initialUrl);
         initialUrl = null;
       }
     } catch (err) {

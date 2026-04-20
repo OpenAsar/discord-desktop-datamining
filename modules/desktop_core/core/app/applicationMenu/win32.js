@@ -1,9 +1,5 @@
 "use strict";
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
 var _electron = require("electron");
 var _Constants = require("../Constants");
 const SEPARATOR = {
@@ -59,5 +55,4 @@ const buildMenu = enableDevtools => [{
     click: () => _electron.app.emit(_Constants.MenuEvents.OPEN_HELP)
   }]
 }];
-var _default = exports.default = buildMenu;
-module.exports = exports.default;
+module.exports = buildMenu;
