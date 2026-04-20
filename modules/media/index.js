@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const native = require('./discord_media.node');
-const isFileManagerAvailable = window?.DiscordNative?.fileManager;
-const isLogDirAvailable = isFileManagerAvailable?.getAndCreateLogDirectorySync;
+const discordNative = globalThis.window?.DiscordNative;
+const isLogDirAvailable = discordNative?.fileManager?.getAndCreateLogDirectorySync;
 let initializeArgs = {};
 let nativeData = {
     nativeReleaseChannel: 'unknown',
@@ -10,13 +10,13 @@ let nativeData = {
     nativeBuildNumber: 0,
     nativeAppArch: 'unknown',
 };
-if (isLogDirAvailable) {
-    const logDirectory = window.DiscordNative.fileManager.getAndCreateLogDirectorySync();
-    const logLevel = window.DiscordNative.fileManager.logLevelSync();
-    const nativeReleaseChannel = window?.DiscordNative?.app.getReleaseChannel?.();
-    const nativeVersion = window?.DiscordNative?.app.getVersion?.();
-    const nativeBuildNumber = window?.DiscordNative?.app.getBuildNumber?.();
-    const nativeAppArch = window?.DiscordNative?.app.getAppArch?.();
+if (isLogDirAvailable != null) {
+    const logDirectory = discordNative.fileManager.getAndCreateLogDirectorySync();
+    const logLevel = discordNative.fileManager.logLevelSync();
+    const nativeReleaseChannel = discordNative?.app.getReleaseChannel?.();
+    const nativeVersion = discordNative?.app.getVersion?.();
+    const nativeBuildNumber = discordNative?.app.getBuildNumber?.();
+    const nativeAppArch = discordNative?.app.getAppArch?.();
     initializeArgs = {
         logDirectory: logDirectory,
         logLevel: logLevel,

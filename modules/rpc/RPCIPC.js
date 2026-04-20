@@ -5,13 +5,13 @@ const fs = require('fs');
 const net = require('net');
 const { createSafeEmitter } = require('./safeEmitter');
 const IS_WINDOWS = process.platform === 'win32';
-let SOCKET_PATH;
+let socketBasePath;
 if (IS_WINDOWS) {
-    SOCKET_PATH = '\\\\?\\pipe\\discord-ipc';
+    socketBasePath = '\\\\?\\pipe\\discord-ipc';
 }
 else {
     const temp = process.env.XDG_RUNTIME_DIR || process.env.TMPDIR || process.env.TMP || process.env.TEMP || '/tmp';
-    SOCKET_PATH = path.join(temp, 'discord-ipc');
+    socketBasePath = path.join(temp, 'discord-ipc');
 }
 function toArrayBuffer(buffer) {
     return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
@@ -20,7 +20,7 @@ function getAvailableSocket(testSocketPathFn, tries = 0, lastErr) {
     if (tries > 9) {
         return Promise.reject(new Error(`Max tries exceeded, last error: ${lastErr}`));
     }
-    const socketPath = `${SOCKET_PATH}-${tries}`;
+    const socketPath = `${socketBasePath}-${tries}`;
     const socket = recastNetSocket(net.createConnection(socketPath));
     return testSocketPathFn(socket).then(() => {
         if (!IS_WINDOWS) {
