@@ -881,7 +881,7 @@ function setupUpdaterEventsWithUpdater(updater) {
         saveWindowConfig(mainWindow);
         mainWindow = null;
         try {
-            moduleUpdater_1.moduleUpdater.quitAndInstallUpdates();
+            updater.quitAndInstallUpdates();
         }
         catch (e) {
             electron_1.app.relaunch();

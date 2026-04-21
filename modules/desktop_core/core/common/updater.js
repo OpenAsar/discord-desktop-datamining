@@ -278,61 +278,66 @@ class Updater extends events_1.EventEmitter {
     _updateMacOSHostVersion(hostExePath) {
         this._handleSyncResponse(this._sendRequestSync({ UpdateMacOSHostVersion: { host_exe_path: hostExePath } }));
     }
+    _hostUpdateNeeded(platform, hostExePath, hostVersion, options) {
+        if (platform === 'osx') {
+            return currentVersion !== hostVersion.join('.') && !options?.allowObsoleteHost;
+        }
+        else {
+            return path_1.default.resolve(hostExePath) !== path_1.default.resolve(process_1.default.execPath) && !options?.allowObsoleteHost;
+        }
+    }
+    _relaunchToNewHost(platform, hostExePath) {
+        console.log('Relaunching to new host', platform, hostExePath);
+        if (platform === 'osx') {
+            this._updateMacOSHostVersion(hostExePath);
+            console.log(`Started hosted updater from ${path_1.default.resolve(process_1.default.execPath)} to ${this.committedHostVersion.join('.')}`);
+        }
+        else {
+            electron_1.app.once('will-quit', () => {
+                child_process_1.default.spawn(hostExePath, [], { detached: true, stdio: 'inherit' });
+            });
+            console.log(`Will Restart from ${path_1.default.resolve(process_1.default.execPath)} to ${path_1.default.resolve(hostExePath)}`);
+        }
+        try {
+            const paths = require('./paths');
+            const userDataPath = paths.getUserData();
+            if (userDataPath !== null) {
+                const eventCachePath = path_1.default.join(userDataPath, EVENT_CACHE_FILENAME);
+                const updaterEvents = this.queryAndTruncateHistory();
+                if (updaterEvents.length > 0) {
+                    fs_1.default.writeFile(eventCachePath, JSON.stringify(updaterEvents), (e) => {
+                        if (e != null) {
+                            console.warn('splashScreen: Failed writing updaterEvents with error: ', e);
+                        }
+                    });
+                }
+            }
+            else {
+                console.error(`Error caching updater events: could not build userDataPath`);
+            }
+        }
+        catch (e) {
+            console.error(`Error caching updater events: ${e}`);
+        }
+        const desktopTTI = analytics.getDesktopTTI();
+        desktopTTI.trackSplashWindowRestart();
+        if (platform === 'osx') {
+            console.log(`Quitting for update from ${path_1.default.resolve(process_1.default.execPath)} to ${path_1.default.resolve(hostExePath)}`);
+        }
+        else {
+            console.log(`Restarting from ${path_1.default.resolve(process_1.default.execPath)} after updating host to ${this.committedHostVersion.join('.')}`);
+        }
+        electron_1.app.quit();
+        this.emit('starting-new-host');
+    }
     _startCurrentVersionInner(options, versions) {
         if (this.committedHostVersion == null) {
             this.committedHostVersion = versions.current_host;
         }
         const platform = getUpdaterPlatformName(process_1.default.platform);
         const hostExePath = this._getHostExePath(platform);
-        let hostUpdateNeeded = false;
-        if (platform === 'osx') {
-            hostUpdateNeeded = currentVersion !== this.committedHostVersion.join('.') && !options?.allowObsoleteHost;
-        }
-        else {
-            hostUpdateNeeded = path_1.default.resolve(hostExePath) !== path_1.default.resolve(process_1.default.execPath) && !options?.allowObsoleteHost;
-        }
-        if (hostUpdateNeeded) {
-            if (platform === 'osx') {
-                this._updateMacOSHostVersion(hostExePath);
-                console.log(`Started hosted updater from ${path_1.default.resolve(process_1.default.execPath)} to ${this.committedHostVersion.join('.')}`);
-            }
-            else {
-                electron_1.app.once('will-quit', () => {
-                    child_process_1.default.spawn(hostExePath, [], { detached: true, stdio: 'inherit' });
-                });
-                console.log(`Will Restart from ${path_1.default.resolve(process_1.default.execPath)} to ${path_1.default.resolve(hostExePath)}`);
-            }
-            try {
-                const paths = require('./paths');
-                const userDataPath = paths.getUserData();
-                if (userDataPath !== null) {
-                    const eventCachePath = path_1.default.join(userDataPath, EVENT_CACHE_FILENAME);
-                    const updaterEvents = this.queryAndTruncateHistory();
-                    if (updaterEvents.length > 0) {
-                        fs_1.default.writeFile(eventCachePath, JSON.stringify(updaterEvents), (e) => {
-                            if (e != null) {
-                                console.warn('splashScreen: Failed writing updaterEvents with error: ', e);
-                            }
-                        });
-                    }
-                }
-                else {
-                    console.error(`Error caching updater events: could not build userDataPath`);
-                }
-            }
-            catch (e) {
-                console.error(`Error caching updater events: ${e}`);
-            }
-            const desktopTTI = analytics.getDesktopTTI();
-            desktopTTI.trackSplashWindowRestart();
-            if (platform === 'osx') {
-                console.log(`Quitting for update from ${path_1.default.resolve(process_1.default.execPath)} to ${path_1.default.resolve(hostExePath)}`);
-            }
-            else {
-                console.log(`Restarting from ${path_1.default.resolve(process_1.default.execPath)} after updating host to ${this.committedHostVersion.join('.')}`);
-            }
-            electron_1.app.quit();
-            this.emit('starting-new-host');
+        if (this._hostUpdateNeeded(platform, hostExePath, this.committedHostVersion, options)) {
+            this._relaunchToNewHost(platform, hostExePath);
             return;
         }
         this._commitModulesInner(versions);
@@ -458,6 +463,19 @@ class Updater extends events_1.EventEmitter {
     startCurrentVersionSync(options) {
         const versions = this.queryCurrentVersionsSync();
         this._startCurrentVersionInner(options, versions);
+    }
+    quitAndInstallUpdates() {
+        const platform = getUpdaterPlatformName(process_1.default.platform);
+        const hostExePath = this._getHostExePath(platform);
+        const versions = this.queryCurrentVersionsSync();
+        if (this._hostUpdateNeeded(platform, hostExePath, versions.current_host, {})) {
+            this._relaunchToNewHost(platform, hostExePath);
+        }
+        else {
+            console.log(`Quitting for module updates`);
+            electron_1.app.relaunch();
+            electron_1.app.quit();
+        }
     }
     async commitModules(queryOptions, versions) {
         if (this.committedHostVersion == null) {
