@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.cleanOldVersions = cleanOldVersions;
 exports.init = init;
+exports.updatePathsForNewUpdater = updatePathsForNewUpdater;
 exports.getUserData = getUserData;
 exports.getUserDataVersioned = getUserDataVersioned;
 exports.getResources = getResources;
@@ -64,18 +65,11 @@ function cleanOldVersions(buildInfo) {
         }
     });
 }
-function init(buildInfo) {
-    resourcesPath = path_1.default.join(require.main.filename, '..', '..', '..');
-    const userDataRoot = determineAppUserDataRoot();
-    userDataPath = determineUserData(userDataRoot, buildInfo);
-    const { app } = require('electron');
-    app.setPath('userData', userDataPath);
-    userDataVersionedPath = path_1.default.join(userDataPath, buildInfo.version);
-    fs_1.default.mkdirSync(userDataVersionedPath, { recursive: true });
+function determineModuleDataPath(userDataPath, resourcesPath, userDataVersionedPath, buildInfo, useNewUpdater) {
     if (buildInfo.localModulesRoot != null) {
         moduleDataPath = buildInfo.localModulesRoot;
     }
-    else if (buildInfo.newUpdater) {
+    else if (useNewUpdater ?? buildInfo.newUpdater) {
         moduleDataPath = path_1.default.join(userDataPath, 'module_data');
     }
     else if (buildInfo.standaloneModules) {
@@ -84,6 +78,16 @@ function init(buildInfo) {
     else {
         moduleDataPath = path_1.default.join(userDataVersionedPath, 'modules');
     }
+}
+function init(buildInfo) {
+    resourcesPath = path_1.default.join(require.main.filename, '..', '..', '..');
+    const userDataRoot = determineAppUserDataRoot();
+    userDataPath = determineUserData(userDataRoot, buildInfo);
+    const { app } = require('electron');
+    app.setPath('userData', userDataPath);
+    userDataVersionedPath = path_1.default.join(userDataPath, buildInfo.version);
+    fs_1.default.mkdirSync(userDataVersionedPath, { recursive: true });
+    determineModuleDataPath(userDataPath, resourcesPath, userDataVersionedPath, buildInfo, null);
     assetCachePath = path_1.default.join(userDataPath, 'discord_asset_cache');
     logPath = path_1.default.join(userDataPath, 'logs');
     fs_1.default.mkdirSync(logPath, { recursive: true });
@@ -101,6 +105,9 @@ function init(buildInfo) {
     else {
         rootPath = installPath;
     }
+}
+function updatePathsForNewUpdater(buildInfo, newUpdater) {
+    determineModuleDataPath(userDataPath, resourcesPath, userDataVersionedPath, buildInfo, newUpdater);
 }
 function getUserData() {
     return userDataPath;

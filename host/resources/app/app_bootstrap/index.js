@@ -18,6 +18,7 @@ else if (mode === 'overlay-host') {
     const appSettings = require('./appSettings');
     appSettings.init();
     const { NEW_UPDATE_ENDPOINT, USE_RUST_BSPATCH, USE_NEW_UPDATER } = require('./Constants');
+    paths.updatePathsForNewUpdater(buildInfo, USE_NEW_UPDATER);
     const isStandaloneModules = buildInfo.releaseChannel === 'development' && buildInfo.standaloneModules;
     if (USE_NEW_UPDATER && !buildInfo.debug && !isStandaloneModules && buildInfo.newUpdater) {
         const { getUpdater, tryInitUpdater } = require('../common/updater');

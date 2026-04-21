@@ -21,6 +21,10 @@ const errorHandler = require('./errorHandler');
 errorHandler.init();
 const paths = require('../common/paths');
 paths.init(buildInfo);
+const appSettings = require('./appSettings');
+appSettings.init();
+const Constants = require('./Constants');
+paths.updatePathsForNewUpdater(buildInfo, Constants.USE_NEW_UPDATER);
 const blackbox = require('../common/blackbox');
 const moduleDataPath = paths.getModuleDataPath();
 if (moduleDataPath != null) {
@@ -38,9 +42,6 @@ crashReporterSetup.init(buildInfo, sentryConfig);
 global.moduleDataPath = paths.getModuleDataPath() ?? undefined;
 global.logPath = paths.getLogPath() ?? undefined;
 global.assetCachePath = paths.getAssetCachePath() ?? undefined;
-const appSettings = require('./appSettings');
-appSettings.init();
-const Constants = require('./Constants');
 function setupHardwareAcceleration() {
     if (process.platform === 'darwin') {
         return;
