@@ -13,7 +13,7 @@
 | erlpack | 1 |
 | game_utils | 1 |
 | hook | 1 |
-| krisp | 1 |
+| krisp | 2 |
 | media | 1 |
 | ml | 1 |
 | modules | 1 |
