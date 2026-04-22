@@ -72,7 +72,7 @@ function createRenderer(pid, url) {
                 offscreen: true,
                 nodeIntegration: false,
                 sandbox: false,
-                preload: require.resolve('discord_desktop_core/core.asar/app/mainScreenPreload.js'),
+                preload: require.resolve('./overlayPreload'),
                 enableRemoteModule: false,
                 contextIsolation: true,
             },
