@@ -278,9 +278,9 @@ class Updater extends events_1.EventEmitter {
     _updateMacOSHostVersion(hostExePath) {
         this._handleSyncResponse(this._sendRequestSync({ UpdateMacOSHostVersion: { host_exe_path: hostExePath } }));
     }
-    _hostUpdateNeeded(platform, hostExePath, hostVersion, options) {
+    _hostUpdateNeeded(platform, hostExePath, options) {
         if (platform === 'osx') {
-            return currentVersion !== hostVersion.join('.') && !options?.allowObsoleteHost;
+            return currentVersion !== this.committedHostVersion.join('.') && !options?.allowObsoleteHost;
         }
         else {
             return path_1.default.resolve(hostExePath) !== path_1.default.resolve(process_1.default.execPath) && !options?.allowObsoleteHost;
@@ -336,7 +336,7 @@ class Updater extends events_1.EventEmitter {
         }
         const platform = getUpdaterPlatformName(process_1.default.platform);
         const hostExePath = this._getHostExePath(platform);
-        if (this._hostUpdateNeeded(platform, hostExePath, this.committedHostVersion, options)) {
+        if (this._hostUpdateNeeded(platform, hostExePath, options)) {
             this._relaunchToNewHost(platform, hostExePath);
             return;
         }
@@ -465,10 +465,10 @@ class Updater extends events_1.EventEmitter {
         this._startCurrentVersionInner(options, versions);
     }
     quitAndInstallUpdates() {
+        this.committedHostVersion = this.queryCurrentVersionsSync().current_host;
         const platform = getUpdaterPlatformName(process_1.default.platform);
         const hostExePath = this._getHostExePath(platform);
-        const versions = this.queryCurrentVersionsSync();
-        if (this._hostUpdateNeeded(platform, hostExePath, versions.current_host, {})) {
+        if (this._hostUpdateNeeded(platform, hostExePath, {})) {
             this._relaunchToNewHost(platform, hostExePath);
         }
         else {
