@@ -1,34 +1,30 @@
+"use strict";
 const KrispModule = require('./discord_krisp.node');
-
-const isLogDirAvailable = globalThis.window?.DiscordNative?.fileManager?.getAndCreateLogDirectorySync;
+const discordNative = globalThis.window?.DiscordNative;
+const isLogDirAvailable = discordNative?.fileManager?.getAndCreateLogDirectorySync;
 let initializationParams;
-if (isLogDirAvailable) {
-  const logDirectory = window.DiscordNative.fileManager.getAndCreateLogDirectorySync(window);
-  const logLevel = window.DiscordNative.fileManager.logLevelSync(window);
-  initializationParams = {logDirectory, logLevel};
-} else {
-  // eslint-disable-next-line no-console
-  console.warn('Unable to find log directory');
+if (isLogDirAvailable != null) {
+    const logDirectory = discordNative.fileManager.getAndCreateLogDirectorySync() ?? undefined;
+    const logLevel = discordNative.fileManager.logLevelSync();
+    initializationParams = { logDirectory, logLevel };
 }
-
+else {
+    console.warn('Unable to find log directory');
+}
 KrispModule._initialize(initializationParams);
-
 KrispModule.getNcModels = function () {
-  return new Promise((resolve) => {
-    KrispModule._getNcModels((models) => resolve(models));
-  });
+    return new Promise((resolve) => {
+        KrispModule._getNcModels((models) => resolve(models));
+    });
 };
-
 KrispModule.getVadModels = function () {
-  return new Promise((resolve) => {
-    KrispModule._getVadModels((models) => resolve(models));
-  });
+    return new Promise((resolve) => {
+        KrispModule._getVadModels((models) => resolve(models));
+    });
 };
-
 KrispModule.getNcModelFilename = function () {
-  return new Promise((resolve) => {
-    KrispModule._getNcModelFilename((model) => resolve(model));
-  });
+    return new Promise((resolve) => {
+        KrispModule._getNcModelFilename((model) => resolve(model));
+    });
 };
-
 module.exports = KrispModule;

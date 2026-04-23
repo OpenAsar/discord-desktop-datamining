@@ -1,166 +1,158 @@
 "use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.disablePAMemoryProfiler = disablePAMemoryProfiler;
-exports.disableProfilingV8Heap = disableProfilingV8Heap;
-exports.enablePAMemoryProfiler = enablePAMemoryProfiler;
-exports.enableProfilingV8Heap = enableProfilingV8Heap;
-exports.flushCookies = flushCookies;
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.flushDNSCache = flushDNSCache;
-exports.flushStorageData = flushStorageData;
-exports.getBlinkMemoryInfo = getBlinkMemoryInfo;
-exports.getCPUCoreCount = getCPUCoreCount;
-exports.getCumulativeCPUUsage = getCumulativeCPUUsage;
-exports.getCurrentCPUUsagePercent = getCurrentCPUUsagePercent;
-exports.getGpuProcessId = getGpuProcessId;
-exports.getHeapStats = getHeapStats;
 exports.getLastCrash = getLastCrash;
+exports.flushCookies = flushCookies;
+exports.getSystemInfo = getSystemInfo;
+exports.flushStorageData = flushStorageData;
+exports.purgeMemory = purgeMemory;
+exports.getProcessUptime = getProcessUptime;
+exports.getCurrentCPUUsagePercent = getCurrentCPUUsagePercent;
+exports.getCumulativeCPUUsage = getCumulativeCPUUsage;
+exports.getCPUCoreCount = getCPUCoreCount;
 exports.getMainArgvSync = getMainArgvSync;
+exports.getUsedHeapSize = getUsedHeapSize;
+exports.getHeapStats = getHeapStats;
+exports.getBlinkMemoryInfo = getBlinkMemoryInfo;
 exports.getPartitionAllocatorStats = getPartitionAllocatorStats;
+exports.enablePAMemoryProfiler = enablePAMemoryProfiler;
+exports.disablePAMemoryProfiler = disablePAMemoryProfiler;
 exports.getPerfAttributedPAMemory = getPerfAttributedPAMemory;
 exports.getPerfAttributedPAMemoryCallstacks = getPerfAttributedPAMemoryCallstacks;
-exports.getProcessUptime = getProcessUptime;
+exports.enableProfilingV8Heap = enableProfilingV8Heap;
+exports.disableProfilingV8Heap = disableProfilingV8Heap;
 exports.getProfilerV8MemoryCallstacks = getProfilerV8MemoryCallstacks;
-exports.getSystemInfo = getSystemInfo;
-exports.getSystemMetrics = getSystemMetrics;
-exports.getUsedHeapSize = getUsedHeapSize;
-exports.purgeMemory = purgeMemory;
 exports.setCrashInformation = setCrashInformation;
-exports.setCrashReason = setCrashReason;
 exports.setMemoryInformation = setMemoryInformation;
-var _electron = _interopRequireDefault(require("electron"));
-var _os = _interopRequireDefault(require("os"));
-var _process = _interopRequireDefault(require("process"));
-var _DiscordIPC = require("../common/DiscordIPC");
-var _minidumpReader = require("./minidumpReader");
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+exports.setCrashReason = setCrashReason;
+exports.getGpuProcessId = getGpuProcessId;
+exports.getSystemMetrics = getSystemMetrics;
+const electron_1 = __importDefault(require("electron"));
+const os_1 = __importDefault(require("os"));
+const process_1 = __importDefault(require("process"));
+const DiscordIPC_1 = require("../common/DiscordIPC");
+const minidumpReader_1 = require("./minidumpReader");
 const CPU_USAGE_GATHER_INTERVAL = 1000;
-const mainArgv = _DiscordIPC.DiscordIPC.renderer.sendSync(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_MAIN_ARGV_SYNC);
+const mainArgv = DiscordIPC_1.DiscordIPC.renderer.sendSync(DiscordIPC_1.IPCEvents.PROCESS_UTILS_GET_MAIN_ARGV_SYNC);
 let totalProcessorUsagePercent = 0;
 let cumulativeCpuUsage;
-const cpuCoreCount = _os.default.cpus().length;
+const cpuCoreCount = os_1.default.cpus().length;
 setInterval(() => {
-  void _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_CPU_USAGE).then(usage => {
-    ({
-      totalProcessorUsagePercent
-    } = usage);
-    if (usage.totalCumulativeUsage != null) cumulativeCpuUsage = usage.totalCumulativeUsage;
-  });
+    void DiscordIPC_1.DiscordIPC.renderer.invoke(DiscordIPC_1.IPCEvents.PROCESS_UTILS_GET_CPU_USAGE).then((usage) => {
+        ({ totalProcessorUsagePercent } = usage);
+        if (usage.totalCumulativeUsage != null)
+            cumulativeCpuUsage = usage.totalCumulativeUsage;
+    });
 }, CPU_USAGE_GATHER_INTERVAL);
 function flushDNSCache() {
-  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_FLUSH_DNS_CACHE);
+    return DiscordIPC_1.DiscordIPC.renderer.invoke(DiscordIPC_1.IPCEvents.PROCESS_UTILS_FLUSH_DNS_CACHE);
 }
 async function getLastCrash() {
-  const lastCrash = await _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_LAST_CRASH);
-  const minidumpInformation = (lastCrash === null || lastCrash === void 0 ? void 0 : lastCrash.pendingMinidumpPath) != null ? await (0, _minidumpReader.getNewestMinidumpInformation)(lastCrash.pendingMinidumpPath) : null;
-  return {
-    date: lastCrash.date,
-    id: lastCrash.id,
-    rendererCrashReason: lastCrash.rendererCrashReason,
-    rendererCrashExitCode: lastCrash.rendererCrashExitCode,
-    minidumpInformation,
-    storedInformation: lastCrash.storedInformation,
-    lastMemoryInformation: lastCrash.lastMemoryInformation,
-    highestMemoryInformation: lastCrash.highestMemoryInformation
-  };
+    const lastCrash = await DiscordIPC_1.DiscordIPC.renderer.invoke(DiscordIPC_1.IPCEvents.PROCESS_UTILS_GET_LAST_CRASH);
+    const minidumpInformation = lastCrash?.pendingMinidumpPath != null ? await (0, minidumpReader_1.getNewestMinidumpInformation)(lastCrash.pendingMinidumpPath) : null;
+    return {
+        date: lastCrash.date,
+        id: lastCrash.id,
+        rendererCrashReason: lastCrash.rendererCrashReason,
+        rendererCrashExitCode: lastCrash.rendererCrashExitCode,
+        minidumpInformation,
+        storedInformation: lastCrash.storedInformation,
+        lastMemoryInformation: lastCrash.lastMemoryInformation,
+        highestMemoryInformation: lastCrash.highestMemoryInformation,
+    };
 }
 async function flushCookies(callback) {
-  try {
-    await _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_FLUSH_COOKIES);
-    callback();
-  } catch (err) {
-    callback(err);
-  }
+    try {
+        await DiscordIPC_1.DiscordIPC.renderer.invoke(DiscordIPC_1.IPCEvents.PROCESS_UTILS_FLUSH_COOKIES);
+        callback();
+    }
+    catch (err) {
+        callback(err);
+    }
 }
 function getSystemInfo() {
-  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_SYSTEM_INFO);
+    return DiscordIPC_1.DiscordIPC.renderer.invoke(DiscordIPC_1.IPCEvents.PROCESS_UTILS_GET_SYSTEM_INFO);
 }
 async function flushStorageData(callback) {
-  try {
-    await _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_FLUSH_STORAGE_DATA);
-    callback();
-  } catch (err) {
-    callback(err);
-  }
+    try {
+        await DiscordIPC_1.DiscordIPC.renderer.invoke(DiscordIPC_1.IPCEvents.PROCESS_UTILS_FLUSH_STORAGE_DATA);
+        callback();
+    }
+    catch (err) {
+        callback(err);
+    }
 }
 function purgeMemory() {
-  _electron.default.webFrame.clearCache();
+    electron_1.default.webFrame.clearCache();
 }
 function getProcessUptime() {
-  return _process.default.uptime();
+    return process_1.default.uptime();
 }
 function getCurrentCPUUsagePercent() {
-  return totalProcessorUsagePercent;
+    return totalProcessorUsagePercent;
 }
 function getCumulativeCPUUsage() {
-  return cumulativeCpuUsage;
+    return cumulativeCpuUsage;
 }
 function getCPUCoreCount() {
-  return cpuCoreCount;
+    return cpuCoreCount;
 }
 function getMainArgvSync() {
-  return mainArgv;
+    return mainArgv;
 }
 function getUsedHeapSize() {
-  const heapStats = _process.default.getHeapStatistics();
-  return heapStats.usedHeapSize;
+    const heapStats = process_1.default.getHeapStatistics();
+    return heapStats.usedHeapSize;
 }
 function getHeapStats() {
-  return _process.default.getHeapStatistics();
+    return process_1.default.getHeapStatistics();
 }
 function getBlinkMemoryInfo() {
-  return _process.default.getBlinkMemoryInfo();
+    return process_1.default.getBlinkMemoryInfo();
 }
 function getPartitionAllocatorStats() {
-  var _ref, _ref$discordMemoryPro, _ref$discordMemoryPro2;
-  return (_ref = _electron.default) === null || _ref === void 0 ? void 0 : (_ref$discordMemoryPro = _ref.discordMemoryProfiler) === null || _ref$discordMemoryPro === void 0 ? void 0 : (_ref$discordMemoryPro2 = _ref$discordMemoryPro.getPartitionAllocatorStats) === null || _ref$discordMemoryPro2 === void 0 ? void 0 : _ref$discordMemoryPro2.call(_ref$discordMemoryPro);
+    return electron_1.default?.discordMemoryProfiler?.getPartitionAllocatorStats?.();
 }
 function enablePAMemoryProfiler(config) {
-  var _ref2, _ref2$discordMemoryPr, _ref2$discordMemoryPr2;
-  (_ref2 = _electron.default) === null || _ref2 === void 0 ? void 0 : (_ref2$discordMemoryPr = _ref2.discordMemoryProfiler) === null || _ref2$discordMemoryPr === void 0 ? void 0 : (_ref2$discordMemoryPr2 = _ref2$discordMemoryPr.enableProfiling) === null || _ref2$discordMemoryPr2 === void 0 ? void 0 : _ref2$discordMemoryPr2.call(_ref2$discordMemoryPr, config);
+    electron_1.default?.discordMemoryProfiler?.enableProfiling?.(config);
 }
 function disablePAMemoryProfiler() {
-  var _ref3, _ref3$discordMemoryPr, _ref3$discordMemoryPr2;
-  (_ref3 = _electron.default) === null || _ref3 === void 0 ? void 0 : (_ref3$discordMemoryPr = _ref3.discordMemoryProfiler) === null || _ref3$discordMemoryPr === void 0 ? void 0 : (_ref3$discordMemoryPr2 = _ref3$discordMemoryPr.disableProfiling) === null || _ref3$discordMemoryPr2 === void 0 ? void 0 : _ref3$discordMemoryPr2.call(_ref3$discordMemoryPr);
+    electron_1.default?.discordMemoryProfiler?.disableProfiling?.();
 }
 function getPerfAttributedPAMemory() {
-  var _ref4, _ref4$discordMemoryPr, _ref4$discordMemoryPr2;
-  return (_ref4 = _electron.default) === null || _ref4 === void 0 ? void 0 : (_ref4$discordMemoryPr = _ref4.discordMemoryProfiler) === null || _ref4$discordMemoryPr === void 0 ? void 0 : (_ref4$discordMemoryPr2 = _ref4$discordMemoryPr.getTypeNameMemoryAllocated) === null || _ref4$discordMemoryPr2 === void 0 ? void 0 : _ref4$discordMemoryPr2.call(_ref4$discordMemoryPr);
+    return electron_1.default?.discordMemoryProfiler?.getTypeNameMemoryAllocated?.();
 }
 function getPerfAttributedPAMemoryCallstacks(options) {
-  var _ref5, _ref5$discordMemoryPr, _ref5$discordMemoryPr2;
-  return (_ref5 = _electron.default) === null || _ref5 === void 0 ? void 0 : (_ref5$discordMemoryPr = _ref5.discordMemoryProfiler) === null || _ref5$discordMemoryPr === void 0 ? void 0 : (_ref5$discordMemoryPr2 = _ref5$discordMemoryPr.getTypeNameMemoryCallstacks) === null || _ref5$discordMemoryPr2 === void 0 ? void 0 : _ref5$discordMemoryPr2.call(_ref5$discordMemoryPr, options);
+    return electron_1.default?.discordMemoryProfiler?.getTypeNameMemoryCallstacks?.(options);
 }
 function enableProfilingV8Heap(options) {
-  var _ref6, _ref6$discordMemoryPr, _ref6$discordMemoryPr2;
-  return (_ref6 = _electron.default) === null || _ref6 === void 0 ? void 0 : (_ref6$discordMemoryPr = _ref6.discordMemoryProfiler) === null || _ref6$discordMemoryPr === void 0 ? void 0 : (_ref6$discordMemoryPr2 = _ref6$discordMemoryPr.enableProfilingV8Heap) === null || _ref6$discordMemoryPr2 === void 0 ? void 0 : _ref6$discordMemoryPr2.call(_ref6$discordMemoryPr, options);
+    return electron_1.default?.discordMemoryProfiler?.enableProfilingV8Heap?.(options);
 }
 function disableProfilingV8Heap() {
-  var _ref7, _ref7$discordMemoryPr, _ref7$discordMemoryPr2;
-  return (_ref7 = _electron.default) === null || _ref7 === void 0 ? void 0 : (_ref7$discordMemoryPr = _ref7.discordMemoryProfiler) === null || _ref7$discordMemoryPr === void 0 ? void 0 : (_ref7$discordMemoryPr2 = _ref7$discordMemoryPr.disableProfilingV8Heap) === null || _ref7$discordMemoryPr2 === void 0 ? void 0 : _ref7$discordMemoryPr2.call(_ref7$discordMemoryPr);
+    return electron_1.default?.discordMemoryProfiler?.disableProfilingV8Heap?.();
 }
 function getProfilerV8MemoryCallstacks() {
-  var _ref8, _ref8$discordMemoryPr, _ref8$discordMemoryPr2;
-  return (_ref8 = _electron.default) === null || _ref8 === void 0 ? void 0 : (_ref8$discordMemoryPr = _ref8.discordMemoryProfiler) === null || _ref8$discordMemoryPr === void 0 ? void 0 : (_ref8$discordMemoryPr2 = _ref8$discordMemoryPr.getProfilerV8MemoryCallstacks) === null || _ref8$discordMemoryPr2 === void 0 ? void 0 : _ref8$discordMemoryPr2.call(_ref8$discordMemoryPr);
+    return electron_1.default?.discordMemoryProfiler?.getProfilerV8MemoryCallstacks?.();
 }
 function setCrashInformation(crashInformation, state) {
-  void _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_SET_CRASH_INFORMATION, crashInformation, state);
+    void DiscordIPC_1.DiscordIPC.renderer.invoke(DiscordIPC_1.IPCEvents.PROCESS_UTILS_SET_CRASH_INFORMATION, crashInformation, state);
 }
 function setMemoryInformation(memoryInformation) {
-  void _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_SET_MEMORY_INFORMATION, {
-    uptimeSeconds: Math.floor(_process.default.uptime()),
-    memoryUsageKB: memoryInformation.memoryUsageKB,
-    usedJSHeapSizeKB: memoryInformation.usedJSHeapSizeKB
-  });
+    void DiscordIPC_1.DiscordIPC.renderer.invoke(DiscordIPC_1.IPCEvents.PROCESS_UTILS_SET_MEMORY_INFORMATION, {
+        uptimeSeconds: Math.floor(process_1.default.uptime()),
+        memoryUsageKB: memoryInformation.memoryUsageKB,
+        usedJSHeapSizeKB: memoryInformation.usedJSHeapSizeKB,
+    });
 }
 function setCrashReason(reason) {
-  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_SET_CRASH_REASON, reason);
+    return DiscordIPC_1.DiscordIPC.renderer.invoke(DiscordIPC_1.IPCEvents.PROCESS_UTILS_SET_CRASH_REASON, reason);
 }
 function getGpuProcessId() {
-  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_GPU_PROCESS_ID);
+    return DiscordIPC_1.DiscordIPC.renderer.invoke(DiscordIPC_1.IPCEvents.PROCESS_UTILS_GET_GPU_PROCESS_ID);
 }
 function getSystemMetrics() {
-  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.PROCESS_UTILS_GET_SYSTEM_METRICS);
+    return DiscordIPC_1.DiscordIPC.renderer.invoke(DiscordIPC_1.IPCEvents.PROCESS_UTILS_GET_SYSTEM_METRICS);
 }

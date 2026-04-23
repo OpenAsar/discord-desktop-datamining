@@ -1,16 +1,15 @@
 "use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.getFeatures = getFeatures;
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.init = init;
-var _FeatureFlags = _interopRequireDefault(require("../common/FeatureFlags"));
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+exports.getFeatures = getFeatures;
+const FeatureFlags_1 = __importDefault(require("../common/FeatureFlags"));
 let features;
 function init() {
-  features = new _FeatureFlags.default();
+    features = new FeatureFlags_1.default();
 }
 function getFeatures() {
-  return features;
+    return features;
 }

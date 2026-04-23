@@ -1,21 +1,17 @@
 "use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.getDiscordIPCEvent = getDiscordIPCEvent;
-var _electron = require("electron");
+const electron_1 = require("electron");
 const discordPrefixRegex = /^DISCORD_/;
 function getDiscordIPCEvent(ev) {
-  return discordPrefixRegex.test(ev) ? ev : `DISCORD_${ev}`;
+    return discordPrefixRegex.test(ev) ? ev : `DISCORD_${ev}`;
 }
-var _default = exports.default = {
-  on: (event, callback) => {
-    _electron.ipcMain.on(getDiscordIPCEvent(event), callback);
-  },
-  removeListener: (event, callback) => {
-    _electron.ipcMain.removeListener(getDiscordIPCEvent(event), callback);
-  },
-  handle: (event, callback) => _electron.ipcMain.handle(getDiscordIPCEvent(event), callback)
+exports.default = {
+    on: (event, callback) => {
+        electron_1.ipcMain.on(getDiscordIPCEvent(event), callback);
+    },
+    removeListener: (event, callback) => {
+        electron_1.ipcMain.removeListener(getDiscordIPCEvent(event), callback);
+    },
+    handle: (event, callback) => electron_1.ipcMain.handle(getDiscordIPCEvent(event), callback),
 };
