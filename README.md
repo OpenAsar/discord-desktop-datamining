@@ -2,7 +2,7 @@
 
 ## development versions
 
-**host: 1.0.986**
+**host: 1.0.987**
 
 | module | version |
 | ------ | :-----: |
