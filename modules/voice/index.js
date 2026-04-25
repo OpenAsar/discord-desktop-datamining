@@ -219,7 +219,6 @@ function bindConnectionInstance(instance) {
         setSecureFramesStateUpdateCallback: (callback) => instance.setSecureFramesStateUpdateCallback(callback),
         setLocalVolume: (userId, volume) => instance.setLocalVolume(userId, volume),
         setLocalMute: (userId, mute) => instance.setLocalMute(userId, mute),
-        setUserPosition: (userId, position) => instance.setUserPosition(userId, position),
         fastUdpReconnect: () => instance.fastUdpReconnect(),
         setLocalPan: (userId, left, right) => instance.setLocalPan(userId, left, right),
         setDisableLocalVideo: (userId, disabled) => instance.setDisableLocalVideo(userId, disabled),
