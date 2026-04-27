@@ -1,11 +1,10 @@
 "use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.IS_WIN = exports.IS_OSX = exports.IS_LINUX = void 0;
-var _process = _interopRequireDefault(require("process"));
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
-const IS_WIN = exports.IS_WIN = _process.default.platform === 'win32';
-const IS_OSX = exports.IS_OSX = _process.default.platform === 'darwin';
-const IS_LINUX = exports.IS_LINUX = _process.default.platform === 'linux';
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.IS_LINUX = exports.IS_OSX = exports.IS_WIN = void 0;
+const process_1 = __importDefault(require("process"));
+exports.IS_WIN = process_1.default.platform === 'win32';
+exports.IS_OSX = process_1.default.platform === 'darwin';
+exports.IS_LINUX = process_1.default.platform === 'linux';

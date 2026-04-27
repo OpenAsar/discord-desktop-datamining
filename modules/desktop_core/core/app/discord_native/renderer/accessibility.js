@@ -1,9 +1,9 @@
 "use strict";
-
-var _DiscordIPC = require("../common/DiscordIPC");
+Object.defineProperty(exports, "__esModule", { value: true });
+const DiscordIPC_1 = require("../common/DiscordIPC");
 function isAccessibilitySupportEnabled() {
-  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.ACCESSIBILITY_GET_ENABLED);
+    return DiscordIPC_1.DiscordIPC.renderer.invoke(DiscordIPC_1.IPCEvents.ACCESSIBILITY_GET_ENABLED);
 }
 module.exports = {
-  isAccessibilitySupportEnabled
+    isAccessibilitySupportEnabled,
 };

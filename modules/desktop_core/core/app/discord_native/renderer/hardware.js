@@ -1,10 +1,7 @@
 "use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.getDisplayCount = getDisplayCount;
-var _DiscordIPC = require("../common/DiscordIPC");
+const DiscordIPC_1 = require("../common/DiscordIPC");
 function getDisplayCount() {
-  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.HARDWARE_GET_DISPLAY_COUNT);
+    return DiscordIPC_1.DiscordIPC.renderer.invoke(DiscordIPC_1.IPCEvents.HARDWARE_GET_DISPLAY_COUNT);
 }

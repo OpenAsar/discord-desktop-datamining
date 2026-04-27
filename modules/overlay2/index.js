@@ -1,63 +1,60 @@
 "use strict";
-
-var _overlay_module = _interopRequireDefault(require("./overlay_module"));
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { "default": e }; }
-// eslint-disable-next-line import/no-unresolved, import/extensions
-
-var isOverlayContext = typeof window !== 'undefined' && window != null && window.__OVERLAY__ || document.getElementById('__OVERLAY__SENTINEL__') != null || /overlay/.test(window.location.pathname);
-var isElectronRenderer = typeof window !== 'undefined' && window != null && window.DiscordNative != null && Boolean(window.DiscordNative.isRenderer);
-var features = isElectronRenderer ? window.DiscordNative.features : global.features;
-var clickZoneCallback;
-var interceptInput = false;
-var imeExclusiveFullscreenCallback;
-var perfInfoCallback;
-
-// [adill] indicates that the race condition between createHostProcess and connectProcess is fixed. remove ~7/2019.
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+const overlay_module_1 = __importDefault(require("./overlay_module"));
+const isOverlayContext = (typeof window !== 'undefined' && window != null && window.__OVERLAY__)
+    || document.getElementById('__OVERLAY__SENTINEL__') != null
+    || /overlay/.test(window.location.pathname);
+const isElectronRenderer = typeof window !== 'undefined'
+    && window != null
+    && window.DiscordNative != null
+    && Boolean(window.DiscordNative.isRenderer);
+const features = isElectronRenderer ? window.DiscordNative.features : global.features;
+let clickZoneCallback;
+let interceptInput = false;
+let imeExclusiveFullscreenCallback;
+let perfInfoCallback;
 features.declareSupported('create_host_on_attach');
 function eventHandler(pid, event) {
-  if (event.message === 'click_zone_event') {
-    if (clickZoneCallback) {
-      clickZoneCallback(event.name, event.x, event.y);
+    if (event.message === 'click_zone_event') {
+        if (clickZoneCallback) {
+            clickZoneCallback(event.name, event.x, event.y);
+        }
     }
-  } else if (event.message === 'ime_exclusive_fullscreen') {
-    if (imeExclusiveFullscreenCallback) {
-      imeExclusiveFullscreenCallback();
+    else if (event.message === 'ime_exclusive_fullscreen') {
+        if (imeExclusiveFullscreenCallback) {
+            imeExclusiveFullscreenCallback();
+        }
     }
-  } else if (event.message === 'perf_info') {
-    if (perfInfoCallback) {
-      perfInfoCallback(event.data);
+    else if (event.message === 'perf_info') {
+        if (perfInfoCallback) {
+            perfInfoCallback(event.data);
+        }
     }
-  }
 }
-_overlay_module["default"]._setEventHandler(eventHandler);
+overlay_module_1.default._setEventHandler(eventHandler);
 if (isOverlayContext) {
-  var _require = require('url'),
-    URL = _require.URL;
-  var url = new URL(window.location);
-  var pid = parseInt(url.searchParams.get('pid'));
-  _overlay_module["default"].connectProcess(pid);
-  _overlay_module["default"].rendererStarted = function () {
-    _overlay_module["default"].sendCommand(pid, {
-      message: 'notify_renderer_started'
-    });
-  };
+    const { URL } = require('url');
+    const url = new URL(window.location);
+    const pid = parseInt(url.searchParams.get('pid'));
+    overlay_module_1.default.connectProcess(pid);
+    overlay_module_1.default.rendererStarted = () => {
+        overlay_module_1.default.sendCommand(pid, { message: 'notify_renderer_started' });
+    };
 }
-_overlay_module["default"].setClickZoneCallback = function (callback) {
-  clickZoneCallback = callback;
+overlay_module_1.default.setClickZoneCallback = (callback) => {
+    clickZoneCallback = callback;
 };
-// NOTE: deprecated. Use `sendCommand` instead.
-_overlay_module["default"].setInputLocked = function (locked) {
-  interceptInput = !locked;
-  var payload = {
-    message: 'intercept_input',
-    intercept: interceptInput
-  };
-  _overlay_module["default"].broadcastCommand(payload);
+overlay_module_1.default.setInputLocked = (locked) => {
+    interceptInput = !locked;
+    const payload = { message: 'intercept_input', intercept: interceptInput };
+    overlay_module_1.default.broadcastCommand(payload);
 };
-_overlay_module["default"].setImeExclusiveFullscreenCallback = function (callback) {
-  imeExclusiveFullscreenCallback = callback;
+overlay_module_1.default.setImeExclusiveFullscreenCallback = (callback) => {
+    imeExclusiveFullscreenCallback = callback;
 };
-_overlay_module["default"].setPerfInfoCallback = function (callback) {
-  perfInfoCallback = callback;
+overlay_module_1.default.setPerfInfoCallback = (callback) => {
+    perfInfoCallback = callback;
 };
-module.exports = _overlay_module["default"];
+module.exports = overlay_module_1.default;

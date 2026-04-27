@@ -1,18 +1,17 @@
 "use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.init = init;
-var _electron = require("electron");
-var _constants = require("./discord_native/common/constants");
-var _ipcMain = _interopRequireDefault(require("./ipcMain"));
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+const electron_1 = require("electron");
+const constants_1 = require("./discord_native/common/constants");
+const ipcMain_1 = __importDefault(require("./ipcMain"));
 let hasInit = false;
 function init() {
-  if (hasInit) {
-    return;
-  }
-  _ipcMain.default.handle(_constants.IPCEvents.GET_MOUSE_COORDINATES, () => _electron.screen.getCursorScreenPoint());
-  hasInit = true;
+    if (hasInit) {
+        return;
+    }
+    ipcMain_1.default.handle(constants_1.IPCEvents.GET_MOUSE_COORDINATES, () => electron_1.screen.getCursorScreenPoint());
+    hasInit = true;
 }

@@ -1,32 +1,31 @@
 "use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.addGlobalPath = addGlobalPath;
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.getGlobalPaths = getGlobalPaths;
+exports.addGlobalPath = addGlobalPath;
 exports.globalPathExists = globalPathExists;
-var _module = _interopRequireDefault(require("module"));
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
-const resolveLookupPaths = _module.default._resolveLookupPaths;
-_module.default._resolveLookupPaths = (request, parent) => {
-  var _parent$paths;
-  const length = parent === null || parent === void 0 ? void 0 : (_parent$paths = parent.paths) === null || _parent$paths === void 0 ? void 0 : _parent$paths.length;
-  if (length != null && length !== 0) {
-    parent.paths = parent.paths.concat(_module.default.globalPaths);
-  } else {
-    parent.paths = _module.default.globalPaths;
-  }
-  return resolveLookupPaths(request, parent);
+const module_1 = __importDefault(require("module"));
+const resolveLookupPaths = module_1.default._resolveLookupPaths;
+module_1.default._resolveLookupPaths = (request, parent) => {
+    const length = parent?.paths?.length;
+    if (length != null && length !== 0) {
+        parent.paths = parent.paths.concat(module_1.default.globalPaths);
+    }
+    else {
+        parent.paths = module_1.default.globalPaths;
+    }
+    return resolveLookupPaths(request, parent);
 };
 function getGlobalPaths() {
-  return _module.default.globalPaths;
+    return module_1.default.globalPaths;
 }
 function addGlobalPath(path) {
-  if (_module.default.globalPaths.indexOf(path) === -1) {
-    _module.default.globalPaths.push(path);
-  }
+    if (module_1.default.globalPaths.indexOf(path) === -1) {
+        module_1.default.globalPaths.push(path);
+    }
 }
 function globalPathExists(path) {
-  return _module.default.globalPaths.indexOf(path) !== -1;
+    return module_1.default.globalPaths.indexOf(path) !== -1;
 }

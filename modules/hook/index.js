@@ -1,16 +1,15 @@
-/* eslint-disable no-console */
+"use strict";
 const hook = require('./discord_hook.node');
-
-const isLogDirAvailable = globalThis.window?.DiscordNative?.fileManager?.getAndCreateLogDirectorySync;
+const discordNative = globalThis.window?.DiscordNative;
+const isLogDirAvailable = discordNative?.fileManager?.getAndCreateLogDirectorySync;
 let initializationParams;
-if (isLogDirAvailable) {
-  const logDirectory = globalThis.window.DiscordNative.fileManager.getAndCreateLogDirectorySync(globalThis.window);
-  const logLevel = globalThis.window.DiscordNative.fileManager.logLevelSync(globalThis.window);
-  initializationParams = {logDirectory, logLevel};
-} else {
-  console.warn('Unable to find log directory');
+if (isLogDirAvailable != null) {
+    const logDirectory = discordNative.fileManager.getAndCreateLogDirectorySync() ?? undefined;
+    const logLevel = discordNative.fileManager.logLevelSync();
+    initializationParams = { logDirectory, logLevel };
 }
-
+else {
+    console.warn('Unable to find log directory');
+}
 hook.initialize(initializationParams);
-
 module.exports = hook;

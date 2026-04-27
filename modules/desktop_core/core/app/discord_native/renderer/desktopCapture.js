@@ -1,9 +1,9 @@
 "use strict";
-
-var _DiscordIPC = require("../common/DiscordIPC");
+Object.defineProperty(exports, "__esModule", { value: true });
+const DiscordIPC_1 = require("../common/DiscordIPC");
 function getDesktopCaptureSources(options) {
-  return _DiscordIPC.DiscordIPC.renderer.invoke(_DiscordIPC.IPCEvents.DESKTOP_CAPTURER_GET_SOURCES, options);
+    return DiscordIPC_1.DiscordIPC.renderer.invoke(DiscordIPC_1.IPCEvents.DESKTOP_CAPTURER_GET_SOURCES, options);
 }
 module.exports = {
-  getDesktopCaptureSources
+    getDesktopCaptureSources,
 };

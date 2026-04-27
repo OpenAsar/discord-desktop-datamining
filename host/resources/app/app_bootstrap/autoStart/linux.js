@@ -1,23 +1,22 @@
 "use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.install = install;
+exports.update = update;
 exports.isInstalled = isInstalled;
 exports.uninstall = uninstall;
-exports.update = update;
-var _electron = require("electron");
-var _fs = _interopRequireDefault(require("fs"));
-var _path = _interopRequireDefault(require("path"));
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
-const appName = _path.default.basename(process.execPath, '.exe');
-const exePath = _electron.app.getPath('exe');
-const exeDir = _path.default.dirname(exePath);
-const iconPath = _path.default.join(exeDir, 'discord.png');
-const autostartDir = _path.default.join(_electron.app.getPath('appData'), 'autostart');
-const electronAppName = _electron.app.name ?? _electron.app.getName();
-const autostartFileName = _path.default.join(autostartDir, electronAppName + '.desktop');
+const electron_1 = require("electron");
+const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
+const appName = path_1.default.basename(process.execPath, '.exe');
+const exePath = electron_1.app.getPath('exe');
+const exeDir = path_1.default.dirname(exePath);
+const iconPath = path_1.default.join(exeDir, 'discord.png');
+const autostartDir = path_1.default.join(electron_1.app.getPath('appData'), 'autostart');
+const electronAppName = electron_1.app.name ?? electron_1.app.getName();
+const autostartFileName = path_1.default.join(autostartDir, electronAppName + '.desktop');
 const desktopFile = `[Desktop Entry]
 Type=Application
 Exec=${exePath}
@@ -29,36 +28,40 @@ Comment=Text and voice chat for gamers.
 X-GNOME-Autostart-enabled=true
 `;
 function ensureDir() {
-  try {
-    _fs.default.mkdirSync(autostartDir);
-    return true;
-  } catch (e) {}
-  return false;
+    try {
+        fs_1.default.mkdirSync(autostartDir);
+        return true;
+    }
+    catch (e) {
+    }
+    return false;
 }
 function install(callback) {
-  ensureDir();
-  try {
-    _fs.default.writeFile(autostartFileName, desktopFile, callback);
-  } catch (e) {
-    callback();
-  }
+    ensureDir();
+    try {
+        fs_1.default.writeFile(autostartFileName, desktopFile, callback);
+    }
+    catch (e) {
+        callback();
+    }
 }
 function update(callback) {
-  callback();
+    callback();
 }
 function isInstalled(callback) {
-  try {
-    _fs.default.stat(autostartFileName, (err, stats) => {
-      if (err != null) {
+    try {
+        fs_1.default.stat(autostartFileName, (err, stats) => {
+            if (err != null) {
+                callback(false);
+                return;
+            }
+            callback(stats.isFile());
+        });
+    }
+    catch (e) {
         callback(false);
-        return;
-      }
-      callback(stats.isFile());
-    });
-  } catch (e) {
-    callback(false);
-  }
+    }
 }
 function uninstall(callback) {
-  _fs.default.unlink(autostartFileName, callback);
+    fs_1.default.unlink(autostartFileName, callback);
 }

@@ -1,92 +1,130 @@
 "use strict";
-
-var electron = _interopRequireWildcard(require("electron"));
-var _os = _interopRequireDefault(require("os"));
-var _path = _interopRequireDefault(require("path"));
-var _appFeatures = require("../../appFeatures");
-var _utils = require("../../utils");
-var _DiscordIPC = require("../common/DiscordIPC");
-var _nativeModules = require("./nativeModules");
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
-function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
-function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const electron = __importStar(require("electron"));
+const os_1 = __importDefault(require("os"));
+const path_1 = __importDefault(require("path"));
+const appFeatures_1 = require("../../appFeatures");
+const utils_1 = require("../../utils");
+const DiscordIPC_1 = require("../common/DiscordIPC");
+const nativeModules_1 = require("./nativeModules");
 function sendToAllWindows(channel, ...args) {
-  electron.BrowserWindow.getAllWindows().forEach(win => {
-    const contents = win.webContents;
-    if (contents != null) {
-      contents.send(channel, ...args);
-    }
-  });
+    electron.BrowserWindow.getAllWindows().forEach((win) => {
+        const contents = win.webContents;
+        if (contents != null) {
+            contents.send(channel, ...args);
+        }
+    });
 }
-if (_utils.isOSX) {
-  let majorVersion;
-  try {
-    majorVersion = parseInt(_os.default.release().split('.')[0], 10);
-  } catch (_e) {
-    majorVersion = 0;
-  }
-  if (majorVersion >= 21 && moduleDataPath != null) {
+if (utils_1.isOSX) {
+    let majorVersion;
     try {
-      const modulePath = (0, _nativeModules.getModulePath)('discord_notifications') ?? _path.default.join(moduleDataPath, 'discord_notifications');
-      const lib = require(modulePath);
-      lib.setDataPath(modulePath);
-      lib.setCallbacks((action, identifier, userText, fallbackDeepLink) => {
-        sendToAllWindows(_DiscordIPC.IPCEvents.NOTIFICATIONS_RECEIVED_RESPONSE, action, identifier, userText, fallbackDeepLink);
-      }, () => {
-        return ['badge', 'banner', 'list', 'sound'];
-      }, identifier => {
-        sendToAllWindows('USER_SETTINGS_OPEN', identifier, 'Notifications');
-      });
-      _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.NOTIFICATIONS_GET_AUTHORIZATION, async (_event, provisional) => {
-        return await lib.getAuthorization(provisional);
-      });
-      _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.NOTIFICATIONS_GET_SETTINGS, async () => {
-        return await lib.getSettings();
-      });
-      _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.NOTIFICATIONS_SEND_NOTIFICATION, async (_event, options) => {
-        return await lib.sendNotification(options);
-      });
-      _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.NOTIFICATIONS_REMOVE_NOTIFICATIONS, (_event, identifiers) => {
-        lib.removeNotifications(identifiers);
-        return Promise.resolve();
-      });
-      _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.NOTIFICATIONS_REMOVE_ALL_NOTIFICATIONS, () => {
-        lib.removeAllNotifications();
-        return Promise.resolve();
-      });
-      (0, _appFeatures.getFeatures)().declareSupported('notifications');
-      (0, _appFeatures.getFeatures)().declareSupported('notifications_provisional');
-    } catch (e) {
-      console.warn('discord_notifications setup failed with error: ', e);
+        majorVersion = parseInt(os_1.default.release().split('.')[0], 10);
     }
-  }
-} else if (_utils.isWindows && electron.Notification.isSupported()) {
-  try {
-    const lib = require('discord_notifications');
-    if (lib == null) {
-      console.warn('discord_notifications module not found.');
-    } else {
-      lib.setCallbacks((action, identifier, userText) => {
-        sendToAllWindows(_DiscordIPC.IPCEvents.NOTIFICATIONS_RECEIVED_RESPONSE, action, identifier, userText);
-      });
-      _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.NOTIFICATIONS_GET_AUTHORIZATION, async () => {
-        return await lib.getAuthorization();
-      });
-      _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.NOTIFICATIONS_GET_SETTINGS, async () => {
-        return await lib.getSettings();
-      });
-      _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.NOTIFICATIONS_SEND_NOTIFICATION, async (_event, options) => {
-        return await lib.showNotification(options);
-      });
-      _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.NOTIFICATIONS_REMOVE_NOTIFICATIONS, async (_event, identifiers) => {
-        return await lib.removeNotifications(identifiers);
-      });
-      _DiscordIPC.DiscordIPC.main.handle(_DiscordIPC.IPCEvents.NOTIFICATIONS_REMOVE_ALL_NOTIFICATIONS, async () => {
-        return await lib.removeAllNotifications();
-      });
-      (0, _appFeatures.getFeatures)().declareSupported('notifications');
+    catch (_e) {
+        majorVersion = 0;
     }
-  } catch (e) {
-    console.warn('discord_notifications setup failed with error: ', e);
-  }
+    if (majorVersion >= 21 && moduleDataPath != null) {
+        try {
+            const modulePath = (0, nativeModules_1.getModulePath)('discord_notifications') ?? path_1.default.join(moduleDataPath, 'discord_notifications');
+            const lib = require(modulePath);
+            lib.setDataPath(modulePath);
+            lib.setCallbacks((action, identifier, userText, fallbackDeepLink) => {
+                sendToAllWindows(DiscordIPC_1.IPCEvents.NOTIFICATIONS_RECEIVED_RESPONSE, action, identifier, userText, fallbackDeepLink);
+            }, (_identifier) => {
+                return ['badge', 'banner', 'list', 'sound'];
+            }, (identifier) => {
+                sendToAllWindows('USER_SETTINGS_OPEN', identifier, 'Notifications');
+            });
+            DiscordIPC_1.DiscordIPC.main.handle(DiscordIPC_1.IPCEvents.NOTIFICATIONS_GET_AUTHORIZATION, async (_event, provisional) => {
+                return await lib.getAuthorization(provisional);
+            });
+            DiscordIPC_1.DiscordIPC.main.handle(DiscordIPC_1.IPCEvents.NOTIFICATIONS_GET_SETTINGS, async (_event) => {
+                return await lib.getSettings();
+            });
+            DiscordIPC_1.DiscordIPC.main.handle(DiscordIPC_1.IPCEvents.NOTIFICATIONS_SEND_NOTIFICATION, async (_event, options) => {
+                return await lib.sendNotification(options);
+            });
+            DiscordIPC_1.DiscordIPC.main.handle(DiscordIPC_1.IPCEvents.NOTIFICATIONS_REMOVE_NOTIFICATIONS, (_event, identifiers) => {
+                lib.removeNotifications(identifiers);
+                return Promise.resolve();
+            });
+            DiscordIPC_1.DiscordIPC.main.handle(DiscordIPC_1.IPCEvents.NOTIFICATIONS_REMOVE_ALL_NOTIFICATIONS, (_event) => {
+                lib.removeAllNotifications();
+                return Promise.resolve();
+            });
+            (0, appFeatures_1.getFeatures)().declareSupported('notifications');
+            (0, appFeatures_1.getFeatures)().declareSupported('notifications_provisional');
+        }
+        catch (e) {
+            console.warn('discord_notifications setup failed with error: ', e);
+        }
+    }
+}
+else if (utils_1.isWindows && electron.Notification.isSupported()) {
+    try {
+        const lib = require('discord_notifications');
+        if (lib == null) {
+            console.warn('discord_notifications module not found.');
+        }
+        else {
+            lib.setCallbacks((action, identifier, userText) => {
+                sendToAllWindows(DiscordIPC_1.IPCEvents.NOTIFICATIONS_RECEIVED_RESPONSE, action, identifier, userText);
+            });
+            DiscordIPC_1.DiscordIPC.main.handle(DiscordIPC_1.IPCEvents.NOTIFICATIONS_GET_AUTHORIZATION, async (_event) => {
+                return await lib.getAuthorization();
+            });
+            DiscordIPC_1.DiscordIPC.main.handle(DiscordIPC_1.IPCEvents.NOTIFICATIONS_GET_SETTINGS, async (_event) => {
+                return await lib.getSettings();
+            });
+            DiscordIPC_1.DiscordIPC.main.handle(DiscordIPC_1.IPCEvents.NOTIFICATIONS_SEND_NOTIFICATION, async (_event, options) => {
+                return await lib.showNotification(options);
+            });
+            DiscordIPC_1.DiscordIPC.main.handle(DiscordIPC_1.IPCEvents.NOTIFICATIONS_REMOVE_NOTIFICATIONS, async (_event, identifiers) => {
+                return await lib.removeNotifications(identifiers);
+            });
+            DiscordIPC_1.DiscordIPC.main.handle(DiscordIPC_1.IPCEvents.NOTIFICATIONS_REMOVE_ALL_NOTIFICATIONS, async (_event) => {
+                return await lib.removeAllNotifications();
+            });
+            (0, appFeatures_1.getFeatures)().declareSupported('notifications');
+        }
+    }
+    catch (e) {
+        console.warn('discord_notifications setup failed with error: ', e);
+    }
 }

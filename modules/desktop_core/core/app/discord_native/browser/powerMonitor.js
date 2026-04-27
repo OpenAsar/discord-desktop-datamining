@@ -1,47 +1,73 @@
 "use strict";
-
-var electron = _interopRequireWildcard(require("electron"));
-function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
-function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
-const {
-  POWER_MONITOR_RESUME,
-  POWER_MONITOR_SUSPEND,
-  POWER_MONITOR_LOCK_SCREEN,
-  POWER_MONITOR_UNLOCK_SCREEN,
-  POWER_MONITOR_GET_SYSTEM_IDLE_TIME
-} = require('../common/constants').IPCEvents;
-electron.ipcMain.handle(POWER_MONITOR_GET_SYSTEM_IDLE_TIME, () => {
-  var _process$env$XDG_SESS;
-  if (process.platform === 'linux' && ((_process$env$XDG_SESS = process.env.XDG_SESSION_TYPE) === null || _process$env$XDG_SESS === void 0 ? void 0 : _process$env$XDG_SESS.startsWith('wayland')) && process.env.WAYLAND_DISPLAY != null) {
-    try {
-      var _discordUtils$isWayla;
-      const discordUtils = require('discord_utils');
-      if ((_discordUtils$isWayla = discordUtils.isWaylandIdleAvailable) === null || _discordUtils$isWayla === void 0 ? void 0 : _discordUtils$isWayla.call(discordUtils)) {
-        return Number(discordUtils.getWaylandSystemIdleTimeMs());
-      }
-    } catch (error) {
-      console.error('Wayland idle time query failed:', error);
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
     }
-  }
-  return electron.powerMonitor.getSystemIdleTime() * 1000;
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+const electron = __importStar(require("electron"));
+const { POWER_MONITOR_RESUME, POWER_MONITOR_SUSPEND, POWER_MONITOR_LOCK_SCREEN, POWER_MONITOR_UNLOCK_SCREEN, POWER_MONITOR_GET_SYSTEM_IDLE_TIME, } = require('../common/constants').IPCEvents;
+electron.ipcMain.handle(POWER_MONITOR_GET_SYSTEM_IDLE_TIME, (_) => {
+    if (process.platform === 'linux'
+        && process.env.XDG_SESSION_TYPE?.startsWith('wayland')
+        && process.env.WAYLAND_DISPLAY != null) {
+        try {
+            const discordUtils = require('discord_utils');
+            if (discordUtils.isWaylandIdleAvailable?.()) {
+                return Number(discordUtils.getWaylandSystemIdleTimeMs());
+            }
+        }
+        catch (error) {
+            console.error('Wayland idle time query failed:', error);
+        }
+    }
+    return electron.powerMonitor.getSystemIdleTime() * 1000;
 });
 function sendToAllWindows(channel) {
-  electron.BrowserWindow.getAllWindows().forEach(win => {
-    const contents = win.webContents;
-    if (contents != null) {
-      contents.send(channel);
-    }
-  });
+    electron.BrowserWindow.getAllWindows().forEach((win) => {
+        const contents = win.webContents;
+        if (contents != null) {
+            contents.send(channel);
+        }
+    });
 }
 electron.powerMonitor.on('resume', () => {
-  sendToAllWindows(POWER_MONITOR_RESUME);
+    sendToAllWindows(POWER_MONITOR_RESUME);
 });
 electron.powerMonitor.on('suspend', () => {
-  sendToAllWindows(POWER_MONITOR_SUSPEND);
+    sendToAllWindows(POWER_MONITOR_SUSPEND);
 });
 electron.powerMonitor.on('lock-screen', () => {
-  sendToAllWindows(POWER_MONITOR_LOCK_SCREEN);
+    sendToAllWindows(POWER_MONITOR_LOCK_SCREEN);
 });
 electron.powerMonitor.on('unlock-screen', () => {
-  sendToAllWindows(POWER_MONITOR_UNLOCK_SCREEN);
+    sendToAllWindows(POWER_MONITOR_UNLOCK_SCREEN);
 });

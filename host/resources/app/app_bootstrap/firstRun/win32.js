@@ -1,73 +1,109 @@
 "use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
 });
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.performFirstRunTasks = performFirstRunTasks;
-var _fs = _interopRequireDefault(require("fs"));
-var _path = _interopRequireDefault(require("path"));
-var paths = _interopRequireWildcard(require("../../common/paths"));
-var _errorHandler = require("../errorHandler");
-var _squirrelUpdate = require("../squirrelUpdate");
-var _Constants = _interopRequireDefault(require("../Constants"));
-function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
-function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
-const appFolder = _path.default.resolve(process.execPath, '..');
-const rootFolder = _path.default.resolve(appFolder, '..');
-const exeName = _path.default.basename(process.execPath);
-const updateExe = _path.default.join(rootFolder, 'Update.exe');
+const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
+const paths = __importStar(require("../../common/paths"));
+const errorHandler_1 = require("../errorHandler");
+const squirrelUpdate_1 = require("../squirrelUpdate");
+const Constants_1 = __importDefault(require("../Constants"));
+const appFolder = path_1.default.resolve(process.execPath, '..');
+const rootFolder = path_1.default.resolve(appFolder, '..');
+const exeName = path_1.default.basename(process.execPath);
+const updateExe = path_1.default.join(rootFolder, 'Update.exe');
 function copyIconToRoot() {
-  const icoSrc = _path.default.join(appFolder, 'app.ico');
-  const icoDest = _path.default.join(rootFolder, 'app.ico');
-  try {
-    const ico = _fs.default.readFileSync(icoSrc);
-    _fs.default.writeFileSync(icoDest, new Uint8Array(ico));
-    return icoDest;
-  } catch (e) {
-    return icoSrc;
-  }
+    const icoSrc = path_1.default.join(appFolder, 'app.ico');
+    const icoDest = path_1.default.join(rootFolder, 'app.ico');
+    try {
+        const ico = fs_1.default.readFileSync(icoSrc);
+        fs_1.default.writeFileSync(icoDest, new Uint8Array(ico));
+        return icoDest;
+    }
+    catch (e) {
+        return icoSrc;
+    }
 }
 function updateShortcuts(updater) {
-  const shortcutFileName = `${_Constants.default.APP_NAME_FOR_HUMANS}.lnk`;
-  const shortcutPaths = [_path.default.join(updater.getKnownFolder('desktop'), shortcutFileName), _path.default.join(updater.getKnownFolder('programs'), _Constants.default.APP_COMPANY, shortcutFileName)];
-  const iconPath = copyIconToRoot();
-  for (const shortcutPath of shortcutPaths) {
-    if (!_fs.default.existsSync(shortcutPath)) {
-      continue;
+    const shortcutFileName = `${Constants_1.default.APP_NAME_FOR_HUMANS}.lnk`;
+    const shortcutPaths = [
+        path_1.default.join(updater.getKnownFolder('desktop'), shortcutFileName),
+        path_1.default.join(updater.getKnownFolder('programs'), Constants_1.default.APP_COMPANY, shortcutFileName),
+    ];
+    const iconPath = copyIconToRoot();
+    for (const shortcutPath of shortcutPaths) {
+        if (!fs_1.default.existsSync(shortcutPath)) {
+            continue;
+        }
+        updater.createShortcut({
+            target_path: updateExe,
+            shortcut_path: shortcutPath,
+            arguments: `--processStart ${exeName}`,
+            icon_path: iconPath,
+            icon_index: 0,
+            description: Constants_1.default.APP_DESCRIPTION,
+            app_user_model_id: Constants_1.default.APP_ID,
+            working_directory: appFolder,
+        });
     }
-    updater.createShortcut({
-      target_path: updateExe,
-      shortcut_path: shortcutPath,
-      arguments: `--processStart ${exeName}`,
-      icon_path: iconPath,
-      icon_index: 0,
-      description: _Constants.default.APP_DESCRIPTION,
-      app_user_model_id: _Constants.default.APP_ID,
-      working_directory: appFolder
-    });
-  }
 }
 function performFirstRunTasks(updater) {
-  const firstRunCompletePath = _path.default.join(paths.getUserDataVersioned(), '.first-run');
-  if (!_fs.default.existsSync(firstRunCompletePath)) {
-    let updatedShortcuts = false;
-    try {
-      if (updater != null) {
-        updateShortcuts(updater);
-        updatedShortcuts = true;
-      }
-    } catch (e) {
-      (0, _errorHandler.handled)(e);
-    }
-    (0, _squirrelUpdate.installProtocol)(_Constants.default.APP_PROTOCOL, () => {
-      try {
-        if (updatedShortcuts) {
-          _fs.default.writeFileSync(firstRunCompletePath, 'true');
+    const firstRunCompletePath = path_1.default.join(paths.getUserDataVersioned(), '.first-run');
+    if (!fs_1.default.existsSync(firstRunCompletePath)) {
+        let updatedShortcuts = false;
+        try {
+            if (updater != null) {
+                updateShortcuts(updater);
+                updatedShortcuts = true;
+            }
         }
-      } catch (e) {
-        (0, _errorHandler.handled)(e);
-      }
-    });
-  }
+        catch (e) {
+            (0, errorHandler_1.handled)(e);
+        }
+        (0, squirrelUpdate_1.installProtocol)(Constants_1.default.APP_PROTOCOL, () => {
+            try {
+                if (updatedShortcuts) {
+                    fs_1.default.writeFileSync(firstRunCompletePath, 'true');
+                }
+            }
+            catch (e) {
+                (0, errorHandler_1.handled)(e);
+            }
+        });
+    }
 }

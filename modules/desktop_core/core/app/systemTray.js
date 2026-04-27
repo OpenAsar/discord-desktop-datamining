@@ -1,48 +1,45 @@
 "use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.displayHowToCloseHint = displayHowToCloseHint;
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.hasInit = void 0;
 exports.init = init;
 exports.show = show;
-var _electron = require("electron");
-var _securityUtils = require("../common/securityUtils");
-var _appSettings = require("./bootstrapModules/appSettings");
-var _ipcMain = _interopRequireDefault(require("./ipcMain"));
-var _utils = require("./utils");
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
-const {
-  APP_NAME
-} = require('./Constants');
+exports.displayHowToCloseHint = displayHowToCloseHint;
+const electron_1 = require("electron");
+const securityUtils_1 = require("../common/securityUtils");
+const appSettings_1 = require("./bootstrapModules/appSettings");
+const ipcMain_1 = __importDefault(require("./ipcMain"));
+const utils_1 = require("./utils");
+const { APP_NAME } = require('./Constants');
 const buildInfo = require('./bootstrapModules/buildInfo').buildInfo;
-const settings = _appSettings.appSettings.getSettings();
+const settings = appSettings_1.appSettings.getSettings();
 const TrayIconNames = {
-  DEFAULT: 'tray',
-  UNREAD: 'tray-unread',
-  CONNECTED: 'tray-connected',
-  SPEAKING: 'tray-speaking',
-  MUTED: 'tray-muted',
-  DEAFENED: 'tray-deafened'
+    DEFAULT: 'tray',
+    UNREAD: 'tray-unread',
+    CONNECTED: 'tray-connected',
+    SPEAKING: 'tray-speaking',
+    MUTED: 'tray-muted',
+    DEAFENED: 'tray-deafened',
 };
 const MenuItems = {
-  SECRET: 'SECRET',
-  MUTE: 'MUTE',
-  DEAFEN: 'DEAFEN',
-  OPEN: 'OPEN',
-  VOICE_SETTINGS: 'VOICE_SETTINGS',
-  CHECK_UPDATE: 'CHECK_UPDATE',
-  QUIT: 'QUIT',
-  ACKNOWLEDGEMENTS: 'ACKNOWLEDGEMENTS'
+    SECRET: 'SECRET',
+    MUTE: 'MUTE',
+    DEAFEN: 'DEAFEN',
+    OPEN: 'OPEN',
+    VOICE_SETTINGS: 'VOICE_SETTINGS',
+    CHECK_UPDATE: 'CHECK_UPDATE',
+    QUIT: 'QUIT',
+    ACKNOWLEDGEMENTS: 'ACKNOWLEDGEMENTS',
 };
 const TrayGuidByChannel = {
-  stable: '699e423d-73da-42ba-b94e-881ff8672467',
-  ptb: '8bdf397e-37fc-440a-ac55-ec80cc585152',
-  canary: 'd9c5e1da-d4ab-424f-97cf-00c2ce9bec67',
-  development: '6603ea8b-b21d-46e9-8ea5-d87b9105613f'
+    stable: '699e423d-73da-42ba-b94e-881ff8672467',
+    ptb: '8bdf397e-37fc-440a-ac55-ec80cc585152',
+    canary: 'd9c5e1da-d4ab-424f-97cf-00c2ce9bec67',
+    development: '6603ea8b-b21d-46e9-8ea5-d87b9105613f',
 };
-let hasInit = exports.hasInit = false;
+exports.hasInit = false;
 let currentIcon = null;
 let options;
 let menuItems;
@@ -51,194 +48,209 @@ let atomTray = null;
 let trayIcons;
 let applications = null;
 function init(_options) {
-  if (hasInit) {
-    console.warn('systemTray: Has already init! Cancelling init.');
-    return;
-  }
-  trayIcons = {};
-  generateTrayIconPaths();
-  exports.hasInit = hasInit = true;
-  options = _options;
-  currentIcon = trayIcons.DEFAULT;
-  menuItems = {};
-  applications = [];
-  contextMenu = [];
-  initializeMenuItems();
-  buildContextMenu();
-  _ipcMain.default.on('SYSTEM_TRAY_SET_ICON', (evt, icon) => setTrayIcon(icon));
-  _ipcMain.default.on('SYSTEM_TRAY_SET_APPLICATIONS', (evt, newApplications) => setApplications(newApplications));
+    if (exports.hasInit) {
+        console.warn('systemTray: Has already init! Cancelling init.');
+        return;
+    }
+    trayIcons = {};
+    generateTrayIconPaths();
+    exports.hasInit = true;
+    options = _options;
+    currentIcon = trayIcons.DEFAULT;
+    menuItems = {};
+    applications = [];
+    contextMenu = [];
+    initializeMenuItems();
+    buildContextMenu();
+    ipcMain_1.default.on('SYSTEM_TRAY_SET_ICON', (evt, icon) => setTrayIcon(icon));
+    ipcMain_1.default.on('SYSTEM_TRAY_SET_APPLICATIONS', (evt, newApplications) => setApplications(newApplications));
 }
 function generateTrayIconPaths() {
-  const resourcePath = `app/images/systemtray/${process.platform}`;
-  const suffix = process.platform === 'darwin' ? 'Template' : '';
-  for (const key of Object.keys(TrayIconNames)) {
-    trayIcons[key] = (0, _utils.exposeModuleResource)(resourcePath, `${TrayIconNames[key]}${suffix}.png`);
-  }
+    const resourcePath = `app/images/systemtray/${process.platform}`;
+    const suffix = process.platform === 'darwin' ? 'Template' : '';
+    for (const key of Object.keys(TrayIconNames)) {
+        trayIcons[key] = (0, utils_1.exposeModuleResource)(resourcePath, `${TrayIconNames[key]}${suffix}.png`);
+    }
 }
 function initializeMenuItems() {
-  const {
-    onToggleMute,
-    onToggleDeafen,
-    onTrayClicked,
-    onOpenVoiceSettings,
-    onCheckForUpdates
-  } = options;
-  const voiceConnected = currentIcon !== trayIcons.DEFAULT && currentIcon !== trayIcons.UNREAD;
-  menuItems[MenuItems.SECRET] = {
-    label: `Discord`,
-    icon: trayIcons.DEFAULT,
-    enabled: false
-  };
-  menuItems[MenuItems.MUTE] = {
-    label: `Mute`,
-    type: 'checkbox',
-    checked: currentIcon === trayIcons.MUTED || currentIcon === trayIcons.DEAFENED,
-    visible: voiceConnected,
-    click: onToggleMute
-  };
-  menuItems[MenuItems.DEAFEN] = {
-    label: `Deafen`,
-    type: 'checkbox',
-    checked: currentIcon === trayIcons.DEAFENED,
-    visible: voiceConnected,
-    click: onToggleDeafen
-  };
-  menuItems[MenuItems.OPEN] = {
-    label: `Open ${APP_NAME}`,
-    type: 'normal',
-    visible: process.platform === 'linux',
-    click: onTrayClicked
-  };
-  menuItems[MenuItems.VOICE_SETTINGS] = {
-    label: 'Voice / Video Settings',
-    type: 'normal',
-    visible: voiceConnected,
-    click: onOpenVoiceSettings
-  };
-  menuItems[MenuItems.CHECK_UPDATE] = {
-    label: 'Check for Updates...',
-    type: 'normal',
-    visible: process.platform !== 'darwin',
-    click: onCheckForUpdates
-  };
-  menuItems[MenuItems.QUIT] = {
-    label: `Quit ${APP_NAME}`,
-    role: 'quit'
-  };
-  menuItems[MenuItems.ACKNOWLEDGEMENTS] = {
-    label: 'Acknowledgements',
-    type: 'normal',
-    visible: process.platform !== 'darwin',
-    click: () => (0, _securityUtils.saferShellOpenExternal)('https://discord.com/acknowledgements')
-  };
+    const { onToggleMute, onToggleDeafen, onTrayClicked, onOpenVoiceSettings, onCheckForUpdates } = options;
+    const voiceConnected = currentIcon !== trayIcons.DEFAULT && currentIcon !== trayIcons.UNREAD;
+    menuItems[MenuItems.SECRET] = {
+        label: `Discord`,
+        icon: trayIcons.DEFAULT,
+        enabled: false,
+    };
+    menuItems[MenuItems.MUTE] = {
+        label: `Mute`,
+        type: 'checkbox',
+        checked: currentIcon === trayIcons.MUTED || currentIcon === trayIcons.DEAFENED,
+        visible: voiceConnected,
+        click: onToggleMute,
+    };
+    menuItems[MenuItems.DEAFEN] = {
+        label: `Deafen`,
+        type: 'checkbox',
+        checked: currentIcon === trayIcons.DEAFENED,
+        visible: voiceConnected,
+        click: onToggleDeafen,
+    };
+    menuItems[MenuItems.OPEN] = {
+        label: `Open ${APP_NAME}`,
+        type: 'normal',
+        visible: process.platform === 'linux',
+        click: onTrayClicked,
+    };
+    menuItems[MenuItems.VOICE_SETTINGS] = {
+        label: 'Voice / Video Settings',
+        type: 'normal',
+        visible: voiceConnected,
+        click: onOpenVoiceSettings,
+    };
+    menuItems[MenuItems.CHECK_UPDATE] = {
+        label: 'Check for Updates...',
+        type: 'normal',
+        visible: process.platform !== 'darwin',
+        click: onCheckForUpdates,
+    };
+    menuItems[MenuItems.QUIT] = {
+        label: `Quit ${APP_NAME}`,
+        role: 'quit',
+    };
+    menuItems[MenuItems.ACKNOWLEDGEMENTS] = {
+        label: 'Acknowledgements',
+        type: 'normal',
+        visible: process.platform !== 'darwin',
+        click: () => (0, securityUtils_1.saferShellOpenExternal)('https://discord.com/acknowledgements'),
+    };
 }
 function buildContextMenu() {
-  const separator = {
-    type: 'separator'
-  };
-  const hasApplications = applications != null && applications.length > 0;
-  contextMenu = [menuItems[MenuItems.SECRET], separator, ...(hasApplications ? [...applications, separator] : []), menuItems[MenuItems.OPEN], menuItems[MenuItems.MUTE], menuItems[MenuItems.DEAFEN], menuItems[MenuItems.VOICE_SETTINGS], menuItems[MenuItems.CHECK_UPDATE], menuItems[MenuItems.ACKNOWLEDGEMENTS], separator, menuItems[MenuItems.QUIT]];
+    const separator = { type: 'separator' };
+    const hasApplications = applications != null && applications.length > 0;
+    contextMenu = [
+        menuItems[MenuItems.SECRET],
+        separator,
+        ...(hasApplications ? [...applications, separator] : []),
+        menuItems[MenuItems.OPEN],
+        menuItems[MenuItems.MUTE],
+        menuItems[MenuItems.DEAFEN],
+        menuItems[MenuItems.VOICE_SETTINGS],
+        menuItems[MenuItems.CHECK_UPDATE],
+        menuItems[MenuItems.ACKNOWLEDGEMENTS],
+        separator,
+        menuItems[MenuItems.QUIT],
+    ];
 }
 function setTrayIcon(icon) {
-  currentIcon = icon !== null ? trayIcons[icon] : null;
-  if (icon == null) {
-    hide();
-    return;
-  } else {
-    show();
-  }
-  const muteIndex = contextMenu.indexOf(menuItems[MenuItems.MUTE]);
-  const deafenIndex = contextMenu.indexOf(menuItems[MenuItems.DEAFEN]);
-  const voiceConnected = contextMenu[muteIndex].visible;
-  let shouldSetContextMenu = false;
-  if (currentIcon !== trayIcons.DEFAULT && currentIcon !== trayIcons.UNREAD) {
-    if (!voiceConnected) {
-      contextMenu[muteIndex].visible = true;
-      contextMenu[deafenIndex].visible = true;
-      shouldSetContextMenu = true;
+    currentIcon = icon !== null ? trayIcons[icon] : null;
+    if (icon == null) {
+        hide();
+        return;
     }
-    if (currentIcon === trayIcons.DEAFENED) {
-      contextMenu[muteIndex].checked = true;
-      contextMenu[deafenIndex].checked = true;
-      shouldSetContextMenu = true;
-    } else if (currentIcon === trayIcons.MUTED) {
-      contextMenu[muteIndex].checked = true;
-      contextMenu[deafenIndex].checked = false;
-      shouldSetContextMenu = true;
-    } else if (contextMenu[muteIndex].checked || contextMenu[deafenIndex].checked) {
-      contextMenu[muteIndex].checked = false;
-      contextMenu[deafenIndex].checked = false;
-      shouldSetContextMenu = true;
+    else {
+        show();
     }
-  } else if (voiceConnected) {
-    contextMenu[muteIndex].visible = false;
-    contextMenu[deafenIndex].visible = false;
-    shouldSetContextMenu = true;
-  }
-  shouldSetContextMenu && setContextMenu();
-  if (atomTray != null && currentIcon != null) {
-    try {
-      atomTray.setImage(currentIcon);
-    } catch (e) {
-      console.error('systemTray: Failed to set tray icon:', e);
+    const muteIndex = contextMenu.indexOf(menuItems[MenuItems.MUTE]);
+    const deafenIndex = contextMenu.indexOf(menuItems[MenuItems.DEAFEN]);
+    const voiceConnected = contextMenu[muteIndex].visible;
+    let shouldSetContextMenu = false;
+    if (currentIcon !== trayIcons.DEFAULT && currentIcon !== trayIcons.UNREAD) {
+        if (!voiceConnected) {
+            contextMenu[muteIndex].visible = true;
+            contextMenu[deafenIndex].visible = true;
+            shouldSetContextMenu = true;
+        }
+        if (currentIcon === trayIcons.DEAFENED) {
+            contextMenu[muteIndex].checked = true;
+            contextMenu[deafenIndex].checked = true;
+            shouldSetContextMenu = true;
+        }
+        else if (currentIcon === trayIcons.MUTED) {
+            contextMenu[muteIndex].checked = true;
+            contextMenu[deafenIndex].checked = false;
+            shouldSetContextMenu = true;
+        }
+        else if (contextMenu[muteIndex].checked || contextMenu[deafenIndex].checked) {
+            contextMenu[muteIndex].checked = false;
+            contextMenu[deafenIndex].checked = false;
+            shouldSetContextMenu = true;
+        }
     }
-  }
+    else if (voiceConnected) {
+        contextMenu[muteIndex].visible = false;
+        contextMenu[deafenIndex].visible = false;
+        shouldSetContextMenu = true;
+    }
+    shouldSetContextMenu && setContextMenu();
+    if (atomTray != null && currentIcon != null) {
+        try {
+            atomTray.setImage(currentIcon);
+        }
+        catch (e) {
+            console.error('systemTray: Failed to set tray icon:', e);
+        }
+    }
 }
 function launchApplication(applicationId) {
-  options.onLaunchApplication(applicationId);
+    options.onLaunchApplication(applicationId);
 }
 function setApplications(newApplications) {
-  applications = newApplications.map(application => ({
-    type: 'normal',
-    label: application.name,
-    click: () => launchApplication(application.id)
-  }));
-  buildContextMenu();
-  setContextMenu();
+    applications = newApplications.map((application) => ({
+        type: 'normal',
+        label: application.name,
+        click: () => launchApplication(application.id),
+    }));
+    buildContextMenu();
+    setContextMenu();
 }
 function setContextMenu() {
-  let menu = null;
-  try {
-    menu = _electron.Menu.buildFromTemplate(contextMenu);
-  } catch (_) {}
-  if (atomTray != null) {
-    atomTray.setContextMenu(menu);
-  }
+    let menu = null;
+    try {
+        menu = electron_1.Menu.buildFromTemplate(contextMenu);
+    }
+    catch (_) {
+    }
+    if (atomTray != null) {
+        atomTray.setContextMenu(menu);
+    }
 }
 function show() {
-  if (atomTray != null) return;
-  if (currentIcon == null) {
-    console.error('systemTray: Cannot create tray icon: currentIcon is null');
-    return;
-  }
-  const guid = ['win32', 'darwin'].includes(process.platform) ? TrayGuidByChannel[buildInfo.releaseChannel] : undefined;
-  try {
-    atomTray = guid !== undefined ? new _electron.Tray(currentIcon, guid) : new _electron.Tray(currentIcon);
-    atomTray.setToolTip(APP_NAME);
-    setContextMenu();
-    atomTray.on('click', options.onTrayClicked);
-  } catch (e) {
-    console.error('systemTray: Failed to create tray icon:', e);
-  }
+    if (atomTray != null)
+        return;
+    if (currentIcon == null) {
+        console.error('systemTray: Cannot create tray icon: currentIcon is null');
+        return;
+    }
+    const guid = ['win32', 'darwin'].includes(process.platform) ? TrayGuidByChannel[buildInfo.releaseChannel] : undefined;
+    try {
+        atomTray = guid !== undefined ? new electron_1.Tray(currentIcon, guid) : new electron_1.Tray(currentIcon);
+        atomTray.setToolTip(APP_NAME);
+        setContextMenu();
+        atomTray.on('click', options.onTrayClicked);
+    }
+    catch (e) {
+        console.error('systemTray: Failed to create tray icon:', e);
+    }
 }
 function hide() {
-  if (atomTray == null) {
-    return;
-  }
-  atomTray.destroy();
-  atomTray = null;
+    if (atomTray == null) {
+        return;
+    }
+    atomTray.destroy();
+    atomTray = null;
 }
 function displayHowToCloseHint() {
-  if (settings == null || atomTray == null) {
-    return;
-  }
-  if (settings.get('trayBalloonShown') != null) {
-    return;
-  }
-  settings.set('trayBalloonShown', true);
-  settings.save();
-  atomTray.displayBalloon({
-    title: 'Discord',
-    content: 'Hi! Discord will run in the background to keep you in touch with your friends.' + ' You can right-click here to quit.'
-  });
+    if (settings == null || atomTray == null) {
+        return;
+    }
+    if (settings.get('trayBalloonShown') != null) {
+        return;
+    }
+    const balloonMessage = 'Hi! Discord will run in the background to keep you in touch with your friends.'
+        + ' You can right-click here to quit.';
+    settings.set('trayBalloonShown', true);
+    settings.save();
+    atomTray.displayBalloon({
+        title: 'Discord',
+        content: balloonMessage,
+    });
 }
