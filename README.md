@@ -14,15 +14,15 @@
 | game_utils | 1 |
 | hook | 1 |
 | krisp | 1 |
-| media | 1 |
+| media | 2 |
 | ml | 1 |
 | modules | 1 |
 | notifications | 1 |
 | overlay2 | 1 |
 | rpc | 1 |
 | spellcheck | 1 |
-| utils | 8 |
-| voice | 5 |
+| utils | 9 |
+| voice | 6 |
 | zstd | 1 |
 
 ## branches
