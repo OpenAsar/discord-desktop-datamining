@@ -2,10 +2,11 @@
 
 ## canary versions
 
-**host: 1.0.937**
+**host: 1.0.938**
 
 | module | version |
 | ------ | :-----: |
+| clips | 1 |
 | cloudsync | 1 |
 | desktop_core | 1 |
 | desktop_overlay | 1 |
