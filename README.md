@@ -22,8 +22,8 @@
 | overlay2 | 1 |
 | rpc | 1 |
 | spellcheck | 1 |
-| utils | 1 |
-| voice | 1 |
+| utils | 2 |
+| voice | 2 |
 | zstd | 1 |
 
 ## branches
