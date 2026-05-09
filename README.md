@@ -23,7 +23,7 @@
 | rpc | 1 |
 | spellcheck | 1 |
 | utils | 5 |
-| voice | 4 |
+| voice | 5 |
 | zstd | 1 |
 
 ## branches
