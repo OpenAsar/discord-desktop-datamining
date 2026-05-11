@@ -141,6 +141,9 @@ features.declareSupported('audio_codec_red');
 features.declareSupported('sidechain_compression');
 features.declareSupported('async_video_input_device_init');
 features.declareSupported('port_aware_latency_testing');
+if (VoiceEngine.isSpatialAudioEnabled()) {
+    features.declareSupported('spatial_audio');
+}
 if (process.platform === 'darwin') {
     features.declareSupported('screen_capture_kit');
     if (versionGreaterThanOrEqual(os.release(), '23.0.0')) {
@@ -194,9 +197,6 @@ if (process.platform === 'win32') {
     features.declareSupported('voice_subsystem_deferred_switch');
     features.declareSupported('voice_bypass_system_audio_input_processing');
     features.declareSupported('clips');
-    if (VoiceEngine.setClipsModulePath !== undefined) {
-        features.declareSupported('clips_v3');
-    }
 }
 function bindConnectionInstance(instance) {
     return {
@@ -219,6 +219,7 @@ function bindConnectionInstance(instance) {
         setSecureFramesStateUpdateCallback: (callback) => instance.setSecureFramesStateUpdateCallback(callback),
         setLocalVolume: (userId, volume) => instance.setLocalVolume(userId, volume),
         setLocalMute: (userId, mute) => instance.setLocalMute(userId, mute),
+        setUserPosition: (userId, position) => instance.setUserPosition(userId, position),
         fastUdpReconnect: () => instance.fastUdpReconnect(),
         setLocalPan: (userId, left, right) => instance.setLocalPan(userId, left, right),
         setDisableLocalVideo: (userId, disabled) => instance.setDisableLocalVideo(userId, disabled),
