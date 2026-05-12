@@ -8,14 +8,14 @@
 | ------ | :-----: |
 | clips | 1 |
 | cloudsync | 1 |
-| desktop_core | 1 |
+| desktop_core | 2 |
 | desktop_overlay | 1 |
 | dispatch | 1 |
 | erlpack | 1 |
 | game_utils | 1 |
 | hook | 1 |
 | krisp | 1 |
-| media | 1 |
+| media | 2 |
 | ml | 1 |
 | modules | 1 |
 | notifications | 1 |
@@ -23,7 +23,7 @@
 | rpc | 1 |
 | spellcheck | 1 |
 | utils | 4 |
-| voice | 1 |
+| voice | 2 |
 | zstd | 1 |
 
 ## branches
