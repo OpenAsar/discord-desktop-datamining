@@ -38,4 +38,7 @@ module.exports = {
     getMemoryUsageBlob() {
         return new Promise((resolve) => native.getMemoryUsageBlob(resolve));
     },
+    getGpuStats(pid) {
+        return Promise.resolve(JSON.parse(native.getGpuStats(pid)));
+    },
 };
