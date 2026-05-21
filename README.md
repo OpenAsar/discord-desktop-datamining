@@ -8,7 +8,7 @@
 | ------ | :-----: |
 | clips | 6 |
 | cloudsync | 1 |
-| desktop_core | 1 |
+| desktop_core | 2 |
 | desktop_overlay | 1 |
 | dispatch | 1 |
 | erlpack | 1 |
@@ -21,7 +21,7 @@
 | overlay2 | 1 |
 | rpc | 1 |
 | spellcheck | 1 |
-| utils | 7 |
+| utils | 8 |
 | voice | 4 |
 | zstd | 1 |
 
