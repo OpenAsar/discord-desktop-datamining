@@ -6,7 +6,7 @@
 
 | module | version |
 | ------ | :-----: |
-| clips | 4 |
+| clips | 6 |
 | cloudsync | 1 |
 | desktop_core | 1 |
 | desktop_overlay | 1 |
