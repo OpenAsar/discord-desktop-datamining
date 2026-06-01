@@ -2,11 +2,10 @@
 
 ## development versions
 
-**host: 1.0.992**
+**host: 1.0.993**
 
 | module | version |
 | ------ | :-----: |
-| clips | 1 |
 | cloudsync | 1 |
 | desktop_core | 1 |
 | desktop_overlay | 1 |
