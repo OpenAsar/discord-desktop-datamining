@@ -2,10 +2,11 @@
 
 ## development versions
 
-**host: 1.0.993**
+**host: 1.0.994**
 
 | module | version |
 | ------ | :-----: |
+| clips | 1 |
 | cloudsync | 1 |
 | desktop_core | 1 |
 | desktop_overlay | 1 |
@@ -15,7 +16,6 @@
 | hook | 1 |
 | krisp | 1 |
 | media | 1 |
-| ml | 1 |
 | modules | 1 |
 | notifications | 1 |
 | overlay2 | 1 |
