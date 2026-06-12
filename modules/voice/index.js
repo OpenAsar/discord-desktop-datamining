@@ -198,6 +198,7 @@ if (process.platform === 'win32') {
     features.declareSupported('voice_subsystem_deferred_switch');
     features.declareSupported('voice_bypass_system_audio_input_processing');
     features.declareSupported('clips');
+    features.declareSupported('clips_thumbnail');
 }
 function bindConnectionInstance(instance) {
     return {
