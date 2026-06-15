@@ -16,8 +16,9 @@
         "@discordapp/discord-native-types": "file:../../../discord_common/js/packages/discord-native-types",
         "@discordapp/native-crash-codes": "file:../../../discord_common/js/packages/native-crash-codes",
         "@openpgp/unbzip2-stream": "2.0.0",
-        "@sentry/browser": "7.112.0",
-        "@sentry/electron": "4.24.0",
+        "@sentry/browser": "10.50.0",
+        "@sentry/electron": "7.13.0",
+        "@sentry/types": "10.50.0",
         "@types/lodash": "4.14.159",
         "@types/node": "22.14.0",
         "arch": "2.2.0",
@@ -30,5 +31,10 @@
         "@types/jest": "28.1.4",
         "electron": "37.6.1",
         "jest": "^27.1.0"
+    },
+    "pnpm": {
+        "patchedDependencies": {
+            "@sentry/electron@7.13.0": "patches/@sentry__electron@7.13.0.patch"
+        }
     }
 }
