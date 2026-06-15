@@ -2,10 +2,10 @@
 const Overlay = require('./discord_overlay2.node');
 if (Overlay._setEventHandler == null && Overlay._setEventHandlerJson != null) {
     Overlay._setEventHandler = (handler) => {
-        const wrappedHandler = (pid, eventJson) => {
+        function wrappedHandler(pid, eventJson) {
             const event = JSON.parse(eventJson);
             handler(pid, event);
-        };
+        }
         Overlay._setEventHandlerJson(wrappedHandler);
     };
 }
