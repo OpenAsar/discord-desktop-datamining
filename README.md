@@ -8,7 +8,7 @@
 | ------ | :-----: |
 | clips | 2 |
 | cloudsync | 1 |
-| desktop_core | 1 |
+| desktop_core | 2 |
 | desktop_overlay | 1 |
 | dispatch | 1 |
 | erlpack | 1 |
@@ -17,7 +17,7 @@
 | krisp | 1 |
 | media | 1 |
 | modules | 1 |
-| notifications | 1 |
+| notifications | 2 |
 | overlay2 | 1 |
 | rpc | 1 |
 | spellcheck | 1 |
