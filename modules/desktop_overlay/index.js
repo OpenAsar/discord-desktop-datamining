@@ -33,14 +33,14 @@ const DesktopOverlayModuleInterface = {
         }
     },
     setFocusCallback: (focus) => {
-        const wrappedCallback = (pid, windowHandle, windowClass) => {
+        function wrappedCallback(pid, windowHandle, windowClass) {
             const previousTargetGamePID = targetGamePID;
             targetGamePID = pid;
             if (previousTargetGamePID !== 0 && targetGamePID !== 0 && targetGamePID !== previousTargetGamePID) {
                 reloadHostWindowCallback(targetGamePID);
             }
             focus(targetGamePID, windowHandle, windowClass);
-        };
+        }
         DesktopOverlay.setFocusCallback(wrappedCallback);
     },
     setFocusLostCallback: (focus) => {

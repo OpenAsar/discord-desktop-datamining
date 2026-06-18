@@ -39,7 +39,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.setCallbacks = setCallbacks;
 exports.getAuthorization = getAuthorization;
 exports.getSettings = getSettings;
-exports.showNotification = showNotification;
+exports.sendNotification = sendNotification;
 exports.removeNotifications = removeNotifications;
 exports.removeAllNotifications = removeAllNotifications;
 const electron = __importStar(require("electron"));
@@ -177,7 +177,7 @@ class ToastBuilder {
         return xml;
     }
 }
-async function showNotification(options) {
+async function sendNotification(options) {
     const toast = new ToastBuilder(options);
     if (options.icon != null) {
         toast.setIcon(await getAssetUrl(options.icon));
@@ -190,9 +190,12 @@ async function showNotification(options) {
     notification.on('close', (_event, action = '') => {
         handleNotificationAction('dismiss', uuid, action);
     });
+    notification.on('failed', (_event, error) => {
+        console.error('discord_notifications: Windows toast failed to display:', error);
+    });
     notifications.set(uuid, notification);
     notification.show();
-    return Promise.resolve(uuid);
+    return Promise.resolve({ identifier: uuid, delivered: true });
 }
 function removeNotifications(identifiers) {
     for (const identifier of identifiers) {

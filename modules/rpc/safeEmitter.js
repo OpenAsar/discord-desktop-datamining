@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.createSafeEmitter = createSafeEmitter;
 function createSafeEmitter() {
     const callbackMap = new Map();
-    const addListener = (name, listener, once) => {
+    function addListener(name, listener, once) {
         let listeners = callbackMap.get(name);
         if (listeners == null) {
             listeners = new Set();
@@ -17,8 +17,8 @@ function createSafeEmitter() {
             };
         }
         listeners.add(listener);
-    };
-    const invokeListener = (name, ...args) => {
+    }
+    function invokeListener(name, ...args) {
         const listeners = callbackMap.get(name);
         if (listeners == null) {
             return;
@@ -26,10 +26,10 @@ function createSafeEmitter() {
         for (const listener of listeners) {
             listener(...args);
         }
-    };
-    const removeAllListeners = () => {
+    }
+    function removeAllListeners() {
         callbackMap.clear();
-    };
+    }
     return {
         on: (name, callback) => addListener(name, callback, false),
         once: (name, callback) => addListener(name, callback, true),
