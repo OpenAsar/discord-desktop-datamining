@@ -6,9 +6,9 @@
 
 | module | version |
 | ------ | :-----: |
-| clips | 3 |
+| clips | 4 |
 | cloudsync | 1 |
-| desktop_core | 1 |
+| desktop_core | 2 |
 | desktop_overlay | 1 |
 | dispatch | 1 |
 | erlpack | 1 |
@@ -21,8 +21,8 @@
 | overlay2 | 1 |
 | rpc | 1 |
 | spellcheck | 1 |
-| utils | 4 |
-| voice | 4 |
+| utils | 5 |
+| voice | 6 |
 | zstd | 1 |
 
 ## branches
