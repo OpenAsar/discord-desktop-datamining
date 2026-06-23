@@ -231,16 +231,16 @@ function eventHandler(pid, event) {
         return;
     }
     const _screen = require('electron').screen;
+    const osrPaintsAtDpr1 = parseInt(process.versions.electron, 10) >= 42;
     if (event.message === 'graphics_info') {
         if (event.width > 0 && event.height > 0) {
-            overlay_module_1.default.logMessage(`Resizing overlay renderer to ${event.width}x${event.height}`);
-            if (global.features.supports('overlay-hidpi')) {
+            if (osrPaintsAtDpr1) {
+                renderer.window.setContentSize(event.width, event.height);
+            }
+            else {
                 const screenRect = { x: 0, y: 0, width: event.width, height: event.height };
                 const dipRect = _screen.screenToDipRect(renderer.window, screenRect);
                 renderer.window.setContentSize(dipRect.width, dipRect.height);
-            }
-            else {
-                renderer.window.setContentSize(event.width, event.height);
             }
             renderer.window.webContents.setFrameRate(60);
         }
@@ -254,7 +254,7 @@ function eventHandler(pid, event) {
         const translated = needsTranslation(event) ? overlay_module_1.default.translateInputEvent(event) : event;
         if (translated) {
             if (!handleAccelerators(renderer.window.webContents, translated)) {
-                if (global.features.supports('overlay-hidpi') && translated.x && translated.y) {
+                if (!osrPaintsAtDpr1 && translated.x && translated.y) {
                     const dipPoint = _screen.screenToDipPoint({ x: translated.x, y: translated.y });
                     translated.x = dipPoint.x;
                     translated.y = dipPoint.y;
