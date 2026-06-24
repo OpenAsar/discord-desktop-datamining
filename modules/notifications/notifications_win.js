@@ -191,7 +191,7 @@ async function sendNotification(options) {
         handleNotificationAction('dismiss', uuid, action);
     });
     notification.on('failed', (_event, error) => {
-        console.error('discord_notifications: Windows toast failed to display:', error);
+        handleNotificationAction('failed', uuid, error);
     });
     notifications.set(uuid, notification);
     notification.show();
