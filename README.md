@@ -17,7 +17,7 @@
 | krisp | 1 |
 | media | 1 |
 | modules | 1 |
-| notifications | 1 |
+| notifications | 2 |
 | overlay2 | 1 |
 | rpc | 1 |
 | spellcheck | 1 |
