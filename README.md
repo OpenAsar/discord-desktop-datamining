@@ -2,7 +2,7 @@
 
 ## ptb versions
 
-**host: 1.0.1201**
+**host: 1.0.1202**
 
 | module | version |
 | ------ | :-----: |
@@ -22,7 +22,7 @@
 | rpc | 1 |
 | spellcheck | 1 |
 | utils | 1 |
-| voice | 2 |
+| voice | 1 |
 | zstd | 1 |
 
 ## branches
