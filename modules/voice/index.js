@@ -453,5 +453,6 @@ if (process.platform === 'win32') {
     features.declareSupported('voice_bypass_system_audio_input_processing');
     features.declareSupported('clips');
     features.declareSupported('clips_thumbnail');
+    features.declareSupported('clips_recording_ready_events');
 }
 module.exports = VoiceEngine;
