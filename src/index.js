@@ -5,6 +5,7 @@ import { cpSync, writeFileSync, readFileSync, existsSync } from 'fs';
 global.LATEST_ONLY = true;
 
 const modules = [
+  'arborium',
   'host',
   'desktop_core',
   'desktop_overlay',
