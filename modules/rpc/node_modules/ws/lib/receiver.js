@@ -69,6 +69,7 @@ class Receiver extends Writable {
 
     this._totalPayloadLength = 0;
     this._messageLength = 0;
+    this._numFragments = 0;
     this._fragments = [];
 
     this._state = GET_INFO;
@@ -445,6 +446,17 @@ class Receiver extends Writable {
 
     if (this._opcode > 0x07) return this.controlMessage(data);
 
+    if (this._maxFragments > 0 && ++this._numFragments > this._maxFragments) {
+      this._loop = false;
+      return error(
+        RangeError,
+        'Too many message fragments',
+        false,
+        1008,
+        'WS_ERR_TOO_MANY_BUFFERED_PARTS'
+      );
+    }
+
     if (this._compressed) {
       this._state = INFLATING;
       this.decompress(data, cb);
@@ -452,20 +464,6 @@ class Receiver extends Writable {
     }
 
     if (data.length) {
-      if (
-        this._maxFragments > 0 &&
-        this._fragments.length >= this._maxFragments
-      ) {
-        this._loop = false;
-        return error(
-          RangeError,
-          'Too many message fragments',
-          false,
-          1008,
-          'WS_ERR_TOO_MANY_BUFFERED_PARTS'
-        );
-      }
-
       //
       // This message is not compressed so its lenght is the sum of the payload
       // length of all fragments.
@@ -500,21 +498,6 @@ class Receiver extends Writable {
               false,
               1009,
               'WS_ERR_UNSUPPORTED_MESSAGE_LENGTH'
-            )
-          );
-        }
-
-        if (
-          this._maxFragments > 0 &&
-          this._fragments.length >= this._maxFragments
-        ) {
-          return cb(
-            error(
-              RangeError,
-              'Too many message fragments',
-              false,
-              1008,
-              'WS_ERR_TOO_MANY_BUFFERED_PARTS'
             )
           );
         }
