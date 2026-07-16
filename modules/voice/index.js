@@ -176,6 +176,7 @@ function bindConnectionInstance(instance) {
         stopAllSamplesLocalPlayback: () => instance.stopAllSamplesLocalPlayback(),
         setOnVideoEncoderFallbackCallback: (callback) => instance.setOnVideoEncoderFallbackCallback(callback),
         setOnVideoDecoderFallbackCallback: (callback) => instance.setOnVideoDecoderFallbackCallback(callback),
+        setVideoCodecErrorCallback: (callback) => instance.setVideoCodecErrorCallback(callback),
         setOnRtcpMessageCallback: (callback) => instance.setOnRtcpMessageCallback?.(callback),
         presentDesktopSourcePicker: (style) => instance.presentDesktopSourcePicker(style),
     };

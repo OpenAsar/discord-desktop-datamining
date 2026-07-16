@@ -2,10 +2,11 @@
 
 ## development versions
 
-**host: 1.0.1017**
+**host: 1.0.1018**
 
 | module | version |
 | ------ | :-----: |
+| arborium | 1 |
 | clips | 1 |
 | cloudsync | 1 |
 | desktop_core | 1 |
