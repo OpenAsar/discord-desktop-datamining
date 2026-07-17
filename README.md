@@ -2,12 +2,12 @@
 
 ## canary versions
 
-**host: 1.0.1048**
+**host: 1.0.1049**
 
 | module | version |
 | ------ | :-----: |
 | arborium | 1 |
-| clips | 4 |
+| clips | 1 |
 | cloudsync | 1 |
 | desktop_core | 1 |
 | desktop_overlay | 1 |
@@ -22,8 +22,8 @@
 | overlay2 | 1 |
 | rpc | 1 |
 | spellcheck | 1 |
-| utils | 4 |
-| voice | 4 |
+| utils | 1 |
+| voice | 1 |
 | zstd | 1 |
 
 ## branches
