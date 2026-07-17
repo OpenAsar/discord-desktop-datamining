@@ -526,6 +526,7 @@ class Receiver extends Writable {
       this._totalPayloadLength = 0;
       this._messageLength = 0;
       this._fragmented = 0;
+      this._numFragments = 0;
       this._fragments = [];
 
       if (this._opcode === 2) {
