@@ -2,10 +2,11 @@
 
 ## stable versions
 
-**host: 1.0.9248**
+**host: 1.0.9249**
 
 | module | version |
 | ------ | :-----: |
+| arborium | 1 |
 | clips | 1 |
 | cloudsync | 1 |
 | desktop_core | 1 |
