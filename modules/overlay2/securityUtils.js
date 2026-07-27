@@ -18,7 +18,13 @@ const BLOCKED_URL_PROTOCOLS = [
     'ms-cxh:',
     'ms-cxh-full:',
     'ms-word:',
+    'shell:',
+    'ms-msdt:',
+    'search-ms:',
+    'ms-officecmd:',
+    'ms-appinstaller:',
 ];
+const MIN_URL_SCHEME_LENGTH = 2;
 function shouldOpenExternalUrl(externalUrl) {
     let parsedUrl;
     try {
@@ -27,7 +33,14 @@ function shouldOpenExternalUrl(externalUrl) {
     catch (_) {
         return false;
     }
-    if (parsedUrl.protocol == null || BLOCKED_URL_PROTOCOLS.includes(parsedUrl.protocol.toLowerCase())) {
+    if (parsedUrl.protocol == null) {
+        return false;
+    }
+    const protocol = parsedUrl.protocol.toLowerCase();
+    if (BLOCKED_URL_PROTOCOLS.includes(protocol)) {
+        return false;
+    }
+    if (protocol.replace(/:$/, '').length < MIN_URL_SCHEME_LENGTH) {
         return false;
     }
     return true;
