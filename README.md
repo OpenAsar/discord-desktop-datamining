@@ -7,7 +7,7 @@
 | module | version |
 | ------ | :-----: |
 | arborium | 1 |
-| clips | 3 |
+| clips | 5 |
 | cloudsync | 1 |
 | desktop_core | 2 |
 | desktop_overlay | 1 |
@@ -23,7 +23,7 @@
 | rpc | 1 |
 | spellcheck | 1 |
 | utils | 10 |
-| voice | 5 |
+| voice | 7 |
 | zstd | 1 |
 
 ## branches
