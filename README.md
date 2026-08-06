@@ -2,7 +2,7 @@
 
 ## canary versions
 
-**host: 1.0.1088**
+**host: 1.0.1091**
 
 | module | version |
 | ------ | :-----: |
