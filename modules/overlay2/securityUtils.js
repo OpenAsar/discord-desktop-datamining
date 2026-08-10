@@ -1,13 +1,9 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.shouldOpenExternalUrl = shouldOpenExternalUrl;
 exports.saferShellOpenExternal = saferShellOpenExternal;
 exports.checkUrlOriginMatches = checkUrlOriginMatches;
 const electron_1 = require("electron");
-const url_1 = __importDefault(require("url"));
 const BLOCKED_URL_PROTOCOLS = [
     'file:',
     'javascript:',
@@ -18,16 +14,25 @@ const BLOCKED_URL_PROTOCOLS = [
     'ms-cxh:',
     'ms-cxh-full:',
     'ms-word:',
+    'shell:',
+    'ms-msdt:',
+    'search-ms:',
+    'ms-officecmd:',
+    'ms-appinstaller:',
 ];
+const MIN_URL_SCHEME_LENGTH = 2;
 function shouldOpenExternalUrl(externalUrl) {
-    let parsedUrl;
+    let protocol;
     try {
-        parsedUrl = url_1.default.parse(externalUrl);
+        protocol = new URL(externalUrl).protocol.toLowerCase();
     }
     catch (_) {
         return false;
     }
-    if (parsedUrl.protocol == null || BLOCKED_URL_PROTOCOLS.includes(parsedUrl.protocol.toLowerCase())) {
+    if (BLOCKED_URL_PROTOCOLS.includes(protocol)) {
+        return false;
+    }
+    if (protocol.replace(/:$/, '').length < MIN_URL_SCHEME_LENGTH) {
         return false;
     }
     return true;
@@ -44,13 +49,11 @@ function checkUrlOriginMatches(urlA, urlB) {
     let parsedUrlA;
     let parsedUrlB;
     try {
-        parsedUrlA = url_1.default.parse(urlA);
-        parsedUrlB = url_1.default.parse(urlB);
+        parsedUrlA = new URL(urlA);
+        parsedUrlB = new URL(urlB);
     }
     catch (_) {
         return false;
     }
-    return (parsedUrlA.protocol === parsedUrlB.protocol
-        && parsedUrlA.slashes === parsedUrlB.slashes
-        && parsedUrlA.host === parsedUrlB.host);
+    return parsedUrlA.protocol === parsedUrlB.protocol && parsedUrlA.host === parsedUrlB.host;
 }

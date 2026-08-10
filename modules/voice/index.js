@@ -137,6 +137,8 @@ function bindConnectionInstance(instance) {
         setLocalMute: (userId, mute) => instance.setLocalMute(userId, mute),
         setUserPosition: (userId, position) => instance.setUserPosition(userId, position),
         fastUdpReconnect: () => instance.fastUdpReconnect(),
+        setUdpEndpoint: (address, port) => instance.setUdpEndpoint(address, port),
+        setOnConnectionFailedCallback: (callback) => instance.setOnConnectionFailedCallback(callback),
         setLocalPan: (userId, left, right) => instance.setLocalPan(userId, left, right),
         setDisableLocalVideo: (userId, disabled) => instance.setDisableLocalVideo(userId, disabled),
         setMinimumOutputDelay: (delay) => instance.setMinimumOutputDelay(delay),
@@ -397,6 +399,7 @@ features.declareSupported('sidechain_compression');
 features.declareSupported('async_video_input_device_init');
 features.declareSupported('port_aware_latency_testing');
 features.declareSupported('krisp_native_error');
+features.declareSupported('udp_endpoint_update');
 if (VoiceEngine.isSpatialAudioEnabled()) {
     features.declareSupported('spatial_audio');
 }
