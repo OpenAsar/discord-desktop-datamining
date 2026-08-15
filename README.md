@@ -15,7 +15,7 @@
 | erlpack | 1 |
 | game_utils | 1 |
 | hook | 1 |
-| krisp | 1 |
+| krisp | 2 |
 | media | 1 |
 | modules | 1 |
 | notifications | 1 |
