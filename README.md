@@ -2,12 +2,12 @@
 
 ## canary versions
 
-**host: 1.0.1115**
+**host: 1.0.1116**
 
 | module | version |
 | ------ | :-----: |
 | arborium | 1 |
-| clips | 2 |
+| clips | 1 |
 | cloudsync | 1 |
 | desktop_core | 1 |
 | desktop_overlay | 1 |
@@ -15,15 +15,15 @@
 | erlpack | 1 |
 | game_utils | 1 |
 | hook | 1 |
-| krisp | 2 |
+| krisp | 1 |
 | media | 1 |
 | modules | 1 |
 | notifications | 1 |
 | overlay2 | 1 |
 | rpc | 1 |
 | spellcheck | 1 |
-| utils | 5 |
-| voice | 4 |
+| utils | 1 |
+| voice | 1 |
 | zstd | 1 |
 
 ## branches
