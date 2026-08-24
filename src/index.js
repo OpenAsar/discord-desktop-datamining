@@ -16,6 +16,7 @@ const modules = [
   'media',
   'sekrit',
   'spellcheck',
+  'sysimg',
   'hook',
   'modules',
   'ml',
