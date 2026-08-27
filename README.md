@@ -2,7 +2,7 @@
 
 ## canary versions
 
-**host: 1.0.1134**
+**host: 1.0.1136**
 
 | module | version |
 | ------ | :-----: |
@@ -24,7 +24,7 @@
 | spellcheck | 1 |
 | sysimg | 1 |
 | utils | 2 |
-| voice | 3 |
+| voice | 1 |
 | zstd | 1 |
 
 ## branches
