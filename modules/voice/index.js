@@ -435,8 +435,7 @@ if (process.platform === 'linux') {
 if (process.platform === 'win32'
     || process.platform === 'linux'
     || (process.platform === 'darwin' && versionGreaterThanOrEqual(os.release(), '16.0.0'))) {
-    features.declareSupported('mediapipe');
-    features.declareSupported('mediapipe_animated');
+    features.declareSupported('video_background_filter');
 }
 if (process.platform === 'win32' || process.platform === 'darwin' || process.platform === 'linux') {
     features.declareSupported('image_quality_measurement');
