@@ -2,11 +2,10 @@
 
 ## ptb versions
 
-**host: 1.0.1217**
+**host: 1.0.1219**
 
 | module | version |
 | ------ | :-----: |
-| arborium | 1 |
 | clips | 1 |
 | cloudsync | 1 |
 | desktop_core | 1 |
