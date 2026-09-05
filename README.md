@@ -6,7 +6,7 @@
 
 | module | version |
 | ------ | :-----: |
-| clips | 4 |
+| clips | 5 |
 | cloudsync | 1 |
 | desktop_core | 1 |
 | desktop_overlay | 1 |
@@ -22,7 +22,7 @@
 | rpc | 1 |
 | spellcheck | 1 |
 | sysimg | 1 |
-| utils | 3 |
+| utils | 4 |
 | voice | 5 |
 | zstd | 1 |
 
