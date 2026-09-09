@@ -8,6 +8,7 @@ exports.destroyRenderer = destroyRenderer;
 exports.eventHandler = eventHandler;
 const electron_1 = require("electron");
 const Backoff_1 = __importDefault(require("./Backoff"));
+const overlaySizing_1 = require("./overlaySizing");
 const overlay_module_1 = __importDefault(require("./overlay_module"));
 const securityUtils_1 = require("./securityUtils");
 const ipcMain = {
@@ -59,17 +60,19 @@ function createRenderer(pid, url) {
     const urlWithPid = new URL(url);
     urlWithPid.searchParams.append('pid', pid.toString());
     url = urlWithPid.toString();
+    const scaleFactor = (0, overlaySizing_1.normalizeScaleFactor)(require('electron').screen.getPrimaryDisplay().scaleFactor);
     renderers[pid] = {
         pid,
         url: `file://${__dirname}/start.html?pid=${pid.toString()}`,
         overlayURL: url,
         backoff: new Backoff_1.default(1000, 30000),
+        scaleFactor,
         window: new electron_1.BrowserWindow({
             show: false,
             skipTaskbar: true,
             transparent: true,
             webPreferences: {
-                offscreen: true,
+                offscreen: { deviceScaleFactor: scaleFactor },
                 nodeIntegration: false,
                 sandbox: false,
                 preload: require.resolve('./overlayPreload'),
@@ -169,17 +172,27 @@ function loadOverlay(pid) {
             dragging: true,
             image: image.getBitmap().toJSON().data,
             size: image.getSize(),
-            offset,
+            offset: (0, overlaySizing_1.dipToPhysicalPoint)(offset, renderer.scaleFactor),
         });
     });
     renderer.window.webContents.on('stop-drag', (_event) => {
         overlay_module_1.default.sendCommand(renderer.pid, { message: 'set_drag_state', dragging: false });
     });
     renderer.window.webContents.on('ime-composition-range-changed', (_event, start, end, bounds) => {
-        overlay_module_1.default.sendCommand(renderer.pid, { message: 'ime_composition_range_changed', start, end, bounds });
+        overlay_module_1.default.sendCommand(renderer.pid, {
+            message: 'ime_composition_range_changed',
+            start,
+            end,
+            bounds: (0, overlaySizing_1.dipToPhysicalRects)(bounds, renderer.scaleFactor),
+        });
     });
     renderer.window.webContents.on('selection-bounds-changed', (_event, anchor, focus, isAnchorFirst) => {
-        overlay_module_1.default.sendCommand(renderer.pid, { message: 'ime_selection_bounds_changed', anchor, focus, isAnchorFirst });
+        overlay_module_1.default.sendCommand(renderer.pid, {
+            message: 'ime_selection_bounds_changed',
+            anchor: (0, overlaySizing_1.dipToPhysicalRect)(anchor, renderer.scaleFactor),
+            focus: (0, overlaySizing_1.dipToPhysicalRect)(focus, renderer.scaleFactor),
+            isAnchorFirst,
+        });
     });
     renderer.window.webContents.on('did-fail-load', (_e, errCode, errDesc, validatedURL) => {
         if (validatedURL !== renderer.url) {
@@ -230,18 +243,10 @@ function eventHandler(pid, event) {
     if (renderer == null || renderer.window == null || renderer.window.isDestroyed()) {
         return;
     }
-    const _screen = require('electron').screen;
-    const osrPaintsAtDpr1 = parseInt(process.versions.electron, 10) >= 42;
     if (event.message === 'graphics_info') {
         if (event.width > 0 && event.height > 0) {
-            if (osrPaintsAtDpr1) {
-                renderer.window.setContentSize(event.width, event.height);
-            }
-            else {
-                const screenRect = { x: 0, y: 0, width: event.width, height: event.height };
-                const dipRect = _screen.screenToDipRect(renderer.window, screenRect);
-                renderer.window.setContentSize(dipRect.width, dipRect.height);
-            }
+            const dipSize = (0, overlaySizing_1.physicalToDipSize)({ width: event.width, height: event.height }, renderer.scaleFactor);
+            renderer.window.setContentSize(dipSize.width, dipSize.height);
             renderer.window.webContents.setFrameRate(60);
         }
         else {
@@ -254,8 +259,8 @@ function eventHandler(pid, event) {
         const translated = needsTranslation(event) ? overlay_module_1.default.translateInputEvent(event) : event;
         if (translated) {
             if (!handleAccelerators(renderer.window.webContents, translated)) {
-                if (!osrPaintsAtDpr1 && translated.x && translated.y) {
-                    const dipPoint = _screen.screenToDipPoint({ x: translated.x, y: translated.y });
+                if ((0, overlaySizing_1.hasPointerCoordinates)(translated)) {
+                    const dipPoint = (0, overlaySizing_1.physicalToDipPoint)({ x: translated.x, y: translated.y }, renderer.scaleFactor);
                     translated.x = dipPoint.x;
                     translated.y = dipPoint.y;
                 }
