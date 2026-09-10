@@ -46,7 +46,7 @@ const offloadAdmControls = appSettings ? appSettings.getSync('offloadAdmControls
 const debugLogging = appSettings ? appSettings.getSync('debugLogging', true) : true;
 const maxLogBytesRaw = appSettings ? appSettings.getSync('maxLogBytes', 5000000) : 5000000;
 const maxLogBytes = Number.isFinite(maxLogBytesRaw) && maxLogBytesRaw > 0 ? Math.min(Math.trunc(maxLogBytesRaw), 0xffffffff) : 5000000;
-const asyncVideoInputDeviceInit = appSettings ? appSettings.getSync('asyncVideoInputDeviceInit', false) : false;
+const asyncVideoInputDeviceInit = process.platform === 'win32';
 function versionGreaterThanOrEqual(v1, v2) {
     const v1parts = v1.split('.').map(Number);
     const v2parts = v2.split('.').map(Number);
@@ -225,9 +225,6 @@ VoiceEngine.queueAudioSubsystem = function (subsystem) {
 };
 VoiceEngine.setOffloadAdmControls = function (doOffload) {
     appSettings.set('offloadAdmControls', doOffload);
-};
-VoiceEngine.setAsyncVideoInputDeviceInitSetting = function (enable) {
-    appSettings.set('asyncVideoInputDeviceInit', enable);
 };
 VoiceEngine.setDebugLogging = function (enable) {
     if (appSettings == null) {
