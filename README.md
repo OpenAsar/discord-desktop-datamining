@@ -6,7 +6,7 @@
 
 | module | version |
 | ------ | :-----: |
-| clips | 1 |
+| clips | 2 |
 | cloudsync | 1 |
 | desktop_core | 2 |
 | desktop_overlay | 1 |
@@ -14,7 +14,7 @@
 | erlpack | 1 |
 | game_utils | 1 |
 | hook | 1 |
-| krisp | 1 |
+| krisp | 2 |
 | media | 1 |
 | modules | 1 |
 | notifications | 1 |
@@ -23,7 +23,7 @@
 | spellcheck | 1 |
 | sysimg | 1 |
 | utils | 1 |
-| voice | 1 |
+| voice | 2 |
 | zstd | 1 |
 
 ## branches
