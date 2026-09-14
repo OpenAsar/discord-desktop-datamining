@@ -11,7 +11,7 @@
 | desktop_core | 1 |
 | desktop_overlay | 1 |
 | dispatch | 1 |
-| erlpack | 1 |
+| erlpack | 2 |
 | game_utils | 1 |
 | hook | 1 |
 | krisp | 1 |
