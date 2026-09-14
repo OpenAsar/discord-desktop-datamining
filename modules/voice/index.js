@@ -1,4 +1,5 @@
 "use strict";
+const MediaHost_1 = require("./MediaHost");
 const VoiceEngine = require('./discord_voice.node');
 const fs = require('fs');
 const os = require('os');
@@ -344,7 +345,6 @@ function log(level, message) {
     consoleLogFn(message);
     VoiceEngine.consoleLog(level, message);
 }
-console.log(`Initializing voice engine with audio subsystem: ${audioSubsystem}`);
 VoiceEngine.platform = process.platform;
 VoiceEngine.initialize({
     audioSubsystem,
@@ -458,4 +458,6 @@ if (process.platform === 'win32') {
     features.declareSupported('clips_thumbnail');
     features.declareSupported('clips_recording_ready_events');
 }
+(0, MediaHost_1.setLog)(log);
+(0, MediaHost_1.initializeMediaHost)(dataDirectory, logDirectory, maxLogBytes, offloadAdmControls, asyncVideoInputDeviceInit);
 module.exports = VoiceEngine;
