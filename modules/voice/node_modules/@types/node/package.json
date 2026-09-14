@@ -1,6 +1,6 @@
 {
     "name": "@types/node",
-    "version": "22.20.2",
+    "version": "26.5.1",
     "description": "TypeScript definitions for node",
     "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/node",
     "license": "MIT",
@@ -119,6 +119,11 @@
             "name": "René",
             "githubUsername": "Renegade334",
             "url": "https://github.com/Renegade334"
+        },
+        {
+            "name": "Yagiz Nizipli",
+            "githubUsername": "anonrig",
+            "url": "https://github.com/anonrig"
         }
     ],
     "main": "",
@@ -127,6 +132,11 @@
         "<=5.6": {
             "*": [
                 "ts5.6/*"
+            ]
+        },
+        "<=5.7": {
+            "*": [
+                "ts5.7/*"
             ]
         }
     },
@@ -137,9 +147,9 @@
     },
     "scripts": {},
     "dependencies": {
-        "undici-types": "~6.21.0"
+        "undici-types": "~8.9.0"
     },
     "peerDependencies": {},
-    "typesPublisherContentHash": "8e6b0ce9d1f2dc282d7964257456bcffbdd45115e795462dde19073b17676daa",
+    "typesPublisherContentHash": "6f5c8d0dfea5f391f6d414b5de64b03719aeafbbbe627156f715a8c47167ddcd",
     "typeScriptVersion": "5.6"
 }
