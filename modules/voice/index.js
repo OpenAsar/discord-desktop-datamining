@@ -1,12 +1,16 @@
 "use strict";
-const MediaHost_1 = require("./MediaHost");
-const VoiceEngine = require('./discord_voice.node');
 const fs = require('fs');
 const os = require('os');
 const process = require('process');
 const path = require('path');
 const discordNative = globalThis.window?.DiscordNative;
 const isElectronRenderer = discordNative != null && discordNative.isRenderer;
+const RUN_MEDIA_HOST = false;
+const VoiceEngine = RUN_MEDIA_HOST
+    ?
+        require('./MediaHost').default
+    :
+        require('./discord_voice.node');
 const appSettings = isElectronRenderer ? discordNative.settings : global.appSettings;
 const features = isElectronRenderer ? discordNative.features : global.features;
 const mainArgv = isElectronRenderer ? discordNative.processUtils.getMainArgvSync() : [];
@@ -455,6 +459,4 @@ if (process.platform === 'win32') {
     features.declareSupported('clips_thumbnail');
     features.declareSupported('clips_recording_ready_events');
 }
-(0, MediaHost_1.setLog)(log);
-(0, MediaHost_1.initializeMediaHost)(dataDirectory, logDirectory, maxLogBytes, offloadAdmControls, asyncVideoInputDeviceInit);
 module.exports = VoiceEngine;
