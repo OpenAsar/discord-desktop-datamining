@@ -22,7 +22,7 @@
 | rpc | 1 |
 | spellcheck | 1 |
 | sysimg | 1 |
-| utils | 10 |
+| utils | 11 |
 | voice | 3 |
 | zstd | 1 |
 
