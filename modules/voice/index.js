@@ -1,12 +1,16 @@
 "use strict";
-const MediaHost_1 = require("./MediaHost");
-const VoiceEngine = require('./discord_voice.node');
 const fs = require('fs');
 const os = require('os');
 const process = require('process');
 const path = require('path');
 const discordNative = globalThis.window?.DiscordNative;
 const isElectronRenderer = discordNative != null && discordNative.isRenderer;
+const RUN_MEDIA_HOST = false;
+const VoiceEngine = RUN_MEDIA_HOST
+    ?
+        require('./MediaHost').default
+    :
+        require('./discord_voice.node');
 const appSettings = isElectronRenderer ? discordNative.settings : global.appSettings;
 const features = isElectronRenderer ? discordNative.features : global.features;
 const mainArgv = isElectronRenderer ? discordNative.processUtils.getMainArgvSync() : [];
@@ -46,7 +50,7 @@ const offloadAdmControls = appSettings ? appSettings.getSync('offloadAdmControls
 const debugLogging = appSettings ? appSettings.getSync('debugLogging', true) : true;
 const maxLogBytesRaw = appSettings ? appSettings.getSync('maxLogBytes', 5000000) : 5000000;
 const maxLogBytes = Number.isFinite(maxLogBytesRaw) && maxLogBytesRaw > 0 ? Math.min(Math.trunc(maxLogBytesRaw), 0xffffffff) : 5000000;
-const asyncVideoInputDeviceInit = appSettings ? appSettings.getSync('asyncVideoInputDeviceInit', false) : false;
+const asyncVideoInputDeviceInit = process.platform === 'win32';
 function versionGreaterThanOrEqual(v1, v2) {
     const v1parts = v1.split('.').map(Number);
     const v2parts = v2.split('.').map(Number);
@@ -225,9 +229,6 @@ VoiceEngine.queueAudioSubsystem = function (subsystem) {
 };
 VoiceEngine.setOffloadAdmControls = function (doOffload) {
     appSettings.set('offloadAdmControls', doOffload);
-};
-VoiceEngine.setAsyncVideoInputDeviceInitSetting = function (enable) {
-    appSettings.set('asyncVideoInputDeviceInit', enable);
 };
 VoiceEngine.setDebugLogging = function (enable) {
     if (appSettings == null) {
@@ -458,6 +459,4 @@ if (process.platform === 'win32') {
     features.declareSupported('clips_thumbnail');
     features.declareSupported('clips_recording_ready_events');
 }
-(0, MediaHost_1.setLog)(log);
-(0, MediaHost_1.initializeMediaHost)(dataDirectory, logDirectory, maxLogBytes, offloadAdmControls, asyncVideoInputDeviceInit);
 module.exports = VoiceEngine;
