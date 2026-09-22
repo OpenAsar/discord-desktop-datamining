@@ -23,7 +23,7 @@
 | spellcheck | 1 |
 | sysimg | 1 |
 | utils | 2 |
-| voice | 1 |
+| voice | 4 |
 | zstd | 1 |
 
 ## branches
