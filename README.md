@@ -6,7 +6,7 @@
 
 | module | version |
 | ------ | :-----: |
-| clips | 2 |
+| clips | 3 |
 | cloudsync | 1 |
 | desktop_core | 3 |
 | desktop_overlay | 1 |
@@ -23,7 +23,7 @@
 | spellcheck | 1 |
 | sysimg | 1 |
 | utils | 5 |
-| voice | 3 |
+| voice | 4 |
 | zstd | 1 |
 
 ## branches
