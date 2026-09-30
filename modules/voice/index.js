@@ -192,10 +192,19 @@ VoiceEngine.createTransport = VoiceEngine._createTransport;
 if (isElectronRenderer) {
     VoiceEngine.setImageDataAllocator((width, height) => new globalThis.window.ImageData(width, height));
 }
-VoiceEngine.createVoiceConnectionWithOptions = function (userId, connectionOptions, onConnectCallback) {
-    const instance = new VoiceEngine.VoiceConnection(userId, connectionOptions, onConnectCallback);
-    return bindConnectionInstance(instance);
-};
+if (RUN_MEDIA_HOST) {
+    const createVoiceRaw = VoiceEngine.createVoiceConnectionWithOptions;
+    VoiceEngine.createVoiceConnectionWithOptions = function (userId, connectionOptions, onConnectCallback) {
+        const instance = createVoiceRaw(userId, connectionOptions, onConnectCallback);
+        return bindConnectionInstance(instance);
+    };
+}
+else {
+    VoiceEngine.createVoiceConnectionWithOptions = function (userId, connectionOptions, onConnectCallback) {
+        const instance = new VoiceEngine.VoiceConnection(userId, connectionOptions, onConnectCallback);
+        return bindConnectionInstance(instance);
+    };
+}
 VoiceEngine.createOwnStreamConnectionWithOptions = VoiceEngine.createVoiceConnectionWithOptions;
 VoiceEngine.createReplayConnection = function (audioEngineId, callback, replayLog) {
     if (replayLog == null) {
