@@ -2,13 +2,13 @@
 
 ## canary versions
 
-**host: 1.0.1196**
+**host: 1.0.1198**
 
 | module | version |
 | ------ | :-----: |
 | clips | 1 |
 | cloudsync | 1 |
-| desktop_core | 4 |
+| desktop_core | 1 |
 | desktop_overlay | 1 |
 | dispatch | 1 |
 | erlpack | 1 |
@@ -22,8 +22,8 @@
 | rpc | 1 |
 | spellcheck | 1 |
 | sysimg | 1 |
-| utils | 6 |
-| voice | 5 |
+| utils | 4 |
+| voice | 2 |
 | zstd | 1 |
 
 ## branches
