@@ -8,7 +8,7 @@ This package contains type definitions for node (https://nodejs.org/).
 Files were exported from https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/node.
 
 ### Additional Details
- * Last updated: Sat, 19 Sep 2026 00:09:37 GMT
+ * Last updated: Fri, 25 Sep 2026 22:04:07 GMT
  * Dependencies: [undici-types](https://npmjs.com/package/undici-types)
 
 # Credits
