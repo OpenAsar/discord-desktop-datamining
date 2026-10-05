@@ -2,13 +2,13 @@
 
 ## stable versions
 
-**host: 1.0.9260**
+**host: 1.0.9261**
 
 | module | version |
 | ------ | :-----: |
 | clips | 1 |
 | cloudsync | 1 |
-| desktop_core | 2 |
+| desktop_core | 1 |
 | desktop_overlay | 1 |
 | dispatch | 1 |
 | erlpack | 1 |
