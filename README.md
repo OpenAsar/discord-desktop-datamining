@@ -15,7 +15,7 @@
 | game_utils | 1 |
 | hook | 1 |
 | krisp | 1 |
-| media | 1 |
+| media | 2 |
 | modules | 1 |
 | ndi | 1 |
 | notifications | 1 |
@@ -23,8 +23,8 @@
 | rpc | 1 |
 | spellcheck | 1 |
 | sysimg | 1 |
-| utils | 12 |
-| voice | 2 |
+| utils | 14 |
+| voice | 5 |
 | zstd | 1 |
 
 ## branches
