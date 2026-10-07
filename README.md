@@ -8,7 +8,7 @@
 | ------ | :-----: |
 | clips | 1 |
 | cloudsync | 1 |
-| desktop_core | 1 |
+| desktop_core | 2 |
 | desktop_overlay | 1 |
 | dispatch | 1 |
 | erlpack | 1 |
@@ -19,12 +19,12 @@
 | modules | 1 |
 | ndi | 1 |
 | notifications | 1 |
-| overlay2 | 1 |
+| overlay2 | 2 |
 | rpc | 1 |
 | spellcheck | 1 |
 | sysimg | 1 |
-| utils | 4 |
-| voice | 2 |
+| utils | 6 |
+| voice | 3 |
 | zstd | 1 |
 
 ## branches
