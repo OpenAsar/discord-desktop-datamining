@@ -2,7 +2,7 @@
 
 ## canary versions
 
-**host: 1.0.1207**
+**host: 1.0.1211**
 
 | module | version |
 | ------ | :-----: |
@@ -20,10 +20,11 @@
 | ndi | 1 |
 | notifications | 1 |
 | overlay2 | 1 |
+| premap | 1 |
 | rpc | 1 |
 | spellcheck | 1 |
 | sysimg | 1 |
-| utils | 1 |
+| utils | 2 |
 | voice | 1 |
 | zstd | 1 |
 
