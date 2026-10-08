@@ -2,7 +2,7 @@
 
 ## canary versions
 
-**host: 1.0.1211**
+**host: 1.0.1212**
 
 | module | version |
 | ------ | :-----: |
@@ -24,7 +24,7 @@
 | rpc | 1 |
 | spellcheck | 1 |
 | sysimg | 1 |
-| utils | 2 |
+| utils | 1 |
 | voice | 1 |
 | zstd | 1 |
 
