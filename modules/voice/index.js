@@ -146,6 +146,7 @@ function bindConnectionInstance(instance) {
         setOnConnectionFailedCallback: (callback) => instance.setOnConnectionFailedCallback(callback),
         setLocalPan: (userId, left, right) => instance.setLocalPan(userId, left, right),
         setDisableLocalVideo: (userId, disabled) => instance.setDisableLocalVideo(userId, disabled),
+        setAvSyncEnabled: (userId, enabled) => instance.setAvSyncEnabled(userId, enabled),
         setMinimumOutputDelay: (delay) => instance.setMinimumOutputDelay(delay),
         getEncryptionModes: (callback) => instance.getEncryptionModes(callback),
         configureConnectionRetries: (baseDelay, maxDelay, maxAttempts) => instance.configureConnectionRetries(baseDelay, maxDelay, maxAttempts),
