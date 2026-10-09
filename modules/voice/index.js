@@ -410,6 +410,7 @@ features.declareSupported('async_video_input_device_init');
 features.declareSupported('port_aware_latency_testing');
 features.declareSupported('krisp_native_error');
 features.declareSupported('udp_endpoint_update');
+features.declareSupported('activity_capture');
 if (VoiceEngine.isSpatialAudioEnabled()) {
     features.declareSupported('spatial_audio');
 }
