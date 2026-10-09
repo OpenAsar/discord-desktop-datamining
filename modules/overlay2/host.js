@@ -76,6 +76,7 @@ function createRenderer(pid, url) {
                 nodeIntegration: false,
                 sandbox: false,
                 preload: require.resolve('./overlayPreload'),
+                additionalArguments: process.argv.includes('--legacy-overlay-worker') ? ['--legacy-overlay-worker'] : [],
                 enableRemoteModule: false,
                 contextIsolation: true,
             },

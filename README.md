@@ -2,7 +2,7 @@
 
 ## ptb versions
 
-**host: 1.0.1223**
+**host: 1.0.1224**
 
 | module | version |
 | ------ | :-----: |
@@ -17,13 +17,15 @@
 | krisp | 1 |
 | media | 1 |
 | modules | 1 |
+| ndi | 1 |
 | notifications | 1 |
 | overlay2 | 1 |
+| premap | 1 |
 | rpc | 1 |
 | spellcheck | 1 |
 | sysimg | 1 |
 | utils | 1 |
-| voice | 2 |
+| voice | 1 |
 | zstd | 1 |
 
 ## branches
