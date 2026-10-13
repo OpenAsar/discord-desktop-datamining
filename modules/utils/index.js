@@ -12,7 +12,7 @@ const discordNative = globalThis.window?.DiscordNative;
 const isElectronRenderer = discordNative?.isRenderer != null;
 if (isElectronRenderer) {
     const { inputCaptureSetWatcher, inputCaptureRegisterElement } = require('./input_capture');
-    inputCaptureSetWatcher(nativeUtils.inputWatchAll);
+    inputCaptureSetWatcher(nativeUtils.inputWatchAll, nativeUtils.getWaylandPortalTrigger);
     delete nativeUtils.inputWatchAll;
     nativeUtils.inputCaptureRegisterElement = inputCaptureRegisterElement;
 }
