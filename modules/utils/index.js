@@ -10,6 +10,12 @@ const nativeUtils = require('./discord_utils.node');
 nativeUtils.clearCandidateGamesCallback = nativeUtils.setCandidateGamesCallback;
 const discordNative = globalThis.window?.DiscordNative;
 const isElectronRenderer = discordNative?.isRenderer != null;
+if (process.platform === 'win32') {
+    const useProcessPollingPerf = isElectronRenderer
+        ? discordNative?.settings?.getSync?.('DESKTOP_PROCESS_POLLING_PERF', false) === true
+        : global.appSettings?.get?.('DESKTOP_PROCESS_POLLING_PERF', false) === true;
+    nativeUtils.setProcessPollingPerfEnabled?.(useProcessPollingPerf);
+}
 if (isElectronRenderer) {
     const { inputCaptureSetWatcher, inputCaptureRegisterElement } = require('./input_capture');
     inputCaptureSetWatcher(nativeUtils.inputWatchAll, nativeUtils.getWaylandPortalTrigger);
