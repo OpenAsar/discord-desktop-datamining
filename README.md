@@ -2,11 +2,11 @@
 
 ## canary versions
 
-**host: 1.0.1231**
+**host: 1.0.1233**
 
 | module | version |
 | ------ | :-----: |
-| clips | 1 |
+| clips | 2 |
 | cloudsync | 1 |
 | desktop_core | 1 |
 | desktop_overlay | 1 |
@@ -24,8 +24,8 @@
 | rpc | 1 |
 | spellcheck | 1 |
 | sysimg | 1 |
-| utils | 2 |
-| voice | 2 |
+| utils | 1 |
+| voice | 4 |
 | zstd | 1 |
 
 ## branches
