@@ -296,3 +296,28 @@ html {
 .build-override-clear-button:hover {
   text-decoration: none;
 }
+
+.splash-inner .splash-text > .splash-status[hidden] {
+  display: none;
+}
+
+.update-progress + .update-progress {
+  margin-top: 12px;
+}
+
+.progress-label {
+  display: block;
+  color: var(--white);
+  font-family: var(--primary-font);
+  font-size: 14px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.dual-progress .update-progress .progress {
+  margin-top: 6px;
+}
+
+.update-progress[data-started='false'] .progress-label {
+  color: var(--placeholder);
+}

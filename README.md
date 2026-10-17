@@ -2,7 +2,7 @@
 
 ## development versions
 
-**host: 1.0.1033**
+**host: 1.0.1035**
 
 | module | version |
 | ------ | :-----: |
@@ -20,6 +20,7 @@
 | ndi | 1 |
 | notifications | 1 |
 | overlay2 | 1 |
+| premap | 1 |
 | rpc | 1 |
 | spellcheck | 1 |
 | sysimg | 1 |

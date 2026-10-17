@@ -146,6 +146,7 @@ function bindConnectionInstance(instance) {
         setOnConnectionFailedCallback: (callback) => instance.setOnConnectionFailedCallback(callback),
         setLocalPan: (userId, left, right) => instance.setLocalPan(userId, left, right),
         setDisableLocalVideo: (userId, disabled) => instance.setDisableLocalVideo(userId, disabled),
+        setAvSyncEnabled: (userId, enabled) => instance.setAvSyncEnabled(userId, enabled),
         setMinimumOutputDelay: (delay) => instance.setMinimumOutputDelay(delay),
         getEncryptionModes: (callback) => instance.getEncryptionModes(callback),
         configureConnectionRetries: (baseDelay, maxDelay, maxAttempts) => instance.configureConnectionRetries(baseDelay, maxDelay, maxAttempts),
@@ -410,6 +411,7 @@ features.declareSupported('async_video_input_device_init');
 features.declareSupported('port_aware_latency_testing');
 features.declareSupported('krisp_native_error');
 features.declareSupported('udp_endpoint_update');
+features.declareSupported('activity_capture');
 if (VoiceEngine.isSpatialAudioEnabled()) {
     features.declareSupported('spatial_audio');
 }
