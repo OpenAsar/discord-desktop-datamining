@@ -27,6 +27,8 @@ const modules = [
   'voice_filters',
   'vigilante',
   'rpc',
+  'premap',
+  'ndi',
   'erlpack',
   'cloudsync',
   'zstd',
