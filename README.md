@@ -18,7 +18,7 @@
 | media | 1 |
 | modules | 1 |
 | ndi | 1 |
-| notifications | 1 |
+| notifications | 2 |
 | overlay2 | 1 |
 | premap | 1 |
 | rpc | 1 |
