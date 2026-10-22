@@ -46,6 +46,7 @@ const electron = __importStar(require("electron"));
 const fs_1 = __importDefault(require("fs"));
 const os_1 = __importDefault(require("os"));
 const stream_1 = require("stream");
+const promises_1 = require("stream/promises");
 const uuid_1 = require("uuid");
 const notifications = new Map();
 const assetMap = new Map();
@@ -62,42 +63,60 @@ function getAuthorization() {
 function getSettings() {
     return Promise.resolve({ authorizationStatus: 'authorized' });
 }
+const ICON_URL_PROTOCOLS = new Set(['http:', 'https:']);
+const ICON_DATA_URL_PATTERN = /^data:image\/[\w.+-]+;base64,([A-Za-z0-9+/=]+)$/;
 async function getAssetUrl(assetUrl) {
     if (assetUrl == null || assetUrl === '') {
-        return Promise.resolve(undefined);
+        return undefined;
     }
-    if (assetMap.has(assetUrl)) {
-        return Promise.resolve(assetMap.get(assetUrl));
+    const cachedPath = assetMap.get(assetUrl);
+    if (cachedPath != null) {
+        return cachedPath;
     }
     const path = os_1.default.tmpdir() + '/' + (0, uuid_1.v4)() + '.png';
-    const filePath = await new Promise((resolve, _reject) => {
-        fetch(assetUrl)
-            .then((response) => {
-            if (response.body == null) {
-                resolve(undefined);
-                return;
-            }
-            const readable = stream_1.Readable.fromWeb(response.body);
-            const stream = fs_1.default.createWriteStream(path);
-            stream.on('finish', () => {
-                resolve(path);
-            });
-            stream.on('error', (err) => {
-                fs_1.default.unlink(path, () => { });
-                console.warn('Failed to write notification icon:', err);
-                resolve(undefined);
-            });
-            readable.pipe(stream);
-        })
-            .catch((err) => {
-            console.warn('Failed to fetch notification icon:', err);
-            resolve(undefined);
-        });
-    });
-    if (filePath != null) {
-        assetMap.set(assetUrl, filePath);
+    const dataUrlMatch = ICON_DATA_URL_PATTERN.exec(assetUrl);
+    if (dataUrlMatch != null) {
+        try {
+            await fs_1.default.promises.writeFile(path, Buffer.from(dataUrlMatch[1], 'base64'));
+        }
+        catch (err) {
+            fs_1.default.unlink(path, () => { });
+            console.warn('Failed to write notification icon:', err);
+            return undefined;
+        }
+        assetMap.set(assetUrl, path);
+        return path;
     }
-    return Promise.resolve(filePath);
+    let parsedUrl;
+    try {
+        parsedUrl = new URL(assetUrl);
+    }
+    catch {
+        return undefined;
+    }
+    if (!ICON_URL_PROTOCOLS.has(parsedUrl.protocol)) {
+        return undefined;
+    }
+    try {
+        const response = await electron.net.fetch(assetUrl, {
+            credentials: 'omit',
+            bypassCustomProtocolHandlers: true,
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        if (response.body == null) {
+            return undefined;
+        }
+        await (0, promises_1.pipeline)(stream_1.Readable.fromWeb(response.body), fs_1.default.createWriteStream(path));
+    }
+    catch (err) {
+        fs_1.default.unlink(path, () => { });
+        console.warn('Failed to fetch notification icon:', err);
+        return undefined;
+    }
+    assetMap.set(assetUrl, path);
+    return path;
 }
 function escapeXml(text) {
     return text
