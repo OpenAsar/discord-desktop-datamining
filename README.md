@@ -2,7 +2,7 @@
 
 ## stable versions
 
-**host: 1.0.9264**
+**host: 1.0.9265**
 
 | module | version |
 | ------ | :-----: |
@@ -18,7 +18,7 @@
 | media | 1 |
 | modules | 1 |
 | ndi | 1 |
-| notifications | 2 |
+| notifications | 1 |
 | overlay2 | 1 |
 | premap | 1 |
 | rpc | 1 |
