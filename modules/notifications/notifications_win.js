@@ -206,8 +206,11 @@ async function sendNotification(options) {
     notification.on('click', (_event, action = '') => {
         handleNotificationAction('clicked', uuid, action);
     });
-    notification.on('close', (_event, action = '') => {
-        handleNotificationAction('dismiss', uuid, action);
+    notification.on('close', (event) => {
+        if (event.reason === 'timedOut') {
+            return;
+        }
+        handleNotificationAction('dismiss', uuid, null);
     });
     notification.on('failed', (_event, error) => {
         handleNotificationAction('failed', uuid, error);
@@ -222,6 +225,7 @@ function removeNotifications(identifiers) {
         if (notification != null) {
             notification.close();
             notifications.delete(identifier);
+            handleNotificationAction('dismiss', identifier, null);
         }
     }
     return Promise.resolve();
