@@ -469,5 +469,7 @@ if (process.platform === 'win32') {
     features.declareSupported('clips');
     features.declareSupported('clips_thumbnail');
     features.declareSupported('clips_recording_ready_events');
+    features.declareSupported('unified_capture_broker');
+    features.declareSupported('conjure_snapshot');
 }
 module.exports = VoiceEngine;

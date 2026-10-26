@@ -10,23 +10,16 @@ module.exports = require('./discord_sysimg.node');
 //   console.log('Output formats:', capabilities.outputFormats.map(f => f.id));
 // });
 
+// Both convert() and convertBytes() return the encoded image as an ArrayBuffer; the module
+// never writes to disk.
 // sysimg.convert('/path/to/input.heic', JSON.stringify({
 //   format: 'jpeg',
-//   outputPath: '/path/to/output.jpg',
 //   maxWidth: 1920,
 //   maxHeight: 1080,
 //   quality: 85
 // }), (err, result) => {
 //   if (err) throw err;
-//   console.log('Saved to:', result.path);
-// });
-
-// sysimg.convert('/path/to/input.png', JSON.stringify({
-//   format: 'jpeg',
-//   quality: 90
-// }), (err, result) => {
-//   if (err) throw err;
-//   console.log('Bytes:', result.length);
+//   console.log('Bytes:', result.byteLength);
 // });
 
 // const fs = require('fs');

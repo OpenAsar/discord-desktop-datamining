@@ -5,7 +5,6 @@ const execFile = util.promisify(childProcess.execFile);
 const fs = require('fs');
 const path = require('path');
 const { wrapInputEventRegister, wrapInputEventUnregister } = require('./input_event');
-const { getNotificationState } = require('windows-notification-state');
 const nativeUtils = require('./discord_utils.node');
 nativeUtils.clearCandidateGamesCallback = nativeUtils.setCandidateGamesCallback;
 const discordNative = globalThis.window?.DiscordNative;
@@ -114,13 +113,5 @@ nativeUtils.submitLiveCrashReport = async (channel, sentryMetadata) => {
         console.error('submitLiveCrashReport: error', e);
     }
     return null;
-};
-nativeUtils.shouldDisplayNotifications = () => {
-    let shouldDisplay = true;
-    if (process.platform === 'win32') {
-        const state = getNotificationState();
-        shouldDisplay = state === 'QUNS_ACCEPTS_NOTIFICATIONS' || state === 'QUNS_APP';
-    }
-    return shouldDisplay;
 };
 module.exports = nativeUtils;
