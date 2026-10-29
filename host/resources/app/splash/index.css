@@ -88,17 +88,8 @@ html {
 .splash-inner {
   text-align: center;
 
-  img,
-  video {
+  img {
     size: 200px;
-  }
-
-  video {
-    visibility: hidden;
-
-    &.loaded {
-      visibility: visible;
-    }
   }
 
   .splash-text {
