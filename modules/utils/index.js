@@ -62,6 +62,11 @@ if (process.platform === 'win32' && isElectronRenderer) {
         nativeUtils.setServiceChannel?.(releaseChannel);
     }
 }
+if (process.platform === 'win32' && isElectronRenderer) {
+    discordNative?.ipc?.on('OVERLAY_REDIRECTED_BUTTON', (_event, deviceType, buttonCode, isButtonDown) => {
+        nativeUtils.inputOnRedirectedEvent?.(deviceType, buttonCode, isButtonDown);
+    });
+}
 function parseNvidiaSmiOutput(result) {
     if (result == null || result.stdout === '') {
         return { error: 'nvidia-smi produced no output' };

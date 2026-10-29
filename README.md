@@ -8,8 +8,8 @@
 | ------ | :-----: |
 | clips | 2 |
 | cloudsync | 1 |
-| desktop_core | 1 |
-| desktop_overlay | 1 |
+| desktop_core | 2 |
+| desktop_overlay | 2 |
 | dispatch | 1 |
 | erlpack | 1 |
 | game_utils | 1 |
@@ -24,7 +24,7 @@
 | rpc | 1 |
 | spellcheck | 1 |
 | sysimg | 1 |
-| utils | 1 |
+| utils | 4 |
 | voice | 2 |
 | zstd | 1 |
 
