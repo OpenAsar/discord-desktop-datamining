@@ -376,6 +376,23 @@ VoiceEngine.setupKrispPath = function () {
         VoiceEngine.setKrispPath(krispPath);
     }
 };
+VoiceEngine.getSpatialAudioHrtfFiles = function () {
+    if (dataDirectory == null) {
+        return { directory: null, files: [] };
+    }
+    try {
+        const files = fs
+            .readdirSync(dataDirectory, { withFileTypes: true })
+            .filter((entry) => entry.isFile() && entry.name.endsWith('.sofa'))
+            .map((entry) => entry.name)
+            .sort();
+        return { directory: dataDirectory, files };
+    }
+    catch (e) {
+        console.warn("Couldn't list HRTF files in ", dataDirectory, ':', e);
+        return { directory: dataDirectory, files: [] };
+    }
+};
 VoiceEngine.setupMLPath = function () {
     const mlPath = discordNative?.nativeModules?.getModulePath('discord_ml');
     if (mlPath != null) {
