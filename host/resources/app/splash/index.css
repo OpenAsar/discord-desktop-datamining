@@ -123,14 +123,25 @@ html {
     border-radius: 4px;
     width: 180px;
     background-color: rgba(255, 255, 255, 0.1);
+    position: relative;
 
     .complete {
+      position: relative;
       border-radius: 4px;
       box-shadow:
         0 2px 4px 0 rgba(0, 0, 0, 0.1),
         inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
       height: 100%;
       background-color: var(--grey-3);
+    }
+
+    /* Download progress sits behind the install fill, like a video's buffered range. */
+    .complete.buffered {
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0.4;
+      box-shadow: none;
     }
   }
 }
@@ -154,29 +165,4 @@ html {
 
 .build-override-clear-button:hover {
   text-decoration: none;
-}
-
-.splash-inner .splash-text > .splash-status[hidden] {
-  display: none;
-}
-
-.update-progress + .update-progress {
-  margin-top: 12px;
-}
-
-.progress-label {
-  display: block;
-  color: var(--white);
-  font-family: var(--primary-font);
-  font-size: 14px;
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-}
-
-.dual-progress .update-progress .progress {
-  margin-top: 6px;
-}
-
-.update-progress[data-started='false'] .progress-label {
-  color: var(--placeholder);
 }
