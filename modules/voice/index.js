@@ -419,6 +419,7 @@ features.declareSupported('remote_user_multi_stream');
 features.declareSupported('go_live_hardware');
 features.declareSupported('bandwidth_estimation_experiments');
 features.declareSupported('mls_pairwise_fingerprints');
+features.declareSupported('dave_pairwise_fingerprint');
 features.declareSupported('soundshare');
 features.declareSupported('screen_soundshare');
 features.declareSupported('offload_adm_controls');
