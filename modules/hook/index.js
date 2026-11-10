@@ -12,4 +12,11 @@ else {
     console.warn('Unable to find log directory');
 }
 hook.initialize(initializationParams);
+hook.connect = function (pid, onConnect, onDisconnect) {
+    const instance = new hook.HookConnection(pid, onConnect, onDisconnect);
+    return {
+        destroy: () => instance.destroy(),
+        sendCommand: (command) => instance.sendCommand(command),
+    };
+};
 module.exports = hook;
