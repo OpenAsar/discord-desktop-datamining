@@ -24,8 +24,8 @@
 | rpc | 1 |
 | spellcheck | 1 |
 | sysimg | 1 |
-| utils | 6 |
-| voice | 1 |
+| utils | 8 |
+| voice | 2 |
 | zstd | 1 |
 
 ## branches
