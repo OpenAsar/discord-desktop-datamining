@@ -135,7 +135,6 @@ function bindConnectionInstance(instance) {
         processMLSProposals: (message, callback) => instance.processMLSProposals(message, callback),
         prepareMLSCommitTransition: (transitionId, commit, callback) => instance.prepareMLSCommitTransition(transitionId, commit, callback),
         processMLSWelcome: (transitionId, welcome, callback) => instance.processMLSWelcome(transitionId, welcome, callback),
-        getMLSPairwiseFingerprint: (version, userId, callback) => instance.getMLSPairwiseFingerprint(version, userId, callback),
         setOnMLSFailureCallback: (callback) => instance.setOnMLSFailureCallback(callback),
         setSecureFramesStateUpdateCallback: (callback) => instance.setSecureFramesStateUpdateCallback(callback),
         setLocalVolume: (userId, volume) => instance.setLocalVolume(userId, volume),
@@ -418,7 +417,7 @@ features.declareSupported('first_frame_callback');
 features.declareSupported('remote_user_multi_stream');
 features.declareSupported('go_live_hardware');
 features.declareSupported('bandwidth_estimation_experiments');
-features.declareSupported('mls_pairwise_fingerprints');
+features.declareSupported('dave_pairwise_fingerprint');
 features.declareSupported('soundshare');
 features.declareSupported('screen_soundshare');
 features.declareSupported('offload_adm_controls');
