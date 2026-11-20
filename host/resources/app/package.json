@@ -10,9 +10,9 @@
         "tsc": "tsc --pretty"
     },
     "dependencies": {
-        "@sentry/browser": "10.50.0",
-        "@sentry/electron": "7.13.0",
-        "@sentry/types": "10.50.0",
+        "@sentry/browser": "10.75.0",
+        "@sentry/electron": "7.20.2",
+        "@sentry/types": "10.75.0",
         "@types/node": "24.19.2",
         "@types/request": "^2.48.5",
         "electron-log": "5.2.0",
@@ -20,10 +20,5 @@
     },
     "devDependencies": {
         "electron": "44.9.3"
-    },
-    "pnpm": {
-        "patchedDependencies": {
-            "@sentry/electron@7.13.0": "patches/@sentry__electron@7.13.0.patch"
-        }
     }
 }
