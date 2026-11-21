@@ -129,7 +129,7 @@ function bindConnectionInstance(instance) {
         destroyUser: (userId) => instance.destroyUser(userId),
         prepareSecureFramesTransition: (transitionId, version, callback) => instance.prepareSecureFramesTransition(transitionId, version, callback),
         prepareSecureFramesEpoch: (epoch, version, groupId) => instance.prepareSecureFramesEpoch(epoch, version, groupId),
-        executeSecureFramesTransition: (transitionId) => instance.executeSecureFramesTransition(transitionId),
+        executeSecureFramesTransition: (transitionId, callback) => instance.executeSecureFramesTransition(transitionId, callback),
         updateMLSExternalSender: (externalSenderPackage) => instance.updateMLSExternalSender(externalSenderPackage),
         getMLSKeyPackage: (callback) => instance.getMLSKeyPackage(callback),
         processMLSProposals: (message, callback) => instance.processMLSProposals(message, callback),
