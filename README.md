@@ -2,7 +2,7 @@
 
 ## ptb versions
 
-**host: 1.0.1234**
+**host: 1.0.1235**
 
 | module | version |
 | ------ | :-----: |
@@ -25,7 +25,7 @@
 | spellcheck | 1 |
 | sysimg | 1 |
 | utils | 1 |
-| voice | 2 |
+| voice | 1 |
 | zstd | 1 |
 
 ## branches

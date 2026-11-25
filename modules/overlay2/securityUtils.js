@@ -17,11 +17,40 @@ const BLOCKED_URL_PROTOCOLS = [
     'shell:',
     'ms-msdt:',
     'search-ms:',
+    'search:',
+    'explorer.assocprotocol.search-ms:',
+    'ms-device-enrollment:',
+    'ldap:',
+    'ldaps:',
+    'smb:',
     'ms-officecmd:',
     'ms-appinstaller:',
 ];
 const MIN_URL_SCHEME_LENGTH = 2;
+function isAllowedWindowsSettingsUrl(externalUrl) {
+    const destination = externalUrl.slice(externalUrl.indexOf(':') + 1);
+    if (['privacy-microphone', 'privacy-webcam', 'camera', 'sound'].includes(destination)) {
+        return true;
+    }
+    if (/^sound-properties\?endpointId=[a-zA-Z0-9{}._-]*$/.test(destination)) {
+        return true;
+    }
+    const cameraId = /^camera\?cameraId=([^&#]*)$/.exec(destination)?.[1];
+    if (cameraId == null) {
+        return false;
+    }
+    try {
+        const decodedCameraId = decodeURIComponent(cameraId);
+        return !/[\x00-\x1f\x7f]/.test(decodedCameraId) && encodeURIComponent(decodedCameraId) === cameraId;
+    }
+    catch (_) {
+        return false;
+    }
+}
 function shouldOpenExternalUrl(externalUrl) {
+    if (typeof externalUrl !== 'string' || externalUrl.trim() !== externalUrl || /[\x00-\x1f\x7f]/.test(externalUrl)) {
+        return false;
+    }
     let protocol;
     try {
         protocol = new URL(externalUrl).protocol.toLowerCase();
@@ -35,7 +64,7 @@ function shouldOpenExternalUrl(externalUrl) {
     if (protocol.replace(/:$/, '').length < MIN_URL_SCHEME_LENGTH) {
         return false;
     }
-    return true;
+    return protocol !== 'ms-settings:' || isAllowedWindowsSettingsUrl(externalUrl);
 }
 function saferShellOpenExternal(externalUrl) {
     if (shouldOpenExternalUrl(externalUrl)) {
