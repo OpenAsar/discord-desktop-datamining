@@ -2,7 +2,7 @@
 
 ## canary versions
 
-**host: 1.0.1362**
+**host: 1.0.1364**
 
 | module | version |
 | ------ | :-----: |
@@ -14,7 +14,7 @@
 | erlpack | 1 |
 | game_utils | 1 |
 | hook | 1 |
-| krisp | 2 |
+| krisp | 1 |
 | media | 1 |
 | modules | 1 |
 | ndi | 1 |
